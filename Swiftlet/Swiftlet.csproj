@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Components\CreateHttpHeader.cs" />
     <Compile Include="Components\CreateQueryParam.cs" />
+    <Compile Include="Components\DeconstructHttpResponse.cs" />
     <Compile Include="Components\GetRequestComponent.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
