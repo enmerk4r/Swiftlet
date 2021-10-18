@@ -9,15 +9,15 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateHttpHeader : GH_Component
+    public class ApiKeyAuth : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreateHttpHeader class.
+        /// Initializes a new instance of the ApiKeyAuth class.
         /// </summary>
-        public CreateHttpHeader()
-          : base("Create Http Header", "CH",
-              "Create a new Http Header",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public ApiKeyAuth()
+          : base("API Key", "API",
+              "Create a header and a query param (you'll likely need one or the other, not both) for API key auth",
+              NamingUtility.CATEGORY, NamingUtility.AUTH)
         {
         }
 
@@ -26,8 +26,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Key", "K", "Header Key", GH_ParamAccess.item);
-            pManager.AddTextParameter("Value", "V", "Header Value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Key", "K", "Header key for your API auth", GH_ParamAccess.item);
+            pManager.AddTextParameter("Value", "V", "Your API key value", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +35,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Http Header", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Your Auth Key-Value as an Http Header", GH_ParamAccess.item);
+            pManager.AddParameter(new QueryParamParam(), "Query Param", "P", "Your Auth Key-Value as a URL query param", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -50,7 +51,11 @@ namespace Swiftlet.Components
             DA.GetData(0, ref key);
             DA.GetData(1, ref value);
 
-            DA.SetData(0, new HttpHeaderGoo(key, value));
+            HttpHeaderGoo hg = new HttpHeaderGoo(key, value);
+            QueryParamGoo qg = new QueryParamGoo(key, value);
+
+            DA.SetData(0, hg);
+            DA.SetData(1, qg);
         }
 
         /// <summary>
@@ -71,7 +76,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("7dc20210-c08f-466f-af5e-286f70f4c630"); }
+            get { return new Guid("09b3834f-0211-4339-a88e-738202f228fa"); }
         }
     }
 }

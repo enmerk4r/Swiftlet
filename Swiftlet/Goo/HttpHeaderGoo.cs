@@ -21,6 +21,11 @@ namespace Swiftlet.Goo
             this.Value = new HttpHeader(null, null);
         }
 
+        public HttpHeaderGoo(HttpHeader header)
+        {
+            this.Value = new HttpHeader(header.Key, header.Value);
+        }
+
         public HttpHeaderGoo(string key, string value)
         {
             this.Value = new HttpHeader(key, value);

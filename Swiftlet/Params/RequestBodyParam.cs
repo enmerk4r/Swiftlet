@@ -9,15 +9,16 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Params
 {
-    public class HttpWebResponseParam : GH_Param<HttpWebResponseGoo>
+    public class RequestBodyParam : GH_Param<RequestBodyGoo>
     {
-        public HttpWebResponseParam()
-            : base("Http Response", "HR", "Http Web Response",
+        public RequestBodyParam()
+            : base("Request Body", "RB", "Collection of Request Body objects",
                  NamingUtility.CATEGORY, NamingUtility.REQUEST, GH_ParamAccess.item)
         {
+
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
-        public override Guid ComponentGuid => new Guid("b1c8d5fd-72ad-4f80-9ada-5f3850bc1a94");
+        public override Guid ComponentGuid => new Guid("cc4b9260-48dc-432e-80c8-5ebf9ab3f66e");
     }
 }

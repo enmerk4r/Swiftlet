@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swiftlet.DataModels.Implementations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,18 +9,11 @@ namespace Swiftlet.DataModels.Interfaces
 {
     public interface IHttpResponseDTO
     {
-        string CharacterSet { get; }
-        string ContentEncoding { get; }
-        long ContentLength { get; }
-        string ContentType { get; }
-        bool IsFromCache { get; }
-        DateTime LastModified { get; }
-        string Method { get; }
-        string ResponseUri { get; }
-        string ResponseServer { get; }
+        string Version { get; }
         int StatusCode { get; }
-        string StatusDescription { get; }
-        bool SupportsHeaders { get; }
+        string ReasonPhrase { get; }
+        List<HttpHeader> Headers { get; }
+        bool IsSuccessStatusCode { get; }
         string Content { get; }
 
         IHttpResponseDTO Duplicate();

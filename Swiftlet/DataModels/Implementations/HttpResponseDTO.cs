@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,100 +11,78 @@ namespace Swiftlet.DataModels.Implementations
 {
     public class HttpResponseDTO : IHttpResponseDTO
     {
+        public string Version { get; private set; }
+
+        public int StatusCode { get; private set; }
+
+        public string ReasonPhrase { get; private set; }
+
+        public List<HttpHeader> Headers { get; private set; }
+
+        public bool IsSuccessStatusCode { get; private set; }
+
+        public string Content { get; private set; }
+
         public HttpResponseDTO()
         {
         }
 
-        public HttpResponseDTO(HttpWebResponse response, string content=null)
+        public HttpResponseDTO(HttpResponseMessage response)
         {
-            this.CharacterSet = response.CharacterSet;
-            this.ContentEncoding = response.ContentEncoding;
-            this.ContentLength = response.ContentLength;
-            this.ContentType = response.ContentType;
-            this.IsFromCache = response.IsFromCache;
-            this.LastModified = response.LastModified;
-            this.Method = response.Method;
-            this.ResponseUri = response.ResponseUri.AbsoluteUri;
-            this.ResponseServer = response.Server;
+            this.Version = response.Version.ToString();
             this.StatusCode = (int)response.StatusCode;
-            this.StatusDescription = response.StatusDescription;
-            this.SupportsHeaders = response.SupportsHeaders;
-            this.Content = content;
+            this.ReasonPhrase = response.ReasonPhrase;
+            this.Headers = new List<HttpHeader>();
+            foreach(var header in response.Headers)
+            {
+                string key = header.Key;
+                string value = string.Empty;
+
+                foreach(string h in header.Value)
+                {
+                    value += h + ",";
+                }
+
+                value = value.Substring(0, value.Length - 1);
+                this.Headers.Add(new HttpHeader(key, value));
+            }
+
+            this.IsSuccessStatusCode = response.IsSuccessStatusCode;
+            this.Content = response.Content.ReadAsStringAsync().Result;
         }
 
         public HttpResponseDTO(
-            string charSet,
-            string contentEncoding,
-            long contentLength,
-            string contentType,
-            bool isFromCache,
-            DateTime lastModified,
-            string method,
-            string responseUri,
-            string responseServer,
-            int statusCode,
-            string statusDescription,
-            bool supportsHeaders,
+            string version,
+            int status,
+            string reasonPhrase,
+            List<HttpHeader> headers,
+            bool isSuccess,
             string content
             )
         {
-            this.CharacterSet = charSet;
-            this.ContentEncoding = contentEncoding;
-            this.ContentLength = contentLength;
-            this.ContentType = contentType;
-            this.IsFromCache = isFromCache;
-            this.LastModified = lastModified;
-            this.Method = method;
-            this.ResponseUri = responseUri;
-            this.ResponseServer = responseServer;
-            this.StatusCode = statusCode;
-            this.StatusDescription = StatusDescription;
-            this.SupportsHeaders = supportsHeaders;
+            this.Version = version;
+            this.StatusCode = status;
+            this.ReasonPhrase = reasonPhrase;
+            this.Headers = new List<HttpHeader>();
+            foreach(var h in headers)
+            {
+                this.Headers.Add(new HttpHeader(h.Key, h.Value));
+            }
+            this.IsSuccessStatusCode = isSuccess;
             this.Content = content;
+
         }
 
-        public string CharacterSet { get; private set; }
-
-        public string ContentEncoding { get; private set; }
-
-        public long ContentLength { get; private set; }
-
-        public string ContentType { get; private set; }
-
-        public bool IsFromCache { get; private set; }
-
-        public DateTime LastModified { get; private set; }
-
-        public string Method { get; private set; }
-
-        public string ResponseUri { get; private set; }
-
-        public string ResponseServer { get; private set; }
-
-        public int StatusCode { get; private set; }
-
-        public string StatusDescription { get; private set; }
-
-        public bool SupportsHeaders { get; private set; }
-
-        public string Content { get; private set; }
 
 
         public IHttpResponseDTO Duplicate()
         {
             return new HttpResponseDTO(
-                this.CharacterSet,
-                this.ContentEncoding,
-                this.ContentLength,
-                this.ContentType,
-                this.IsFromCache,
-                this.LastModified,
-                this.Method,
-                this.ResponseUri,
-                this.ResponseServer,
+                this.Version,
                 this.StatusCode,
-                this.StatusDescription,
-                this.SupportsHeaders,
+                this.ReasonPhrase,
+                this.Headers,
+                this.IsSuccessStatusCode,
                 this.Content);
         }
     }

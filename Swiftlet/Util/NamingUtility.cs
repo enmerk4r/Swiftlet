@@ -10,8 +10,9 @@ namespace Swiftlet.Util
     {
         public const string CATEGORY = "Swiftlet";
 
-        public const string REQUESTS = "Requests";
-        public const string PARAMS = "Query Params";
-        public const string HEADERS = "Headers";
+        public const string AUTH = "Auth";
+        public const string REQUEST = "Request";
+        public const string SEND = "Send";
+        public const string READ = "Read";
     }
 }

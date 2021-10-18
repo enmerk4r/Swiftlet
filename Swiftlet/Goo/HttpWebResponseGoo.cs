@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,14 +28,9 @@ namespace Swiftlet.Goo
             this.Value = (HttpResponseDTO)response.Duplicate();
         }
 
-        public HttpWebResponseGoo(HttpWebResponse response)
+        public HttpWebResponseGoo(HttpResponseMessage response)
         {
             this.Value = new HttpResponseDTO(response);
-        }
-
-        public HttpWebResponseGoo(HttpWebResponse response, string content)
-        {
-            this.Value = new HttpResponseDTO(response, content);
         }
 
         public override IGH_Goo Duplicate()

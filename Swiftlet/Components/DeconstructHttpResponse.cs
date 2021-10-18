@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Implementations;
@@ -16,9 +16,9 @@ namespace Swiftlet.Components
         /// Initializes a new instance of the DeconstructHttpResponse class.
         /// </summary>
         public DeconstructHttpResponse()
-          : base("Deconstruct Response", "Deconstruct Response",
+          : base("Deconstruct Response", "DR",
               "Deconstruct Http Response",
-              NamingUtility.CATEGORY, NamingUtility.REQUESTS)
+              NamingUtility.CATEGORY, NamingUtility.READ)
         {
         }
 
@@ -28,7 +28,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new HttpWebResponseParam(), "Response", "Response", "Http Web response", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Http Web response", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -36,19 +36,13 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("CharSet", "CS", "Character Set", GH_ParamAccess.item);
-            pManager.AddTextParameter("Encoding", "E", "Content Encoding", GH_ParamAccess.item);
-            pManager.AddTextParameter("Length", "L", "Content Length", GH_ParamAccess.item);
-            pManager.AddTextParameter("Type", "T", "Content Type", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("IsCache", "IC", "Is From Cache", GH_ParamAccess.item);
-            pManager.AddTimeParameter("Modified", "LM", "Last Modified", GH_ParamAccess.item);
-            pManager.AddTextParameter("Method", "M", "Method", GH_ParamAccess.item);
-            pManager.AddTextParameter("Uri", "R", "Response Uri", GH_ParamAccess.item);
-            pManager.AddTextParameter("Server", "S", "Response Server", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Status Code", "SC", "Http Status Code", GH_ParamAccess.item);
-            pManager.AddTextParameter("Status Description", "SD", "Http Status Description", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Supports Headers", "SH", "Supports Http Headers", GH_ParamAccess.item);
-            pManager.AddTextParameter("Content", "C", "Response body content", GH_ParamAccess.item);
+            pManager.AddTextParameter("Version", "V", "The HTTP message version. The default is 1.1", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Status", "S", "Http status code", GH_ParamAccess.item);
+            pManager.AddTextParameter("Reason", "R", "The reason phrase which typically is sent by servers together with the status code", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpHeaderParam(), "Headers", "H", "The collection of HTTP response headers", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("IsSuccess", "iS", "Indicates if the HTTP response was successful", GH_ParamAccess.item);
+            pManager.AddTextParameter("Content", "C", "Response content", GH_ParamAccess.item);
+
         }
 
         /// <summary>
@@ -61,20 +55,14 @@ namespace Swiftlet.Components
             DA.GetData(0, ref goo);
 
             HttpResponseDTO dto = goo.Value;
-            DA.SetData(0, dto.CharacterSet);
-            DA.SetData(1, dto.ContentEncoding);
-            DA.SetData(2, dto.ContentLength.ToString());
-            DA.SetData(3, dto.ContentType);
-            DA.SetData(4, dto.IsFromCache);
-            DA.SetData(5, dto.LastModified);
-            DA.SetData(6, dto.Method);
-            DA.SetData(7, dto.ResponseUri);
-            DA.SetData(8, dto.ResponseServer);
-            DA.SetData(9, dto.StatusCode);
-            DA.SetData(10, dto.StatusDescription);
-            DA.SetData(11, dto.SupportsHeaders);
-            DA.SetData(12, dto.Content);
+            DA.SetData(0, dto.Version);
+            DA.SetData(1, dto.StatusCode);
+            DA.SetData(2, dto.ReasonPhrase);
+            DA.SetDataList(3, dto.Headers.Select(h => new HttpHeaderGoo(h)));
+            DA.SetData(4, dto.IsSuccessStatusCode);
+            DA.SetData(5, dto.Content);
         }
+
 
         /// <summary>
         /// Provides an Icon for the component.

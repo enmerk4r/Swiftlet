@@ -9,15 +9,15 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateHttpHeader : GH_Component
+    public class BearerTokenAuth : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreateHttpHeader class.
+        /// Initializes a new instance of the BearerTokenAuth class.
         /// </summary>
-        public CreateHttpHeader()
-          : base("Create Http Header", "CH",
-              "Create a new Http Header",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public BearerTokenAuth()
+          : base("Bearer Token Auth", "BEARER",
+              "Creates an Authorization header for your Bearer token",
+              NamingUtility.CATEGORY, NamingUtility.AUTH)
         {
         }
 
@@ -26,8 +26,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Key", "K", "Header Key", GH_ParamAccess.item);
-            pManager.AddTextParameter("Value", "V", "Header Value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Token", "T", "Bearer Token", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Http Header", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Your Authorization heder", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -44,13 +43,10 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string key = string.Empty;
-            string value = string.Empty;
+            string token = string.Empty;
 
-            DA.GetData(0, ref key);
-            DA.GetData(1, ref value);
-
-            DA.SetData(0, new HttpHeaderGoo(key, value));
+            DA.GetData(0, ref token);
+            DA.SetData(0, new HttpHeaderGoo("Authorization", $"Bearer {token}"));
         }
 
         /// <summary>
@@ -71,7 +67,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("7dc20210-c08f-466f-af5e-286f70f4c630"); }
+            get { return new Guid("133b9c3f-63b0-42e2-bc8e-8eb7d4e916bc"); }
         }
     }
 }

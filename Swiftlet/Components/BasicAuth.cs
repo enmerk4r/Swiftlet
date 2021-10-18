@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Text;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.Goo;
@@ -9,15 +9,15 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateHttpHeader : GH_Component
+    public class BasicAuth : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreateHttpHeader class.
+        /// Initializes a new instance of the StandardAuth class.
         /// </summary>
-        public CreateHttpHeader()
-          : base("Create Http Header", "CH",
-              "Create a new Http Header",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public BasicAuth()
+          : base("Basic Auth", "BASIC",
+              "Creates an Authorization header for your Basic auth",
+              NamingUtility.CATEGORY, NamingUtility.AUTH)
         {
         }
 
@@ -26,8 +26,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Key", "K", "Header Key", GH_ParamAccess.item);
-            pManager.AddTextParameter("Value", "V", "Header Value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Username", "U", "Your Basic Auth username", GH_ParamAccess.item);
+            pManager.AddTextParameter("Password", "P", "Your password. Keep in mind, you're in Grasshopper, so this is kinda sketchy... just sayin'", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Http Header", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Your Basic Auth header", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -44,13 +44,15 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string key = string.Empty;
-            string value = string.Empty;
+            string uname = string.Empty;
+            string pwd = string.Empty;
 
-            DA.GetData(0, ref key);
-            DA.GetData(1, ref value);
+            DA.GetData(0, ref uname);
+            DA.GetData(1, ref pwd);
 
-            DA.SetData(0, new HttpHeaderGoo(key, value));
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{uname}:{pwd}"));
+
+            DA.SetData(0, new HttpHeaderGoo("Authorization", $"Basic {credentials}"));
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("7dc20210-c08f-466f-af5e-286f70f4c630"); }
+            get { return new Guid("6d601bf4-8302-44b6-8d64-85818fb9a419"); }
         }
     }
 }

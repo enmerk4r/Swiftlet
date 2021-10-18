@@ -35,6 +35,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -56,29 +57,39 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\ApiKeyAuth.cs" />
+    <Compile Include="Components\BasicAuth.cs" />
+    <Compile Include="Components\BearerTokenAuth.cs" />
     <Compile Include="Components\CreateHttpHeader.cs" />
     <Compile Include="Components\CreateQueryParam.cs" />
+    <Compile Include="Components\CreateTextBody.cs" />
     <Compile Include="Components\DeconstructHttpResponse.cs" />
     <Compile Include="Components\GetRequestComponent.cs" />
+    <Compile Include="Components\PostRequestComponent.cs" />
+    <Compile Include="DataModels\Enums\ContentType.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
+    <Compile Include="DataModels\Implementations\RequestBodyText.cs" />
     <Compile Include="DataModels\Interfaces\IHttpHeader.cs" />
     <Compile Include="DataModels\Interfaces\IHttpResponseDTO.cs" />
     <Compile Include="DataModels\Interfaces\IKeyValue.cs" />
     <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
+    <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
     <Compile Include="Goo\QueryParamGoo.cs" />
+    <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
+    <Compile Include="Params\RequestBodyParam.cs" />
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\HeaderUtility.cs" />
     <Compile Include="Util\NamingUtility.cs" />
     <Compile Include="Util\UrlUtility.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

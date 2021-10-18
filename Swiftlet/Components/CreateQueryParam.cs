@@ -15,9 +15,9 @@ namespace Swiftlet.Components
         /// Initializes a new instance of the CreateQuery class.
         /// </summary>
         public CreateQueryParam()
-          : base("Create Query Param", "Create Query Param",
+          : base("Create Query Param", "CQP",
               "Create an Http Query Param",
-              NamingUtility.CATEGORY, NamingUtility.PARAMS)
+              NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
 
         }
@@ -27,8 +27,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Key", "Key", "Query Parameter Key", GH_ParamAccess.item);
-            pManager.AddTextParameter("Value", "Value", "Query Parameter Value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Key", "K", "Query Parameter Key", GH_ParamAccess.item);
+            pManager.AddTextParameter("Value", "V", "Query Parameter Value", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new QueryParamParam(), "Param", "Param", "Http Query Parameter", GH_ParamAccess.item);
+            pManager.AddParameter(new QueryParamParam(), "Param", "P", "Http Query Parameter", GH_ParamAccess.item);
         }
 
         /// <summary>
