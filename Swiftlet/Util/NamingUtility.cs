@@ -10,9 +10,9 @@ namespace Swiftlet.Util
     {
         public const string CATEGORY = "Swiftlet";
 
-        public const string AUTH = "Auth";
-        public const string REQUEST = "Request";
-        public const string SEND = "Send";
-        public const string READ = "Read";
+        public const string AUTH = "1. Auth";
+        public const string REQUEST = "2. Request";
+        public const string SEND = "3. Send";
+        public const string READ = "4. Read";
     }
 }

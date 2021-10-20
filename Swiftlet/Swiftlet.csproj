@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -64,8 +67,13 @@
     <Compile Include="Components\CreateQueryParam.cs" />
     <Compile Include="Components\CreateTextBody.cs" />
     <Compile Include="Components\DeconstructHttpResponse.cs" />
+    <Compile Include="Components\DeconstructJsonValue.cs" />
+    <Compile Include="Components\GetJsonObjectKeys.cs" />
     <Compile Include="Components\GetRequestComponent.cs" />
+    <Compile Include="Components\ParseJson.cs" />
+    <Compile Include="Components\ParseJsonObject.cs" />
     <Compile Include="Components\PostRequestComponent.cs" />
+    <Compile Include="Components\Read JToken.cs" />
     <Compile Include="DataModels\Enums\ContentType.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
@@ -76,19 +84,30 @@
     <Compile Include="DataModels\Interfaces\IKeyValue.cs" />
     <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
     <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
+    <Compile Include="FormatJsonString.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
+    <Compile Include="Goo\JArrayGoo.cs" />
+    <Compile Include="Goo\JObjectGoo.cs" />
+    <Compile Include="Goo\JTokenGoo.cs" />
     <Compile Include="Goo\QueryParamGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
+    <Compile Include="Params\JArrayParam.cs" />
+    <Compile Include="Params\JObjectParam.cs" />
+    <Compile Include="Params\JTokenParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
+    <Compile Include="Components\ParseJsonArray.cs" />
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HeaderUtility.cs" />
     <Compile Include="Util\NamingUtility.cs" />
     <Compile Include="Util\UrlUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
