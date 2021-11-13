@@ -68,7 +68,10 @@
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
+    <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
     <Compile Include="Components\3_Send\GetRequestComponent.cs" />
+    <Compile Include="Components\3_Send\PatchRequestComponent.cs" />
+    <Compile Include="Components\3_Send\PutRequestComponent.cs" />
     <Compile Include="Components\4_ReadJson\GetObjectKey.cs" />
     <Compile Include="Components\4_ReadJson\ParseJson.cs" />
     <Compile Include="Components\3_Send\PostRequestComponent.cs" />

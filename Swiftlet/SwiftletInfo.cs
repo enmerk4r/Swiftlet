@@ -26,7 +26,7 @@ namespace Swiftlet
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "";
+                return "Grasshopper plugin for accessing Web APIs";
             }
         }
         public override Guid Id
@@ -42,7 +42,7 @@ namespace Swiftlet
             get
             {
                 //Return a string identifying you or your company.
-                return "";
+                return "Sergey Pigach";
             }
         }
         public override string AuthorContact

@@ -10,13 +10,13 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ParseJson : GH_Component
+    public class ParseJsonString : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParseJSON class.
         /// </summary>
-        public ParseJson()
-          : base("Parse JSON", "PJ",
+        public ParseJsonString()
+          : base("Parse JSON String", "PJS",
               "Parse a string into a searchable JSON Object",
               NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
