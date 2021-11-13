@@ -13,6 +13,6 @@ namespace Swiftlet.Util
         public const string AUTH = "1. Auth";
         public const string REQUEST = "2. Request";
         public const string SEND = "3. Send";
-        public const string READ = "4. Read";
+        public const string READ_JSON = "4. Read JSON";
     }
 }

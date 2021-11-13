@@ -4,28 +4,33 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
+using Swiftlet.Goo;
+using Swiftlet.Params;
 using Swiftlet.Util;
 
-namespace Swiftlet
+namespace Swiftlet.Components
 {
-    public class FormatJsonString : GH_Component
+    public class GetObjectKey : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the FormatJsonString class.
+        /// Initializes a new instance of the GetObjectKey class.
         /// </summary>
-        public FormatJsonString()
-          : base("Format Json String", "FORMAT",
-              "Prettify a JSON string by formatting it with proper indentations",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+        public GetObjectKey()
+          : base("Get JSON Object Key", "GJOK",
+              "Get a specific key from JObject",
+              NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("JSON String", "J", "Unformatted JSON string", GH_ParamAccess.item);
+            pManager.AddParameter(new JObjectParam(), "JObject", "JO", "JObject to fetch the key from", GH_ParamAccess.item);
+            pManager.AddTextParameter("Key", "K", "Key to fetch from JObject", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -33,7 +38,7 @@ namespace Swiftlet
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Pretty JSON", "P", "Formatted JSON string (this helps with readability)", GH_ParamAccess.item);
+            pManager.AddParameter(new JTokenParam(), "JToken", "JT", "Fetched JToken", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -42,11 +47,25 @@ namespace Swiftlet
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string json = string.Empty;
-            DA.GetData(0, ref json);
+            JObjectGoo goo = null;
+            string key = null;
 
-            JObject obj = JObject.Parse(json);
-            DA.SetData(0, obj.ToString());
+            DA.GetData(0, ref goo);
+            DA.GetData(1, ref key);
+
+            JObject jobj = goo.Value;
+            JToken token = null;
+
+            try
+            {
+                token = jobj.GetValue(key);
+            }
+            catch
+            {
+
+            }
+            
+            if (token != null) DA.SetData(0, new JTokenGoo(token));
         }
 
         /// <summary>
@@ -67,7 +86,7 @@ namespace Swiftlet
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("37c912a2-2ab5-4926-8911-cb220b6adb25"); }
+            get { return new Guid("b70e62d2-141b-48f9-b023-b0579178c22c"); }
         }
     }
 }

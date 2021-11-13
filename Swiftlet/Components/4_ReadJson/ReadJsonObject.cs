@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
@@ -10,26 +10,26 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ReadJsonToken : GH_Component
+    public class ReadJsonObject : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the Read_JToken class.
+        /// Initializes a new instance of the GetJsonObjectKeys class.
         /// </summary>
-        public ReadJsonToken()
-          : base("Read JSON Token", "RJ",
-              "Convert any abstract JToken to an indented JSON string",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+        public ReadJsonObject()
+          : base("Read JSON Object", "RJO",
+              "Get all keys and values from JObject",
+              NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "JToken", "J", "JToken to be converted to a string", GH_ParamAccess.item);
+            pManager.AddParameter(new JTokenParam(), "JObject", "JO", "JObject to get the keys and values from", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -37,7 +37,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Text", "T", "JSON String", GH_ParamAccess.item);
+            pManager.AddTextParameter("Keys", "K", "JObject keys", GH_ParamAccess.list);
+            pManager.AddParameter(new JTokenParam(), "JTokens", "JT", "Parsed JSON Tokens", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -49,8 +50,27 @@ namespace Swiftlet.Components
             JTokenGoo goo = null;
             DA.GetData(0, ref goo);
 
+            List<string> keys = new List<string>();
+            List<JTokenGoo> tokens = new List<JTokenGoo>();
+
             JToken token = goo.Value;
-            DA.SetData(0, token.ToString());
+
+            if (token is JObject)
+            {
+                JObject obj = token as JObject;
+                keys = obj.Properties().Select(p => p.Name).ToList();
+                foreach(string k in keys)
+                {
+                    JToken value = obj.GetValue(k);
+                    tokens.Add(new JTokenGoo(value));
+                }
+                DA.SetDataList(0, keys);
+                DA.SetDataList(1, tokens);
+            }
+            else
+            {
+                throw new Exception("Input is not a JObject");
+            }
         }
 
         /// <summary>
@@ -71,7 +91,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("5c90048b-9a14-43b5-9996-c67511880604"); }
+            get { return new Guid("acc96ec4-b5d8-49fc-b8cf-2e604430388b"); }
         }
     }
 }

@@ -10,25 +10,26 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ParseJsonObject : GH_Component
+    public class StringifyJsonToken : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParseJsonObject class.
+        /// Initializes a new instance of the Read_JToken class.
         /// </summary>
-        public ParseJsonObject()
-          : base("Get JSON Key", "KEY",
-              "Search for a JSON key",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+        public StringifyJsonToken()
+          : base("Stringify JSON Token", "SJT",
+              "Convert any abstract JToken to an indented JSON string",
+              NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "JSON", "J", "JSON Object to search for the key in", GH_ParamAccess.item);
-            pManager.AddTextParameter("Key", "K", "Key to search for", GH_ParamAccess.item);
+            pManager.AddParameter(new JTokenParam(), "JToken", "JT", "JToken to be converted to a string", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -36,7 +37,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "Value", "V", "Value as a JSON token", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T", "JSON String", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -46,28 +47,10 @@ namespace Swiftlet.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             JTokenGoo goo = null;
-            string str = string.Empty;
-
             DA.GetData(0, ref goo);
-            DA.GetData(1, ref str);
 
             JToken token = goo.Value;
-            if (token is JObject)
-            {
-                JObject obj = token as JObject;
-                JToken found = obj.GetValue(str);
-
-                if (found != null) DA.SetData(0, new JTokenGoo(found));
-            }
-            else if (token is JArray)
-            {
-                throw new Exception("JToken is a JArray, not a JObject");
-            }
-            else
-            {
-                throw new Exception("JToken is not a JObject");
-            }
-
+            DA.SetData(0, token.ToString());
         }
 
         /// <summary>
@@ -88,7 +71,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("f3931057-ebad-4a07-9c03-5bde0cd107cf"); }
+            get { return new Guid("5c90048b-9a14-43b5-9996-c67511880604"); }
         }
     }
 }

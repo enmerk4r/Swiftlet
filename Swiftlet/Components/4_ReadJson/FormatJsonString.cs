@@ -4,30 +4,30 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
-using Swiftlet.Goo;
-using Swiftlet.Params;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ParseJson : GH_Component
+    public class FormatJsonString : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParseJSON class.
+        /// Initializes a new instance of the FormatJsonString class.
         /// </summary>
-        public ParseJson()
-          : base("Parse JSON", "JSON",
-              "Parse a string into a searchable JSON Object",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+        public FormatJsonString()
+          : base("Format Json String", "FJS",
+              "Prettify a JSON string by formatting it with proper indentations",
+              NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Text", "T", "JSON-formatted string to be parsed", GH_ParamAccess.item);
+            pManager.AddTextParameter("JSON String", "J", "Unformatted JSON string", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "JToken", "J", "Parsed JSON Token", GH_ParamAccess.item);
+            pManager.AddTextParameter("Pretty JSON", "P", "Formatted JSON string (this helps with readability)", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -47,8 +47,8 @@ namespace Swiftlet.Components
             string json = string.Empty;
             DA.GetData(0, ref json);
 
-            JToken token = JToken.Parse(json);
-            if (token != null) DA.SetData(0, new JTokenGoo(token));
+            JObject obj = JObject.Parse(json);
+            DA.SetData(0, obj.ToString());
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("18b4fd6e-e6b9-4958-b8c5-1e0cf5a3d016"); }
+            get { return new Guid("37c912a2-2ab5-4926-8911-cb220b6adb25"); }
         }
     }
 }

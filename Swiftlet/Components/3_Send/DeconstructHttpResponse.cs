@@ -18,11 +18,11 @@ namespace Swiftlet.Components
         public DeconstructHttpResponse()
           : base("Deconstruct Response", "DR",
               "Deconstruct Http Response",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+              NamingUtility.CATEGORY, NamingUtility.SEND)
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>

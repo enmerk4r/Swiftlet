@@ -8,41 +8,41 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Goo
 {
-    public class JObjectGoo : GH_Goo<JObject>
+    public class JValueGoo : GH_Goo<JValue>
     {
         public override bool IsValid => this.Value != null;
 
-        public override string TypeName => "JSON Object";
+        public override string TypeName => "JSON Value";
 
-        public override string TypeDescription => "Searchable JSON Token";
+        public override string TypeDescription => "JSON Value Object";
 
-        public JObjectGoo()
+        public JValueGoo()
         {
             this.Value = null;
         }
 
-        public JObjectGoo(JObject obj)
+        public JValueGoo(JValue value)
         {
-            this.Value = obj;
+            this.Value = value;
         }
 
         public override IGH_Goo Duplicate()
         {
-            return new JObjectGoo(this.Value.DeepClone() as JObject);
+            return new JValueGoo(this.Value.DeepClone() as JValue);
         }
 
         public override string ToString()
         {
-            return "JSON Object";
+            return "JSON Value";
         }
 
         public override bool CastTo<Q>(ref Q target)
         {
             Type q = typeof(Q);
-            JObject obj = this.Value;
+            JValue value = this.Value;
             if (q == typeof(JTokenGoo))
             {
-                JToken token = obj;
+                JToken token = value;
                 if (token != null)
                 {
                     object temp = new JTokenGoo(token);
@@ -62,7 +62,7 @@ namespace Swiftlet.Goo
                     JTokenGoo goo = source as JTokenGoo;
                     if (goo != null)
                     {
-                        JObject value = goo.Value as JObject;
+                        JValue value = goo.Value as JValue;
                         if (value != null)
                         {
                             this.Value = value;

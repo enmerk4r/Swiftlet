@@ -10,24 +10,26 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ParseJsonArray : GH_Component
+    public class ReadJsonArray : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParseJsonArray class.
         /// </summary>
-        public ParseJsonArray()
-          : base("Parse JSON Array", "JSON ARRAY",
-              "Parse a JSON Array into a series of searchable JSON objects",
-              NamingUtility.CATEGORY, NamingUtility.READ)
+        public ReadJsonArray()
+          : base("Read JSON Array", "RJA",
+              "Read a JSON Array into a series of searchable JSON objects",
+              NamingUtility.CATEGORY, NamingUtility.READ_JSON)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "Array", "A", "JSON Array to be broken down into individual JSON objects", GH_ParamAccess.item);
+            pManager.AddParameter(new JTokenParam(), "Array", "JA", "JSON Array to be broken down into individual JSON objects", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +37,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new JTokenParam(), "JTokens", "J", "JSON Tokens as list", GH_ParamAccess.list);
+            pManager.AddParameter(new JTokenParam(), "JTokens", "JT", "JSON Tokens as list", GH_ParamAccess.list);
         }
 
         /// <summary>

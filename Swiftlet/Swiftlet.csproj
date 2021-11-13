@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,20 +61,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\ApiKeyAuth.cs" />
-    <Compile Include="Components\BasicAuth.cs" />
-    <Compile Include="Components\BearerTokenAuth.cs" />
-    <Compile Include="Components\CreateHttpHeader.cs" />
-    <Compile Include="Components\CreateQueryParam.cs" />
-    <Compile Include="Components\CreateTextBody.cs" />
-    <Compile Include="Components\DeconstructHttpResponse.cs" />
-    <Compile Include="Components\DeconstructJsonValue.cs" />
-    <Compile Include="Components\GetJsonObjectKeys.cs" />
-    <Compile Include="Components\GetRequestComponent.cs" />
-    <Compile Include="Components\ParseJson.cs" />
-    <Compile Include="Components\ParseJsonObject.cs" />
-    <Compile Include="Components\PostRequestComponent.cs" />
-    <Compile Include="Components\Read JToken.cs" />
+    <Compile Include="Components\1_Auth\ApiKeyAuth.cs" />
+    <Compile Include="Components\1_Auth\BasicAuth.cs" />
+    <Compile Include="Components\1_Auth\BearerTokenAuth.cs" />
+    <Compile Include="Components\2_Request\CreateHttpHeader.cs" />
+    <Compile Include="Components\2_Request\CreateQueryParam.cs" />
+    <Compile Include="Components\2_Request\CreateTextBody.cs" />
+    <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
+    <Compile Include="Components\3_Send\GetRequestComponent.cs" />
+    <Compile Include="Components\4_ReadJson\GetObjectKey.cs" />
+    <Compile Include="Components\4_ReadJson\ParseJson.cs" />
+    <Compile Include="Components\3_Send\PostRequestComponent.cs" />
+    <Compile Include="Components\4_ReadJson\ReadJsonArray.cs" />
+    <Compile Include="Components\4_ReadJson\ReadJsonObject.cs" />
+    <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
+    <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
+    <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
     <Compile Include="DataModels\Enums\ContentType.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
@@ -84,12 +87,13 @@
     <Compile Include="DataModels\Interfaces\IKeyValue.cs" />
     <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
     <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
-    <Compile Include="FormatJsonString.cs" />
+    <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
     <Compile Include="Goo\JArrayGoo.cs" />
     <Compile Include="Goo\JObjectGoo.cs" />
     <Compile Include="Goo\JTokenGoo.cs" />
+    <Compile Include="Goo\JValueGoo.cs" />
     <Compile Include="Goo\QueryParamGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
@@ -97,9 +101,9 @@
     <Compile Include="Params\JArrayParam.cs" />
     <Compile Include="Params\JObjectParam.cs" />
     <Compile Include="Params\JTokenParam.cs" />
+    <Compile Include="Params\JValueParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
-    <Compile Include="Components\ParseJsonArray.cs" />
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HeaderUtility.cs" />

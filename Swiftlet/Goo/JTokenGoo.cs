@@ -33,7 +33,94 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
-            return "JSON Token";
+            if (this.Value is JObject) return "JSON Object";
+            else if (this.Value is JArray) return "JSON Array";
+            else if (this.Value is JValue) return "JSON Value";
+            else return "JSON Token";
+        }
+
+        public override bool CastTo<Q>(ref Q target)
+        {
+            Type q = typeof(Q);
+            JToken token = this.Value;
+            if (q == typeof(JObjectGoo))
+            {
+                JObject obj = token as JObject;
+                if (obj != null)
+                {
+                    object temp = new JObjectGoo(obj);
+                    target = (Q)temp;
+                    return true;
+                }
+            }
+            else if (q == typeof(JArrayGoo))
+            {
+                JArray array = token as JArray;
+                if (array != null)
+                {
+                    object temp = new JArrayGoo(array);
+                    target = (Q)temp;
+                    return true;
+                }
+            }
+            else if (q == typeof(JValueGoo))
+            {
+                JValue value = token as JValue;
+                if (value != null)
+                {
+                    object temp = new JValueGoo(value);
+                    target = (Q)temp;
+                    return true;
+                }
+            }
+            return base.CastTo(ref target);
+        }
+
+        public override bool CastFrom(object source)
+        {
+            if (source != null)
+            {
+                if (source.GetType() == typeof(JArrayGoo))
+                {
+                    JArrayGoo goo = source as JArrayGoo;
+                    if (goo != null)
+                    {
+                        JArray value = goo.Value as JArray;
+                        if (value != null)
+                        {
+                            this.Value = value;
+                            return true;
+                        }
+                    }
+                }
+                else if (source.GetType() == typeof(JObjectGoo))
+                {
+                    JObjectGoo goo = source as JObjectGoo;
+                    if (goo != null)
+                    {
+                        JObject value = goo.Value as JObject;
+                        if (value != null)
+                        {
+                            this.Value = value;
+                            return true;
+                        }
+                    }
+                }
+                else if (source.GetType() == typeof(JValueGoo))
+                {
+                    JValueGoo goo = source as JValueGoo;
+                    if (goo != null)
+                    {
+                        JValue value = goo.Value as JValue;
+                        if (value != null)
+                        {
+                            this.Value = value;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return base.CastFrom(source);
         }
     }
 }

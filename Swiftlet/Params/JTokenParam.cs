@@ -12,12 +12,12 @@ namespace Swiftlet.Params
     public class JTokenParam : GH_Param<JTokenGoo>
     {
         public JTokenParam()
-            : base("JToken", "JToken", "Collection of JSON Tokens",
-                 NamingUtility.CATEGORY, NamingUtility.READ, GH_ParamAccess.item)
+            : base("JToken", "JT", "Collection of JSON Tokens",
+                 NamingUtility.CATEGORY, NamingUtility.READ_JSON, GH_ParamAccess.item)
         {
 
         }
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("a2bdb76c-7a0e-4537-a7f1-0fb37a6b35ac");
     }
 }
