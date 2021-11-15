@@ -161,6 +161,24 @@
     <None Include="Resources\ParamBase_jarray_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_read_json_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_json_object_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_json_value_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_request_body_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_separate_json_tokens_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_stringify_json_token_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_token_auth_24x24.png" />
   </ItemGroup>
   <ItemGroup>
@@ -225,24 +243,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_object_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_request_body_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_separate_json_tokens_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_stringify_json_token_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
