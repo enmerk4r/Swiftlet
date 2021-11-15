@@ -107,6 +107,11 @@
     <Compile Include="Params\JValueParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\HeaderUtility.cs" />
@@ -115,6 +120,129 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_jobject_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_jtoken_param_24x24 .png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_jvalue_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_request_body_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_create_http_header_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_create_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_create_text_body_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_http_header_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_http_response_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ParamBase_jarray_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_token_auth_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_api_auth_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_basic_auth_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_http_header_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_text_body_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_response_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_delete_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_format_json_string_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_get_json_object_key.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_get_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_http_header_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_http_response_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_jarray_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_jobject_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_jtoken_param_24x24 .png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_jvalue_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_parse_json_string_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_patch_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_post_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_put_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_json_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_json_object_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_json_value_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_request_body_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_separate_json_tokens_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_stringify_json_token_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

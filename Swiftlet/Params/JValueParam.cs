@@ -3,6 +3,7 @@ using Swiftlet.Goo;
 using Swiftlet.Util;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,5 +20,7 @@ namespace Swiftlet.Params
         }
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("f46d2a50-02f2-46c9-8a93-f7a8d37843d4");
+
+        protected override Bitmap Icon => Properties.Resources.Icons_jvalue_param_24x24;
     }
 }
