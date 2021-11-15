@@ -40,8 +40,6 @@ namespace Swiftlet.Components
             pManager.AddTextParameter("AsString", "S", "JSON Value as string", GH_ParamAccess.item);
             pManager.AddNumberParameter("AsNumber", "N", "JSON Value as number", GH_ParamAccess.item);
             pManager.AddBooleanParameter("AsBool", "B", "JSON Value as boolean", GH_ParamAccess.item);
-            pManager.AddParameter(new JTokenParam(), "AsObject", "JO", "JSON Value as JObject", GH_ParamAccess.item);
-            pManager.AddParameter(new JArrayParam(), "AsArray", "JA", "JSON Value as JArray", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -53,26 +51,17 @@ namespace Swiftlet.Components
             JTokenGoo goo = null;
             DA.GetData(0, ref goo);
 
-
-            JToken input_token = goo.Value;
-
-            try { DA.SetData(0, input_token.ToString()); }
-            catch { }
-            try { DA.SetData(1, input_token.ToObject<double>()); }
-            catch { }
-            try { DA.SetData(2, input_token.ToObject<bool>()); }
-            catch { }
-
-            if (input_token is JObject)
+            if (goo != null)
             {
-                DA.SetData(3, new JTokenGoo(input_token));
-            }
-            if (input_token is JArray)
-            {
-                DA.SetData(4, new JArrayGoo(input_token as JArray));
-            }
+                JToken input_token = goo.Value;
 
-            
+                try { DA.SetData(0, input_token.ToString()); }
+                catch { }
+                try { DA.SetData(1, input_token.ToObject<double>()); }
+                catch { }
+                try { DA.SetData(2, input_token.ToObject<bool>()); }
+                catch { }
+            }
         }
 
         /// <summary>

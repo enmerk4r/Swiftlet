@@ -49,18 +49,22 @@ namespace Swiftlet.Components
             JTokenGoo goo = null;
             DA.GetData(0, ref goo);
 
-            JToken token = goo.Value;
-            if (token is JArray)
+            if (goo != null)
             {
-                JArray array = token as JArray;
-                List<JToken> tokens = new List<JToken>();
-                foreach (var t in array) tokens.Add(t);
 
-                DA.SetDataList(0, tokens.Select(o => new JTokenGoo(o)));
-            }
-            else
-            {
-                throw new Exception("Input token is not an array");
+                JToken token = goo.Value;
+                if (token is JArray)
+                {
+                    JArray array = token as JArray;
+                    List<JToken> tokens = new List<JToken>();
+                    foreach (var t in array) tokens.Add(t);
+
+                    DA.SetDataList(0, tokens.Select(o => new JTokenGoo(o)));
+                }
+                else
+                {
+                    throw new Exception("Input token is not an array");
+                }
             }
 
         }

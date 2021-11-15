@@ -50,26 +50,30 @@ namespace Swiftlet.Components
             JTokenGoo goo = null;
             DA.GetData(0, ref goo);
 
-            List<string> keys = new List<string>();
-            List<JTokenGoo> tokens = new List<JTokenGoo>();
-
-            JToken token = goo.Value;
-
-            if (token is JObject)
+            if (goo != null)
             {
-                JObject obj = token as JObject;
-                keys = obj.Properties().Select(p => p.Name).ToList();
-                foreach(string k in keys)
+
+                List<string> keys = new List<string>();
+                List<JTokenGoo> tokens = new List<JTokenGoo>();
+
+                JToken token = goo.Value;
+
+                if (token is JObject)
                 {
-                    JToken value = obj.GetValue(k);
-                    tokens.Add(new JTokenGoo(value));
+                    JObject obj = token as JObject;
+                    keys = obj.Properties().Select(p => p.Name).ToList();
+                    foreach (string k in keys)
+                    {
+                        JToken value = obj.GetValue(k);
+                        tokens.Add(new JTokenGoo(value));
+                    }
+                    DA.SetDataList(0, keys);
+                    DA.SetDataList(1, tokens);
                 }
-                DA.SetDataList(0, keys);
-                DA.SetDataList(1, tokens);
-            }
-            else
-            {
-                throw new Exception("Input is not a JObject");
+                else
+                {
+                    throw new Exception("Input is not a JObject");
+                }
             }
         }
 
