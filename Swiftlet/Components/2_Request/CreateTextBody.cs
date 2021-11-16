@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Enums;
@@ -31,6 +32,34 @@ namespace Swiftlet.Components
         {
             _cType = ContentType.JSON;
             this.IsJsonChecked = true;
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            this.IsTextChecked = reader.GetBoolean(nameof(this.IsTextChecked));
+            this.IsJavascriptChecked = reader.GetBoolean(nameof(this.IsJavascriptChecked));
+            this.IsJsonChecked = reader.GetBoolean(nameof(this.IsJsonChecked));
+            this.IsHtmlChecked = reader.GetBoolean(nameof(this.IsHtmlChecked));
+            this.IsXmlChecked = reader.GetBoolean(nameof(this.IsXmlChecked));
+
+            if (this.IsTextChecked) _cType = ContentType.Text;
+            else if (this.IsJavascriptChecked) _cType = ContentType.JavaScript;
+            else if (this.IsJsonChecked) _cType = ContentType.JSON;
+            else if (this.IsHtmlChecked) _cType = ContentType.HTML;
+            else if (this.IsXmlChecked) _cType = ContentType.XML;
+
+            this.Message = this._cType.ToString();
+            return base.Read(reader);
+        }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetBoolean(nameof(this.IsTextChecked), this.IsTextChecked);
+            writer.SetBoolean(nameof(this.IsJavascriptChecked), this.IsJavascriptChecked);
+            writer.SetBoolean(nameof(this.IsJsonChecked), this.IsJsonChecked);
+            writer.SetBoolean(nameof(this.IsHtmlChecked), this.IsHtmlChecked);
+            writer.SetBoolean(nameof(this.IsXmlChecked), this.IsXmlChecked);
+            return base.Write(writer);
         }
 
         /// <summary>

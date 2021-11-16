@@ -1,5 +1,5 @@
 name: swiftlet
-version: 0.1.0
+version: 0.1.1
 authors:
   - Sergey Pigach
 description: >
@@ -19,4 +19,6 @@ keywords:
 - scraping
 - endpoint
 - headers
+- http
+- https
 icon_url: "https://swiftlet.s3.us-east-2.amazonaws.com/Logo_32x32.png"
