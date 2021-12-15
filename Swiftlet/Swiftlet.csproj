@@ -65,8 +65,13 @@
     <Compile Include="Components\1_Auth\BasicAuth.cs" />
     <Compile Include="Components\1_Auth\BearerTokenAuth.cs" />
     <Compile Include="Components\2_Request\CreateHttpHeader.cs" />
+    <Compile Include="Components\2_Request\CreateJsonArray.cs" />
+    <Compile Include="Components\2_Request\CreateJsonObject.cs" />
+    <Compile Include="Components\2_Request\CreateJsonValue.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
+    <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
+    <Compile Include="Components\2_Request\SetJsonKey.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
     <Compile Include="Components\3_Send\GetRequestComponent.cs" />
@@ -243,6 +248,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_json_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_json_object_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_json_value_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_remove_json_key_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_set_json_key_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
