@@ -12,5 +12,6 @@ namespace Swiftlet.DataModels.Interfaces
         string Value { get; }
 
         void SetValue(string value);
+        string ToJsonString();
     }
 }

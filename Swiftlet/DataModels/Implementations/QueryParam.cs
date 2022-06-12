@@ -1,4 +1,5 @@
-﻿using Swiftlet.DataModels.Interfaces;
+﻿using Newtonsoft.Json.Linq;
+using Swiftlet.DataModels.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,13 @@ namespace Swiftlet.DataModels.Implementations
         public string ToQueryString()
         {
             return $"{this.Key}={this.Value}";
+        }
+
+        public string ToJsonString()
+        {
+            JObject obj = new JObject();
+            obj.Add(this.Key, this.Value);
+            return obj.ToString().Replace("\n", "").Replace("\r", "");
         }
 
         public QueryParam(string key, string value)
