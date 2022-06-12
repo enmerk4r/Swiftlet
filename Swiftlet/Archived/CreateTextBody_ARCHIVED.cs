@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
-using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Enums;
 using Swiftlet.DataModels.Implementations;
@@ -14,7 +12,8 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateTextBody : GH_Component
+    [Obsolete]
+    public class CreateTextBody_ARCHIVED : GH_Component
     {
         private ContentType _cType;
 
@@ -27,7 +26,7 @@ namespace Swiftlet.Components
         /// <summary>
         /// Initializes a new instance of the CreatePostBody class.
         /// </summary>
-        public CreateTextBody()
+        public CreateTextBody_ARCHIVED()
           : base("Create Text Body", "CTB",
               "Create a Request Body that supports text formats",
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
@@ -35,6 +34,8 @@ namespace Swiftlet.Components
             _cType = ContentType.JSON;
             this.IsJsonChecked = true;
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
 
         public override bool Read(GH_IReader reader)
         {
@@ -69,7 +70,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Content", "C", "Text contents of your request body", GH_ParamAccess.item);
+            pManager.AddTextParameter("Content", "C", "Text contents of your request body", GH_ParamAccess.item, string.Empty);
             pManager[0].Optional = true;
         }
 
@@ -87,48 +88,8 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            object input = null;
             string txt = string.Empty;
-
-            DA.GetData(0, ref input);
-
-            if (input == null) { } // Do nothing
-            else if (input is GH_String)
-            {
-                GH_String str = input as GH_String;
-                if (str != null)
-                {
-                    txt = str.ToString();
-                }
-            }
-            else if (input is JArrayGoo)
-            {
-                JArrayGoo arrayGoo = input as JArrayGoo;
-                if (arrayGoo != null)
-                {
-                    txt = arrayGoo.Value.ToString();
-                }
-            }
-            else if (input is JObjectGoo)
-            {
-                JObjectGoo objectGoo = input as JObjectGoo;
-                if (objectGoo != null)
-                {
-                    txt = objectGoo.Value.ToString();
-                }
-            }
-            else if (input is JTokenGoo)
-            {
-                JTokenGoo tokenGoo = input as JTokenGoo;
-                if (tokenGoo != null)
-                {
-                    txt = tokenGoo.Value.ToString();
-                }
-            }
-            else
-            {
-                throw new Exception(" Content must be a string, a JObject or a JArray");
-            }
+            DA.GetData(0, ref txt);
 
             RequestBodyText txtBody = new RequestBodyText(this._cType, txt);
             RequestBodyGoo goo = new RequestBodyGoo(txtBody);
@@ -214,7 +175,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("d5bf7d4a-9fc3-4984-90f7-feb32aa96d9f"); }
+            get { return new Guid("87d53fb2-ba5d-46dc-bc7b-92eac5aebc6c"); }
         }
     }
 }
