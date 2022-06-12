@@ -47,8 +47,19 @@ namespace Swiftlet.Components
             string json = string.Empty;
             DA.GetData(0, ref json);
 
-            JObject obj = JObject.Parse(json);
-            DA.SetData(0, obj.ToString());
+            string value = string.Empty;
+
+            try
+            {
+                JObject obj = JObject.Parse(json);
+                value = obj.ToString();
+            }
+            catch
+            {
+                JArray array = JArray.Parse(json);
+                value = array.ToString();
+            }
+            DA.SetData(0, value);
         }
 
         /// <summary>
