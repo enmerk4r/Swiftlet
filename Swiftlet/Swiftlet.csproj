@@ -71,6 +71,7 @@
     <Compile Include="Components\2_Request\CreateJsonValue.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
+    <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
