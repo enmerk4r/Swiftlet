@@ -1,5 +1,4 @@
-﻿using Swiftlet.DataModels.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +8,7 @@ namespace Swiftlet.DataModels.Interfaces
 {
     public interface IRequestBody
     {
-        ContentType ContentType { get; }
+        string ContentType { get; }
         object Value { get; }
 
         IRequestBody Duplicate();

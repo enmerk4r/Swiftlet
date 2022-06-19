@@ -1,5 +1,4 @@
 ﻿using Grasshopper.Kernel.Types;
-using Swiftlet.DataModels.Enums;
 using Swiftlet.DataModels.Implementations;
 using Swiftlet.DataModels.Interfaces;
 using Swiftlet.Util;
@@ -36,7 +35,7 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
-            return $"REQUEST BODY [ {HeaderUtility.GetContentType(this.Value.ContentType)} ]";
+            return $"REQUEST BODY [ {this.Value.ContentType} ]";
         }
     }
 }

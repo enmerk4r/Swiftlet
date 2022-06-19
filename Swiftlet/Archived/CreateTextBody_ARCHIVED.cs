@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using Swiftlet.DataModels.Enums;
 using Swiftlet.DataModels.Implementations;
 using Swiftlet.Goo;
 using Swiftlet.Params;
@@ -15,7 +14,7 @@ namespace Swiftlet.Components
     [Obsolete]
     public class CreateTextBody_ARCHIVED : GH_Component
     {
-        private ContentType _cType;
+        private string _cType;
 
         private bool IsTextChecked { get; set; }
         private bool IsJavascriptChecked { get; set; }
@@ -31,7 +30,7 @@ namespace Swiftlet.Components
               "Create a Request Body that supports text formats",
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
-            _cType = ContentType.JSON;
+            _cType = ContentTypeUtility.ApplicationJson;
             this.IsJsonChecked = true;
         }
 
@@ -45,11 +44,11 @@ namespace Swiftlet.Components
             this.IsHtmlChecked = reader.GetBoolean(nameof(this.IsHtmlChecked));
             this.IsXmlChecked = reader.GetBoolean(nameof(this.IsXmlChecked));
 
-            if (this.IsTextChecked) _cType = ContentType.Text;
-            else if (this.IsJavascriptChecked) _cType = ContentType.JavaScript;
-            else if (this.IsJsonChecked) _cType = ContentType.JSON;
-            else if (this.IsHtmlChecked) _cType = ContentType.HTML;
-            else if (this.IsXmlChecked) _cType = ContentType.XML;
+            if (this.IsTextChecked) _cType = ContentTypeUtility.TextPlain;
+            else if (this.IsJavascriptChecked) _cType = ContentTypeUtility.JavaScript;
+            else if (this.IsJsonChecked) _cType = ContentTypeUtility.ApplicationJson;
+            else if (this.IsHtmlChecked) _cType = ContentTypeUtility.TextHtml;
+            else if (this.IsXmlChecked) _cType = ContentTypeUtility.ApplicationXml;
 
             this.Message = this._cType.ToString();
             return base.Read(reader);
@@ -110,7 +109,7 @@ namespace Swiftlet.Components
 
         private void Menu_TextClick(object sender, EventArgs args)
         {
-            this._cType = ContentType.Text;
+            this._cType = ContentTypeUtility.TextPlain;
             this.UncheckAll();
             this.IsTextChecked = true;
             this.ExpireSolution(true);
@@ -118,7 +117,7 @@ namespace Swiftlet.Components
 
         private void Menu_JavascriptClick(object sender, EventArgs args)
         {
-            this._cType = ContentType.JavaScript;
+            this._cType = ContentTypeUtility.JavaScript;
             this.UncheckAll();
             this.IsJavascriptChecked = true;
             this.ExpireSolution(true);
@@ -126,7 +125,7 @@ namespace Swiftlet.Components
 
         private void Menu_JsonClick(object sender, EventArgs args)
         {
-            this._cType = ContentType.JSON;
+            this._cType = ContentTypeUtility.ApplicationJson;
             this.UncheckAll();
             this.IsJsonChecked = true;
             this.ExpireSolution(true);
@@ -134,7 +133,7 @@ namespace Swiftlet.Components
 
         private void Menu_HtmlClick(object sender, EventArgs args)
         {
-            this._cType = ContentType.HTML;
+            this._cType = ContentTypeUtility.TextHtml;
             this.UncheckAll();
             this.IsHtmlChecked = true;
             this.ExpireSolution(true);
@@ -142,7 +141,7 @@ namespace Swiftlet.Components
 
         private void Menu_XmlClick(object sender, EventArgs args)
         {
-            this._cType = ContentType.XML;
+            this._cType = ContentTypeUtility.ApplicationXml;
             this.UncheckAll();
             this.IsXmlChecked = true;
             this.ExpireSolution(true);

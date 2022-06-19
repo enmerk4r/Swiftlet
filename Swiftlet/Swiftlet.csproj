@@ -70,6 +70,7 @@
     <Compile Include="Components\2_Request\CreateJsonObject.cs" />
     <Compile Include="Components\2_Request\CreateJsonValue.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
+    <Compile Include="Components\2_Request\CreateTextBodyCustom.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
@@ -87,7 +88,6 @@
     <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
     <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
     <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
-    <Compile Include="DataModels\Enums\ContentType.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
@@ -121,7 +121,7 @@
     </Compile>
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\HeaderUtility.cs" />
+    <Compile Include="Util\ContentTypeUtility.cs" />
     <Compile Include="Util\NamingUtility.cs" />
     <Compile Include="Util\UrlUtility.cs" />
   </ItemGroup>
@@ -266,6 +266,7 @@
   <ItemGroup>
     <None Include="Resources\Icons_set_json_key_24x24.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
