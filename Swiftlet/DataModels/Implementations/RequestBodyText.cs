@@ -1,5 +1,5 @@
-﻿using Swiftlet.DataModels.Enums;
-using Swiftlet.DataModels.Interfaces;
+﻿using Swiftlet.DataModels.Interfaces;
+using Swiftlet.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace Swiftlet.DataModels.Implementations
 {
     public class RequestBodyText : IRequestBody
     {
-        public ContentType ContentType { get; private set; }
+        public string ContentType { get; private set; }
 
         public object Value { get; private set; }
 
@@ -28,10 +28,10 @@ namespace Swiftlet.DataModels.Implementations
 
         public RequestBodyText()
         {
-            this.ContentType = ContentType.Text;
+            this.ContentType = ContentTypeUtility.TextPlain;
         }
 
-        public RequestBodyText(ContentType type, string text)
+        public RequestBodyText(string type, string text)
         {
             this.ContentType = type;
             this.Text = text;

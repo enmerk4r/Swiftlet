@@ -88,7 +88,7 @@ namespace Swiftlet.Components
                 HttpContent content = null;
                 if (body is RequestBodyText)
                 {
-                    content = new StringContent(((RequestBodyText)body).Text, System.Text.Encoding.UTF8, HeaderUtility.GetContentType(body.ContentType));
+                    content = new StringContent(((RequestBodyText)body).Text, System.Text.Encoding.UTF8, body.ContentType);
                 }
                 var task = client.PutAsync(fullUrl, content);
                 var result = task.Result;
