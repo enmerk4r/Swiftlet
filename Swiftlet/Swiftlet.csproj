@@ -70,6 +70,7 @@
     <Compile Include="Components\2_Request\CreateJsonObject.cs" />
     <Compile Include="Components\2_Request\CreateJsonValue.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
+    <Compile Include="Components\2_Request\CreateByteArrayBody.cs" />
     <Compile Include="Components\2_Request\CreateTextBodyCustom.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
+    <Compile Include="DataModels\Implementations\RequestBodyByteArray.cs" />
     <Compile Include="DataModels\Implementations\RequestBodyText.cs" />
     <Compile Include="DataModels\Interfaces\IHttpHeader.cs" />
     <Compile Include="DataModels\Interfaces\IHttpResponseDTO.cs" />
