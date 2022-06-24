@@ -34,6 +34,8 @@ namespace Swiftlet.Components
             this.IsJsonChecked = true;
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         public override bool Read(GH_IReader reader)
         {
             this.IsTextChecked = reader.GetBoolean(nameof(this.IsTextChecked));
