@@ -89,6 +89,7 @@
     <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
     <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
     <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
+    <Compile Include="Components\5_Save\SaveWebResponse.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
