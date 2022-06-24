@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.DataModels.Implementations
 {
-    public class RequestBodyText : IRequestBody
+    public class RequestBodyByteArray : IRequestBody
     {
         public string ContentType { get; private set; }
 
         public object Value { get; private set; }
 
-        public string Text
+        public byte[] Content
         {
             get
             {
-                return this.Value as string;
+                return this.Value as byte[];
             }
             private set
             {
@@ -27,25 +27,24 @@ namespace Swiftlet.DataModels.Implementations
             }
         }
 
-        public RequestBodyText()
+        public RequestBodyByteArray()
         {
-            this.ContentType = ContentTypeUtility.TextPlain;
         }
 
-        public RequestBodyText(string type, string text)
+        public RequestBodyByteArray(string type, byte[] content)
         {
             this.ContentType = type;
-            this.Text = text;
+            this.Content = content;
         }
 
         public IRequestBody Duplicate()
         {
-            return new RequestBodyText(this.ContentType, this.Text);
+            return new RequestBodyByteArray(this.ContentType, this.Content);
         }
 
         public HttpContent ToHttpContent()
         {
-            return new StringContent(this.Text, Encoding.UTF8, this.ContentType);
+            return new ByteArrayContent(this.Content);
         }
     }
 }
