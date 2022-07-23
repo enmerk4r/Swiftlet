@@ -15,5 +15,6 @@ namespace Swiftlet.Util
         public const string SEND = "3. Send";
         public const string READ_JSON = "4. Read JSON";
         public const string SAVE_TO_DISK = "5. Save";
+        public const string SOCKETS = "6. Sockets";
     }
 }
