@@ -102,9 +102,10 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
-    <Compile Include="DataModels\Enums\ContentType.cs" />
-    <Compile Include="Components\5_Save\SaveText.cs" />
-    <Compile Include="Components\5_Save\SaveWebResponse.cs" />
+    <Compile Include="Components\6_Save\CreateCsvLine.cs" />
+    <Compile Include="Components\6_Save\SaveCSV.cs" />
+    <Compile Include="Components\6_Save\SaveText.cs" />
+    <Compile Include="Components\6_Save\SaveWebResponse.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />

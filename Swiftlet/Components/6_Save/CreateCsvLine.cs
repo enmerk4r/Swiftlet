@@ -1,41 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Windows.Forms;
-using GH_IO.Serialization;
+
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
-using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
-using Swiftlet.DataModels.Implementations;
-using Swiftlet.Goo;
-using Swiftlet.Params;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateByteArrayBody : GH_Component
+    public class CreateCsvLine : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreatePostBody class.
+        /// Initializes a new instance of the CreateCsvLine class.
         /// </summary>
-        public CreateByteArrayBody()
-          : base("Create Byte Array Body", "CBAB",
-              "Create a Request Body that supports Byte Array content",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public CreateCsvLine()
+          : base("Create CSV Line", "CSVL",
+              "Formats multiple ",
+              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
         {
         }
-
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
-            pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
+            pManager.AddTextParameter("Cells", "C", "Cell values of a CSV line", GH_ParamAccess.list);
+            pManager.AddTextParameter("Delimiter", "D", "CSV delimeter", GH_ParamAccess.item, ",");
+
+            pManager[1].Optional = true;
         }
 
         /// <summary>
@@ -43,7 +35,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new RequestBodyParam(), "Body", "B", "Request Body", GH_ParamAccess.item);
+            pManager.AddTextParameter("Line", "L", "Formatted CSV line", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -52,20 +44,26 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string path = string.Empty;
-            string contentType = string.Empty;
+            List<string> cells = new List<string>();
+            string delimiter = ",";
+            DA.GetDataList(0, cells);
+            DA.GetData(1, ref delimiter);
 
-            DA.GetData(0, ref path);
-            DA.GetData(1, ref contentType);
+            string line = string.Empty;
 
-            var content = File.ReadAllBytes(path);
+            foreach(string cell in cells)
+            {
+                string cleanCell = cell;
+                if (cell.Contains(delimiter))
+                {
+                    cleanCell = $"\"{cell}\"";
+                }
+                line += $"{cleanCell}{delimiter}";
+            }
 
-            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, content);
-            RequestBodyGoo goo = new RequestBodyGoo(txtBody);
-
-            DA.SetData(0, goo);
+            line = line.Remove(line.Length - 1, 1);
+            DA.SetData(0, line);
         }
-
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -85,7 +83,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("05df5f52-6e60-4492-9332-03189a83ec18"); }
+            get { return new Guid("D9B2041E-FF4E-446E-B634-4EBACD47051E"); }
         }
     }
 }
