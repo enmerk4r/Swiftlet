@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
 using HtmlAgilityPack;
 using Rhino.Geometry;
@@ -10,27 +10,25 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ReadHtml : GH_Component
+    public class GetElementsByXPATH : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ReadHtmlDocumentComponent class.
+        /// Initializes a new instance of the GetElementsByXPATH class.
         /// </summary>
-        public ReadHtml()
-          : base("Read HTML", "HTML",
-              "Read HTML Markup",
+        public GetElementsByXPATH()
+          : base("Get Elements By XPATH", "BYXPATH",
+              "Get HTML elements via an XPATH expression",
               NamingUtility.CATEGORY, NamingUtility.READ_HTML)
-
         {
         }
-
-        public override GH_Exposure Exposure => GH_Exposure.primary;
-
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("HTML", "H", "HTML Markup", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Parent", "P", "Parent node", GH_ParamAccess.item);
+            pManager.AddTextParameter("XPATH", "X", "XPATH Expression", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -38,7 +36,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new HtmlNodeParam(), "Node", "N", "Html Node", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Children", "C", "A list of child nodes", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -47,13 +45,24 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string html = string.Empty;
-            DA.GetData(0, ref html);
+            HtmlNodeGoo goo = null;
+            string xpath = string.Empty;
+            DA.GetData(0, ref goo);
+            DA.GetData(1, ref xpath);
 
-            HtmlDocument dom = new HtmlDocument();
-            dom.LoadHtml(html);
+            if (goo == null) return;
+            if (string.IsNullOrEmpty(xpath)) return;
+            HtmlNode node = goo.Value;
 
-            DA.SetData(0, new HtmlNodeGoo(dom.DocumentNode));
+            if (node == null) return;
+
+            HtmlNodeCollection children = node.SelectNodes(xpath);
+            List<HtmlNode> found = new List<HtmlNode>();
+            if (children != null)
+            {
+                found.AddRange(children);
+            }
+            DA.SetDataList(0, found.Select(o => new HtmlNodeGoo(o)));
         }
 
         /// <summary>
@@ -74,7 +83,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("349B64D0-63E5-4263-85E1-788D03A71920"); }
+            get { return new Guid("DCED6D9C-0654-484A-AEC3-02D941F22EA9"); }
         }
     }
 }
