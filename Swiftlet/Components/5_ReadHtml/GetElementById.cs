@@ -1,41 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Windows.Forms;
-using GH_IO.Serialization;
+
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
-using Newtonsoft.Json.Linq;
+using HtmlAgilityPack;
 using Rhino.Geometry;
-using Swiftlet.DataModels.Implementations;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateByteArrayBody : GH_Component
+    public class GetElementById : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreatePostBody class.
+        /// Initializes a new instance of the GetElementById class.
         /// </summary>
-        public CreateByteArrayBody()
-          : base("Create Byte Array Body", "CBAB",
-              "Create a Request Body that supports Byte Array content",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public GetElementById()
+          : base("Get Element By Id", "BYID",
+              "Get an HTML element by ID",
+              NamingUtility.CATEGORY, NamingUtility.READ_HTML)
         {
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
-
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
-            pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Parent", "P", "Parent node", GH_ParamAccess.item);
+            pManager.AddTextParameter("ID", "I", "HTML Element ID", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -43,7 +37,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new RequestBodyParam(), "Body", "B", "Request Body", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Element", "E", "Found element", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -52,20 +46,24 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string path = string.Empty;
-            string contentType = string.Empty;
+            HtmlNodeGoo goo = null;
+            string elementId = string.Empty;
+            DA.GetData(0, ref goo);
+            DA.GetData(1, ref elementId);
 
-            DA.GetData(0, ref path);
-            DA.GetData(1, ref contentType);
+            if (goo == null) return;
+            if (string.IsNullOrEmpty(elementId)) return;
+            HtmlNode node = goo.Value;
 
-            var content = File.ReadAllBytes(path);
+            if (node == null) return;
 
-            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, content);
-            RequestBodyGoo goo = new RequestBodyGoo(txtBody);
+            HtmlDocument tempDoc = new HtmlDocument();
+            tempDoc.LoadHtml(node.OuterHtml);
 
-            DA.SetData(0, goo);
+            HtmlNode element = tempDoc.GetElementbyId(elementId);
+            if (element == null) return;
+            DA.SetData(0, new HtmlNodeGoo(element));
         }
-
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -85,7 +83,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("05df5f52-6e60-4492-9332-03189a83ec18"); }
+            get { return new Guid("799427C4-0E1B-4ADB-B3A0-1CE33DDF7A41"); }
         }
     }
 }
