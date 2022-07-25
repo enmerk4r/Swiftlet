@@ -10,27 +10,26 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ReadHtml : GH_Component
+    public class GetElementById : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ReadHtmlDocumentComponent class.
+        /// Initializes a new instance of the GetElementById class.
         /// </summary>
-        public ReadHtml()
-          : base("Read HTML", "HTML",
-              "Read HTML Markup",
+        public GetElementById()
+          : base("Get Element By Id", "BYID",
+              "Get an HTML element by ID",
               NamingUtility.CATEGORY, NamingUtility.READ_HTML)
-
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
-
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("HTML", "H", "HTML Markup", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Parent", "P", "Parent node", GH_ParamAccess.item);
+            pManager.AddTextParameter("ID", "I", "HTML Element ID", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new HtmlNodeParam(), "Node", "N", "Html Node", GH_ParamAccess.item);
+            pManager.AddParameter(new HtmlNodeParam(), "Element", "E", "Found element", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -47,13 +46,23 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string html = string.Empty;
-            DA.GetData(0, ref html);
+            HtmlNodeGoo goo = null;
+            string elementId = string.Empty;
+            DA.GetData(0, ref goo);
+            DA.GetData(1, ref elementId);
 
-            HtmlDocument dom = new HtmlDocument();
-            dom.LoadHtml(html);
+            if (goo == null) return;
+            if (string.IsNullOrEmpty(elementId)) return;
+            HtmlNode node = goo.Value;
 
-            DA.SetData(0, new HtmlNodeGoo(dom.DocumentNode));
+            if (node == null) return;
+
+            HtmlDocument tempDoc = new HtmlDocument();
+            tempDoc.LoadHtml(node.OuterHtml);
+
+            HtmlNode element = tempDoc.GetElementbyId(elementId);
+            if (element == null) return;
+            DA.SetData(0, new HtmlNodeGoo(element));
         }
 
         /// <summary>
@@ -74,7 +83,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("349B64D0-63E5-4263-85E1-788D03A71920"); }
+            get { return new Guid("799427C4-0E1B-4ADB-B3A0-1CE33DDF7A41"); }
         }
     }
 }

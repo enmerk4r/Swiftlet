@@ -27,10 +27,7 @@ namespace Swiftlet.Goo
 
         public HtmlNodeGoo(HtmlNode node)
         {
-            string html = node.OuterHtml;
-            HtmlDocument dom = new HtmlDocument();
-            dom.LoadHtml(html);
-            this.Value = dom.DocumentNode;
+            this.Value = node;
         }
 
         public override IGH_Goo Duplicate()
@@ -40,7 +37,7 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
-            return this.Value.OuterHtml;
+            return $"HTML Node [ {this.Value?.Name} ]";
         }
     }
 }

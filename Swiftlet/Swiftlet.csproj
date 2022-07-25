@@ -89,7 +89,17 @@
     <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
     <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
     <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
+    <Compile Include="Components\5_ReadHtml\GetAttributeValue.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementById.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByAttributeValue.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByClassName.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByTagName.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByXPATH.cs" />
+    <Compile Include="Components\5_ReadHtml\GetHtmlAttributes.cs" />
+    <Compile Include="Components\5_ReadHtml\GetHtmlNodeChildren.cs" />
+    <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
+    <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
     <Compile Include="DataModels\Enums\ContentType.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
