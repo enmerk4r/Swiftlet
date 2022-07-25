@@ -70,7 +70,7 @@ namespace Swiftlet.Components._6_Save
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.Icons_save_csv_24x24;
             }
         }
 

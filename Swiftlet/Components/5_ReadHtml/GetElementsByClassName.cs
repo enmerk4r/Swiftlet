@@ -104,7 +104,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.Icons_get_elements_by_class_name_24x24;
             }
         }
 
