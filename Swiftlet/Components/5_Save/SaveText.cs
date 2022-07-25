@@ -1,35 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
+using System.Net.Http;
+using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
+using Swiftlet.DataModels.Implementations;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
 
-namespace Swiftlet.Components._2_Request
+namespace Swiftlet.Components
 {
-    public class RemoveJsonKey : GH_Component
+    public class SaveText : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the RemoveJsonToken class.
+        /// Initializes a new instance of the CreatePostBody class.
         /// </summary>
-        public RemoveJsonKey()
-          : base("Remove JSON Key", "RJK",
-              "Remove a key from JObject",
-              NamingUtility.CATEGORY, NamingUtility.REQUEST)
+        public SaveText()
+          : base("Save Text", "ST",
+              "Save text to disk",
+              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
         {
         }
-        public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new JObjectParam(), "JObject", "JO", "JObject to remove the key from", GH_ParamAccess.item);
-            pManager.AddTextParameter("Key", "K", "Key to be removed", GH_ParamAccess.item);
+            pManager.AddTextParameter("Content", "C", "Text to be saved to disk", GH_ParamAccess.item);
+            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -37,7 +43,7 @@ namespace Swiftlet.Components._2_Request
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddParameter(new JObjectParam(), "JObject", "JO", "Updated JObject", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Bytes", "B", "Size of saved file in bytes", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -46,22 +52,21 @@ namespace Swiftlet.Components._2_Request
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            JObjectGoo goo = null;
-            string key = string.Empty;
+            string content = string.Empty;
+            string path = string.Empty;
 
-            DA.GetData(0, ref goo);
-            DA.GetData(1, ref key);
+            DA.GetData(0, ref content);
+            DA.GetData(1, ref path);
 
-            JObject obj = goo.Value.DeepClone() as JObject;
-            try
+
+            using (StreamWriter writer = new StreamWriter(path))
             {
-                obj.Remove(key);
+                writer.Write(content);
             }
-            catch
-            {
-                // pass
-            }
-            DA.SetData(0, new JObjectGoo(obj));
+
+            long length = new System.IO.FileInfo(path).Length;
+
+            DA.SetData(0, length);
         }
 
         /// <summary>
@@ -73,7 +78,7 @@ namespace Swiftlet.Components._2_Request
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_remove_json_key_24x24;
+                return Properties.Resources.Icons_create_text_body_24x24;
             }
         }
 
@@ -82,7 +87,8 @@ namespace Swiftlet.Components._2_Request
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("452cf748-8d55-42f8-b141-499b8f931891"); }
+            get { return new Guid("1010fb58-d4a6-462d-810e-d5ee1b920ff4"); }
         }
     }
+
 }

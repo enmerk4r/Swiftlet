@@ -86,11 +86,7 @@ namespace Swiftlet.Components
                     client.DefaultRequestHeaders.Add(header.Value.Key, header.Value.Value);
                 }
 
-                HttpContent content = null;
-                if (body is RequestBodyText)
-                {
-                    content = new StringContent(((RequestBodyText)body).Text, System.Text.Encoding.UTF8, HeaderUtility.GetContentType(body.ContentType));
-                }
+                HttpContent content = body.ToHttpContent();
                 var result = this.PatchAsync(client, fullUrl, content);
 
                 HttpResponseDTO dto = new HttpResponseDTO(result);
