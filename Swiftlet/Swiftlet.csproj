@@ -33,9 +33,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="HtmlAgilityPack, Version=1.11.43.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>packages\HtmlAgilityPack.1.11.43\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -89,8 +91,21 @@
     <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
     <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
     <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
-    <Compile Include="Components\5_Save\SaveText.cs" />
-    <Compile Include="Components\5_Save\SaveWebResponse.cs" />
+    <Compile Include="Components\5_ReadHtml\GetAttributeValue.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementById.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByAttributeValue.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByClassName.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByTagName.cs" />
+    <Compile Include="Components\5_ReadHtml\GetElementsByXPATH.cs" />
+    <Compile Include="Components\5_ReadHtml\GetHtmlAttributes.cs" />
+    <Compile Include="Components\5_ReadHtml\GetHtmlNodeChildren.cs" />
+    <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
+    <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
+    <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
+    <Compile Include="Components\6_Save\CreateCsvLine.cs" />
+    <Compile Include="Components\6_Save\SaveCSV.cs" />
+    <Compile Include="Components\6_Save\SaveText.cs" />
+    <Compile Include="Components\6_Save\SaveWebResponse.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
@@ -109,6 +124,7 @@
     <Compile Include="Goo\JTokenGoo.cs" />
     <Compile Include="Goo\JValueGoo.cs" />
     <Compile Include="Goo\QueryParamGoo.cs" />
+    <Compile Include="Goo\HtmlNodeGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
@@ -117,6 +133,7 @@
     <Compile Include="Params\JTokenParam.cs" />
     <Compile Include="Params\JValueParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
+    <Compile Include="Params\HtmlNodeParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
