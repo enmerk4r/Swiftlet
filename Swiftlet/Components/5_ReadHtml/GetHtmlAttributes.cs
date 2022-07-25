@@ -69,7 +69,7 @@ namespace Swiftlet.Components._5_ReadHtml
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.Icons_get_html_attributes_24x24;
             }
         }
 
