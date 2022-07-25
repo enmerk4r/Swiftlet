@@ -23,6 +23,8 @@ namespace Swiftlet.DataModels.Implementations
 
         public string Content { get; private set; }
 
+        public byte[] Bytes { get; private set; }
+
         public HttpResponseDTO()
         {
         }
@@ -49,6 +51,7 @@ namespace Swiftlet.DataModels.Implementations
 
             this.IsSuccessStatusCode = response.IsSuccessStatusCode;
             this.Content = response.Content.ReadAsStringAsync().Result;
+            this.Bytes = response.Content.ReadAsByteArrayAsync().Result.ToArray();
         }
 
         public HttpResponseDTO(
@@ -57,7 +60,8 @@ namespace Swiftlet.DataModels.Implementations
             string reasonPhrase,
             List<HttpHeader> headers,
             bool isSuccess,
-            string content
+            string content,
+            byte[] bytes
             )
         {
             this.Version = version;
@@ -70,7 +74,7 @@ namespace Swiftlet.DataModels.Implementations
             }
             this.IsSuccessStatusCode = isSuccess;
             this.Content = content;
-
+            this.Bytes = bytes;
         }
 
 
@@ -83,7 +87,8 @@ namespace Swiftlet.DataModels.Implementations
                 this.ReasonPhrase,
                 this.Headers,
                 this.IsSuccessStatusCode,
-                this.Content);
+                this.Content,
+                this.Bytes.ToArray());
         }
     }
 }
