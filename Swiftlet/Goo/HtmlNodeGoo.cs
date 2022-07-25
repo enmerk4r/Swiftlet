@@ -1,6 +1,5 @@
 ﻿using Grasshopper.Kernel.Types;
 using HtmlAgilityPack;
-using Swiftlet.DataModels.Enums;
 using Swiftlet.DataModels.Implementations;
 using Swiftlet.DataModels.Interfaces;
 using Swiftlet.Util;
