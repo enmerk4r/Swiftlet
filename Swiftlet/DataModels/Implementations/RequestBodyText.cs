@@ -1,8 +1,9 @@
-﻿using Swiftlet.DataModels.Enums;
-using Swiftlet.DataModels.Interfaces;
+﻿using Swiftlet.DataModels.Interfaces;
+using Swiftlet.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace Swiftlet.DataModels.Implementations
 {
     public class RequestBodyText : IRequestBody
     {
-        public ContentType ContentType { get; private set; }
+        public string ContentType { get; private set; }
 
         public object Value { get; private set; }
 
@@ -28,10 +29,10 @@ namespace Swiftlet.DataModels.Implementations
 
         public RequestBodyText()
         {
-            this.ContentType = ContentType.Text;
+            this.ContentType = ContentTypeUtility.TextPlain;
         }
 
-        public RequestBodyText(ContentType type, string text)
+        public RequestBodyText(string type, string text)
         {
             this.ContentType = type;
             this.Text = text;
@@ -40,6 +41,11 @@ namespace Swiftlet.DataModels.Implementations
         public IRequestBody Duplicate()
         {
             return new RequestBodyText(this.ContentType, this.Text);
+        }
+
+        public HttpContent ToHttpContent()
+        {
+            return new StringContent(this.Text, Encoding.UTF8, this.ContentType);
         }
     }
 }

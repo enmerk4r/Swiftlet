@@ -15,6 +15,7 @@ namespace Swiftlet.DataModels.Interfaces
         List<HttpHeader> Headers { get; }
         bool IsSuccessStatusCode { get; }
         string Content { get; }
+        byte[] Bytes { get; }
 
         IHttpResponseDTO Duplicate();
     }
