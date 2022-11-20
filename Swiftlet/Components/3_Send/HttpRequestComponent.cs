@@ -90,7 +90,7 @@ namespace Swiftlet.Components
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 this.TaskList.Add(Task.Run(
-                    () => { return new HttpRequestSolveResults() { ComputedResponse = package.GetResponse() }; }, 
+                    () => { return new HttpRequestSolveResults() { Value = package.GetResponse() }; }, 
                     CancelToken
                     ));
                 return;
@@ -117,7 +117,7 @@ namespace Swiftlet.Components
                 string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
-                result = new HttpRequestSolveResults() { ComputedResponse = package.GetResponse() };
+                result = new HttpRequestSolveResults() { Value = package.GetResponse() };
                 return;
             }
 
@@ -125,9 +125,9 @@ namespace Swiftlet.Components
             if (result != null)
             {
 
-                DA.SetData(0, result.ComputedResponse.StatusCode);
-                DA.SetData(1, result.ComputedResponse.Content);
-                DA.SetData(2,  new HttpWebResponseGoo(result.ComputedResponse));
+                DA.SetData(0, result.Value.StatusCode);
+                DA.SetData(1, result.Value.Content);
+                DA.SetData(2,  new HttpWebResponseGoo(result.Value));
             }
 
 
@@ -153,11 +153,6 @@ namespace Swiftlet.Components
         {
             get { return new Guid("cc8b1ecf-a2e7-495c-8d41-1e84011633bf"); }
         }
-    }
-
-    public class HttpRequestSolveResults
-    {
-        public HttpResponseDTO ComputedResponse { get; set; } 
     }
 
 

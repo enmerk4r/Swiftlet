@@ -108,6 +108,7 @@
     <Compile Include="Components\6_Save\SaveText.cs" />
     <Compile Include="Components\6_Save\SaveWebResponse.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
+    <Compile Include="DataModels\Implementations\HttpRequestSolveResult.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
     <Compile Include="DataModels\Implementations\RequestBodyByteArray.cs" />

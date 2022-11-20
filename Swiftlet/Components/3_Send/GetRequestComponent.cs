@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Implementations;
@@ -13,7 +14,7 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class GetRequestComponent : GH_Component
+    public class GetRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
     {
         /// <summary>
         /// Initializes a new instance of the GetRequestComponent class.
@@ -49,30 +50,16 @@ namespace Swiftlet.Components
             pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Full Http response object (with metadata)", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
+        public HttpResponseDTO SendRequest(string url, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders)
         {
-            string url = string.Empty;
-            List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
-            List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
-
-            DA.GetData(0, ref url);
-            DA.GetDataList(1, queryParams);
-            DA.GetDataList(2, httpHeaders);
-
             if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
             if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
 
 
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
-
             if (!string.IsNullOrEmpty(fullUrl))
             {
-
                 HttpClient client = new HttpClient();
 
                 // Add headers
@@ -83,18 +70,57 @@ namespace Swiftlet.Components
 
                 var result = client.GetAsync(fullUrl).Result;
                 HttpResponseDTO dto = new HttpResponseDTO(result);
-                
-
-                DA.SetData(0, dto.StatusCode);
-                DA.SetData(1, dto.Content);
-                DA.SetData(2, new HttpWebResponseGoo(dto));
-                
-
-                
+                return dto;
             }
             else
             {
                 throw new Exception("Invalid Url");
+            }
+        }
+
+        /// <summary>
+        /// This is the method that actually does the work.
+        /// </summary>
+        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            if (InPreSolve)
+            {
+                string url = string.Empty;
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
+
+                DA.GetData(0, ref url);
+                DA.GetDataList(1, queryParams);
+                DA.GetDataList(2, httpHeaders);
+
+                this.TaskList.Add(Task.Run(
+                    () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) }; },
+                    CancelToken
+                    ));
+                return;
+            }
+
+            if (!GetSolveResults(DA, out HttpRequestSolveResults result))
+            {
+                string url = string.Empty;
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
+
+                DA.GetData(0, ref url);
+                DA.GetDataList(1, queryParams);
+                DA.GetDataList(2, httpHeaders);
+
+                result = new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) };
+                return;
+            }
+
+
+            if (result != null)
+            {
+                DA.SetData(0, result.Value.StatusCode);
+                DA.SetData(1, result.Value.Content);
+                DA.SetData(2, new HttpWebResponseGoo(result.Value));
             }
 
 

@@ -11,10 +11,11 @@ using Swiftlet.Params;
 using Swiftlet.Util;
 using System.Net.Http;
 using Swiftlet.DataModels.Interfaces;
+using System.Threading.Tasks;
 
 namespace Swiftlet.Components
 {
-    public class PostRequestComponent : GH_Component
+    public class PostRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
     {
         /// <summary>
         /// Initializes a new instance of the PostRequestComponent class.
@@ -51,22 +52,8 @@ namespace Swiftlet.Components
             pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Full Http response object (with metadata)", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
+        public HttpResponseDTO SendRequest(string url, RequestBodyGoo bodyGoo, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders)
         {
-            string url = string.Empty;
-            RequestBodyGoo bodyGoo = null;
-            List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
-            List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
-
-            DA.GetData(0, ref url);
-            DA.GetData(1, ref bodyGoo);
-            DA.GetDataList(2, queryParams);
-            DA.GetDataList(3, httpHeaders);
-
             if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
             if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
 
@@ -91,16 +78,60 @@ namespace Swiftlet.Components
 
                 HttpResponseDTO dto = new HttpResponseDTO(result);
 
-                DA.SetData(0, dto.StatusCode);
-                DA.SetData(1, dto.Content);
-                DA.SetData(2, new HttpWebResponseGoo(dto));
-
-
-
+                return dto;
             }
             else
             {
                 throw new Exception("Invalid Url");
+            }
+        }
+
+        /// <summary>
+        /// This is the method that actually does the work.
+        /// </summary>
+        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            if (InPreSolve)
+            {
+                string url = string.Empty;
+                RequestBodyGoo bodyGoo = null;
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
+
+                DA.GetData(0, ref url);
+                DA.GetData(1, ref bodyGoo);
+                DA.GetDataList(2, queryParams);
+                DA.GetDataList(3, httpHeaders);
+
+                this.TaskList.Add(Task.Run(
+                    () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, bodyGoo, queryParams, httpHeaders) }; },
+                    CancelToken
+                    ));
+                return;
+            }
+
+            if (!GetSolveResults(DA, out HttpRequestSolveResults result))
+            {
+                string url = string.Empty;
+                RequestBodyGoo bodyGoo = null;
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
+
+                DA.GetData(0, ref url);
+                DA.GetData(1, ref bodyGoo);
+                DA.GetDataList(2, queryParams);
+                DA.GetDataList(3, httpHeaders);
+
+                result = new HttpRequestSolveResults() { Value = this.SendRequest(url, bodyGoo, queryParams, httpHeaders) };
+                return;
+            }
+
+            if (result != null)
+            {
+                DA.SetData(0, result.Value.StatusCode);
+                DA.SetData(1, result.Value.Content);
+                DA.SetData(2, new HttpWebResponseGoo(result.Value));
             }
 
         }
