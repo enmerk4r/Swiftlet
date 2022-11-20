@@ -22,7 +22,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace Swiftlet.Components
 {
-    public class HttpRequestComponent : GH_TaskCapableComponent<SolveResults>
+    public class HttpRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
     {
         /// <summary>
         /// Initializes a new instance of the GetRequestComponent class.
@@ -90,13 +90,13 @@ namespace Swiftlet.Components
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 this.TaskList.Add(Task.Run(
-                    () => { return new SolveResults() { ComputedResponse = package.GetResponse() }; }, 
+                    () => { return new HttpRequestSolveResults() { ComputedResponse = package.GetResponse() }; }, 
                     CancelToken
                     ));
                 return;
             }
 
-            if (!GetSolveResults(DA, out SolveResults result))
+            if (!GetSolveResults(DA, out HttpRequestSolveResults result))
             {
                 string url = string.Empty;
                 string method = string.Empty;
@@ -117,7 +117,7 @@ namespace Swiftlet.Components
                 string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
-                result = new SolveResults() { ComputedResponse = package.GetResponse() };
+                result = new HttpRequestSolveResults() { ComputedResponse = package.GetResponse() };
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace Swiftlet.Components
         }
     }
 
-    public class SolveResults
+    public class HttpRequestSolveResults
     {
         public HttpResponseDTO ComputedResponse { get; set; } 
     }
