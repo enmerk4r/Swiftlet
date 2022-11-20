@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Policy;
+using System.Threading;
 using System.Threading.Tasks;
 using Grasshopper.Documentation;
 using Grasshopper.Kernel;
@@ -21,7 +22,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace Swiftlet.Components
 {
-    public class HttpRequestComponent : GH_Component
+    public class HttpRequestComponent : GH_TaskCapableComponent<SolveResults>
     {
         /// <summary>
         /// Initializes a new instance of the GetRequestComponent class.
@@ -33,17 +34,22 @@ namespace Swiftlet.Components
         {
         }
 
+        public bool UseTasks { get; set; }
+        public bool InPreSolve { get; set; }
+
+        public List<Task<HttpResponseDTO>> TaskList { get; set; }
+
         public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("URL", "U", "URL for the web resource you're trying to reach", GH_ParamAccess.tree);
-            pManager.AddTextParameter("Method", "M", "HTTP method: \"GET\", \"POST\", \"PUT\", \"DELETE\", \"PATCH\", \"HEAD\", \"CONNECT\", \"OPTIONS\", \"TRACE\"", GH_ParamAccess.tree);
-            pManager.AddParameter(new RequestBodyParam(), "Body", "B", "POST Body", GH_ParamAccess.tree);
-            pManager.AddParameter(new QueryParamParam(), "Params", "P", "Query Params", GH_ParamAccess.tree);
-            pManager.AddParameter(new HttpHeaderParam(), "Headers", "H", "Http Headers", GH_ParamAccess.tree);
+            pManager.AddTextParameter("URL", "U", "URL for the web resource you're trying to reach", GH_ParamAccess.item);
+            pManager.AddTextParameter("Method", "M", "HTTP method: \"GET\", \"POST\", \"PUT\", \"DELETE\", \"PATCH\", \"HEAD\", \"CONNECT\", \"OPTIONS\", \"TRACE\"", GH_ParamAccess.item);
+            pManager.AddParameter(new RequestBodyParam(), "Body", "B", "POST Body", GH_ParamAccess.item);
+            pManager.AddParameter(new QueryParamParam(), "Params", "P", "Query Params", GH_ParamAccess.list);
+            pManager.AddParameter(new HttpHeaderParam(), "Headers", "H", "Http Headers", GH_ParamAccess.list);
 
             pManager[2].Optional = true;
             pManager[3].Optional = true;
@@ -66,74 +72,60 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            GH_Structure<GH_String> urls = null;
-            GH_Structure<GH_String> methods = null;
-            
-            GH_Structure<RequestBodyGoo> bodyGoos = null;
-            GH_Structure<QueryParamGoo> queryParams = null;
-            GH_Structure<HttpHeaderGoo> httpHeaders = null;
-
-            DA.GetDataTree(0, out urls);
-            DA.GetDataTree(1, out methods);
-            DA.GetDataTree(2, out bodyGoos);
-            DA.GetDataTree(3, out queryParams);
-            DA.GetDataTree(4, out httpHeaders);
-
-            GH_SimplificationMode sMode = GH_SimplificationMode.CollapseLeadingOverlaps;
-            urls.Simplify(sMode);
-            methods.Simplify(sMode);
-            bodyGoos.Simplify(sMode);
-            queryParams.Simplify(sMode);
-            httpHeaders.Simplify(sMode);
-
-
-            if (urls.PathCount != methods.PathCount)
+            if (InPreSolve)
             {
-                throw new Exception("The number of provided URLs does not match the number of provided HTTP methods. Please, check your data tree structure");
+                string url = string.Empty;
+                string method = string.Empty;
+                RequestBodyGoo bodyGoo = null;
+
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
+
+                this.TaskList = new List<Task<HttpResponseDTO>>();
+
+
+                DA.GetData(0, ref url);
+                DA.GetData(1, ref method);
+                DA.GetData(2, ref bodyGoo);
+                DA.GetDataList(3, queryParams);
+                DA.GetDataList(4, httpHeaders);
+
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                this.TaskList.Add(Task.Run(() => package.GetResponse(), CancelToken));
+                return;
             }
 
-            List<GH_Path> paths = urls.Paths.ToList();
-
-            List<HttpRequestPackage> requests = new List<HttpRequestPackage>();
-            List<Task<HttpResponseDTO>> tasks = new List<Task<HttpResponseDTO>>();
-
-            foreach(GH_Path path in paths) 
+            if (!GetSolveResults(DA, out SolveResults result))
             {
-                string url = ((List<GH_String>)urls.get_Branch(path)).First().Value;
-                string method = ((List<GH_String>)methods.get_Branch(path)).First().Value;
+                string url = string.Empty;
+                string method = string.Empty;
+                RequestBodyGoo bodyGoo = null;
 
-                IRequestBody body = null;
-                List<QueryParam> qParams = new List<QueryParam>();
-                List<HttpHeader> headers = new List<HttpHeader>();
+                List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
+                List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
 
-                try
-                {
-                    body = ((List<RequestBodyGoo>)bodyGoos.get_Branch(path)).First().Value;
-                }
-                catch { }
+                this.TaskList = new List<Task<HttpResponseDTO>>();
 
-                try
-                {
-                    qParams = ((List<QueryParamGoo>)queryParams.get_Branch(path)).Select(p => p.Value).ToList();
-                }
-                catch { }
 
-                try
-                {
-                    headers = ((List<HttpHeaderGoo>)httpHeaders.get_Branch(path)).Select(p => p.Value).ToList();
-                }
-                catch { }
+                DA.GetData(0, ref url);
+                DA.GetData(1, ref method);
+                DA.GetData(2, ref bodyGoo);
+                DA.GetDataList(3, queryParams);
+                DA.GetDataList(4, httpHeaders);
 
-                HttpRequestPackage package = new HttpRequestPackage(url, method, body, qParams, headers, path);
-                requests.Add(package);
-                tasks.Add(package.GetResponse());
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                result = new SolveResults() { ComputedResponse = package.GetResponse() };
+                return;
             }
 
-            List<HttpResponseDTO> responses = tasks.Select(t => t.Result).ToList();
 
+            if (result != null)
+            {
 
-
-            
+                DA.SetData(0, result.ComputedResponse.StatusCode);
+                DA.SetData(1, result.ComputedResponse.Content);
+                DA.SetData(2,  new HttpWebResponseGoo(result.ComputedResponse));
+            }
 
 
         }
@@ -147,7 +139,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_get_request_24x24;
+                return null;
             }
         }
 
@@ -160,22 +152,26 @@ namespace Swiftlet.Components
         }
     }
 
-    class HttpRequestPackage 
+    public class SolveResults
+    {
+        public HttpResponseDTO ComputedResponse { get; set; } 
+    }
+
+
+    public class HttpRequestPackage 
     { 
         public string Url { get; }
         public string Method { get; }
         public IRequestBody Body { get; }
         public List<QueryParam> QueryParams { get; }
         public List<HttpHeader> HttpHeaders { get; }
-        public GH_Path Path { get; }
-        public HttpRequestPackage(string url, string method, IRequestBody body, List<QueryParam> queryParams, List<HttpHeader> headers, GH_Path path)
+        public HttpRequestPackage(string url, string method, IRequestBody body, List<QueryParam> queryParams, List<HttpHeader> headers)
         {
             this.Url = url;
             this.Method = method.ToUpper();
             this.Body = body;
             this.QueryParams = queryParams.Select(o => o).ToList();
             this.HttpHeaders = headers.Select(o => o).ToList();
-            this.Path = path;
         }
 
         private HttpMethod GetHttpMethod()
@@ -213,7 +209,7 @@ namespace Swiftlet.Components
             return msg;
         }
 
-        public async Task<HttpResponseDTO> GetResponse()
+        public HttpResponseDTO GetResponse()
         {
             try
             {
@@ -237,22 +233,22 @@ namespace Swiftlet.Components
                     if (this.Method == "POST")
                     {
                         HttpContent content = this.Body.ToHttpContent();
-                        response = await client.PostAsync(fullUrl, content);
+                        response = client.PostAsync(fullUrl, content).Result;
                     }
                     else if (this.Method == "PUT") 
                     {
                         HttpContent content = this.Body.ToHttpContent();
-                        response = await client.PutAsync(fullUrl, content);
+                        response = client.PutAsync(fullUrl, content).Result;
                     }
                     else if (this.Method == "PATCH")
                     {
                         HttpContent content = this.Body.ToHttpContent();
-                        response = await this.PatchAsync(client, fullUrl, content);
+                        response = this.PatchAsync(client, fullUrl, content).Result;
                     }
                     else
                     {
                         HttpRequestMessage msg = this.GetRequestMessage();
-                        response = await client.SendAsync(msg);
+                        response = client.SendAsync(msg).Result;
                     }
 
                     HttpResponseDTO dto = new HttpResponseDTO(response);
