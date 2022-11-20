@@ -34,10 +34,6 @@ namespace Swiftlet.Components
         {
         }
 
-        public bool UseTasks { get; set; }
-        public bool InPreSolve { get; set; }
-
-        public List<Task<HttpResponseDTO>> TaskList { get; set; }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
         /// <summary>
@@ -81,17 +77,22 @@ namespace Swiftlet.Components
                 List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
                 List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
 
-                this.TaskList = new List<Task<HttpResponseDTO>>();
-
-
                 DA.GetData(0, ref url);
                 DA.GetData(1, ref method);
                 DA.GetData(2, ref bodyGoo);
                 DA.GetDataList(3, queryParams);
                 DA.GetDataList(4, httpHeaders);
 
-                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
-                this.TaskList.Add(Task.Run(() => package.GetResponse(), CancelToken));
+                if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
+                if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
+
+                string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
+
+                HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                this.TaskList.Add(Task.Run(
+                    () => { return new SolveResults() { ComputedResponse = package.GetResponse() }; }, 
+                    CancelToken
+                    ));
                 return;
             }
 
@@ -104,16 +105,18 @@ namespace Swiftlet.Components
                 List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
                 List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
 
-                this.TaskList = new List<Task<HttpResponseDTO>>();
-
-
                 DA.GetData(0, ref url);
                 DA.GetData(1, ref method);
                 DA.GetData(2, ref bodyGoo);
                 DA.GetDataList(3, queryParams);
                 DA.GetDataList(4, httpHeaders);
 
-                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
+                if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
+
+                string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
+
+                HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 result = new SolveResults() { ComputedResponse = package.GetResponse() };
                 return;
             }
