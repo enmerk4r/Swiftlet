@@ -49,6 +49,11 @@ namespace Swiftlet.Components
             JTokenGoo goo = null;
             DA.GetData(0, ref goo);
 
+            if (goo == null)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to read JSON Token");
+                return;
+            }
             JToken token = goo.Value;
             DA.SetData(0, token.ToString());
         }

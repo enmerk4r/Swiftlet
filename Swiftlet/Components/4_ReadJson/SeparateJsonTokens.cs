@@ -60,6 +60,12 @@ namespace Swiftlet.Components._4_ReadJson
                 JArrayGoo arrGoo = null;
                 JValueGoo valGoo = null;
 
+                if (goo == null)
+                {
+                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to read JToken");
+                    return;
+                }
+
                 if (goo.CastTo<JObjectGoo>(ref objGoo))
                 {
                     objectGoo.Add(objGoo);

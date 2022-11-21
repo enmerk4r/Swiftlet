@@ -47,7 +47,17 @@ namespace Swiftlet.Components
             string json = string.Empty;
             DA.GetData(0, ref json);
 
-            JToken token = JToken.Parse(json);
+            JToken token = null;
+
+            try
+            {
+                token = JToken.Parse(json);
+            }
+            catch
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Unable to parse JSON string");
+                return;
+            }
             if (token != null) DA.SetData(0, new JTokenGoo(token));
         }
 
