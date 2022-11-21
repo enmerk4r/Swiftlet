@@ -14,7 +14,7 @@ namespace Swiftlet.Params
     {
         public ListenerContextParam()
             : base("Listener Context", "LC", "Collection of Http Request and Response objects",
-                 NamingUtility.CATEGORY, NamingUtility.SERVE, GH_ParamAccess.item)
+                 NamingUtility.CATEGORY, NamingUtility.LISTEN, GH_ParamAccess.item)
         {
 
         }

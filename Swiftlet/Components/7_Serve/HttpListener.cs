@@ -43,7 +43,7 @@ namespace Swiftlet.Components._7_Serve
         public HttpListenerComponent()
           : base("HTTP Listener", "L",
               "A simple HTTP listener component that can receive HTTP requests",
-              NamingUtility.CATEGORY, NamingUtility.SERVE)
+              NamingUtility.CATEGORY, NamingUtility.LISTEN)
         {
             
         }
