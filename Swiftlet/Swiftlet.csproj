@@ -107,6 +107,7 @@
     <Compile Include="Components\6_Save\SaveCSV.cs" />
     <Compile Include="Components\6_Save\SaveText.cs" />
     <Compile Include="Components\6_Save\SaveWebResponse.cs" />
+    <Compile Include="Components\7_Serve\HttpListener.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpRequestSolveResult.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
     <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
     <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
+    <Compile Include="EventArgs\RequestReceivedEventArgs.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
     <Compile Include="Goo\JArrayGoo.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Goo\JValueGoo.cs" />
     <Compile Include="Goo\QueryParamGoo.cs" />
     <Compile Include="Goo\HtmlNodeGoo.cs" />
+    <Compile Include="Goo\ListenerContextGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
@@ -136,6 +139,7 @@
     <Compile Include="Params\JValueParam.cs" />
     <Compile Include="Params\QueryParamParam.cs" />
     <Compile Include="Params\HtmlNodeParam.cs" />
+    <Compile Include="Params\ListenerContextParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -345,6 +349,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_http_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_http_listener_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
