@@ -53,11 +53,11 @@ namespace Swiftlet.Components._7_Serve
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Scheme", "S", "http or https", GH_ParamAccess.item);
+            //pManager.AddTextParameter("Scheme", "S", "http or https", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Port", "P", "Port number to listen at between 0 and 65353", GH_ParamAccess.item);
             pManager.AddTextParameter("Route", "R", "An optional path", GH_ParamAccess.item);
 
-            pManager[2].Optional = true;
+            pManager[1].Optional = true;
         }
 
         /// <summary>
@@ -78,17 +78,17 @@ namespace Swiftlet.Components._7_Serve
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string scheme = string.Empty;
+            string scheme = "http";
             int port = 80;
             string route = string.Empty;
 
-            DA.GetData(0, ref scheme);
-            DA.GetData(1, ref port);
-            DA.GetData(2, ref route);
+            //DA.GetData(0, ref scheme);
+            DA.GetData(0, ref port);
+            DA.GetData(1, ref route);
 
-            if (string.IsNullOrEmpty(scheme)) return;
+            //if (string.IsNullOrEmpty(scheme)) return;
 
-            scheme = scheme.ToLower();
+            //scheme = scheme.ToLower();
 
             this.Listener.Close();
             this._listener = null;
