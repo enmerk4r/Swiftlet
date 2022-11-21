@@ -51,14 +51,15 @@ namespace Swiftlet.Components
 
             try
             {
-                JObject obj = JObject.Parse(json);
-                value = obj.ToString();
+                JToken token = JToken.Parse(json);
+                value = token.ToString();
             }
-            catch
+            catch (Exception ex)
             {
-                JArray array = JArray.Parse(json);
-                value = array.ToString();
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+                return;
             }
+            
             DA.SetData(0, value);
         }
 
