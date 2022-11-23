@@ -26,7 +26,7 @@ namespace Swiftlet.Components
         public SaveWebResponse()
           : base("Save Web Response", "SWR",
               "Save Web Response to disk",
-              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
+              NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
             this._binaryChecked = true;
             this.UpdateMessage();

@@ -1,31 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
+using Newtonsoft.Json.Linq;
 using Rhino.Geometry;
+using Swiftlet.DataModels.Implementations;
+using Swiftlet.Goo;
+using Swiftlet.Params;
 using Swiftlet.Util;
 
-namespace Swiftlet.Components._6_Save
+namespace Swiftlet.Components
 {
-    public class SaveCSV : GH_Component
+    public class SaveText : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the SaveCSV class.
+        /// Initializes a new instance of the CreatePostBody class.
         /// </summary>
-        public SaveCSV()
-          : base("Save CSV", "CSV",
-              "Save formatted CSV Lines as a CSV file",
-              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
+        public SaveText()
+          : base("Save Text", "ST",
+              "Save text to disk",
+              NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Lines", "L", "CSV-formatted lines (use the \"Create CSV Line\" component)", GH_ParamAccess.list);
-            pManager.AddTextParameter("Path", "P", "Output path", GH_ParamAccess.item);
+            pManager.AddTextParameter("Content", "C", "Text to be saved to disk", GH_ParamAccess.item);
+            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -42,18 +52,16 @@ namespace Swiftlet.Components._6_Save
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> lines = new List<string>();
+            string content = string.Empty;
             string path = string.Empty;
 
-            DA.GetDataList(0, lines);
+            DA.GetData(0, ref content);
             DA.GetData(1, ref path);
+
 
             using (StreamWriter writer = new StreamWriter(path))
             {
-                foreach(string line in lines)
-                {
-                    writer.WriteLine(line);
-                }
+                writer.Write(content);
             }
 
             long length = new System.IO.FileInfo(path).Length;
@@ -70,7 +78,7 @@ namespace Swiftlet.Components._6_Save
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_save_csv_24x24;
+                return Properties.Resources.Icons_save_text_24x24;
             }
         }
 
@@ -79,7 +87,8 @@ namespace Swiftlet.Components._6_Save
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("C8F5887A-30F1-4FE5-A737-DAE37BDACC5C"); }
+            get { return new Guid("1010fb58-d4a6-462d-810e-d5ee1b920ff4"); }
         }
     }
+
 }
