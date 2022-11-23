@@ -103,10 +103,14 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
-    <Compile Include="Components\6_Save\CreateCsvLine.cs" />
-    <Compile Include="Components\6_Save\SaveCSV.cs" />
-    <Compile Include="Components\6_Save\SaveText.cs" />
-    <Compile Include="Components\6_Save\SaveWebResponse.cs" />
+    <Compile Include="Components\6_Utilities\DeompressData.cs" />
+    <Compile Include="Components\6_Utilities\CompressData.cs" />
+    <Compile Include="Components\6_Utilities\CreateCsvLine.cs" />
+    <Compile Include="Components\6_Utilities\SaveCSV.cs" />
+    <Compile Include="Components\6_Utilities\SaveText.cs" />
+    <Compile Include="Components\6_Utilities\SaveWebResponse.cs" />
+    <Compile Include="Components\6_Utilities\ByteArrayToText.cs" />
+    <Compile Include="Components\6_Utilities\TextToByteArray.cs" />
     <Compile Include="Components\7_Serve\HttpListener.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpRequestSolveResult.cs" />
@@ -130,6 +134,7 @@
     <Compile Include="Goo\QueryParamGoo.cs" />
     <Compile Include="Goo\HtmlNodeGoo.cs" />
     <Compile Include="Goo\ListenerContextGoo.cs" />
+    <Compile Include="Goo\ByteArrayGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
@@ -140,6 +145,7 @@
     <Compile Include="Params\QueryParamParam.cs" />
     <Compile Include="Params\HtmlNodeParam.cs" />
     <Compile Include="Params\ListenerContextParam.cs" />
+    <Compile Include="Params\ByteArrayParam.cs" />
     <Compile Include="Params\RequestBodyParam.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -148,6 +154,7 @@
     </Compile>
     <Compile Include="SwiftletInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\CompressionUtility.cs" />
     <Compile Include="Util\ContentTypeUtility.cs" />
     <Compile Include="Util\NamingUtility.cs" />
     <Compile Include="Util\UrlUtility.cs" />
