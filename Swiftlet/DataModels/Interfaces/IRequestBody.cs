@@ -14,5 +14,7 @@ namespace Swiftlet.DataModels.Interfaces
 
         IRequestBody Duplicate();
         HttpContent ToHttpContent();
+
+        byte[] ToByteArray();
     }
 }

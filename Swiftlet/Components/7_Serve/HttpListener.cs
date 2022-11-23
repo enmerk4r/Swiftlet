@@ -1,5 +1,6 @@
 ﻿using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
+using Swiftlet.DataModels.Interfaces;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
@@ -11,9 +12,8 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
-namespace Swiftlet.Components._7_Serve
+namespace Swiftlet.Components
 {
     public class HttpListenerComponent : GH_Component
     {
@@ -35,7 +35,11 @@ namespace Swiftlet.Components._7_Serve
 
         private HttpListenerContext _context;
 
-        private string _body;
+        private string _requestBody;
+        private IRequestBody _responseBody;
+
+        private List<HttpHeaderGoo> _headerGoos;
+        private List<QueryParamGoo> _queryParamGoos;
 
         /// <summary>
         /// Initializes a new instance of the HttpListener class.
@@ -56,8 +60,10 @@ namespace Swiftlet.Components._7_Serve
             //pManager.AddTextParameter("Scheme", "S", "http or https", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Port", "P", "Port number to listen at between 0 and 65353", GH_ParamAccess.item);
             pManager.AddTextParameter("Route", "R", "An optional path", GH_ParamAccess.item);
+            pManager.AddParameter(new RequestBodyParam(), "Response Body", "B", "Pre-canned response body that will be returned to the sender", GH_ParamAccess.item);
 
             pManager[1].Optional = true;
+            pManager[2].Optional = true;
         }
 
         /// <summary>
@@ -68,7 +74,7 @@ namespace Swiftlet.Components._7_Serve
             pManager.AddTextParameter("Method", "M", "Request Method", GH_ParamAccess.item);
             pManager.AddParameter(new HttpHeaderParam(), "Headers", "H", "Http Request Headers", GH_ParamAccess.list);
             pManager.AddParameter(new QueryParamParam(), "Query Params", "Q", "Components of the request query string", GH_ParamAccess.list);
-            pManager.AddTextParameter("Body", "B", "Request Body", GH_ParamAccess.item);
+            pManager.AddTextParameter("Content", "C", "Request Content", GH_ParamAccess.item);
             //pManager.AddParameter(new ListenerContextParam(), "Context", "CT", "Listener Context", GH_ParamAccess.item);
         }
 
@@ -81,10 +87,17 @@ namespace Swiftlet.Components._7_Serve
             string scheme = "http";
             int port = 80;
             string route = string.Empty;
+            RequestBodyGoo bodyGoo = null;
 
             //DA.GetData(0, ref scheme);
             DA.GetData(0, ref port);
             DA.GetData(1, ref route);
+            DA.GetData(2, ref bodyGoo);
+
+            if (bodyGoo != null)
+            {
+                _responseBody = bodyGoo.Value;
+            }
 
             //if (string.IsNullOrEmpty(scheme)) return;
 
@@ -92,6 +105,9 @@ namespace Swiftlet.Components._7_Serve
 
             this.Listener.Close();
             this._listener = null;
+
+            _headerGoos = new List<HttpHeaderGoo>();
+            _queryParamGoos = new List<QueryParamGoo>();
 
             if (scheme != "http" && scheme != "https")
             {
@@ -120,25 +136,10 @@ namespace Swiftlet.Components._7_Serve
             List<HttpHeaderGoo> headerGoos = new List<HttpHeaderGoo>();
             List<QueryParamGoo> queryParamGoos = new List<QueryParamGoo>();
 
-            if (_context != null) 
-            {
-                // Get Headers
-                foreach (var key in this._context.Request.Headers.AllKeys)
-                {
-                    HttpHeaderGoo goo = new HttpHeaderGoo(key, this._context.Request.Headers.GetValues(key).FirstOrDefault());
-                    headerGoos.Add(goo);
-                }
-
-                // Get Query Params
-                foreach (var key in this._context.Request.QueryString.AllKeys)
-                {
-                    QueryParamGoo goo = new QueryParamGoo(key, this._context.Request.QueryString.GetValues(key).FirstOrDefault());
-                    queryParamGoos.Add(goo);
-                }
-            }
-            DA.SetDataList(1, headerGoos);
-            DA.SetDataList(2, queryParamGoos);
-            DA.SetData(3, _body);
+            
+            DA.SetDataList(1, _headerGoos);
+            DA.SetDataList(2, _queryParamGoos);
+            DA.SetData(3, _requestBody);
             //DA.SetData(4, new ListenerContextGoo(this._context));
 
         }
@@ -169,10 +170,39 @@ namespace Swiftlet.Components._7_Serve
             {
                 this.Listener.Start();
                 var context = this.Listener.GetContext();
-                this._body = null;
-                if (context.Request.HasEntityBody)
-                { 
-                    _body = new StreamReader(context.Request.InputStream).ReadToEnd();
+                this._requestBody = null;
+
+                if (_context != null)
+                {
+                    if (context.Request.HasEntityBody)
+                    {
+                        _requestBody = new StreamReader(context.Request.InputStream).ReadToEnd();
+                    }
+
+
+                    // Get Headers
+                    foreach (var key in this._context.Request.Headers.AllKeys)
+                    {
+                        HttpHeaderGoo goo = new HttpHeaderGoo(key, this._context.Request.Headers.GetValues(key).FirstOrDefault());
+                        _headerGoos.Add(goo);
+                    }
+
+                    // Get Query Params
+                    foreach (var key in this._context.Request.QueryString.AllKeys)
+                    {
+                        QueryParamGoo goo = new QueryParamGoo(key, this._context.Request.QueryString.GetValues(key).FirstOrDefault());
+                        _queryParamGoos.Add(goo);
+                    }
+
+
+                    // Send response
+                    byte[] response = new byte[0];
+                    if (this._responseBody != null)
+                    {
+                        response = this._responseBody.ToByteArray();
+                    }
+                    context.Response.OutputStream.Write(response, 0, response.Length);
+                    context.Response.OutputStream.Close();
                 }
                 this.OnHttpRequestReceived(new RequestReceivedEventArgs(context));
                 return;

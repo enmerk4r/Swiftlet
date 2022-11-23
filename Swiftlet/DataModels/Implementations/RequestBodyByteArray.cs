@@ -46,5 +46,10 @@ namespace Swiftlet.DataModels.Implementations
         {
             return new ByteArrayContent(this.Content);
         }
+        public byte[] ToByteArray()
+        {
+            return this.Content;
+        }
+
     }
 }
