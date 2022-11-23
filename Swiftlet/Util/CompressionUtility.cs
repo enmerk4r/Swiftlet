@@ -25,16 +25,6 @@ namespace Swiftlet.Util
             }
         }
 
-        public static byte[] CompressString(string s, Encoding encoding)
-        {
-            return Compress(encoding.GetBytes(s));
-        }
-
-        public static string CompressStringToBase64(string s, Encoding encoding)
-        {
-            return Convert.ToBase64String(CompressString(s, encoding));
-        }
-
         public static byte[] Decompress(Stream source)
         {
             using (var gzip = new GZipStream(source, CompressionMode.Decompress))
@@ -55,9 +45,5 @@ namespace Swiftlet.Util
             }
         }
 
-        public static string DecompressString(Stream source, Encoding encoding)
-        {
-            return encoding.GetString(Decompress(source));
-        }
     }
 }
