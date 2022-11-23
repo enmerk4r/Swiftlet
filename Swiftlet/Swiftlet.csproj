@@ -106,10 +106,12 @@
     <Compile Include="Components\6_Utilities\DeompressData.cs" />
     <Compile Include="Components\6_Utilities\CompressData.cs" />
     <Compile Include="Components\6_Utilities\CreateCsvLine.cs" />
+    <Compile Include="Components\6_Utilities\ByteArrayToFile.cs" />
     <Compile Include="Components\6_Utilities\SaveCSV.cs" />
     <Compile Include="Components\6_Utilities\SaveText.cs" />
     <Compile Include="Components\6_Utilities\SaveWebResponse.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToText.cs" />
+    <Compile Include="Components\6_Utilities\FileToByteArray.cs" />
     <Compile Include="Components\6_Utilities\TextToByteArray.cs" />
     <Compile Include="Components\7_Serve\HttpListener.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />

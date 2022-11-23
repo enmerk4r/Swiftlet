@@ -42,6 +42,7 @@ namespace Swiftlet.Components
             pManager.AddParameter(new HttpHeaderParam(), "Headers", "H", "The collection of HTTP response headers", GH_ParamAccess.list);
             pManager.AddBooleanParameter("IsSuccess", "iS", "Indicates if the HTTP response was successful", GH_ParamAccess.item);
             pManager.AddTextParameter("Content", "C", "Response content", GH_ParamAccess.item);
+            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Response data as byte array", GH_ParamAccess.item);
 
         }
 
@@ -61,6 +62,7 @@ namespace Swiftlet.Components
             DA.SetDataList(3, dto.Headers.Select(h => new HttpHeaderGoo(h)));
             DA.SetData(4, dto.IsSuccessStatusCode);
             DA.SetData(5, dto.Content);
+            DA.SetData(6, new ByteArrayGoo(dto.Bytes));
         }
 
 

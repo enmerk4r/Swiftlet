@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -9,14 +10,14 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ByteArrayToText : GH_Component
+    public class ByteArrayToFile : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the TextToByteArray class.
         /// </summary>
-        public ByteArrayToText()
-          : base("Byte Array To Text", "BATXT",
-              "Converts a byte array to text",
+        public ByteArrayToFile()
+          : base("Byte Array to File", "BAF",
+              "Save a byte array to a local file",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
@@ -28,10 +29,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Input Byte Array", GH_ParamAccess.item);
-            pManager.AddTextParameter("Encoding", "E", "Can be ASCII, Unicode, UTF8, UTF7, UTF32", GH_ParamAccess.item, "UTF8");
-
-            pManager[1].Optional = true;
+            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Byte Array to save", GH_ParamAccess.item);
+            pManager.AddTextParameter("Path", "P", "Output filepath", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter( "Text", "T", "Output text", GH_ParamAccess.item);
+            pManager.AddIntegerParameter( "Bytes", "B", "Saved file size in bytes", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -49,32 +48,19 @@ namespace Swiftlet.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             ByteArrayGoo goo = null;
-            string encoding = string.Empty;
+            string path = string.Empty;
 
             DA.GetData(0, ref goo);
-            DA.GetData(1, ref encoding);
+            DA.GetData(1, ref path);
 
-            string txt = string.Empty;
-
-            string upperEncoding = encoding.ToUpper();
-
-            switch (upperEncoding)
+            using (BinaryWriter writer = new BinaryWriter(new FileStream(path, FileMode.Create)))
             {
-                case "ASCII":
-                    txt = Encoding.ASCII.GetString(goo.Value); break;
-                case "UNICODE":
-                    txt = Encoding.Unicode.GetString(goo.Value); break;
-                case "UTF8":
-                    txt = Encoding.UTF8.GetString(goo.Value); break;
-                case "UTF7":
-                    txt = Encoding.UTF7.GetString(goo.Value); break;
-                case "UTF32":
-                    txt = Encoding.UTF32.GetString(goo.Value); break;
-                default:
-                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{encoding} is an unknown encoding"); return;
+                writer.Write(goo.Value);
             }
 
-            DA.SetData(0, txt);
+            long length = new System.IO.FileInfo(path).Length;
+
+            DA.SetData(0, length);
         }
 
         /// <summary>
@@ -95,7 +81,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("15e4454a-ee5b-483f-886f-f10307421ff7"); }
+            get { return new Guid("921383a8-97e2-434d-bd02-560312ad4fd8"); }
         }
     }
 }
