@@ -67,12 +67,13 @@
     <Compile Include="Components\1_Auth\ApiKeyAuth.cs" />
     <Compile Include="Components\1_Auth\BasicAuth.cs" />
     <Compile Include="Components\1_Auth\BearerTokenAuth.cs" />
+    <Compile Include="Components\2_Request\CreateByteArrayBody.cs" />
     <Compile Include="Components\2_Request\CreateHttpHeader.cs" />
     <Compile Include="Components\2_Request\CreateJsonArray.cs" />
     <Compile Include="Components\2_Request\CreateJsonObject.cs" />
     <Compile Include="Components\2_Request\CreateJsonValue.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
-    <Compile Include="Components\2_Request\CreateByteArrayBody.cs" />
+    <Compile Include="Components\2_Request\CreateByteArrayBodyFromFile.cs" />
     <Compile Include="Components\2_Request\CreateTextBodyCustom.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
@@ -361,6 +362,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_http_listener_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_text_to_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_file_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_text_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_compress_data_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_decompress_data_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_file_to_byte_array_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
