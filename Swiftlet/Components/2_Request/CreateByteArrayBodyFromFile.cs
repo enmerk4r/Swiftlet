@@ -15,14 +15,14 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateByteArrayBody : GH_Component
+    public class CreateByteArrayBodyFromFile : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CreatePostBody class.
         /// </summary>
-        public CreateByteArrayBody()
-          : base("Create Byte Array Body", "CBAB",
-              "Create a Request Body that supports Byte Array content",
+        public CreateByteArrayBodyFromFile()
+          : base("Create Byte Array Body from File", "BABFF",
+              "Create a Request Body that supports Byte Array content by providing a filepath",
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
         }
@@ -34,7 +34,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Input byte array", GH_ParamAccess.item);
+            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
             pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
         }
 
@@ -52,17 +52,18 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ByteArrayGoo goo = null;
+            string path = string.Empty;
             string contentType = string.Empty;
 
-            DA.GetData(0, ref goo);
+            DA.GetData(0, ref path);
             DA.GetData(1, ref contentType);
 
+            var content = File.ReadAllBytes(path);
 
-            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, goo.Value);
-            RequestBodyGoo body = new RequestBodyGoo(txtBody);
+            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, content);
+            RequestBodyGoo goo = new RequestBodyGoo(txtBody);
 
-            DA.SetData(0, body);
+            DA.SetData(0, goo);
         }
 
 
@@ -84,7 +85,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("43f12a67-6ab6-450d-8a10-63081f20cdbf"); }
+            get { return new Guid("05df5f52-6e60-4492-9332-03189a83ec18"); }
         }
     }
 }
