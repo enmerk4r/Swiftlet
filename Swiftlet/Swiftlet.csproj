@@ -115,6 +115,7 @@
     <Compile Include="Components\6_Utilities\FileToByteArray.cs" />
     <Compile Include="Components\6_Utilities\TextToByteArray.cs" />
     <Compile Include="Components\7_Serve\HttpListener.cs" />
+    <Compile Include="Components\7_Serve\SocketListener.cs" />
     <Compile Include="DataModels\Implementations\HttpHeader.cs" />
     <Compile Include="DataModels\Implementations\HttpRequestSolveResult.cs" />
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
     <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
     <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
+    <Compile Include="EventArgs\SocketMessageReceivedEventArgs.cs" />
     <Compile Include="EventArgs\RequestReceivedEventArgs.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
