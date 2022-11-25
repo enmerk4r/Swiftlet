@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Grasshopper.Kernel;
-using Rhino.Geometry;
-using Swiftlet.DataModels.Implementations;
+﻿using Grasshopper.Kernel;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Swiftlet.Components._7_Serve
 {
@@ -36,13 +29,16 @@ namespace Swiftlet.Components._7_Serve
 
         private Task _runningTask;
 
-        private string _url;
-        private List<QueryParam> _queryParams;
+        private string _fullUrl;
         private List<string> _onOpen;
 
         private string lastMessage;
 
-        private bool _resetClient = true;
+        private CancellationToken _cancellationToken;
+
+        private bool _freeze;
+
+        private int _failCounter;
 
         /// <summary>
         /// Initializes a new instance of the SocketListener class.
@@ -75,6 +71,12 @@ namespace Swiftlet.Components._7_Serve
             pManager.AddTextParameter("Messages", "M", "Inbound Socket Messages", GH_ParamAccess.list);
         }
 
+        protected override void BeforeSolveInstance()
+        {
+            this._freeze = true;
+            base.BeforeSolveInstance();
+        }
+
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
@@ -98,60 +100,92 @@ namespace Swiftlet.Components._7_Serve
             if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
-            _url = fullUrl;
-            _queryParams = queryParams.Select(q => q.Value).ToList();
+            bool inputsChanged = this.InputsChanged(fullUrl, onOpen);
+
+            _fullUrl = fullUrl;
             _onOpen = onOpen;
 
-            if (this._resetClient)
+            if (this.Client?.State != WebSocketState.Open || inputsChanged)
             {
-                this.ClearRuntimeMessages();
-                this._client = null;
-                this._runningTask = Task.Run(this.ListenForRequests);
-                this.lastMessage = null;
+                if (_failCounter < 5)
+                {
+                    _cancellationToken = new CancellationTokenSource().Token;
+                    this.ClearRuntimeMessages();
+                    this._client = null;
+                    this._runningTask = Task.Run(this.ListenForRequests);
+                    this.lastMessage = null;
+                }
+                else
+                {
+                    _failCounter = 0;
+                }
             }
-
-            this._resetClient = true;
 
             DA.SetData(0, lastMessage);
         }
 
+        protected override void AfterSolveInstance()
+        {
+            this._freeze = false;
+            base.AfterSolveInstance();
+        }
+
+        public bool InputsChanged(string fullUrl, List<string> onOpen)
+        {
+            if (this._fullUrl != fullUrl) return true;
+            if (this._onOpen != null && onOpen != null)
+            {
+                if (this._onOpen.Count != onOpen.Count) return true;
+                for (int i = 0; i < onOpen.Count; i++)
+                {
+                    if (this._onOpen[i] != onOpen[i]) return true;
+                }
+            }
+            if (this._onOpen == null && onOpen != null) return true;
+            if (this._onOpen != null && onOpen == null) return true;
+            return false;
+        }
+
         public void HandleSocketMessage(object sender, EventArgs args)
         {
-            Grasshopper.Instances.ActiveCanvas.BeginInvoke(new Action(() => {
-                this.ExpireSolution(true);
-            }));
-            
+            if (!this._freeze)
+            {
+                Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
+                {
+                    ExpireSolution(true);
+                });
+            }
         }
 
         public async Task ListenForRequests()
         {
             try
             {
-                await this.Client.ConnectAsync(new Uri(this._url), CancellationToken.None);
+                await this.Client.ConnectAsync(new Uri(this._fullUrl), _cancellationToken);
 
                 foreach (string msg in this._onOpen)
                 {
                     System.ArraySegment<byte> payload = new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg));
-                    await this.Client.SendAsync(payload, WebSocketMessageType.Text, true, CancellationToken.None);
+                    await this.Client.SendAsync(payload, WebSocketMessageType.Text, true, _cancellationToken);
                 }
 
                 while (this.Client.State == WebSocketState.Open)
                 {
                     //Receive buffer
-                    var receiveBuffer = new byte[1048576]; //1 MB
+                    var receiveBuffer = new byte[1024]; //1 MB
 
                     ArraySegment<byte> bytesReceived = new ArraySegment<byte>(receiveBuffer);
-                    WebSocketReceiveResult result = await Client.ReceiveAsync(bytesReceived, CancellationToken.None);
+                    WebSocketReceiveResult result = await Client.ReceiveAsync(bytesReceived, _cancellationToken);
 
                     string message = Encoding.UTF8.GetString(receiveBuffer);
-                    this.lastMessage = message;
-                    this._resetClient = false;
+                    this.lastMessage = message.Replace("\0", "");
                     this.OnSocketMessageReceived(new SocketMessageReceivedEventArgs(message));
                 }
             }
             catch (Exception exc)
             {
                 this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, exc.Message);
+                this._failCounter++;
             }
         }
 
@@ -165,7 +199,7 @@ namespace Swiftlet.Components._7_Serve
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.Icons_socket_listener_24x24;
             }
         }
 
