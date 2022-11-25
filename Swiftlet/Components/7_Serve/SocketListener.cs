@@ -40,12 +40,13 @@ namespace Swiftlet.Components._7_Serve
 
         private int _failCounter;
 
+
         /// <summary>
         /// Initializes a new instance of the SocketListener class.
         /// </summary>
         public SocketListener()
           : base("Socket Listener", "SOCKET",
-              "A simple socket listener component",
+              "A simple socket listener component. \nThis component is VERY ALPHA! Use at your own risk.\nIf you are having trouble stopping it from running, just disconnect from the internet and wait for a few seconds.",
               NamingUtility.CATEGORY, NamingUtility.LISTEN)
         {
         }
@@ -83,8 +84,6 @@ namespace Swiftlet.Components._7_Serve
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            
-
             string url = string.Empty;
             List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
             List<string> onOpen = new List<string>();
