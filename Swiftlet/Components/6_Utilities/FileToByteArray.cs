@@ -1,31 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Swiftlet.Goo;
+using Swiftlet.Params;
 using Swiftlet.Util;
 
-namespace Swiftlet.Components._6_Save
+namespace Swiftlet.Components
 {
-    public class SaveCSV : GH_Component
+    public class FileToByteArray : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the SaveCSV class.
+        /// Initializes a new instance of the TextToByteArray class.
         /// </summary>
-        public SaveCSV()
-          : base("Save CSV", "CSV",
-              "Save formatted CSV Lines as a CSV file",
-              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
+        public FileToByteArray()
+          : base("File To Byte Array", "FBA",
+              "Read a file into a byte array",
+              NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Lines", "L", "CSV-formatted lines (use the \"Create CSV Line\" component)", GH_ParamAccess.list);
-            pManager.AddTextParameter("Path", "P", "Output path", GH_ParamAccess.item);
+            pManager.AddTextParameter("Path", "P", "Input File", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -33,7 +37,7 @@ namespace Swiftlet.Components._6_Save
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Bytes", "B", "Size of saved file in bytes", GH_ParamAccess.item);
+            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Byte Array", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -42,23 +46,12 @@ namespace Swiftlet.Components._6_Save
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> lines = new List<string>();
             string path = string.Empty;
+            DA.GetData(0, ref path);
 
-            DA.GetDataList(0, lines);
-            DA.GetData(1, ref path);
+            byte[] array = File.ReadAllBytes(path);
 
-            using (StreamWriter writer = new StreamWriter(path))
-            {
-                foreach(string line in lines)
-                {
-                    writer.WriteLine(line);
-                }
-            }
-
-            long length = new System.IO.FileInfo(path).Length;
-
-            DA.SetData(0, length);
+            DA.SetData(0, new ByteArrayGoo(array));
         }
 
         /// <summary>
@@ -70,7 +63,7 @@ namespace Swiftlet.Components._6_Save
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_save_csv_24x24;
+                return Properties.Resources.Icons_file_to_byte_array_24x24;
             }
         }
 
@@ -79,7 +72,7 @@ namespace Swiftlet.Components._6_Save
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("C8F5887A-30F1-4FE5-A737-DAE37BDACC5C"); }
+            get { return new Guid("6514b6d2-779e-4cd6-92b7-91a2f4a36360"); }
         }
     }
 }

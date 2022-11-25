@@ -53,6 +53,12 @@ namespace Swiftlet.Components
             DA.GetData(0, ref goo);
             DA.GetData(1, ref key);
 
+            if (goo == null)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to read JObject");
+                return;
+            }
+
             JObject jobj = goo.Value;
             JToken token = null;
 
@@ -60,9 +66,10 @@ namespace Swiftlet.Components
             {
                 token = jobj.GetValue(key);
             }
-            catch
+            catch (Exception exc)
             {
-
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, exc.Message);
+                return;
             }
             
             if (token != null) DA.SetData(0, new JTokenGoo(token));

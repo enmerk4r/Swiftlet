@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
+using System.IO.Compression;
+using System.Text;
 using Grasshopper.Kernel;
+using Rhino.Commands;
 using Rhino.Geometry;
+using Swiftlet.Goo;
+using Swiftlet.Params;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateCsvLine : GH_Component
+    public class DeompressData : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the CreateCsvLine class.
+        /// Initializes a new instance of the CompressText class.
         /// </summary>
-        public CreateCsvLine()
-          : base("Create CSV Line", "CSVL",
-              "Formats multiple ",
-              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
+        public DeompressData()
+          : base("Decompress Data", "UGZIP",
+              "Un-GZIP byte array data",
+              NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Cells", "C", "Cell values of a CSV line", GH_ParamAccess.list);
-            pManager.AddTextParameter("Delimiter", "D", "CSV delimeter", GH_ParamAccess.item, ",");
-
-            pManager[1].Optional = true;
+            pManager.AddParameter(new ByteArrayParam(), "Compressed", "C", "Compressed text", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -35,7 +39,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Line", "L", "Formatted CSV line", GH_ParamAccess.item);
+            pManager.AddParameter(new ByteArrayParam(), "Uncompressed", "U", "Uncompressed text", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -44,26 +48,16 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> cells = new List<string>();
-            string delimiter = ",";
-            DA.GetDataList(0, cells);
-            DA.GetData(1, ref delimiter);
+            ByteArrayGoo compressed = null;
 
-            string line = string.Empty;
+            DA.GetData(0, ref compressed);
 
-            foreach(string cell in cells)
-            {
-                string cleanCell = cell;
-                if (cell.Contains(delimiter))
-                {
-                    cleanCell = $"\"{cell}\"";
-                }
-                line += $"{cleanCell}{delimiter}";
-            }
+            var uncompressed = CompressionUtility.Decompress(compressed.Value);
 
-            line = line.Remove(line.Length - 1, 1);
-            DA.SetData(0, line);
+            DA.SetData(0, new ByteArrayGoo(uncompressed));
         }
+
+        
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -74,7 +68,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_create_csv_line_24x24;
+                return Properties.Resources.Icons_decompress_data_24x24;
             }
         }
 
@@ -83,7 +77,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("D9B2041E-FF4E-446E-B634-4EBACD47051E"); }
+            get { return new Guid("4da74eea-0134-4ab4-8e68-7e929e839bbe"); }
         }
     }
 }

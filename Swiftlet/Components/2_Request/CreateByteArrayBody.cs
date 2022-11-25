@@ -34,7 +34,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
+            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Input byte array", GH_ParamAccess.item);
             pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
         }
 
@@ -52,18 +52,17 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string path = string.Empty;
+            ByteArrayGoo goo = null;
             string contentType = string.Empty;
 
-            DA.GetData(0, ref path);
+            DA.GetData(0, ref goo);
             DA.GetData(1, ref contentType);
 
-            var content = File.ReadAllBytes(path);
 
-            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, content);
-            RequestBodyGoo goo = new RequestBodyGoo(txtBody);
+            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, goo.Value);
+            RequestBodyGoo body = new RequestBodyGoo(txtBody);
 
-            DA.SetData(0, goo);
+            DA.SetData(0, body);
         }
 
 
@@ -85,7 +84,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("05df5f52-6e60-4492-9332-03189a83ec18"); }
+            get { return new Guid("43f12a67-6ab6-450d-8a10-63081f20cdbf"); }
         }
     }
 }
