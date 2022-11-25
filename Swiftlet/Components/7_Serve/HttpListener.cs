@@ -41,6 +41,8 @@ namespace Swiftlet.Components
         private List<HttpHeaderGoo> _headerGoos;
         private List<QueryParamGoo> _queryParamGoos;
 
+        private bool RequestTriggeredSolve;
+
         /// <summary>
         /// Initializes a new instance of the HttpListener class.
         /// </summary>
@@ -78,13 +80,13 @@ namespace Swiftlet.Components
             //pManager.AddParameter(new ListenerContextParam(), "Context", "CT", "Listener Context", GH_ParamAccess.item);
         }
 
+
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string scheme = "http";
             int port = 80;
             string route = string.Empty;
             RequestBodyGoo bodyGoo = null;
@@ -99,19 +101,15 @@ namespace Swiftlet.Components
                 _responseBody = bodyGoo.Value;
             }
 
-            //if (string.IsNullOrEmpty(scheme)) return;
-
-            //scheme = scheme.ToLower();
-
             this.Listener.Close();
             this._listener = null;
 
-            _headerGoos = new List<HttpHeaderGoo>();
-            _queryParamGoos = new List<QueryParamGoo>();
-
-            if (scheme != "http" && scheme != "https")
+            if (!this.RequestTriggeredSolve)
             {
-                throw new Exception("Scheme must be either \"http\" or \"https\"");
+                _headerGoos = new List<HttpHeaderGoo>();
+                _queryParamGoos = new List<QueryParamGoo>();
+                _requestBody = null;
+                this._context = null;
             }
 
             if (port < 0 || port > 65353)
@@ -121,7 +119,7 @@ namespace Swiftlet.Components
 
             if (!string.IsNullOrEmpty(route) && !route.EndsWith("/")) route += "/";
 
-            string uri = $"{scheme}://localhost:{port}/{route}";
+            string uri = $"http://localhost:{port}/{route}";
             this.Message = uri;
 
             this.Listener.Prefixes.Clear();
@@ -130,13 +128,9 @@ namespace Swiftlet.Components
             this.HttpRequestReceived -= HttpListenerComponent_RequestReceived;
             this.HttpRequestReceived += HttpListenerComponent_RequestReceived;
 
-            
+            this.RequestTriggeredSolve = false;
+
             DA.SetData(0, this._context?.Request.HttpMethod);
-
-            List<HttpHeaderGoo> headerGoos = new List<HttpHeaderGoo>();
-            List<QueryParamGoo> queryParamGoos = new List<QueryParamGoo>();
-
-            
             DA.SetDataList(1, _headerGoos);
             DA.SetDataList(2, _queryParamGoos);
             DA.SetData(3, _requestBody);
@@ -171,8 +165,9 @@ namespace Swiftlet.Components
                 this.Listener.Start();
                 var context = this.Listener.GetContext();
                 this._requestBody = null;
+                this.RequestTriggeredSolve = true;
 
-                if (_context != null)
+                if (context != null)
                 {
                     if (context.Request.HasEntityBody)
                     {
@@ -181,16 +176,16 @@ namespace Swiftlet.Components
 
 
                     // Get Headers
-                    foreach (var key in this._context.Request.Headers.AllKeys)
+                    foreach (var key in context.Request.Headers.AllKeys)
                     {
-                        HttpHeaderGoo goo = new HttpHeaderGoo(key, this._context.Request.Headers.GetValues(key).FirstOrDefault());
+                        HttpHeaderGoo goo = new HttpHeaderGoo(key, context.Request.Headers.GetValues(key).FirstOrDefault());
                         _headerGoos.Add(goo);
                     }
 
                     // Get Query Params
-                    foreach (var key in this._context.Request.QueryString.AllKeys)
+                    foreach (var key in context.Request.QueryString.AllKeys)
                     {
-                        QueryParamGoo goo = new QueryParamGoo(key, this._context.Request.QueryString.GetValues(key).FirstOrDefault());
+                        QueryParamGoo goo = new QueryParamGoo(key, context.Request.QueryString.GetValues(key).FirstOrDefault());
                         _queryParamGoos.Add(goo);
                     }
 
@@ -207,7 +202,7 @@ namespace Swiftlet.Components
                 this.OnHttpRequestReceived(new RequestReceivedEventArgs(context));
                 return;
             }
-            catch
+            catch (Exception exc)
             {
 
             }
