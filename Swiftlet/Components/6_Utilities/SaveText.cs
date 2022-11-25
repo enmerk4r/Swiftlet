@@ -23,7 +23,7 @@ namespace Swiftlet.Components
         public SaveText()
           : base("Save Text", "ST",
               "Save text to disk",
-              NamingUtility.CATEGORY, NamingUtility.SAVE_TO_DISK)
+              NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
 

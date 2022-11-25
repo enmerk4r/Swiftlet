@@ -47,5 +47,10 @@ namespace Swiftlet.DataModels.Implementations
         {
             return new StringContent(this.Text, Encoding.UTF8, this.ContentType);
         }
+
+        public byte[] ToByteArray()
+        {
+            return Encoding.UTF8.GetBytes(this.Text);
+        }
     }
 }
