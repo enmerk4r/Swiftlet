@@ -73,6 +73,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_base64_to_text_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_base64_to_text_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_basic_auth_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_basic_auth_24x24", resourceCulture);
@@ -613,6 +623,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_socket_listener_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_socket_listener_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_stringify_html_node_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_stringify_html_node_24x24", resourceCulture);
@@ -626,6 +646,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_stringify_json_token_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_stringify_json_token_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_text_to_base64_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_text_to_base64_24x24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
