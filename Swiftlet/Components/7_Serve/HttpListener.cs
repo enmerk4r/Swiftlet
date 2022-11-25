@@ -48,7 +48,7 @@ namespace Swiftlet.Components
         /// </summary>
         public HttpListenerComponent()
           : base("HTTP Listener", "L",
-              "A simple HTTP listener component that can receive HTTP requests",
+              "A simple HTTP listener component that can receive HTTP requests. \nThis component is VERY ALPHA. Use at your own risk.",
               NamingUtility.CATEGORY, NamingUtility.LISTEN)
         {
             
