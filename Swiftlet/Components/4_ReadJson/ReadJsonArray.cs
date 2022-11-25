@@ -63,7 +63,8 @@ namespace Swiftlet.Components
                 }
                 else
                 {
-                    throw new Exception("Input token is not an array");
+                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input token is not an array");
+                    return;
                 }
             }
 
