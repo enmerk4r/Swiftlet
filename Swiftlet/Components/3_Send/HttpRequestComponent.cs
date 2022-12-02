@@ -84,9 +84,8 @@ namespace Swiftlet.Components
                 DA.GetDataList(4, httpHeaders);
 
                 ValidateUrl(url);
-                string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
-
-                HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+            
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 this.TaskList.Add(Task.Run(
                     () => { return new HttpRequestSolveResults() { Value = package.GetResponse() }; }, 
                     CancelToken
@@ -110,9 +109,8 @@ namespace Swiftlet.Components
                 DA.GetDataList(4, httpHeaders);
 
                 ValidateUrl(url);
-                string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
-
-                HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+              
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 result = new HttpRequestSolveResults() { Value = package.GetResponse() };
                 return;
             }
@@ -199,7 +197,9 @@ namespace Swiftlet.Components
 
         public HttpRequestMessage GetRequestMessage()
         {
-            HttpRequestMessage msg = new HttpRequestMessage(this.GetHttpMethod(), this.Url);
+            string fullUrl = UrlUtility.AddQueryParams(this.Url, this.QueryParams);
+
+            HttpRequestMessage msg = new HttpRequestMessage(this.GetHttpMethod(), fullUrl);
             return msg;
         }
 
@@ -207,9 +207,6 @@ namespace Swiftlet.Components
         {
             try
             {
-                if (string.IsNullOrEmpty(this.Url)) throw new Exception("Invalid Url");
-                if (!this.Url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
-
                 string fullUrl = UrlUtility.AddQueryParams(this.Url, this.QueryParams);
 
                 if (!string.IsNullOrEmpty(fullUrl))
