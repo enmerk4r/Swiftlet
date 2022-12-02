@@ -17,7 +17,7 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class DeleteRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
+    public class DeleteRequestComponent : BaseRequestComponent
     {
         /// <summary>
         /// Initializes a new instance of the GetRequestComponent class.
@@ -55,8 +55,7 @@ namespace Swiftlet.Components
 
         public HttpResponseDTO SendRequest(string url, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders)
         {
-            if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
-            if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
+            ValidateUrl(url);
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
             if (!string.IsNullOrEmpty(fullUrl))
@@ -98,6 +97,8 @@ namespace Swiftlet.Components
                 DA.GetDataList(1, queryParams);
                 DA.GetDataList(2, httpHeaders);
 
+                ValidateUrl(url);
+
                 this.TaskList.Add(Task.Run(
                     () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) }; },
                     CancelToken
@@ -114,6 +115,8 @@ namespace Swiftlet.Components
                 DA.GetData(0, ref url);
                 DA.GetDataList(1, queryParams);
                 DA.GetDataList(2, httpHeaders);
+
+                ValidateUrl(url);
 
                 result = new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) };
                 return;
