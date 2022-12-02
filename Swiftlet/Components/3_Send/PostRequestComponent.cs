@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Components
 {
-    public class PostRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
+    public class PostRequestComponent : BaseRequestComponent
     {
         /// <summary>
         /// Initializes a new instance of the PostRequestComponent class.
@@ -54,9 +54,7 @@ namespace Swiftlet.Components
 
         public HttpResponseDTO SendRequest(string url, RequestBodyGoo bodyGoo, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders)
         {
-            if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
-            if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
-
+            ValidateUrl(url);
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
             var body = bodyGoo.Value;
@@ -104,6 +102,8 @@ namespace Swiftlet.Components
                 DA.GetDataList(2, queryParams);
                 DA.GetDataList(3, httpHeaders);
 
+                ValidateUrl(url);
+
                 this.TaskList.Add(Task.Run(
                     () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, bodyGoo, queryParams, httpHeaders) }; },
                     CancelToken
@@ -122,6 +122,8 @@ namespace Swiftlet.Components
                 DA.GetData(1, ref bodyGoo);
                 DA.GetDataList(2, queryParams);
                 DA.GetDataList(3, httpHeaders);
+
+                ValidateUrl(url);
 
                 result = new HttpRequestSolveResults() { Value = this.SendRequest(url, bodyGoo, queryParams, httpHeaders) };
                 return;

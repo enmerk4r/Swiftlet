@@ -22,7 +22,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace Swiftlet.Components
 {
-    public class HttpRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
+    public class HttpRequestComponent : BaseRequestComponent
     {
         /// <summary>
         /// Initializes a new instance of the GetRequestComponent class.
@@ -83,9 +83,7 @@ namespace Swiftlet.Components
                 DA.GetDataList(3, queryParams);
                 DA.GetDataList(4, httpHeaders);
 
-                if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
-                if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
-
+                ValidateUrl(url);
                 string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
@@ -111,9 +109,7 @@ namespace Swiftlet.Components
                 DA.GetDataList(3, queryParams);
                 DA.GetDataList(4, httpHeaders);
 
-                if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
-                if (!url.StartsWith("http")) throw new Exception("Please, make sure your URL starts with 'http' or 'https'");
-
+                ValidateUrl(url);
                 string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
                 HttpRequestPackage package = new HttpRequestPackage(fullUrl, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
