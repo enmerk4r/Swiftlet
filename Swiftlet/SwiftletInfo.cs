@@ -19,7 +19,7 @@ namespace Swiftlet
             get
             {
                 //Return a 24x24 pixel bitmap to represent this GHA library.
-                return null;
+                return Properties.Resources.Logo_24x24;
             }
         }
         public override string Description
