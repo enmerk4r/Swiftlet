@@ -26,6 +26,7 @@ namespace Swiftlet.Components
             : base(name, nickname, description, category, subCategory)
         {
             IpBlacklistUtil = new IpBlacklistUtil();
+            IpBlacklistUtil.LoadBlacklist();
         }
 
         /// <summary>
