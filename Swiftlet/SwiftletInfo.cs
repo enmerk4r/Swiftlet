@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Reflection;
 using Grasshopper.Kernel;
 
 namespace Swiftlet
@@ -53,5 +54,23 @@ namespace Swiftlet
                 return "";
             }
         }
+        public override string Version
+        {
+            get
+            {
+                return AssemblyVersion;
+            }
+        }
+
+        public override string AssemblyVersion
+        {
+            get
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var assemblyName = new AssemblyName(assembly.FullName);
+                return assemblyName.Version.ToString();
+            }
+        }
+
     }
 }

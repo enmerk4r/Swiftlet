@@ -20,7 +20,7 @@ namespace Swiftlet.DataModels.Implementations
 
         public string ToQueryString()
         {
-            return $"{this.Key}={this.Value}";
+            return $"{Uri.EscapeDataString(this.Key)}={Uri.EscapeDataString(this.Value)}";
         }
 
         public QueryParam(string key, string value)
