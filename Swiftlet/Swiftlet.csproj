@@ -81,6 +81,7 @@
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
+    <Compile Include="Components\3_Send\BaseRequestComponent.cs" />
     <Compile Include="Components\3_Send\HttpRequestComponent.cs" />
     <Compile Include="Components\3_Send\GetRequestComponent.cs" />
     <Compile Include="Components\3_Send\PatchRequestComponent.cs" />
@@ -163,7 +164,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\CompressionUtility.cs" />
     <Compile Include="Util\ContentTypeUtility.cs" />
+    <Compile Include="Util\IpBlacklistUtil.cs" />
     <Compile Include="Util\NamingUtility.cs" />
+    <Compile Include="Util\IIpBlacklistUtil.cs" />
     <Compile Include="Util\UrlUtility.cs" />
   </ItemGroup>
   <ItemGroup>
