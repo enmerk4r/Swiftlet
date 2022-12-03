@@ -64,7 +64,7 @@ namespace Swiftlet.Components
 
             if (!String.IsNullOrEmpty(uri.Query))
             {
-                return InvalidUrlReturnValue("Please do not include query parameters in your URL.", throwOnInvalid);
+                return InvalidUrlReturnValue("Please do not include query parameters in your URL. Use the Params (P) input instead.", throwOnInvalid);
             }
 
             if (!String.IsNullOrEmpty(uri.Fragment))
