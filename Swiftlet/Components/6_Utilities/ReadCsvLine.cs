@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
 using Grasshopper.Kernel;
+using Microsoft.VisualBasic.FileIO;
 using Rhino.Geometry;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class CreateCsvLine : GH_Component
+    public class ReadCsvLine : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CreateCsvLine class.
         /// </summary>
-        public CreateCsvLine()
-          : base("Create CSV Line", "CSVL",
-              "Formats multiple strings as a single line of delimeter-separated values",
+        public ReadCsvLine()
+          : base("Read CSV Line", "RCSVL",
+              "Extracts individual values from a delimeter-separated line",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
@@ -24,7 +25,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Cells", "C", "Cell values of a CSV line", GH_ParamAccess.list);
+            pManager.AddTextParameter("Line", "L", "Formatted CSV line", GH_ParamAccess.item);
             pManager.AddTextParameter("Delimiter", "D", "CSV delimeter", GH_ParamAccess.item, ",");
 
             pManager[1].Optional = true;
@@ -35,7 +36,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Line", "L", "Formatted CSV line", GH_ParamAccess.item);
+            pManager.AddTextParameter("Cells", "C", "Cell values of a CSV line", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -44,25 +45,28 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<string> cells = new List<string>();
+            string line = string.Empty;
             string delimiter = ",";
-            DA.GetDataList(0, cells);
+
+            DA.GetData(0, ref line);
             DA.GetData(1, ref delimiter);
 
-            string line = string.Empty;
+            TextFieldParser parser = new TextFieldParser(new StringReader(line));
 
-            foreach(string cell in cells)
+            if (line.Contains("\""))
             {
-                string cleanCell = cell;
-                if (cell.Contains(delimiter))
-                {
-                    cleanCell = $"\"{cell}\"";
-                }
-                line += $"{cleanCell}{delimiter}";
+                parser.HasFieldsEnclosedInQuotes = true;
+            }
+            parser.SetDelimiters(delimiter);
+
+            List<string> cells = new List<string>();
+
+            while (!parser.EndOfData)
+            {
+                cells.AddRange(parser.ReadFields());
             }
 
-            line = line.Remove(line.Length - 1, 1);
-            DA.SetData(0, line);
+            DA.SetDataList(0, cells);
         }
 
         /// <summary>
@@ -74,7 +78,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_create_csv_line_24x24;
+                return null;
             }
         }
 
@@ -83,7 +87,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("D9B2041E-FF4E-446E-B634-4EBACD47051E"); }
+            get { return new Guid("0478d672-bfbd-4502-b627-07b2e5d7f664"); }
         }
     }
 }
