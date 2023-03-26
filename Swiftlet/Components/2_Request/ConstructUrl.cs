@@ -13,19 +13,19 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ConstructUrl : GH_Component
+    public class CreateUrl : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the DeconstructHttpResponse class.
         /// </summary>
-        public ConstructUrl()
-          : base("Construct URL", "CURL",
-              "Construct a URL from constituent parts",
-              NamingUtility.CATEGORY, NamingUtility.SEND)
+        public CreateUrl()
+          : base("Create URL", "CURL",
+              "Construct a URL from its constituent parts",
+              NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        public override GH_Exposure Exposure => GH_Exposure.primary;
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -111,7 +111,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.Icons_construct_url_24x24;
             }
         }
 

@@ -83,7 +83,7 @@
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
-    <Compile Include="Components\3_Send\ConstructUrl.cs" />
+    <Compile Include="Components\2_Request\ConstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
@@ -408,6 +408,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Logo_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_construct_url_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_url_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_read_csv_line_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_split_text_into_lines_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
