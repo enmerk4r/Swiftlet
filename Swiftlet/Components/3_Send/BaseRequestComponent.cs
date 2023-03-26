@@ -49,28 +49,37 @@ namespace Swiftlet.Components
         {
             if (String.IsNullOrEmpty(url))
             {
-                return InvalidUrlReturnValue("Invalid URL.", throwOnInvalid);
+                return InvalidUrlReturnValue(" Invalid URL.", throwOnInvalid);
             }
 
-            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            
+
+            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
             {
-                return InvalidUrlReturnValue("URL is not well formed.", throwOnInvalid);
+                return InvalidUrlReturnValue(" URL must include a scheme (http:// or https://)", throwOnInvalid);
             }
 
             Uri uri = new Uri(url);
+
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                return InvalidUrlReturnValue(" URL is not well formed.", throwOnInvalid);
+            }
+
+            
             if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
             {
-                return InvalidUrlReturnValue("Please make sure your URL starts with 'http' or 'https'.", throwOnInvalid);
+                return InvalidUrlReturnValue(" Please make sure your URL starts with 'http' or 'https'.", throwOnInvalid);
             }
 
             if (!String.IsNullOrEmpty(uri.Query))
             {
-                return InvalidUrlReturnValue("Please do not include query parameters in your URL. Use the Params (P) input instead.", throwOnInvalid);
+                return InvalidUrlReturnValue(" Please do not include query parameters in your URL. Use the Params (P) input instead.", throwOnInvalid);
             }
 
             if (!String.IsNullOrEmpty(uri.Fragment))
             {
-                return InvalidUrlReturnValue("Please do not include a fragment in your URL.", throwOnInvalid);
+                return InvalidUrlReturnValue(" Please do not include a fragment in your URL.", throwOnInvalid);
             }
 
             if (uri.HostNameType == UriHostNameType.Dns)
@@ -82,27 +91,27 @@ namespace Swiftlet.Components
                 }
                 catch (System.Net.Sockets.SocketException)
                 {
-                    return InvalidUrlReturnValue("Please use a valid hostname or IP address.", throwOnInvalid);
+                    return InvalidUrlReturnValue(" Please use a valid hostname or IP address.", throwOnInvalid);
                 }
                 if (IpBlacklistUtil.IsIpHostBlacklisted(hostEntry))
                 {
-                    return InvalidUrlReturnValue("The given hostname or IP address is blacklisted.", throwOnInvalid);
+                    return InvalidUrlReturnValue(" The given hostname or IP address is blacklisted.", throwOnInvalid);
                 }
             }
             else if (uri.HostNameType == UriHostNameType.IPv6 || uri.HostNameType == UriHostNameType.IPv4)
             {
                 if ( !IPAddress.TryParse(uri.Host, out IPAddress ipAddress) )
                 {
-                    return InvalidUrlReturnValue("Please use a valid hostname or IP address.", throwOnInvalid);
+                    return InvalidUrlReturnValue(" Please use a valid hostname or IP address.", throwOnInvalid);
                 }
                 if (IpBlacklistUtil.IsIpAddressBlacklisted(ipAddress))
                 {
-                    return InvalidUrlReturnValue("The given hostname or IP address is blacklisted.", throwOnInvalid);
+                    return InvalidUrlReturnValue(" The given hostname or IP address is blacklisted.", throwOnInvalid);
                 }
             }
             else
             {
-                return InvalidUrlReturnValue("The given hostname or IP address is invalid.", throwOnInvalid);
+                return InvalidUrlReturnValue(" The given hostname or IP address is invalid.", throwOnInvalid);
             }
 
             return true;
