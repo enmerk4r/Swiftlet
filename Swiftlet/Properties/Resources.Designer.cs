@@ -113,6 +113,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_byte_array_to_list_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_byte_array_to_list_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_byte_array_to_text_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_byte_array_to_text_24x24", resourceCulture);
@@ -486,6 +496,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_jvalue_param_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_jvalue_param_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_list_to_byte_array_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_list_to_byte_array_24x24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
