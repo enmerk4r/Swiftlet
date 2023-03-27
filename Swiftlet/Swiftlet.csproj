@@ -428,13 +428,13 @@
     <None Include="Resources\Logo_16x16.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_list_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Icons_byte_array_to_list_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_replace_empty_branches_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_list_to_byte_array_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
