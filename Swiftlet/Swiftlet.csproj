@@ -126,6 +126,7 @@
     <Compile Include="Components\6_Utilities\Base64ToText.cs" />
     <Compile Include="Components\6_Utilities\TextToBase64.cs" />
     <Compile Include="Components\6_Utilities\ListToByteArray.cs" />
+    <Compile Include="Components\6_Utilities\ReplaceEmptyBranches.cs" />
     <Compile Include="Components\6_Utilities\TextToByteArray.cs" />
     <Compile Include="Components\7_Serve\HttpListener.cs" />
     <Compile Include="Components\7_Serve\SocketListener.cs" />
@@ -431,6 +432,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_byte_array_to_list_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_replace_empty_branches_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
