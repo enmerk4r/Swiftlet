@@ -34,7 +34,7 @@ namespace Swiftlet.Components
             pManager.AddTextParameter("Scheme", "S", "URL scheme (http or https)", GH_ParamAccess.item);
             pManager.AddTextParameter("Host", "H", "Host component of the URL", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Port", "P", "TCP port number", GH_ParamAccess.item);
-            pManager.AddTextParameter("Route", "R", "Components of a route to an online resource", GH_ParamAccess.list);
+            pManager.AddTextParameter("Route", "R", "A route (path) to an online resource", GH_ParamAccess.item);
 
             pManager[2].Optional = true;
             pManager[3].Optional = true;
@@ -57,13 +57,13 @@ namespace Swiftlet.Components
             string scheme = string.Empty;
             string host = string.Empty;
             int port = -1;
-            List<string> routeComponents = new List<string>();
+            string route = string.Empty;
             
 
             DA.GetData(0, ref scheme);
             DA.GetData(1, ref host);
             DA.GetData(2, ref port);
-            DA.GetDataList(3, routeComponents);
+            DA.GetData(3, ref route);
 
             UriBuilder builder = new UriBuilder();
             builder.Scheme = scheme;
@@ -71,31 +71,10 @@ namespace Swiftlet.Components
 
             if (port > 0) builder.Port = port;
 
-            List<string> pathTokens = new List<string>();
 
-            foreach (string component in routeComponents)
+            if (!string.IsNullOrEmpty(route))
             {
-                pathTokens.AddRange(component.Split('/'));
-            }
-
-            string path = "";
-
-            foreach (string component in pathTokens) 
-            {
-                string f = $"/{component}";
-
-                if (f != "/")
-                {
-                    path += f;
-                }
-            };
-
-            
-
-            if (!string.IsNullOrEmpty(path))
-            {
-                path = path.Substring(1, path.Length - 1);
-                builder.Path = path;
+                builder.Path = route;
             }
 
             DA.SetData(0, builder.ToString());

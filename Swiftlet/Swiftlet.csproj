@@ -83,7 +83,7 @@
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
-    <Compile Include="Components\2_Request\ConstructUrl.cs" />
+    <Compile Include="Components\2_Request\CreateUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
