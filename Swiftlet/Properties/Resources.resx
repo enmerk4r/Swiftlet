@@ -133,6 +133,9 @@
   <data name="Icons_byte_array_to_file_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_byte_array_to_file_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_byte_array_to_list_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_byte_array_to_list_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_byte_array_to_text_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_byte_array_to_text_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -246,6 +249,9 @@
   </data>
   <data name="Icons_jvalue_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_jvalue_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_list_to_byte_array_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_list_to_byte_array_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_parse_json_string_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_parse_json_string_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
