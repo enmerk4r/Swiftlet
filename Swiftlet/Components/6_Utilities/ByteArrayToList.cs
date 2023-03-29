@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Text;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -10,14 +10,14 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ByteArrayToFile : GH_Component
+    public class ByteArrayToList : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the TextToByteArray class.
         /// </summary>
-        public ByteArrayToFile()
-          : base("Byte Array to File", "BAF",
-              "Save a byte array to a local file",
+        public ByteArrayToList()
+          : base("Byte Array To List", "BAL",
+              "Converts a byte array into a list of integers",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
@@ -29,8 +29,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Byte Array to save", GH_ParamAccess.item);
-            pManager.AddTextParameter("Path", "P", "Output filepath", GH_ParamAccess.item);
+            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Byte Array to convert", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter( "Bytes", "B", "Saved file size in bytes", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Bytes", "B", "Byte Array as a list of integers", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -48,19 +47,9 @@ namespace Swiftlet.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             ByteArrayGoo goo = null;
-            string path = string.Empty;
-
             DA.GetData(0, ref goo);
-            DA.GetData(1, ref path);
 
-            using (BinaryWriter writer = new BinaryWriter(new FileStream(path, FileMode.Create)))
-            {
-                writer.Write(goo.Value);
-            }
-
-            long length = new System.IO.FileInfo(path).Length;
-
-            DA.SetData(0, length);
+            DA.SetDataList(0, goo.Value.Select(b => ((int)b)).ToList());
         }
 
         /// <summary>
@@ -72,7 +61,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_byte_array_to_file_24x24;
+                return Properties.Resources.Icons_byte_array_to_list_24x24;
             }
         }
 
@@ -81,7 +70,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("921383a8-97e2-434d-bd02-560312ad4fd8"); }
+            get { return new Guid("60e16712-a6aa-4e02-860a-d587b512320c"); }
         }
     }
 }

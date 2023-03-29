@@ -1,36 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using Grasshopper.Kernel;
+using Microsoft.VisualBasic.FileIO;
 using Rhino.Geometry;
-using Swiftlet.Goo;
-using Swiftlet.Params;
 using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class ByteArrayToFile : GH_Component
+    public class SplitTextIntoLines : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the TextToByteArray class.
+        /// Initializes a new instance of the CreateCsvLine class.
         /// </summary>
-        public ByteArrayToFile()
-          : base("Byte Array to File", "BAF",
-              "Save a byte array to a local file",
+        public SplitTextIntoLines()
+          : base("Split Text Into Lines", "STIL",
+              "Takes a block of text and splits it into individual lines by the newline character",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
-
-        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Byte Array to save", GH_ParamAccess.item);
-            pManager.AddTextParameter("Path", "P", "Output filepath", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T", "Text to split into lines", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -38,7 +34,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter( "Bytes", "B", "Saved file size in bytes", GH_ParamAccess.item);
+            pManager.AddTextParameter("Lines", "L", "Individual lines", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -47,20 +43,12 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ByteArrayGoo goo = null;
-            string path = string.Empty;
+            string text = string.Empty;
+            DA.GetData(0, ref text);
 
-            DA.GetData(0, ref goo);
-            DA.GetData(1, ref path);
+            List<string> lines = text.Split('\n').ToList();
 
-            using (BinaryWriter writer = new BinaryWriter(new FileStream(path, FileMode.Create)))
-            {
-                writer.Write(goo.Value);
-            }
-
-            long length = new System.IO.FileInfo(path).Length;
-
-            DA.SetData(0, length);
+            DA.SetDataList(0, lines);
         }
 
         /// <summary>
@@ -72,7 +60,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_byte_array_to_file_24x24;
+                return Properties.Resources.Icons_split_text_into_lines_24x24;
             }
         }
 
@@ -81,7 +69,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("921383a8-97e2-434d-bd02-560312ad4fd8"); }
+            get { return new Guid("3561ef51-707a-414b-b344-68b79108bc46"); }
         }
     }
 }

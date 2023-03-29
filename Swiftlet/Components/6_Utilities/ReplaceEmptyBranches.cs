@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Grasshopper;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Swiftlet.Goo;
 using Swiftlet.Params;
@@ -9,29 +12,27 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
-    public class TextToBase64 : GH_Component
+    public class ReplaceEmptyBranches : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the TextToByteArray class.
         /// </summary>
-        public TextToBase64()
-          : base("Text To Base64", "TB64",
-              "Converts text to a Base64 encoded string",
+        public ReplaceEmptyBranches()
+          : base("Replace Empty Branches", "REB",
+              "Substitutes all empty branches in a tree with a provided list of values.\nUseful for padding missing values in a web scraping scenario",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.quinary;
+        public override GH_Exposure Exposure => GH_Exposure.senary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Text", "T", "Input Text", GH_ParamAccess.item);
-            pManager.AddTextParameter("Encoding", "E", "Can be ASCII, Unicode, UTF8, UTF7, UTF32", GH_ParamAccess.item, "UTF8");
-            
-            pManager[1].Optional = false;
+            pManager.AddGenericParameter("Tree", "T", "Input tree", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Replacement", "R", "List of values to replace empty branches with", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Base64", "B", "Base64 encoded string", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Tree", "T", "Output tree with padded empty branches", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -48,35 +49,30 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string txt = string.Empty;
-            string encoding = string.Empty;
+            GH_Structure<IGH_Goo> tree = new GH_Structure<IGH_Goo>();
+            List<IGH_Goo> padding = new List<IGH_Goo>();
 
-            DA.GetData(0, ref txt);
-            DA.GetData(1, ref encoding);
+            
+            DA.GetDataTree(0, out tree);
+            DA.GetDataList(1, padding);
 
-            byte[] array = null;
+            GH_Structure<IGH_Goo> newTree = tree.Duplicate();
 
-            string upperEncoding = encoding.ToUpper();
-
-            switch (upperEncoding)
+            foreach (GH_Path path in tree.Paths)
             {
-                case "ASCII":
-                    array = Encoding.ASCII.GetBytes(txt); break;
-                case "UNICODE":
-                    array = Encoding.Unicode.GetBytes(txt); break;
-                case "UTF8":
-                    array = Encoding.UTF8.GetBytes(txt); break;
-                case "UTF7":
-                    array = Encoding.UTF7.GetBytes(txt); break;
-                case "UTF32":
-                    array = Encoding.UTF32.GetBytes(txt); break;
-                default:
-                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{encoding} is an unknown encoding"); return;
+                var branch = tree.get_Branch(path);
+
+                if (branch.Count == 0)
+                {
+                    for (int i = 0; i < padding.Count; i++)
+                    {
+                        newTree.Insert((padding[i]).Duplicate(), path, i);
+                    }
+                }
             }
 
-            string base64 = System.Convert.ToBase64String(array);
 
-            DA.SetData(0, base64);
+            DA.SetDataTree(0, newTree);
         }
 
         /// <summary>
@@ -88,7 +84,7 @@ namespace Swiftlet.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Properties.Resources.Icons_text_to_base64_24x24;
+                return Properties.Resources.Icons_replace_empty_branches_24x24;
             }
         }
 
@@ -97,7 +93,7 @@ namespace Swiftlet.Components
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("ac216550-bea2-4f2d-b9fa-c5b0df90c423"); }
+            get { return new Guid("1b49e53c-43ae-4a66-8615-c7db063465da"); }
         }
     }
 }

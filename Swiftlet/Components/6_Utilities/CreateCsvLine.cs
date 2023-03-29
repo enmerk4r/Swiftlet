@@ -14,7 +14,7 @@ namespace Swiftlet.Components
         /// </summary>
         public CreateCsvLine()
           : base("Create CSV Line", "CSVL",
-              "Formats multiple ",
+              "Formats multiple strings as a single line of delimeter-separated values",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {
         }

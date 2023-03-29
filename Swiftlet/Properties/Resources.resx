@@ -133,11 +133,17 @@
   <data name="Icons_byte_array_to_file_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_byte_array_to_file_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_byte_array_to_list_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_byte_array_to_list_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_byte_array_to_text_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_byte_array_to_text_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_compress_data_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_compress_data_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_construct_url_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_construct_url_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_create_byte_array_body_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_byte_array_body_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -171,6 +177,9 @@
   </data>
   <data name="Icons_deconstruct_response_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_deconstruct_response_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_deconstruct_url_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_deconstruct_url_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_delete_request_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_delete_request_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -241,6 +250,9 @@
   <data name="Icons_jvalue_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_jvalue_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_list_to_byte_array_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_list_to_byte_array_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_parse_json_string_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_parse_json_string_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -256,6 +268,9 @@
   <data name="Icons_query_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_query_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_read_csv_line_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_read_csv_line_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_read_html_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_read_html_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -270,6 +285,9 @@
   </data>
   <data name="Icons_remove_json_key_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_remove_json_key_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_replace_empty_branches_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_replace_empty_branches_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_request_body_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_request_body_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -292,6 +310,9 @@
   <data name="Icons_socket_listener_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_socket_listener_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_split_text_into_lines_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_split_text_into_lines_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_stringify_html_node_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_stringify_html_node_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -306,6 +327,9 @@
   </data>
   <data name="Icons_token_auth_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_token_auth_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Logo_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Logo_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Logo_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Logo_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

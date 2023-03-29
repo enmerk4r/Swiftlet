@@ -113,6 +113,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_byte_array_to_list_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_byte_array_to_list_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_byte_array_to_text_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_byte_array_to_text_24x24", resourceCulture);
@@ -126,6 +136,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_compress_data_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_compress_data_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_construct_url_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_construct_url_24x24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -236,6 +256,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_deconstruct_response_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_deconstruct_response_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_deconstruct_url_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_deconstruct_url_24x24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -473,6 +503,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_list_to_byte_array_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_list_to_byte_array_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_parse_json_string_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_parse_json_string_24x24", resourceCulture);
@@ -523,6 +563,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_read_csv_line_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_read_csv_line_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_read_html_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_read_html_24x24", resourceCulture);
@@ -566,6 +616,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_remove_json_key_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_remove_json_key_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_replace_empty_branches_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_replace_empty_branches_24x24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -643,6 +703,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_split_text_into_lines_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("Icons_split_text_into_lines_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_stringify_html_node_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_stringify_html_node_24x24", resourceCulture);
@@ -686,6 +756,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_token_auth_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_token_auth_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Logo_16x16 {
+            get {
+                object obj = ResourceManager.GetObject("Logo_16x16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
