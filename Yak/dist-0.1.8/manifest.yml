@@ -1,0 +1,31 @@
+name: swiftlet
+version: 0.1.8
+authors:
+  - Sergey Pigach
+description: >
+  Swiftlet is a tool that lets you call into Web APIs directly from Grasshopper.
+  If you are interested in scraping the internet, tapping into public and private 
+  APIs or testing your own web backends, Swiftlet is a tool for you! It provides a 
+  streamlined workflow for sending GET, POST, DELETE, PUT and PATCH requests to 
+  any API endpoint. It gives you advanced control over request headers, 
+  query params, supports several kinds of web authentication and lets you parse 
+  JSON formatted web responses.
+keywords:
+- web
+- api
+- get
+- post
+- request
+- scraping
+- endpoint
+- headers
+- http
+- https
+- html
+- websocket
+- webhook
+- ShapeDiver
+- cloud
+- database
+- query
+icon_url: "https://swiftlet.s3.us-east-2.amazonaws.com/Logo_32x32.png"
