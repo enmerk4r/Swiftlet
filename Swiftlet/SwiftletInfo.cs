@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Reflection;
+using Grasshopper;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 
 namespace Swiftlet
 {
@@ -72,5 +74,17 @@ namespace Swiftlet
             }
         }
 
+    }
+
+    public class SwiftletCategoryIcon : GH_AssemblyPriority
+    {
+        public object Properties { get; private set; }
+
+        public override GH_LoadingInstruction PriorityLoad()
+        {
+            Instances.ComponentServer.AddCategoryIcon("Swiftlet", Swiftlet.Properties.Resources.Logo_16x16);
+            Instances.ComponentServer.AddCategorySymbolName("Swiftlet", 'S');
+            return GH_LoadingInstruction.Proceed;
+        }
     }
 }
