@@ -86,6 +86,7 @@
     <Compile Include="Components\2_Request\CreateUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHeader.cs" />
     <Compile Include="Components\3_Send\DeconstructQueryParam.cs" />
+    <Compile Include="Components\3_Send\Throttle.cs" />
     <Compile Include="Components\3_Send\DeconstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
