@@ -44,7 +44,9 @@ namespace Swiftlet.DataModels.Implementations
 
         public HttpContent ToHttpContent()
         {
-            return new ByteArrayContent(this.Content);
+            var content = new ByteArrayContent(this.Content);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(this.ContentType);
+            return content;
         }
         public byte[] ToByteArray()
         {

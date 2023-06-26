@@ -45,7 +45,9 @@ namespace Swiftlet.DataModels.Implementations
 
         public HttpContent ToHttpContent()
         {
-            return new StringContent(this.Text, Encoding.UTF8, this.ContentType);
+            var content = new StringContent(this.Text, Encoding.UTF8, this.ContentType);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(this.ContentType);
+            return content;
         }
 
         public byte[] ToByteArray()
