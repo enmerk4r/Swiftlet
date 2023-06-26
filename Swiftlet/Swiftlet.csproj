@@ -113,9 +113,10 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
+    <Compile Include="Components\6_Utilities\URLencode.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
     <Compile Include="Components\6_Utilities\ColorToHex.cs" />
-    <Compile Include="Components\6_Utilities\ReplaceEmptyBranches - Copy.cs" />
+    <Compile Include="Components\6_Utilities\GenerateGUID.cs" />
     <Compile Include="Components\6_Utilities\SplitTextIntoLines.cs" />
     <Compile Include="Components\6_Utilities\ReadCsvLine.cs" />
     <Compile Include="Components\6_Utilities\DeompressData.cs" />
