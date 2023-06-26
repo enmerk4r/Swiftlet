@@ -84,6 +84,8 @@
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
     <Compile Include="Components\2_Request\CreateUrl.cs" />
+    <Compile Include="Components\3_Send\DeconstructHeader.cs" />
+    <Compile Include="Components\3_Send\DeconstructQueryParam.cs" />
     <Compile Include="Components\3_Send\DeconstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
+    <Compile Include="Components\6_Utilities\ColorToHex.cs" />
     <Compile Include="Components\6_Utilities\SplitTextIntoLines.cs" />
     <Compile Include="Components\6_Utilities\ReadCsvLine.cs" />
     <Compile Include="Components\6_Utilities\DeompressData.cs" />
@@ -124,6 +127,7 @@
     <Compile Include="Components\6_Utilities\ByteArrayToText.cs" />
     <Compile Include="Components\6_Utilities\FileToByteArray.cs" />
     <Compile Include="Components\6_Utilities\Base64ToText.cs" />
+    <Compile Include="Components\6_Utilities\HexToColor.cs" />
     <Compile Include="Components\6_Utilities\TextToBase64.cs" />
     <Compile Include="Components\6_Utilities\ListToByteArray.cs" />
     <Compile Include="Components\6_Utilities\ReplaceEmptyBranches.cs" />
