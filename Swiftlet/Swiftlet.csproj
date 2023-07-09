@@ -114,6 +114,7 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
+    <Compile Include="Components\6_Utilities\ByteArrayToBitmap.cs" />
     <Compile Include="Components\6_Utilities\URLencode.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
     <Compile Include="Components\6_Utilities\ColorToHex.cs" />
