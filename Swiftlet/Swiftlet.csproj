@@ -114,6 +114,7 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
+    <Compile Include="Components\6_Utilities\BitmapToMesh.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToBitmap.cs" />
     <Compile Include="Components\6_Utilities\URLencode.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
     <Compile Include="EventArgs\SocketMessageReceivedEventArgs.cs" />
     <Compile Include="EventArgs\RequestReceivedEventArgs.cs" />
+    <Compile Include="Goo\BitmapGoo.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
     <Compile Include="Goo\JArrayGoo.cs" />
@@ -163,6 +165,7 @@
     <Compile Include="Goo\ListenerContextGoo.cs" />
     <Compile Include="Goo\ByteArrayGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
+    <Compile Include="Params\BitmapParam.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
     <Compile Include="Params\JArrayParam.cs" />
