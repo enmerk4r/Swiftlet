@@ -44,7 +44,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddMeshParameter("Bitmap", "B", "Output bitmap", GH_ParamAccess.item);
+            pManager.AddMeshParameter("Mesh", "M", "Output colored mesh", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "C", "Bitmap colors (in the original order)", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Width", "W", "Bitmap width (in pixels)", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Height", "H", "Bitmap height (in pixels)", GH_ParamAccess.item);
