@@ -15,7 +15,7 @@ namespace Swiftlet.Components
         /// Initializes a new instance of the TextToByteArray class.
         /// </summary>
         public Base64ToText()
-          : base("Base64 to Text", "TB64",
+          : base("Base64 to Text", "B64T",
               "Converts a Base64 encoded string to cleartext",
               NamingUtility.CATEGORY, NamingUtility.UTILITIES)
         {

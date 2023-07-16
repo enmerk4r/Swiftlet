@@ -118,15 +118,15 @@ namespace Swiftlet.Components
                 List<QueryParamGoo> queryParams = new List<QueryParamGoo>();
                 List<HttpHeaderGoo> httpHeaders = new List<HttpHeaderGoo>();
 
-                ValidateUrl(url);
 
                 DA.GetData(0, ref url);
                 DA.GetData(1, ref bodyGoo);
                 DA.GetDataList(2, queryParams);
                 DA.GetDataList(3, httpHeaders);
 
+                ValidateUrl(url);
+
                 result = new HttpRequestSolveResults() { Value = this.SendRequest(url, bodyGoo, queryParams, httpHeaders) };
-                return;
             }
 
             if (result != null)

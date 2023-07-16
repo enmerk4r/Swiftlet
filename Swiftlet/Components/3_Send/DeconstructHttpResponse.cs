@@ -28,7 +28,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Http Web response", GH_ParamAccess.item);
+            pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Http Web response to deconstruct", GH_ParamAccess.item);
         }
 
         /// <summary>

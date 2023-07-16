@@ -30,7 +30,7 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("URL", "U", "A URL string to be deconstructed", GH_ParamAccess.item);
+            pManager.AddTextParameter("URL", "U", "A URL string to deconstruct", GH_ParamAccess.item);
         }
 
         /// <summary>

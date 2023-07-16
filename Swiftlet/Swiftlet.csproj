@@ -51,6 +51,11 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="QRCoder, Version=1.4.3.0, Culture=neutral, PublicKeyToken=c4ed5b9ae8358a28, processorArchitecture=MSIL">
+      <HintPath>packages\QRCoder.1.4.3\lib\net40\QRCoder.dll</HintPath>
+    </Reference>
     <Reference Include="Rhino.UI, Version=6.18.19266.14200, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
       <HintPath>packages\RhinoCommon.6.18.19266.14201\lib\net45\Rhino.UI.dll</HintPath>
     </Reference>
@@ -66,6 +71,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\1_Auth\ApiKeyAuth.cs" />
@@ -76,14 +82,19 @@
     <Compile Include="Components\2_Request\CreateJsonArray.cs" />
     <Compile Include="Components\2_Request\CreateJsonObject.cs" />
     <Compile Include="Components\2_Request\CreateJsonValue.cs" />
+    <Compile Include="Components\2_Request\CreateMultipartFormBodyUnnamed.cs" />
     <Compile Include="Components\2_Request\CreateQueryParam.cs" />
     <Compile Include="Components\2_Request\CreateByteArrayBodyFromFile.cs" />
+    <Compile Include="Components\2_Request\CreateMultipartFormBodyNamed.cs" />
     <Compile Include="Components\2_Request\CreateTextBodyCustom.cs" />
     <Compile Include="Components\2_Request\CreateTextBody.cs" />
     <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
     <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
     <Compile Include="Components\2_Request\SetJsonKey.cs" />
     <Compile Include="Components\2_Request\CreateUrl.cs" />
+    <Compile Include="Components\3_Send\DeconstructHeader.cs" />
+    <Compile Include="Components\3_Send\DeconstructQueryParam.cs" />
+    <Compile Include="Components\3_Send\Throttle.cs" />
     <Compile Include="Components\3_Send\DeconstructUrl.cs" />
     <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
     <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
@@ -111,7 +122,16 @@
     <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
     <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
     <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
+    <Compile Include="Components\6_Utilities\Base64ToByteArray.cs" />
+    <Compile Include="Components\6_Utilities\BitmapToByteArray.cs" />
+    <Compile Include="Components\6_Utilities\GenerateQRCode.cs" />
+    <Compile Include="Components\6_Utilities\BitmapToMesh.cs" />
+    <Compile Include="Components\6_Utilities\ByteArrayToBitmap.cs" />
+    <Compile Include="Components\6_Utilities\ByteArrayToBase64.cs" />
+    <Compile Include="Components\6_Utilities\URLencode.cs" />
     <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
+    <Compile Include="Components\6_Utilities\ColorToHex.cs" />
+    <Compile Include="Components\6_Utilities\GenerateGUID.cs" />
     <Compile Include="Components\6_Utilities\SplitTextIntoLines.cs" />
     <Compile Include="Components\6_Utilities\ReadCsvLine.cs" />
     <Compile Include="Components\6_Utilities\DeompressData.cs" />
@@ -124,6 +144,7 @@
     <Compile Include="Components\6_Utilities\ByteArrayToText.cs" />
     <Compile Include="Components\6_Utilities\FileToByteArray.cs" />
     <Compile Include="Components\6_Utilities\Base64ToText.cs" />
+    <Compile Include="Components\6_Utilities\HexToColor.cs" />
     <Compile Include="Components\6_Utilities\TextToBase64.cs" />
     <Compile Include="Components\6_Utilities\ListToByteArray.cs" />
     <Compile Include="Components\6_Utilities\ReplaceEmptyBranches.cs" />
@@ -135,6 +156,7 @@
     <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
     <Compile Include="DataModels\Implementations\QueryParam.cs" />
     <Compile Include="DataModels\Implementations\RequestBodyByteArray.cs" />
+    <Compile Include="DataModels\Implementations\RequestBodyMultipartForm.cs" />
     <Compile Include="DataModels\Implementations\RequestBodyText.cs" />
     <Compile Include="DataModels\Interfaces\IHttpHeader.cs" />
     <Compile Include="DataModels\Interfaces\IHttpResponseDTO.cs" />
@@ -144,6 +166,7 @@
     <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
     <Compile Include="EventArgs\SocketMessageReceivedEventArgs.cs" />
     <Compile Include="EventArgs\RequestReceivedEventArgs.cs" />
+    <Compile Include="Goo\BitmapGoo.cs" />
     <Compile Include="Goo\HttpHeaderGoo.cs" />
     <Compile Include="Goo\HttpWebResponseGoo.cs" />
     <Compile Include="Goo\JArrayGoo.cs" />
@@ -155,6 +178,7 @@
     <Compile Include="Goo\ListenerContextGoo.cs" />
     <Compile Include="Goo\ByteArrayGoo.cs" />
     <Compile Include="Goo\RequestBodyGoo.cs" />
+    <Compile Include="Params\BitmapParam.cs" />
     <Compile Include="Params\HttpHeaderParam.cs" />
     <Compile Include="Params\HttpWebResponseParam.cs" />
     <Compile Include="Params\JArrayParam.cs" />
@@ -221,6 +245,15 @@
     <None Include="Resources\ParamBase_jarray_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Logo_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Logo_16x16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_multipart_form_data_unnamed.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_read_json_array_24x24.png" />
   </ItemGroup>
   <ItemGroup>
@@ -230,76 +263,109 @@
     <None Include="Resources\Icons_read_json_value_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_remove_json_key_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_replace_empty_branches_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_request_body_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_save_csv_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_save_text_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_save_web_response_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_separate_json_tokens_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_set_json_key_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_socket_listener_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_split_text_into_lines_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_stringify_html_node_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_stringify_json_token_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_text_to_base64_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_text_to_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_throttle_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_token_auth_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_url_encode_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_api_auth_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_base64_to_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_base64_to_text_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_basic_auth_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_bitmap_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_bitmap_to_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_base64_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_bitmap_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_file_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_list_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_mesh_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_byte_array_to_text_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_compress_data_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_construct_url_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_byte_array_body_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_csv_line_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_create_http_header_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_response_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_delete_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_format_json_string_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_json_object_key.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_header_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_response_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jarray_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jobject_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jtoken_param_24x24 .png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jvalue_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_parse_json_string_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_patch_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_post_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_put_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_query_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_create_json_array_24x24.png" />
@@ -311,10 +377,55 @@
     <None Include="Resources\Icons_create_json_value_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_remove_json_key_24x24.png" />
+    <None Include="Resources\Icons_create_multipart_form_data_named_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_set_json_key_24x24.png" />
+    <None Include="Resources\Icons_create_multipart_form_data_unnamed_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_text_body_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_create_text_body_custom_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_decompress_data_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_http_header_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_query_param_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_response_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_deconstruct_url_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_delete_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_file_to_byte_array_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_format_json_string_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_generate_guid_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_generate_qr_code_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_get_attribute_value_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_get_child_nodes_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_get_element_by_id_24x24.png" />
@@ -338,103 +449,67 @@
     <None Include="Resources\Icons_get_inner_html_24x24.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Icons_get_json_object_key.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_get_request_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Icons_html_node_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_read_html_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_stringify_html_node_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_attribute_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_child_nodes_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_byte_array_body_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_text_body_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_text_body_custom_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_web_response_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_csv_line_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_csv_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_text_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_request_24x24.png" />
+    <None Include="Resources\Icons_http_header_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_http_listener_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_text_to_byte_array_24x24.png" />
+    <None Include="Resources\Icons_http_request_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_file_24x24.png" />
+    <None Include="Resources\Icons_http_response_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_text_24x24.png" />
+    <None Include="Resources\Icons_jarray_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_compress_data_24x24.png" />
+    <None Include="Resources\Icons_jobject_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_decompress_data_24x24.png" />
+    <None Include="Resources\Icons_jtoken_param_24x24 .png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_file_to_byte_array_24x24.png" />
+    <None Include="Resources\Icons_jvalue_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_text_to_base64_24x24.png" />
+    <None Include="Resources\Icons_list_to_byte_array_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_base64_to_text_24x24.png" />
+    <None Include="Resources\Icons_parse_json_string_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_socket_listener_24x24.png" />
+    <None Include="Resources\Icons_patch_request_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_byte_array_24x24.png" />
+    <None Include="Resources\Icons_post_request_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Logo_24x24.png" />
+    <None Include="Resources\Icons_put_request_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_construct_url_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_url_24x24.png" />
+    <None Include="Resources\Icons_query_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_read_csv_line_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_split_text_into_lines_24x24.png" />
+    <None Include="Resources\Icons_read_html_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Logo_16x16.png" />
+    <None Include="Resources\Icons_color_to_hex_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_list_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_replace_empty_branches_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_list_to_byte_array_24x24.png" />
+    <None Include="Resources\Icons_hex_to_color_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
