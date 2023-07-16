@@ -13,7 +13,7 @@ namespace Swiftlet.Params
     public class BitmapParam : GH_Param<BitmapGoo>
     {
         public BitmapParam()
-            : base("Bitmap", "BM", "Collection of Bitmaps",
+            : base("Bitmap", "BMP", "Collection of Bitmaps",
                  NamingUtility.CATEGORY, NamingUtility.UTILITIES, GH_ParamAccess.item)
         {
 
@@ -22,6 +22,6 @@ namespace Swiftlet.Params
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("c1cdd3a5-faaf-484a-978b-307139ebf7f4");
 
-        protected override Bitmap Icon => null;
+        protected override Bitmap Icon => Properties.Resources.Icons_bitmap_24x24;
     }
 }
