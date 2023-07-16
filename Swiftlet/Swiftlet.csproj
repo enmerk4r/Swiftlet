@@ -353,9 +353,6 @@
     <None Include="Resources\Icons_byte_array_to_text_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_color_to_hex_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Icons_compress_data_24x24.png" />
   </ItemGroup>
   <ItemGroup>
@@ -458,9 +455,6 @@
     <None Include="Resources\Icons_get_request_24x24.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icons_hex_to_color_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Icons_html_node_param_24x24.png" />
   </ItemGroup>
   <ItemGroup>
@@ -510,6 +504,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icons_read_html_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_color_to_hex_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons_hex_to_color_24x24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
