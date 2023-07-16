@@ -112,7 +112,6 @@ namespace Swiftlet.Components
               
                 HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
                 result = new HttpRequestSolveResults() { Value = package.GetResponse() };
-                return;
             }
 
 

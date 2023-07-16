@@ -119,7 +119,6 @@ namespace Swiftlet.Components
                 ValidateUrl(url);
 
                 result = new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) };
-                return;
             }
 
             if (result != null)
