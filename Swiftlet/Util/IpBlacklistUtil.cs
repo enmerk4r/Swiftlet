@@ -146,7 +146,9 @@ namespace Swiftlet.Util
                         throw new ArgumentException("B must be a number between 0 and 128 for IPv6 CIDR blocks like {IPv6 address}/B.");
                     }
 
-                    var addressParts = cidrBlockParts[0].Split(':');
+                    // special case for IPv6 CIDR blocks ending with "::", e.g. "2600:1f18:6364:0f24::/64"
+                    var tmp = cidrBlockParts[0].EndsWith("::") ? cidrBlockParts[0] + "0" : cidrBlockParts[0];
+                    var addressParts = tmp.Split(':');
                     if (addressParts.Length > 8)
                     {
                         throw new ArgumentException("Malformed IPv6 CIDR block.");
