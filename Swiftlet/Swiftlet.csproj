@@ -41,8 +41,10 @@
   </PropertyGroup>
 
   <!-- ==================== Rhino 8 Configuration ==================== -->
+  <!-- Rhino 8.0-8.19 uses .NET 7, Rhino 8.20+ uses .NET 8 -->
+  <!-- Using net7.0 for maximum backwards compatibility -->
   <PropertyGroup Condition="$(Configuration.Contains('Rhino8'))">
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <RhinoVersion>8</RhinoVersion>
     <DefineConstants>$(DefineConstants);RHINO8</DefineConstants>
     <!-- Versions defined in Directory.Build.props -->
