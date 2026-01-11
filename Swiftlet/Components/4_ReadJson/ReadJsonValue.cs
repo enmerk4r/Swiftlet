@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
@@ -55,12 +55,23 @@ namespace Swiftlet.Components
             {
                 JToken input_token = goo.Value;
 
-                try { DA.SetData(0, input_token.ToString()); }
+                try
+                {
+                    if (input_token.Type == JTokenType.Null)
+                    {
+                        DA.SetData(0, null);
+                    }
+                    else
+                    {
+                        DA.SetData(0, input_token.ToString());
+                    }
+                }
                 catch { }
                 try { DA.SetData(1, input_token.ToObject<double>()); }
                 catch { }
                 try { DA.SetData(2, input_token.ToObject<bool>()); }
                 catch { }
+
             }
         }
 
