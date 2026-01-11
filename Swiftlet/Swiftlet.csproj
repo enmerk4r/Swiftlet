@@ -1,544 +1,137 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BE3CFFB5-BC61-4FE9-9743-BE85FF523060}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Swiftlet</RootNamespace>
     <AssemblyName>Swiftlet</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <Version>0.1.9.0</Version>
+    <Copyright>Copyright © 2021</Copyright>
+    <Configurations>Debug-Rhino6;Release-Rhino6;Debug-Rhino7;Release-Rhino7;Debug-Rhino8;Release-Rhino8</Configurations>
+    <Platforms>AnyCPU</Platforms>
+
+    <!-- Enable nullable and implicit usings for .NET 8 builds only -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+
+    <!-- Suppress assembly info generation since we'll define our own if needed -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <!-- Use Windows-specific TFMs for WinForms/WPF support -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+
+    <!-- Required for non-string resources (bitmaps, icons) in .resx files -->
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+
+  <!-- ==================== Rhino 6 Configuration ==================== -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino6'))">
+    <TargetFramework>net462</TargetFramework>
+    <RhinoVersion>6</RhinoVersion>
+    <DefineConstants>$(DefineConstants);RHINO6</DefineConstants>
+    <!-- Versions defined in Directory.Build.props -->
+  </PropertyGroup>
+
+  <!-- ==================== Rhino 7 Configuration ==================== -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino7'))">
+    <TargetFramework>net48</TargetFramework>
+    <RhinoVersion>7</RhinoVersion>
+    <DefineConstants>$(DefineConstants);RHINO7</DefineConstants>
+    <!-- Versions defined in Directory.Build.props -->
+  </PropertyGroup>
+
+  <!-- ==================== Rhino 8 Configuration ==================== -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino8'))">
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RhinoVersion>8</RhinoVersion>
+    <DefineConstants>$(DefineConstants);RHINO8</DefineConstants>
+    <!-- Versions defined in Directory.Build.props -->
+  </PropertyGroup>
+
+  <!-- ==================== Debug/Release Settings ==================== -->
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
   </PropertyGroup>
+
+  <!-- ==================== Output Settings ==================== -->
+  <PropertyGroup>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- ==================== Debug Launch Settings ==================== -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino6')) And $(Configuration.Contains('Debug'))">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\Rhino 6\System\Rhino.exe</StartProgram>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino7')) And $(Configuration.Contains('Debug'))">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\Rhino 7\System\Rhino.exe</StartProgram>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino8')) And $(Configuration.Contains('Debug'))">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\Rhino 8\System\Rhino.exe</StartProgram>
+  </PropertyGroup>
+
+  <!-- ==================== Package References ==================== -->
+  <!-- RhinoCommon and Grasshopper -->
   <ItemGroup>
-    <Reference Include="Eto, Version=2.5.0.0, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>packages\RhinoCommon.6.18.19266.14201\lib\net45\Eto.dll</HintPath>
-    </Reference>
-    <Reference Include="GH_IO, Version=6.18.19266.14200, Culture=neutral, PublicKeyToken=6a29997d2e6b4f97, processorArchitecture=MSIL">
-      <HintPath>packages\Grasshopper.6.18.19266.14201\lib\net45\GH_IO.dll</HintPath>
-    </Reference>
-    <Reference Include="Grasshopper, Version=6.18.19266.14200, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
-      <HintPath>packages\Grasshopper.6.18.19266.14201\lib\net45\Grasshopper.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.11.43.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <HintPath>packages\HtmlAgilityPack.1.11.43\lib\Net45\HtmlAgilityPack.dll</HintPath>
-    </Reference>
+    <PackageReference Include="RhinoCommon" Version="$(RhinoCommonVersion)" />
+    <PackageReference Include="Grasshopper" Version="$(GrasshopperVersion)" />
+  </ItemGroup>
+
+  <!-- Other dependencies (versions defined in Directory.Build.props) -->
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="$(HtmlAgilityPackVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="QRCoder" Version="$(QRCoderVersion)" />
+    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- ==================== Framework References (for .NET Framework) ==================== -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462' Or '$(TargetFramework)' == 'net48'">
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="QRCoder, Version=1.4.3.0, Culture=neutral, PublicKeyToken=c4ed5b9ae8358a28, processorArchitecture=MSIL">
-      <HintPath>packages\QRCoder.1.4.3\lib\net40\QRCoder.dll</HintPath>
-    </Reference>
-    <Reference Include="Rhino.UI, Version=6.18.19266.14200, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>packages\RhinoCommon.6.18.19266.14201\lib\net45\Rhino.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="RhinoCommon, Version=6.18.19266.14200, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>packages\RhinoCommon.6.18.19266.14201\lib\net45\RhinoCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
+
+  <!-- ==================== Resources ==================== -->
   <ItemGroup>
-    <Compile Include="Components\1_Auth\ApiKeyAuth.cs" />
-    <Compile Include="Components\1_Auth\BasicAuth.cs" />
-    <Compile Include="Components\1_Auth\BearerTokenAuth.cs" />
-    <Compile Include="Components\2_Request\CreateByteArrayBody.cs" />
-    <Compile Include="Components\2_Request\CreateHttpHeader.cs" />
-    <Compile Include="Components\2_Request\CreateJsonArray.cs" />
-    <Compile Include="Components\2_Request\CreateJsonObject.cs" />
-    <Compile Include="Components\2_Request\CreateJsonValue.cs" />
-    <Compile Include="Components\2_Request\CreateMultipartFormBodyUnnamed.cs" />
-    <Compile Include="Components\2_Request\CreateQueryParam.cs" />
-    <Compile Include="Components\2_Request\CreateByteArrayBodyFromFile.cs" />
-    <Compile Include="Components\2_Request\CreateMultipartFormBodyNamed.cs" />
-    <Compile Include="Components\2_Request\CreateTextBodyCustom.cs" />
-    <Compile Include="Components\2_Request\CreateTextBody.cs" />
-    <Compile Include="Archived\CreateTextBody_ARCHIVED.cs" />
-    <Compile Include="Components\2_Request\RemoveJsonKey.cs" />
-    <Compile Include="Components\2_Request\SetJsonKey.cs" />
-    <Compile Include="Components\2_Request\CreateUrl.cs" />
-    <Compile Include="Components\3_Send\DeconstructHeader.cs" />
-    <Compile Include="Components\3_Send\DeconstructQueryParam.cs" />
-    <Compile Include="Components\3_Send\Throttle.cs" />
-    <Compile Include="Components\3_Send\DeconstructUrl.cs" />
-    <Compile Include="Components\3_Send\DeconstructHttpResponse.cs" />
-    <Compile Include="Components\3_Send\DeleteRequestComponent.cs" />
-    <Compile Include="Components\3_Send\BaseRequestComponent.cs" />
-    <Compile Include="Components\3_Send\HttpRequestComponent.cs" />
-    <Compile Include="Components\3_Send\GetRequestComponent.cs" />
-    <Compile Include="Components\3_Send\PatchRequestComponent.cs" />
-    <Compile Include="Components\3_Send\PutRequestComponent.cs" />
-    <Compile Include="Components\4_ReadJson\GetObjectKey.cs" />
-    <Compile Include="Components\4_ReadJson\ParseJson.cs" />
-    <Compile Include="Components\3_Send\PostRequestComponent.cs" />
-    <Compile Include="Components\4_ReadJson\ReadJsonArray.cs" />
-    <Compile Include="Components\4_ReadJson\ReadJsonObject.cs" />
-    <Compile Include="Components\4_ReadJson\ReadJsonValue.cs" />
-    <Compile Include="Components\4_ReadJson\SeparateJsonTokens.cs" />
-    <Compile Include="Components\4_ReadJson\StringifyJsonToken.cs" />
-    <Compile Include="Components\5_ReadHtml\GetAttributeValue.cs" />
-    <Compile Include="Components\5_ReadHtml\GetElementById.cs" />
-    <Compile Include="Components\5_ReadHtml\GetElementsByAttributeValue.cs" />
-    <Compile Include="Components\5_ReadHtml\GetElementsByClassName.cs" />
-    <Compile Include="Components\5_ReadHtml\GetElementsByTagName.cs" />
-    <Compile Include="Components\5_ReadHtml\GetElementsByXPATH.cs" />
-    <Compile Include="Components\5_ReadHtml\GetHtmlAttributes.cs" />
-    <Compile Include="Components\5_ReadHtml\GetHtmlNodeChildren.cs" />
-    <Compile Include="Components\5_ReadHtml\GetInnerHTML.cs" />
-    <Compile Include="Components\5_ReadHtml\ReadHtml.cs" />
-    <Compile Include="Components\5_ReadHtml\StringifyHtmlNode.cs" />
-    <Compile Include="Components\6_Utilities\Base64ToByteArray.cs" />
-    <Compile Include="Components\6_Utilities\BitmapToByteArray.cs" />
-    <Compile Include="Components\6_Utilities\GenerateQRCode.cs" />
-    <Compile Include="Components\6_Utilities\BitmapToMesh.cs" />
-    <Compile Include="Components\6_Utilities\ByteArrayToBitmap.cs" />
-    <Compile Include="Components\6_Utilities\ByteArrayToBase64.cs" />
-    <Compile Include="Components\6_Utilities\URLencode.cs" />
-    <Compile Include="Components\6_Utilities\ByteArrayToList.cs" />
-    <Compile Include="Components\6_Utilities\ColorToHex.cs" />
-    <Compile Include="Components\6_Utilities\GenerateGUID.cs" />
-    <Compile Include="Components\6_Utilities\SplitTextIntoLines.cs" />
-    <Compile Include="Components\6_Utilities\ReadCsvLine.cs" />
-    <Compile Include="Components\6_Utilities\DeompressData.cs" />
-    <Compile Include="Components\6_Utilities\CompressData.cs" />
-    <Compile Include="Components\6_Utilities\CreateCsvLine.cs" />
-    <Compile Include="Components\6_Utilities\ByteArrayToFile.cs" />
-    <Compile Include="Components\6_Utilities\SaveCSV.cs" />
-    <Compile Include="Components\6_Utilities\SaveText.cs" />
-    <Compile Include="Components\6_Utilities\SaveWebResponse.cs" />
-    <Compile Include="Components\6_Utilities\ByteArrayToText.cs" />
-    <Compile Include="Components\6_Utilities\FileToByteArray.cs" />
-    <Compile Include="Components\6_Utilities\Base64ToText.cs" />
-    <Compile Include="Components\6_Utilities\HexToColor.cs" />
-    <Compile Include="Components\6_Utilities\TextToBase64.cs" />
-    <Compile Include="Components\6_Utilities\ListToByteArray.cs" />
-    <Compile Include="Components\6_Utilities\ReplaceEmptyBranches.cs" />
-    <Compile Include="Components\6_Utilities\TextToByteArray.cs" />
-    <Compile Include="Components\7_Serve\HttpListener.cs" />
-    <Compile Include="Components\7_Serve\SocketListener.cs" />
-    <Compile Include="DataModels\Implementations\HttpHeader.cs" />
-    <Compile Include="DataModels\Implementations\HttpRequestSolveResult.cs" />
-    <Compile Include="DataModels\Implementations\HttpResponseDTO.cs" />
-    <Compile Include="DataModels\Implementations\QueryParam.cs" />
-    <Compile Include="DataModels\Implementations\RequestBodyByteArray.cs" />
-    <Compile Include="DataModels\Implementations\RequestBodyMultipartForm.cs" />
-    <Compile Include="DataModels\Implementations\RequestBodyText.cs" />
-    <Compile Include="DataModels\Interfaces\IHttpHeader.cs" />
-    <Compile Include="DataModels\Interfaces\IHttpResponseDTO.cs" />
-    <Compile Include="DataModels\Interfaces\IKeyValue.cs" />
-    <Compile Include="DataModels\Interfaces\IQueryParam.cs" />
-    <Compile Include="DataModels\Interfaces\IRequestBody.cs" />
-    <Compile Include="Components\4_ReadJson\FormatJsonString.cs" />
-    <Compile Include="EventArgs\SocketMessageReceivedEventArgs.cs" />
-    <Compile Include="EventArgs\RequestReceivedEventArgs.cs" />
-    <Compile Include="Goo\BitmapGoo.cs" />
-    <Compile Include="Goo\HttpHeaderGoo.cs" />
-    <Compile Include="Goo\HttpWebResponseGoo.cs" />
-    <Compile Include="Goo\JArrayGoo.cs" />
-    <Compile Include="Goo\JObjectGoo.cs" />
-    <Compile Include="Goo\JTokenGoo.cs" />
-    <Compile Include="Goo\JValueGoo.cs" />
-    <Compile Include="Goo\QueryParamGoo.cs" />
-    <Compile Include="Goo\HtmlNodeGoo.cs" />
-    <Compile Include="Goo\ListenerContextGoo.cs" />
-    <Compile Include="Goo\ByteArrayGoo.cs" />
-    <Compile Include="Goo\RequestBodyGoo.cs" />
-    <Compile Include="Params\BitmapParam.cs" />
-    <Compile Include="Params\HttpHeaderParam.cs" />
-    <Compile Include="Params\HttpWebResponseParam.cs" />
-    <Compile Include="Params\JArrayParam.cs" />
-    <Compile Include="Params\JObjectParam.cs" />
-    <Compile Include="Params\JTokenParam.cs" />
-    <Compile Include="Params\JValueParam.cs" />
-    <Compile Include="Params\QueryParamParam.cs" />
-    <Compile Include="Params\HtmlNodeParam.cs" />
-    <Compile Include="Params\ListenerContextParam.cs" />
-    <Compile Include="Params\ByteArrayParam.cs" />
-    <Compile Include="Params\RequestBodyParam.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="SwiftletInfo.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\CompressionUtility.cs" />
-    <Compile Include="Util\ContentTypeUtility.cs" />
-    <Compile Include="Util\IpBlacklistUtil.cs" />
-    <Compile Include="Util\NamingUtility.cs" />
-    <Compile Include="Util\IIpBlacklistUtil.cs" />
-    <Compile Include="Util\UrlUtility.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Resources\ParamBase_jobject_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_jtoken_param_24x24 .png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_jvalue_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_request_body_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_create_http_header_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_create_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_create_text_body_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_http_header_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_http_response_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ParamBase_jarray_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Logo_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Logo_16x16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_multipart_form_data_unnamed.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_object_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_json_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_remove_json_key_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_replace_empty_branches_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_request_body_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_csv_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_text_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_save_web_response_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_separate_json_tokens_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_set_json_key_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_socket_listener_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_split_text_into_lines_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_stringify_html_node_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_stringify_json_token_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_text_to_base64_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_text_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_throttle_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_token_auth_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_url_encode_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_api_auth_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_base64_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_base64_to_text_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_basic_auth_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_bitmap_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_bitmap_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_base64_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_bitmap_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_file_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_list_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_mesh_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_byte_array_to_text_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_compress_data_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_construct_url_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_byte_array_body_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_csv_line_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_http_header_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_json_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_json_object_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_json_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_multipart_form_data_named_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_multipart_form_data_unnamed_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_text_body_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_create_text_body_custom_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_decompress_data_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_http_header_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_response_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_deconstruct_url_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_delete_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_file_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_format_json_string_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_generate_guid_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_generate_qr_code_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_attribute_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_child_nodes_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_element_by_id_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_elements_by_attribute_value_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_elements_by_class_name_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_elements_by_tag_name_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_elements_by_xpath_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_html_attributes_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_inner_html_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_json_object_key.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_get_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_html_node_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_header_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_listener_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_http_response_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jarray_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jobject_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jtoken_param_24x24 .png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_jvalue_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_list_to_byte_array_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_parse_json_string_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_patch_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_post_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_put_request_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_query_param_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_csv_line_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_read_html_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_color_to_hex_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icons_hex_to_color_24x24.png" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <!-- ==================== Post-Build: Rename to .gha ==================== -->
+  <Target Name="RenameToGha" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)$(TargetName).gha" />
+    <Delete Files="$(TargetPath)" />
   </Target>
-  <Target Name="AfterBuild">
+
+  <!-- ==================== Post-Build: Create Yak Package (Release only) ==================== -->
+  <Target Name="CreateYakPackage" AfterTargets="RenameToGha" Condition="$(Configuration.Contains('Release'))">
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -File &quot;$(ProjectDir)..\Yak\Build-YakPackage.ps1&quot; -Configuration &quot;$(Configuration)&quot; -Version &quot;$(Version)&quot; -OutputDir &quot;$(TargetDir.TrimEnd('\'))&quot; -ProjectDir &quot;$(ProjectDir.TrimEnd('\'))&quot;" />
   </Target>
-  -->
-  <PropertyGroup>
-    <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
-Erase "$(TargetPath)"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <FallbackCulture>en-US</FallbackCulture>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartProgram>C:\Program Files\Rhino 6\System\Rhino.exe</StartProgram>
-    <StartArguments>
-    </StartArguments>
-    <StartAction>Program</StartAction>
-  </PropertyGroup>
-  <Import Project="packages\RhinoCommon.6.18.19266.14201\build\net45\RhinoCommon.targets" Condition="Exists('packages\RhinoCommon.6.18.19266.14201\build\net45\RhinoCommon.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\RhinoCommon.6.18.19266.14201\build\net45\RhinoCommon.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\RhinoCommon.6.18.19266.14201\build\net45\RhinoCommon.targets'))" />
-    <Error Condition="!Exists('packages\Grasshopper.6.18.19266.14201\build\net45\Grasshopper.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Grasshopper.6.18.19266.14201\build\net45\Grasshopper.targets'))" />
-  </Target>
-  <Import Project="packages\Grasshopper.6.18.19266.14201\build\net45\Grasshopper.targets" Condition="Exists('packages\Grasshopper.6.18.19266.14201\build\net45\Grasshopper.targets')" />
+
 </Project>

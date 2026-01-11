@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Web.ModelBinding;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.Goo;
