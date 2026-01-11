@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Web;
-using System.Web.UI.WebControls;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Implementations;

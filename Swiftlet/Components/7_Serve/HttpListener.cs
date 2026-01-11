@@ -1,16 +1,13 @@
 ﻿using Grasshopper.Kernel;
-using Newtonsoft.Json.Linq;
 using Swiftlet.DataModels.Interfaces;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 
 namespace Swiftlet.Components
