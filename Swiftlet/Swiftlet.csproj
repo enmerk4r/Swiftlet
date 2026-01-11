@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Swiftlet</RootNamespace>
     <AssemblyName>Swiftlet</AssemblyName>
-    <Version>0.1.9.0</Version>
+    <Version>0.2.0</Version>
     <Copyright>Copyright © 2021</Copyright>
     <Configurations>Debug-Rhino6;Release-Rhino6;Debug-Rhino7;Release-Rhino7;Debug-Rhino8;Release-Rhino8</Configurations>
     <Platforms>AnyCPU</Platforms>
