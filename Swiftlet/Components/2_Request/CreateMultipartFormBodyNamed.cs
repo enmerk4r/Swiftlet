@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -14,6 +14,7 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
+    [Obsolete("Use Create Multipart Form Body with Multipart Field components instead.")]
     public class CreateMultipartFormBodyNamed : GH_Component
     {
         /// <summary>
@@ -26,7 +27,7 @@ namespace Swiftlet.Components
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
 
         /// <summary>
         /// Registers all the input parameters for this component.

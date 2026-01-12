@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,7 @@ namespace Swiftlet.Util
         public const string ApplicationJson = "application/json";
         public const string TextHtml = "text/html";
         public const string ApplicationXml = "application/xml";
+        public const string ApplicationOctetStream = "application/octet-stream";
         public const string MultipartForm = "multipart/form-data";
 
         public static string ContentTypeToMessage(string contentType)
