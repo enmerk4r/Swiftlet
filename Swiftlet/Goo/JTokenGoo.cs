@@ -1,4 +1,5 @@
-﻿using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Types;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -33,10 +34,28 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
-            if (this.Value is JObject) return "JSON Object";
-            else if (this.Value is JArray) return "JSON Array";
-            else if (this.Value is JValue) return "JSON Value";
-            else return "JSON Token";
+            if (this.Value is JObject obj)
+            {
+                return $"JSON Object [{obj.Count} keys]";
+            }
+
+            if (this.Value is JArray array)
+            {
+                return $"JSON Array [{array.Count} items]";
+            }
+
+            if (this.Value is JValue value)
+            {
+                string preview = value.ToString(Formatting.None);
+                if (preview.Length > 20)
+                {
+                    preview = preview.Substring(0, 20) + "...";
+                }
+
+                return $"JSON Value [{preview}]";
+            }
+
+            return "JSON Token";
         }
 
         public override bool CastTo<Q>(ref Q target)
