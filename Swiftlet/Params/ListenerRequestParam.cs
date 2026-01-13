@@ -1,4 +1,4 @@
-﻿using Grasshopper.Kernel;
+using Grasshopper.Kernel;
 using Swiftlet.Goo;
 using Swiftlet.Util;
 using System;
@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Params
 {
-    public class ListenerContextParam : GH_Param<ListenerContextGoo>
+    public class ListenerRequestParam : GH_Param<ListenerRequestGoo>
     {
-        public ListenerContextParam()
-            : base("Listener Context", "LC", "Collection of Http Request and Response objects",
+        public ListenerRequestParam()
+            : base("Listener Request", "LR", "Collection of Http Request and Response objects",
                  NamingUtility.CATEGORY, NamingUtility.LISTEN, GH_ParamAccess.item)
         {
 
