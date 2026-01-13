@@ -9,7 +9,8 @@ description: >
   streamlined workflow for sending GET, POST, DELETE, PUT and PATCH requests to
   any API endpoint. It gives you advanced control over request headers,
   query params, supports several kinds of web authentication and lets you parse
-  JSON formatted web responses.
+  JSON formatted web responses. Swiftlet also includes MCP (Model Context Protocol)
+  server components for exposing Grasshopper tools to AI clients like Claude.
 keywords:
 - web
 - api
@@ -29,4 +30,9 @@ keywords:
 - database
 - query
 - qr
+- mcp
+- claude
+- ai
+- llm
+- anthropic
 icon_url: "https://swiftlet.s3.us-east-2.amazonaws.com/Logo_32x32.png"

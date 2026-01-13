@@ -131,8 +131,26 @@
     <Delete Files="$(TargetPath)" />
   </Target>
 
+  <!-- ==================== Post-Build: Build SwiftletBridge ==================== -->
+  <Target Name="BuildSwiftletBridge" AfterTargets="RenameToGha">
+    <PropertyGroup>
+      <BridgeProject>$(ProjectDir)..\SwiftletBridge\SwiftletBridge.csproj</BridgeProject>
+      <BridgePublishDir>$(ProjectDir)..\SwiftletBridge\bin\publish\win-x64</BridgePublishDir>
+    </PropertyGroup>
+
+    <!-- Publish SwiftletBridge as self-contained single-file executable -->
+    <Exec Command="dotnet publish &quot;$(BridgeProject)&quot; -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o &quot;$(BridgePublishDir)&quot;"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="low" />
+
+    <!-- Copy SwiftletBridge.exe to Swiftlet output directory -->
+    <Copy SourceFiles="$(BridgePublishDir)\SwiftletBridge.exe" DestinationFolder="$(TargetDir)" />
+
+    <Message Text="SwiftletBridge.exe copied to $(TargetDir)" Importance="high" />
+  </Target>
+
   <!-- ==================== Post-Build: Create Yak Package (Release only) ==================== -->
-  <Target Name="CreateYakPackage" AfterTargets="RenameToGha" Condition="$(Configuration.Contains('Release'))">
+  <Target Name="CreateYakPackage" AfterTargets="BuildSwiftletBridge" Condition="$(Configuration.Contains('Release'))">
     <Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -File &quot;$(ProjectDir)..\Yak\Build-YakPackage.ps1&quot; -Configuration &quot;$(Configuration)&quot; -Version &quot;$(Version)&quot; -OutputDir &quot;$(TargetDir.TrimEnd('\'))&quot; -ProjectDir &quot;$(ProjectDir.TrimEnd('\'))&quot;" />
   </Target>
 

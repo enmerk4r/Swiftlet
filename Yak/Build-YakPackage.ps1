@@ -7,6 +7,9 @@
     It creates a dist-X.X.X folder, copies the necessary files, generates manifest.yml
     from the template, and runs yak build to create the .yak package.
 
+    It also publishes the SwiftletBridge MCP bridge for all supported platforms
+    (Windows, macOS Intel, macOS ARM).
+
 .PARAMETER Configuration
     The build configuration (e.g., Release-Rhino6, Release-Rhino7, Release-Rhino8)
 
@@ -99,6 +102,8 @@ $YakDir = Join-Path $ProjectDir "..\Yak"
 $DistDir = Join-Path $YakDir "dist-$NormalizedVersion"
 $TemplateFile = Join-Path $YakDir "manifest-template.yml"
 $ManifestFile = Join-Path $DistDir "manifest.yml"
+$BridgeProjectDir = Join-Path $ProjectDir "..\SwiftletBridge"
+$McpDir = Join-Path $DistDir "mcp"
 
 Write-Host "============================================"
 Write-Host "Building Yak Package"
@@ -115,6 +120,12 @@ Write-Host "============================================"
 if (-not (Test-Path $DistDir)) {
     Write-Host "Creating directory: $DistDir"
     New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
+}
+
+# Create mcp folder for bridge executables
+if (-not (Test-Path $McpDir)) {
+    Write-Host "Creating directory: $McpDir"
+    New-Item -ItemType Directory -Path $McpDir -Force | Out-Null
 }
 
 # Files to copy (relative to OutputDir)
@@ -137,7 +148,70 @@ foreach ($file in $FilesToCopy) {
     }
 }
 
-# Generate manifest.yml from template
+# ==================== Build SwiftletBridge for all platforms ====================
+Write-Host ""
+Write-Host "============================================"
+Write-Host "Building SwiftletBridge MCP Bridge"
+Write-Host "============================================"
+
+$BridgeCsproj = Join-Path $BridgeProjectDir "SwiftletBridge.csproj"
+
+if (Test-Path $BridgeCsproj) {
+    # Define target platforms
+    $BridgePlatforms = @(
+        @{ Rid = "win-x64"; OutputName = "SwiftletBridge.exe" },
+        @{ Rid = "osx-x64"; OutputName = "SwiftletBridge-macos-x64" },
+        @{ Rid = "osx-arm64"; OutputName = "SwiftletBridge-macos-arm64" }
+    )
+
+    foreach ($platform in $BridgePlatforms) {
+        $rid = $platform.Rid
+        $outputName = $platform.OutputName
+        $publishDir = Join-Path $BridgeProjectDir "bin\publish\$rid"
+
+        Write-Host "  Publishing SwiftletBridge for $rid..."
+
+        # Publish as self-contained single file
+        $publishArgs = @(
+            "publish",
+            $BridgeCsproj,
+            "-c", "Release",
+            "-r", $rid,
+            "--self-contained", "true",
+            "-p:PublishSingleFile=true",
+            "-p:PublishTrimmed=true",
+            "-p:EnableCompressionInSingleFile=true",
+            "-o", $publishDir
+        )
+
+        $process = Start-Process -FilePath "dotnet" -ArgumentList $publishArgs -Wait -NoNewWindow -PassThru
+
+        if ($process.ExitCode -eq 0) {
+            # Find the published executable
+            $sourceExe = if ($rid -like "win-*") {
+                Join-Path $publishDir "SwiftletBridge.exe"
+            } else {
+                Join-Path $publishDir "SwiftletBridge"
+            }
+
+            if (Test-Path $sourceExe) {
+                $destPath = Join-Path $McpDir $outputName
+                Copy-Item $sourceExe $destPath -Force
+                Write-Host "    Created: $outputName"
+            } else {
+                Write-Warning "    Published executable not found: $sourceExe"
+            }
+        } else {
+            Write-Warning "    Failed to publish for $rid (exit code: $($process.ExitCode))"
+        }
+    }
+} else {
+    Write-Warning "SwiftletBridge project not found at: $BridgeCsproj"
+    Write-Warning "MCP bridge will not be included in the package."
+}
+
+# ==================== Generate manifest.yml ====================
+Write-Host ""
 Write-Host "Generating manifest.yml from template..."
 if (Test-Path $TemplateFile) {
     $manifestContent = Get-Content $TemplateFile -Raw
@@ -149,7 +223,8 @@ if (Test-Path $TemplateFile) {
     exit 1
 }
 
-# Run yak build
+# ==================== Run yak build ====================
+Write-Host ""
 Write-Host "Building Yak package..."
 Push-Location $DistDir
 try {
@@ -179,3 +254,9 @@ try {
 Write-Host "============================================"
 Write-Host "Yak package build complete!"
 Write-Host "============================================"
+Write-Host ""
+Write-Host "MCP Bridge executables are in: $McpDir"
+Write-Host "  - SwiftletBridge.exe (Windows)"
+Write-Host "  - SwiftletBridge-macos-x64 (macOS Intel)"
+Write-Host "  - SwiftletBridge-macos-arm64 (macOS Apple Silicon)"
+Write-Host ""
