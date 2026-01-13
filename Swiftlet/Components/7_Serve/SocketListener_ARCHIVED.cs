@@ -1,4 +1,4 @@
-﻿using Grasshopper.Kernel;
+using Grasshopper.Kernel;
 using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
@@ -12,14 +12,19 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Components._7_Serve
 {
-    public class SocketListener : GH_Component
+    /// <summary>
+    /// ARCHIVED: This component has been replaced by WebSocketClientComponent.
+    /// Kept for backwards compatibility with existing Grasshopper definitions.
+    /// </summary>
+    [Obsolete("Use WebSocketClientComponent instead. This component is kept for backwards compatibility.")]
+    public class SocketListener_ARCHIVED : GH_Component
     {
         ClientWebSocket _client;
         ClientWebSocket Client
         {
             get
             {
-                if (_client == null) 
+                if (_client == null)
                 {
                     this._client = new ClientWebSocket();
                 }
@@ -44,12 +49,14 @@ namespace Swiftlet.Components._7_Serve
         /// <summary>
         /// Initializes a new instance of the SocketListener class.
         /// </summary>
-        public SocketListener()
+        public SocketListener_ARCHIVED()
           : base("Socket Listener", "SOCKET",
-              "A simple socket listener component. \nThis component is VERY ALPHA! Use at your own risk.\nIf you are having trouble stopping it from running, just disconnect from the internet and wait for a few seconds.",
+              "[DEPRECATED - Use WebSocket Client instead]\nA simple socket listener component. \nThis component is VERY ALPHA! Use at your own risk.\nIf you are having trouble stopping it from running, just disconnect from the internet and wait for a few seconds.",
               NamingUtility.CATEGORY, NamingUtility.LISTEN)
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -95,7 +102,7 @@ namespace Swiftlet.Components._7_Serve
             this.SocketMessageReceived -= this.HandleSocketMessage;
             this.SocketMessageReceived += this.HandleSocketMessage;
 
-            
+
             if (string.IsNullOrEmpty(url)) throw new Exception("Invalid Url");
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
