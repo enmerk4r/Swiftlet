@@ -60,20 +60,19 @@ namespace Swiftlet.Components
 
             if (!string.IsNullOrEmpty(fullUrl))
             {
+                // Use HttpRequestMessage with shared client (add headers to request, not client)
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, fullUrl);
 
-                HttpClient client = new HttpClient();
-
-                // Add headers
+                // Add headers to the request message
                 foreach (HttpHeaderGoo header in httpHeaders)
                 {
-                    client.DefaultRequestHeaders.Add(header.Value.Key, header.Value.Value);
+                    request.Headers.TryAddWithoutValidation(header.Value.Key, header.Value.Value);
                 }
 
-                var result = client.DeleteAsync(fullUrl).Result;
+                var result = HttpClientFactory.SharedClient.SendAsync(request).Result;
                 HttpResponseDTO dto = new HttpResponseDTO(result);
 
                 return dto;
-
             }
             else
             {

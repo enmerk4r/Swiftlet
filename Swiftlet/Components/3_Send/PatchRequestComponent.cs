@@ -61,18 +61,19 @@ namespace Swiftlet.Components
 
             if (!string.IsNullOrEmpty(fullUrl))
             {
+                // Use HttpRequestMessage with shared client (add headers to request, not client)
+                HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), fullUrl);
 
-                HttpClient client = new HttpClient();
-
-                // Add headers
+                // Add headers to the request message
                 foreach (HttpHeaderGoo header in httpHeaders)
                 {
-                    client.DefaultRequestHeaders.Add(header.Value.Key, header.Value.Value);
+                    request.Headers.TryAddWithoutValidation(header.Value.Key, header.Value.Value);
                 }
 
-                HttpContent content = body.ToHttpContent();
-                var result = this.PatchAsync(client, fullUrl, content);
+                // Add body content
+                request.Content = body.ToHttpContent();
 
+                var result = HttpClientFactory.SharedClient.SendAsync(request).Result;
                 HttpResponseDTO dto = new HttpResponseDTO(result);
 
                 return dto;
@@ -136,29 +137,6 @@ namespace Swiftlet.Components
                 DA.SetData(2, new HttpWebResponseGoo(result.Value));
             }
 
-        }
-
-        public HttpResponseMessage PatchAsync(HttpClient client, string requestUri, HttpContent iContent)
-        {
-            var method = new HttpMethod("PATCH");
-
-            var request = new HttpRequestMessage(method, requestUri)
-            {
-                Content = iContent
-            };
-
-            HttpResponseMessage response = null;
-
-            try
-            {
-                var task = client.SendAsync(request);
-                response = task.Result;
-            }
-            catch (TaskCanceledException e)
-            {
-            }
-
-            return response;
         }
 
         /// <summary>
