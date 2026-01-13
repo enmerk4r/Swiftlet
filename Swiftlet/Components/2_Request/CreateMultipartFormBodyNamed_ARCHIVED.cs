@@ -14,15 +14,19 @@ using Swiftlet.Util;
 
 namespace Swiftlet.Components
 {
+    /// <summary>
+    /// ARCHIVED: This component has been replaced by Create Multipart Form Body with Multipart Field components.
+    /// Kept for backwards compatibility with existing Grasshopper definitions.
+    /// </summary>
     [Obsolete("Use Create Multipart Form Body with Multipart Field components instead.")]
-    public class CreateMultipartFormBodyNamed : GH_Component
+    public class CreateMultipartFormBodyNamed_ARCHIVED : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CreatePostBody class.
         /// </summary>
-        public CreateMultipartFormBodyNamed()
+        public CreateMultipartFormBodyNamed_ARCHIVED()
           : base("Create Multipart Form Body Named", "CMFBN",
-              "Create a Request Body that supports the multipart/form-data Content-Type with named fields",
+              "[DEPRECATED] Create a Request Body that supports the multipart/form-data Content-Type with named fields",
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
         }
