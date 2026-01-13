@@ -10,7 +10,7 @@ using System.Web;
 using Grasshopper.Kernel;
 using Swiftlet.Util;
 
-namespace Swiftlet.Components._1_Auth
+namespace Swiftlet.Components
 {
     /// <summary>
     /// OAuth 2.0 Authorization component that handles the authorization code flow with PKCE.

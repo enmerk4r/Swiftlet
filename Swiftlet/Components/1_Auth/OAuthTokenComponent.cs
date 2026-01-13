@@ -9,7 +9,7 @@ using Swiftlet.Goo;
 using Swiftlet.Params;
 using Swiftlet.Util;
 
-namespace Swiftlet.Components._1_Auth
+namespace Swiftlet.Components
 {
     /// <summary>
     /// OAuth 2.0 Token Exchange component that exchanges an authorization code for access and refresh tokens.
