@@ -1,4 +1,5 @@
 using Grasshopper.Kernel;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Swiftlet.DataModels.Implementations;
 using Swiftlet.Goo;
@@ -9,8 +10,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Swiftlet.Components
 {
@@ -42,7 +45,7 @@ namespace Swiftlet.Components
 
         private bool _requestTriggeredSolve = false;
         private int _currentPort = -1;
-        private string _serverName = "Grasshopper MCP Server";
+        private string _serverName = "Swiftlet";
 
         private const string MCP_PROTOCOL_VERSION = "2024-11-05";
 
@@ -74,7 +77,7 @@ namespace Swiftlet.Components
         {
             int port = 3001;
             List<McpToolDefinitionGoo> toolGoos = new List<McpToolDefinitionGoo>();
-            string serverName = "Grasshopper MCP Server";
+            string serverName = "Swiftlet";
 
             DA.GetData(0, ref port);
             DA.GetDataList(1, toolGoos);
@@ -94,11 +97,11 @@ namespace Swiftlet.Components
                 .Select(g => g.Value)
                 .ToList();
 
-            // Update outputs based on tool definitions
-            // If outputs changed, return early - the DA object doesn't know about the new outputs
-            // and a new solve will be triggered with the correct structure
-            if (UpdateOutputsFromTools())
+            // Check if outputs need to be updated - if so, schedule a deferred update
+            // to avoid modifying parameters during an active solution
+            if (NeedsOutputUpdate())
             {
+                ScheduleOutputUpdate();
                 return;
             }
 
@@ -145,10 +148,47 @@ namespace Swiftlet.Components
         }
 
         /// <summary>
+        /// Checks if output parameters need to be updated based on tool definitions.
+        /// </summary>
+        private bool NeedsOutputUpdate()
+        {
+            var currentOutputs = new HashSet<string>(Params.Output.Select(p => p.NickName));
+            var desiredOutputs = new HashSet<string>(_tools.Select(t => t.Name));
+
+            // Check if any outputs need to be removed
+            foreach (var output in Params.Output)
+            {
+                if (!desiredOutputs.Contains(output.NickName))
+                    return true;
+            }
+
+            // Check if any outputs need to be added
+            foreach (var tool in _tools)
+            {
+                if (!currentOutputs.Contains(tool.Name))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Schedules a deferred output parameter update to avoid modifying parameters during solution.
+        /// </summary>
+        private void ScheduleOutputUpdate()
+        {
+            // Use OnPingDocument to schedule parameter changes after the current solution completes
+            var doc = OnPingDocument();
+            if (doc != null)
+            {
+                doc.ScheduleSolution(5, d => UpdateOutputsFromTools());
+            }
+        }
+
+        /// <summary>
         /// Updates output parameters based on tool definitions.
         /// </summary>
-        /// <returns>True if outputs were modified, false otherwise.</returns>
-        private bool UpdateOutputsFromTools()
+        private void UpdateOutputsFromTools()
         {
             // Get current output tool names
             var currentOutputs = new HashSet<string>(Params.Output.Select(p => p.NickName));
@@ -174,7 +214,7 @@ namespace Swiftlet.Components
                     var param = new McpToolCallRequestParam();
                     param.Name = tool.Name;
                     param.NickName = tool.Name;
-                    param.Description = $"Tool call context for '{tool.Name}'";
+                    param.Description = $"Tool call request for '{tool.Name}'";
                     param.Access = GH_ParamAccess.item;
                     Params.RegisterOutputParam(param);
                     changed = true;
@@ -185,8 +225,6 @@ namespace Swiftlet.Components
             {
                 Params.OnParametersChanged();
             }
-
-            return changed;
         }
 
         protected override void AfterSolveInstance()
@@ -520,6 +558,67 @@ namespace Swiftlet.Components
                 StopListener();
             }
             base.DocumentContextChanged(document, context);
+        }
+
+        #endregion
+
+        #region Context Menu
+
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+
+            Menu_AppendSeparator(menu);
+            Menu_AppendItem(menu, "Copy MCP Config", OnCopyMcpConfig, true);
+        }
+
+        private void OnCopyMcpConfig(object sender, EventArgs e)
+        {
+            try
+            {
+                string config = GenerateMcpConfig();
+                Clipboard.SetText(config);
+                Rhino.RhinoApp.WriteLine("MCP configuration copied to clipboard.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to copy MCP config: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GenerateMcpConfig()
+        {
+            // Find SwiftletBridge.exe next to the Swiftlet.gha assembly
+            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            string assemblyDir = Path.GetDirectoryName(assemblyLocation);
+            string bridgePath = Path.Combine(assemblyDir, "SwiftletBridge.exe");
+
+            // Check if bridge exists
+            if (!File.Exists(bridgePath))
+            {
+                throw new FileNotFoundException(
+                    $"SwiftletBridge.exe not found at: {bridgePath}\n\n" +
+                    "Make sure the bridge executable is in the same folder as Swiftlet.gha");
+            }
+
+            // Build the MCP server URL
+            int port = _currentPort > 0 ? _currentPort : 3001;
+            string serverUrl = $"http://localhost:{port}/mcp/";
+
+            // Generate the config JSON (Newtonsoft.Json handles escaping automatically)
+            var config = new JObject
+            {
+                ["mcpServers"] = new JObject
+                {
+                    [_serverName] = new JObject
+                    {
+                        ["command"] = bridgePath,
+                        ["args"] = new JArray { serverUrl }
+                    }
+                }
+            };
+
+            return config.ToString(Formatting.Indented);
         }
 
         #endregion
