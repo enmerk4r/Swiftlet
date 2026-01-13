@@ -1,4 +1,4 @@
-﻿using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Types;
 using Swiftlet.DataModels.Implementations;
 using Swiftlet.DataModels.Interfaces;
 using Swiftlet.Util;
@@ -11,32 +11,32 @@ using System.Threading.Tasks;
 
 namespace Swiftlet.Goo
 {
-    public class ListenerContextGoo : GH_Goo<HttpListenerContext>
+    public class ListenerRequestGoo : GH_Goo<HttpListenerContext>
     {
         public override bool IsValid => this.Value != null;
 
-        public override string TypeName => "Http Listener Context";
+        public override string TypeName => "Http Listener Request";
 
         public override string TypeDescription => "Contains Http Request and Response information";
 
-        public ListenerContextGoo()
+        public ListenerRequestGoo()
         {
             this.Value = null;
         }
 
-        public ListenerContextGoo(HttpListenerContext context)
+        public ListenerRequestGoo(HttpListenerContext context)
         {
             this.Value = context;
         }
 
         public override IGH_Goo Duplicate()
         {
-            return new ListenerContextGoo(this.Value);
+            return new ListenerRequestGoo(this.Value);
         }
 
         public override string ToString()
         {
-            return $"LISTENER CONTEXT";
+            return $"LISTENER REQUEST";
         }
     }
 }
