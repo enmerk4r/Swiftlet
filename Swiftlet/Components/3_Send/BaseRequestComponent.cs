@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Swiftlet.DataModels.Implementations;
@@ -20,6 +22,16 @@ namespace Swiftlet.Components
     public abstract class BaseRequestComponent : GH_TaskCapableComponent<HttpRequestSolveResults>
     {
         /// <summary>
+        /// Available timeout options in seconds.
+        /// </summary>
+        protected static readonly int[] TimeoutOptions = { 1, 5, 10, 15, 30, 60, 100, 300, 600, 900 };
+
+        /// <summary>
+        /// Current timeout setting in seconds.
+        /// </summary>
+        protected int TimeoutSeconds { get; set; } = HttpClientFactory.DefaultTimeoutSeconds;
+
+        /// <summary>
         /// Initializes a new instance of the BaseRequestComponent class.
         /// </summary>
         public BaseRequestComponent(string name, string nickname, string description, string category, string subCategory)
@@ -33,6 +45,65 @@ namespace Swiftlet.Components
         /// IP blacklist utils.
         /// </summary>
         IIpBlacklistUtil IpBlacklistUtil;
+
+        #region Serialization
+
+        public override bool Read(GH_IReader reader)
+        {
+            if (reader.ItemExists("TimeoutSeconds"))
+            {
+                TimeoutSeconds = reader.GetInt32("TimeoutSeconds");
+            }
+            return base.Read(reader);
+        }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetInt32("TimeoutSeconds", TimeoutSeconds);
+            return base.Write(writer);
+        }
+
+        #endregion
+
+        #region Context Menu
+
+        public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+        {
+            base.AppendAdditionalMenuItems(menu);
+
+            ToolStripMenuItem timeoutMenu = new ToolStripMenuItem("Timeout");
+
+            foreach (int timeout in TimeoutOptions)
+            {
+                string label = timeout >= 60
+                    ? $"{timeout / 60} min" + (timeout % 60 > 0 ? $" {timeout % 60} s" : "")
+                    : $"{timeout} s";
+
+                if (timeout == HttpClientFactory.DefaultTimeoutSeconds)
+                {
+                    label += " (default)";
+                }
+
+                ToolStripMenuItem item = new ToolStripMenuItem(label, null, OnTimeoutClick);
+                item.Tag = timeout;
+                item.Checked = (TimeoutSeconds == timeout);
+                timeoutMenu.DropDownItems.Add(item);
+            }
+
+            menu.Items.Add(timeoutMenu);
+        }
+
+        private void OnTimeoutClick(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            if (item != null && item.Tag is int timeout)
+            {
+                TimeoutSeconds = timeout;
+                ExpireSolution(true);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Validates the given url according to the following criteria: 
