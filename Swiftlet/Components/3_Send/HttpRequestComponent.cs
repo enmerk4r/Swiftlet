@@ -85,9 +85,9 @@ namespace Swiftlet.Components
 
                 ValidateUrl(url);
             
-                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList(), TimeoutSeconds);
                 this.TaskList.Add(Task.Run(
-                    () => { return new HttpRequestSolveResults() { Value = package.GetResponse() }; }, 
+                    () => { return new HttpRequestSolveResults() { Value = package.GetResponse() }; },
                     CancelToken
                     ));
                 return;
@@ -110,7 +110,7 @@ namespace Swiftlet.Components
 
                 ValidateUrl(url);
               
-                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList());
+                HttpRequestPackage package = new HttpRequestPackage(url, method, bodyGoo?.Value, queryParams.Select(q => q.Value).ToList(), httpHeaders.Select(h => h.Value).ToList(), TimeoutSeconds);
                 result = new HttpRequestSolveResults() { Value = package.GetResponse() };
             }
 
@@ -156,13 +156,16 @@ namespace Swiftlet.Components
         public IRequestBody Body { get; }
         public List<QueryParam> QueryParams { get; }
         public List<HttpHeader> HttpHeaders { get; }
-        public HttpRequestPackage(string url, string method, IRequestBody body, List<QueryParam> queryParams, List<HttpHeader> headers)
+        public int TimeoutSeconds { get; }
+
+        public HttpRequestPackage(string url, string method, IRequestBody body, List<QueryParam> queryParams, List<HttpHeader> headers, int timeoutSeconds = 100)
         {
             this.Url = url;
             this.Method = method.ToUpper();
             this.Body = body;
             this.QueryParams = queryParams.Select(o => o).ToList();
             this.HttpHeaders = headers.Select(o => o).ToList();
+            this.TimeoutSeconds = timeoutSeconds;
         }
 
         private HttpMethod GetHttpMethod()
@@ -228,8 +231,8 @@ namespace Swiftlet.Components
                         }
                     }
 
-                    // Send request using shared client
-                    HttpResponseMessage response = HttpClientFactory.SharedClient.SendAsync(request).Result;
+                    // Send request using shared client with timeout
+                    HttpResponseMessage response = HttpClientFactory.SendWithTimeout(request, this.TimeoutSeconds);
 
                     HttpResponseDTO dto = new HttpResponseDTO(response);
 
