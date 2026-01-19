@@ -187,7 +187,7 @@ namespace Swiftlet.Components._7_Serve
         {
             get
             {
-                return null;
+                return Properties.Resources.Icons_udp_listener;
             }
         }
 

@@ -72,7 +72,7 @@ namespace Swiftlet.Components
             DA.SetDataList(0, results);
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_get_xml_elements_by_xpath;
 
         public override Guid ComponentGuid => new Guid("C3D4E5F6-A7B8-6C7D-1E2F-3A4B5C6D7E8F");
     }

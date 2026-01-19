@@ -393,7 +393,7 @@ namespace Swiftlet.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return Properties.Resources.Icons_oauth_authorize; }
         }
 
         public override Guid ComponentGuid

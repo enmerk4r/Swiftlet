@@ -17,6 +17,6 @@ namespace Swiftlet.Params
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("3bc83348-4829-5cdc-bffd-80db24d0fbe2");
 
-        protected override Bitmap Icon => null;
+        protected override Bitmap Icon => Properties.Resources.Icons_xml_node;
     }
 }

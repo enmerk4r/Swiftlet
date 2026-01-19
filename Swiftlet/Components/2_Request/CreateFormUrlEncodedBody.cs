@@ -21,7 +21,7 @@ namespace Swiftlet.Components
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
@@ -67,7 +67,7 @@ namespace Swiftlet.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_create_form_url_encoded_body;
 
         public override Guid ComponentGuid => new Guid("C9D0E1F2-A3B4-2233-7E8F-90011223344A");
     }
