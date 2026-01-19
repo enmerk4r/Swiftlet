@@ -373,6 +373,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_create_xml_element {
+            get {
+                object obj = ResourceManager.GetObject("Icons_create_xml_element", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_decompress_data_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_decompress_data_24x24", resourceCulture);

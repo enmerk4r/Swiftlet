@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
@@ -34,8 +35,8 @@ namespace Swiftlet.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new ByteArrayParam(), "Byte Array", "A", "Input byte array", GH_ParamAccess.item);
-            pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Content", "C", "Input content (byte array, string, JSON, XML, or HTML)", GH_ParamAccess.item);
+            pManager.AddTextParameter("ContentType", "T", "Content-Type header value", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -52,17 +53,83 @@ namespace Swiftlet.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ByteArrayGoo goo = null;
+            object input = null;
             string contentType = string.Empty;
 
-            DA.GetData(0, ref goo);
+            DA.GetData(0, ref input);
             DA.GetData(1, ref contentType);
 
+            byte[] bytes = null;
 
-            RequestBodyByteArray txtBody = new RequestBodyByteArray(contentType, goo.Value);
-            RequestBodyGoo body = new RequestBodyGoo(txtBody);
+            if (input is ByteArrayGoo)
+            {
+                ByteArrayGoo goo = input as ByteArrayGoo;
+                if (goo != null)
+                {
+                    bytes = goo.Value;
+                }
+            }
+            else if (input is GH_String)
+            {
+                GH_String str = input as GH_String;
+                if (str != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(str.Value);
+                }
+            }
+            else if (input is JArrayGoo)
+            {
+                JArrayGoo arrayGoo = input as JArrayGoo;
+                if (arrayGoo != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(arrayGoo.Value.ToString());
+                }
+            }
+            else if (input is JObjectGoo)
+            {
+                JObjectGoo objectGoo = input as JObjectGoo;
+                if (objectGoo != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(objectGoo.Value.ToString());
+                }
+            }
+            else if (input is JTokenGoo)
+            {
+                JTokenGoo tokenGoo = input as JTokenGoo;
+                if (tokenGoo != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(tokenGoo.Value.ToString());
+                }
+            }
+            else if (input is XmlNodeGoo)
+            {
+                XmlNodeGoo xmlGoo = input as XmlNodeGoo;
+                if (xmlGoo != null && xmlGoo.Value != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(xmlGoo.Value.OuterXml);
+                }
+            }
+            else if (input is HtmlNodeGoo)
+            {
+                HtmlNodeGoo htmlGoo = input as HtmlNodeGoo;
+                if (htmlGoo != null && htmlGoo.Value != null)
+                {
+                    bytes = Encoding.UTF8.GetBytes(htmlGoo.Value.OuterHtml);
+                }
+            }
+            else
+            {
+                throw new Exception("Content must be a byte array, string, JObject, JArray, XML Node, or HTML Node");
+            }
 
-            DA.SetData(0, body);
+            if (bytes == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Content is null");
+                return;
+            }
+
+            RequestBodyByteArray body = new RequestBodyByteArray(contentType, bytes);
+            DA.SetData(0, new RequestBodyGoo(body));
         }
 
 
