@@ -493,6 +493,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_download_file {
+            get {
+                object obj = ResourceManager.GetObject("Icons_download_file", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_file_to_byte_array_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_file_to_byte_array_24x24", resourceCulture);
@@ -1196,6 +1206,26 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_udp_stream {
             get {
                 object obj = ResourceManager.GetObject("Icons_udp_stream", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_upload_file {
+            get {
+                object obj = ResourceManager.GetObject("Icons_upload_file", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_upload_file_multipart {
+            get {
+                object obj = ResourceManager.GetObject("Icons_upload_file_multipart", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
