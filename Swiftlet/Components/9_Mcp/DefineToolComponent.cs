@@ -18,7 +18,7 @@ namespace Swiftlet.Components
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
@@ -60,7 +60,7 @@ namespace Swiftlet.Components
             DA.SetData(0, new McpToolDefinitionGoo(tool));
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_define_tool;
 
         public override Guid ComponentGuid => new Guid("E5F6A7B8-C9D0-1234-EF01-345678901234");
     }

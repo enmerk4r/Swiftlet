@@ -49,6 +49,8 @@ namespace Swiftlet.Components._7_Serve
             _messageQueue = new ConcurrentQueue<ReceivedMessage>();
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Port", "P", "Port number to listen on (0-65535)", GH_ParamAccess.item, 8181);
@@ -343,7 +345,7 @@ namespace Swiftlet.Components._7_Serve
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return Properties.Resources.Icons_socket_server; }
         }
 
         public override Guid ComponentGuid

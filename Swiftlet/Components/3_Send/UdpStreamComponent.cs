@@ -21,6 +21,8 @@ namespace Swiftlet.Components._3_Send
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -110,7 +112,7 @@ namespace Swiftlet.Components._3_Send
         {
             get
             {
-                return null;
+                return Properties.Resources.Icons_udp_stream;
             }
         }
 

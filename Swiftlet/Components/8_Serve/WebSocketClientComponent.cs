@@ -39,6 +39,8 @@ namespace Swiftlet.Components._7_Serve
             _messageBuffer = new List<string>();
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddTextParameter("URL", "U", "URL of WebSocket server (ws:// or wss://)", GH_ParamAccess.item);

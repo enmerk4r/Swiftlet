@@ -20,6 +20,8 @@ namespace Swiftlet.Components._7_Serve
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddParameter(new WebSocketConnectionParam(), "Connection", "C", "WebSocket connection from WebSocket Client or WebSocket Server", GH_ParamAccess.item);
@@ -105,7 +107,7 @@ namespace Swiftlet.Components._7_Serve
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return Properties.Resources.Icons_websocket_send; }
         }
 
         public override Guid ComponentGuid

@@ -67,7 +67,7 @@ namespace Swiftlet.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_get_xml_attribute_value;
 
         public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-7D8E-2F3A-4B5C6D7E8F90");
     }

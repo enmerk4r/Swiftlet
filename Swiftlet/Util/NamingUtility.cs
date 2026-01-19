@@ -17,7 +17,7 @@ namespace Swiftlet.Util
         public const string READ_HTML = "5. Read HTML";
         public const string READ_XML = "6. Read XML";
         public const string UTILITIES = "7. Utilities";
-        public const string LISTEN = "8. Listen";
+        public const string LISTEN = "8. Server";
         public const string MCP = "9. MCP";
     }
 }

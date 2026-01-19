@@ -45,7 +45,7 @@ namespace Swiftlet.Components
             DA.SetData(1, node.InnerXml);
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_get_xml_inner_text;
 
         public override Guid ComponentGuid => new Guid("F6A7B8C9-D0E1-9F00-4B5C-6D7E8F900112");
     }

@@ -16,7 +16,7 @@ namespace Swiftlet.Components
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
@@ -60,7 +60,7 @@ namespace Swiftlet.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return Properties.Resources.Icons_create_multipart_field_bytes; }
         }
 
         public override Guid ComponentGuid

@@ -21,7 +21,7 @@ namespace Swiftlet.Components._2_Request
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
         }
-        public override GH_Exposure Exposure => GH_Exposure.senary;
+        public override GH_Exposure Exposure => GH_Exposure.septenary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

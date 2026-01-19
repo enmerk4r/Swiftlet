@@ -623,7 +623,7 @@ namespace Swiftlet.Components
 
         #endregion
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_mcp_server;
 
         public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-0123-DEF0-234567890123");
 
