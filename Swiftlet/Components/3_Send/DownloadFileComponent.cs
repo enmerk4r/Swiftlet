@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,26 +13,29 @@ using Swiftlet.Util;
 namespace Swiftlet.Components
 {
     /// <summary>
-    /// Result object for download operations.
-    /// </summary>
-    public class DownloadFileResult
-    {
-        public bool Success { get; set; }
-        public string Path { get; set; }
-        public int StatusCode { get; set; }
-        public long FileSize { get; set; }
-        public int Progress { get; set; }
-        public string Error { get; set; }
-    }
-
-    /// <summary>
     /// Downloads a file from a URL directly to disk using streaming (memory-efficient for large files).
+    /// Uses async pattern to keep UI responsive during download.
     /// </summary>
-    public class DownloadFileComponent : GH_TaskCapableComponent<DownloadFileResult>
+    public class DownloadFileComponent : GH_Component
     {
         private const int BufferSize = 81920; // 80KB buffer
-        private DateTime _lastProgressUpdate = DateTime.MinValue;
-        private readonly TimeSpan _progressUpdateInterval = TimeSpan.FromMilliseconds(100);
+
+        // Async state
+        private Task _downloadTask;
+        private CancellationTokenSource _cancellationTokenSource;
+        private volatile bool _isDownloading;
+        private volatile int _progress;
+        private long _bytesDownloaded;
+        private long _totalBytes;
+        private volatile bool _completed;
+        private volatile bool _success;
+        private volatile string _error;
+        private volatile int _statusCode;
+        private string _downloadPath;
+
+        // Throttle UI updates
+        private DateTime _lastUiUpdate = DateTime.MinValue;
+        private readonly TimeSpan _uiUpdateInterval = TimeSpan.FromMilliseconds(100);
 
         public DownloadFileComponent()
           : base("Download File", "DL",
@@ -60,7 +62,7 @@ namespace Swiftlet.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddBooleanParameter("Done", "D", "True when download is complete", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Progress", "P", "Download progress (0-100%)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Progress", "P", "Download progress (0-100%), or -1 if server doesn't report file size", GH_ParamAccess.item);
             pManager.AddTextParameter("Path", "F", "Path to downloaded file", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Status", "S", "HTTP status code", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Size", "Sz", "File size in bytes", GH_ParamAccess.item);
@@ -83,120 +85,139 @@ namespace Swiftlet.Components
             DA.GetData(4, ref run);
             DA.GetData(5, ref overwrite);
 
+            // User turned off Run - cancel any ongoing download and reset
             if (!run)
             {
+                if (_isDownloading)
+                {
+                    CancelDownload();
+                }
+                ResetState();
                 this.Message = "Idle";
-                DA.SetData(0, false); // Done
-                DA.SetData(1, 0);     // Progress
-                DA.SetData(2, null);  // Path
-                DA.SetData(3, 0);     // Status
-                DA.SetData(4, 0);     // Size
-                DA.SetData(5, null);  // Error
-                return;
-            }
-
-            if (InPreSolve)
-            {
-                // Validate inputs
-                if (string.IsNullOrEmpty(url))
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "URL is required");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(path))
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path is required");
-                    return;
-                }
-
-                if (File.Exists(path) && !overwrite)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File already exists and Overwrite is false");
-                    return;
-                }
-
-                // Build URL with query params
-                string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(q => q.Value).ToList());
-
-                // Queue async task
-                var headerList = headers.Select(h => h.Value).ToList();
-                var token = CancelToken;
-
-                this.Message = "Starting...";
-
-                TaskList.Add(Task.Run(async () =>
-                {
-                    return await DownloadAsync(fullUrl, path, headerList, token);
-                }, token));
-
-                return;
-            }
-
-            // Post-solve: output results
-            if (!GetSolveResults(DA, out DownloadFileResult result))
-            {
-                // Synchronous fallback (shouldn't normally happen with Run button)
                 DA.SetData(0, false);
                 DA.SetData(1, 0);
                 DA.SetData(2, null);
                 DA.SetData(3, 0);
                 DA.SetData(4, 0);
-                DA.SetData(5, "No result");
+                DA.SetData(5, null);
                 return;
             }
 
-            if (result != null)
+            // Download completed - output results
+            if (_completed)
             {
-                DA.SetData(0, result.Success);                    // Done
-                DA.SetData(1, result.Progress);                   // Progress
-                DA.SetData(2, result.Success ? result.Path : null); // Path
-                DA.SetData(3, result.StatusCode);                 // Status
-                DA.SetData(4, (int)result.FileSize);              // Size
-                DA.SetData(5, result.Error);                      // Error
+                DA.SetData(0, _success);
+                DA.SetData(1, _progress);
+                DA.SetData(2, _success ? _downloadPath : null);
+                DA.SetData(3, _statusCode);
+                DA.SetData(4, (int)_bytesDownloaded);
+                DA.SetData(5, _error);
 
-                if (result.Success)
+                if (_success)
                 {
-                    this.Message = $"Done ({FormatBytes(result.FileSize)})";
+                    this.Message = $"Done ({FormatBytes(_bytesDownloaded)})";
                 }
                 else
                 {
                     this.Message = "Failed";
                 }
+                return;
             }
+
+            // Download in progress - output current progress
+            if (_isDownloading)
+            {
+                DA.SetData(0, false);
+                // Output -1 if we don't know total size (no Content-Length header)
+                DA.SetData(1, _totalBytes > 0 ? _progress : -1);
+                DA.SetData(2, null);
+                DA.SetData(3, 0);
+                DA.SetData(4, (int)_bytesDownloaded);
+                DA.SetData(5, null);
+
+                // Message is updated by the download task
+                return;
+            }
+
+            // Start new download
+            if (string.IsNullOrEmpty(url))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "URL is required");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path is required");
+                return;
+            }
+
+            if (File.Exists(path) && !overwrite)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File already exists and Overwrite is false");
+                return;
+            }
+
+            // Build URL with query params
+            string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(q => q.Value).ToList());
+            var headerList = headers.Select(h => h.Value).ToList();
+
+            // Start async download
+            _downloadPath = path;
+            _isDownloading = true;
+            _completed = false;
+            _success = false;
+            _progress = 0;
+            _bytesDownloaded = 0;
+            _totalBytes = 0;
+            _error = null;
+            _statusCode = 0;
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var token = _cancellationTokenSource.Token;
+
+            this.Message = "Starting...";
+
+            _downloadTask = Task.Run(async () =>
+            {
+                await DownloadAsync(fullUrl, path, headerList, token);
+            });
+
+            // Output initial state
+            DA.SetData(0, false);
+            DA.SetData(1, 0);
+            DA.SetData(2, null);
+            DA.SetData(3, 0);
+            DA.SetData(4, 0);
+            DA.SetData(5, null);
         }
 
-        private async Task<DownloadFileResult> DownloadAsync(string url, string path, List<DataModels.Implementations.HttpHeader> headers, CancellationToken token)
+        private async Task DownloadAsync(string url, string path, List<DataModels.Implementations.HttpHeader> headers, CancellationToken token)
         {
-            var result = new DownloadFileResult { Path = path, Progress = 0 };
-
             try
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Get, url))
                 {
-                    // Add headers
                     foreach (var header in headers)
                     {
                         request.Headers.TryAddWithoutValidation(header.Key, header.Value);
                     }
 
-                    // Use ResponseHeadersRead to start streaming immediately without buffering
                     using (var response = await HttpClientFactory.SharedClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                     {
-                        result.StatusCode = (int)response.StatusCode;
+                        _statusCode = (int)response.StatusCode;
 
                         if (!response.IsSuccessStatusCode)
                         {
-                            result.Success = false;
-                            result.Error = $"HTTP {result.StatusCode}: {response.ReasonPhrase}";
-                            return result;
+                            _error = $"HTTP {_statusCode}: {response.ReasonPhrase}";
+                            _completed = true;
+                            _isDownloading = false;
+                            ScheduleUiUpdate();
+                            return;
                         }
 
-                        var contentLength = response.Content.Headers.ContentLength;
-                        long totalBytes = contentLength ?? 0;
-                        long bytesDownloaded = 0;
+                        _totalBytes = response.Content.Headers.ContentLength ?? 0;
 
-                        // Ensure directory exists
                         var directory = Path.GetDirectoryName(path);
                         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                         {
@@ -212,76 +233,125 @@ namespace Swiftlet.Components
                             while ((bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
                             {
                                 await fileStream.WriteAsync(buffer, 0, bytesRead, token);
-                                bytesDownloaded += bytesRead;
+                                _bytesDownloaded += bytesRead;
 
-                                // Update progress
-                                if (totalBytes > 0)
+                                // Calculate progress percentage if we know total size
+                                if (_totalBytes > 0)
                                 {
-                                    result.Progress = (int)((bytesDownloaded * 100) / totalBytes);
+                                    int newProgress = (int)((_bytesDownloaded * 100L) / _totalBytes);
+                                    _progress = Math.Min(newProgress, 99); // Cap at 99 until complete
                                 }
 
-                                UpdateProgressMessage(bytesDownloaded, totalBytes);
+                                UpdateProgressMessage();
                             }
                         }
 
-                        result.FileSize = bytesDownloaded;
-                        result.Progress = 100;
-                        result.Success = true;
+                        _progress = 100;
+                        _success = true;
+                        _completed = true;
+                        _isDownloading = false;
+                        ScheduleUiUpdate();
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                result.Success = false;
-                result.Error = "Download cancelled";
-                // Clean up partial file
+                _error = "Download cancelled";
+                _completed = true;
+                _isDownloading = false;
                 TryDeleteFile(path);
+                ScheduleUiUpdate();
             }
             catch (HttpRequestException ex)
             {
-                result.Success = false;
-                result.Error = $"HTTP error: {ex.Message}";
+                _error = $"HTTP error: {ex.Message}";
+                _completed = true;
+                _isDownloading = false;
                 TryDeleteFile(path);
+                ScheduleUiUpdate();
             }
             catch (IOException ex)
             {
-                result.Success = false;
-                result.Error = $"File error: {ex.Message}";
+                _error = $"File error: {ex.Message}";
+                _completed = true;
+                _isDownloading = false;
                 TryDeleteFile(path);
+                ScheduleUiUpdate();
             }
             catch (Exception ex)
             {
-                result.Success = false;
-                result.Error = ex.Message;
+                _error = ex.Message;
+                _completed = true;
+                _isDownloading = false;
                 TryDeleteFile(path);
+                ScheduleUiUpdate();
             }
-
-            return result;
         }
 
-        private void UpdateProgressMessage(long bytesDownloaded, long totalBytes)
+        private void UpdateProgressMessage()
         {
             var now = DateTime.Now;
-            if (now - _lastProgressUpdate < _progressUpdateInterval)
+            if (now - _lastUiUpdate < _uiUpdateInterval)
                 return;
 
-            _lastProgressUpdate = now;
+            _lastUiUpdate = now;
 
             string message;
-            if (totalBytes > 0)
+            if (_totalBytes > 0)
             {
-                int percent = (int)((bytesDownloaded * 100) / totalBytes);
-                message = $"Downloading... {percent}% ({FormatBytes(bytesDownloaded)} / {FormatBytes(totalBytes)})";
+                message = $"Downloading... {_progress}% ({FormatBytes(_bytesDownloaded)} / {FormatBytes(_totalBytes)})";
             }
             else
             {
-                message = $"Downloading... {FormatBytes(bytesDownloaded)}";
+                message = $"Downloading... {FormatBytes(_bytesDownloaded)}";
             }
 
             Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
             {
                 this.Message = message;
+                ExpireSolution(true);
             }));
+        }
+
+        private void ScheduleUiUpdate()
+        {
+            Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+            {
+                ExpireSolution(true);
+            }));
+        }
+
+        private void CancelDownload()
+        {
+            try
+            {
+                _cancellationTokenSource?.Cancel();
+            }
+            catch
+            {
+                // Ignore cancellation errors
+            }
+        }
+
+        private void ResetState()
+        {
+            _isDownloading = false;
+            _completed = false;
+            _success = false;
+            _progress = 0;
+            _bytesDownloaded = 0;
+            _totalBytes = 0;
+            _error = null;
+            _statusCode = 0;
+            _downloadPath = null;
+            _downloadTask = null;
+
+            try
+            {
+                _cancellationTokenSource?.Dispose();
+            }
+            catch { }
+            _cancellationTokenSource = null;
         }
 
         private static string FormatBytes(long bytes)
@@ -310,7 +380,24 @@ namespace Swiftlet.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_download_file; // TODO: Add icon
+        public override void RemovedFromDocument(GH_Document document)
+        {
+            CancelDownload();
+            ResetState();
+            base.RemovedFromDocument(document);
+        }
+
+        public override void DocumentContextChanged(GH_Document document, GH_DocumentContext context)
+        {
+            if (context == GH_DocumentContext.Close)
+            {
+                CancelDownload();
+                ResetState();
+            }
+            base.DocumentContextChanged(document, context);
+        }
+
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_download_file;
 
         public override Guid ComponentGuid => new Guid("D1E2F3A4-B5C6-7D8E-9F00-112233445566");
     }
