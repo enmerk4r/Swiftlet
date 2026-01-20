@@ -168,11 +168,13 @@ namespace Swiftlet.Components
 
                 _listenerTask = Task.Run(() => WaitForCallback(_cancellationTokenSource.Token));
 
-                // Open browser
+                // Open browser using rundll32 for reliable URL handling on Windows
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = fullAuthUrl,
-                    UseShellExecute = true
+                    FileName = "rundll32.exe",
+                    Arguments = $"url.dll,FileProtocolHandler {fullAuthUrl}",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
                 });
 
                 // Trigger UI update

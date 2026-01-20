@@ -15,12 +15,28 @@ namespace Swiftlet.Components
 {
     /// <summary>
     /// Uploads a file as multipart/form-data with optional additional fields (memory-efficient for large files).
+    /// Uses async pattern to keep UI responsive during upload.
     /// </summary>
-    public class UploadFileMultipartComponent : GH_TaskCapableComponent<UploadFileResult>
+    public class UploadFileMultipartComponent : GH_Component
     {
         private const int BufferSize = 81920; // 80KB buffer
-        private DateTime _lastProgressUpdate = DateTime.MinValue;
-        private readonly TimeSpan _progressUpdateInterval = TimeSpan.FromMilliseconds(100);
+
+        // Async state
+        private Task _uploadTask;
+        private CancellationTokenSource _cancellationTokenSource;
+        private volatile bool _isUploading;
+        private volatile int _progress;
+        private long _bytesUploaded;
+        private long _totalBytes;
+        private volatile bool _completed;
+        private volatile bool _success;
+        private volatile string _error;
+        private volatile int _statusCode;
+        private volatile string _responseContent;
+
+        // Throttle UI updates
+        private DateTime _lastUiUpdate = DateTime.MinValue;
+        private readonly TimeSpan _uiUpdateInterval = TimeSpan.FromMilliseconds(100);
 
         public UploadFileMultipartComponent()
           : base("Upload File Multipart", "ULMP",
@@ -77,90 +93,33 @@ namespace Swiftlet.Components
             DA.GetDataList(6, headers);
             DA.GetData(7, ref run);
 
+            // User turned off Run - cancel any ongoing upload and reset
             if (!run)
             {
+                if (_isUploading)
+                {
+                    CancelUpload();
+                }
+                ResetState();
                 this.Message = "Idle";
-                DA.SetData(0, false); // Done
-                DA.SetData(1, 0);     // Progress
-                DA.SetData(2, 0);     // Status
-                DA.SetData(3, null);  // Content
-                DA.SetData(4, null);  // Error
-                return;
-            }
-
-            if (InPreSolve)
-            {
-                // Validate inputs
-                if (string.IsNullOrEmpty(url))
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "URL is required");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(path))
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path is required");
-                    return;
-                }
-
-                if (!File.Exists(path))
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File does not exist");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(fieldName))
-                {
-                    fieldName = "file";
-                }
-
-                // Use actual filename if not specified
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    fileName = Path.GetFileName(path);
-                }
-
-                // Auto-detect content type if not specified
-                if (string.IsNullOrEmpty(contentType))
-                {
-                    contentType = MimeTypeUtility.GetMimeType(path);
-                }
-
-                var headerList = headers.Select(h => h.Value).ToList();
-                var fieldList = fields.Select(f => f.Value).ToList();
-                var token = CancelToken;
-                long fileSize = new FileInfo(path).Length;
-
-                this.Message = $"Starting... ({FormatBytes(fileSize)})";
-
-                TaskList.Add(Task.Run(async () =>
-                {
-                    return await UploadMultipartAsync(url, path, fieldName, fileName, contentType, fieldList, headerList, fileSize, token);
-                }, token));
-
-                return;
-            }
-
-            // Post-solve: output results
-            if (!GetSolveResults(DA, out UploadFileResult result))
-            {
                 DA.SetData(0, false);
                 DA.SetData(1, 0);
                 DA.SetData(2, 0);
                 DA.SetData(3, null);
-                DA.SetData(4, "No result");
+                DA.SetData(4, null);
                 return;
             }
 
-            if (result != null)
+            // Upload completed - output results
+            if (_completed)
             {
-                DA.SetData(0, result.Success);   // Done
-                DA.SetData(1, result.Progress);  // Progress
-                DA.SetData(2, result.StatusCode); // Status
-                DA.SetData(3, result.Content);   // Content
-                DA.SetData(4, result.Error);     // Error
+                DA.SetData(0, _success);
+                DA.SetData(1, _progress);
+                DA.SetData(2, _statusCode);
+                DA.SetData(3, _responseContent);
+                DA.SetData(4, _error);
 
-                if (result.Success)
+                if (_success)
                 {
                     this.Message = "Done";
                 }
@@ -168,20 +127,97 @@ namespace Swiftlet.Components
                 {
                     this.Message = "Failed";
                 }
+                return;
             }
+
+            // Upload in progress - output current progress
+            if (_isUploading)
+            {
+                DA.SetData(0, false);
+                DA.SetData(1, _progress);
+                DA.SetData(2, 0);
+                DA.SetData(3, null);
+                DA.SetData(4, null);
+                return;
+            }
+
+            // Start new upload - validate inputs
+            if (string.IsNullOrEmpty(url))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "URL is required");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path is required");
+                return;
+            }
+
+            if (!File.Exists(path))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File does not exist");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                fieldName = "file";
+            }
+
+            // Use actual filename if not specified
+            if (string.IsNullOrEmpty(fileName))
+            {
+                fileName = Path.GetFileName(path);
+            }
+
+            // Auto-detect content type if not specified
+            if (string.IsNullOrEmpty(contentType))
+            {
+                contentType = MimeTypeUtility.GetMimeType(path);
+            }
+
+            var headerList = headers.Select(h => h.Value).ToList();
+            var fieldList = fields.Select(f => f.Value).ToList();
+            long fileSize = new FileInfo(path).Length;
+
+            // Start async upload
+            _isUploading = true;
+            _completed = false;
+            _success = false;
+            _progress = 0;
+            _bytesUploaded = 0;
+            _totalBytes = fileSize;
+            _error = null;
+            _statusCode = 0;
+            _responseContent = null;
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var token = _cancellationTokenSource.Token;
+
+            this.Message = $"Starting... ({FormatBytes(fileSize)})";
+
+            _uploadTask = Task.Run(async () =>
+            {
+                await UploadMultipartAsync(url, path, fieldName, fileName, contentType, fieldList, headerList, fileSize, token);
+            });
+
+            // Output initial state
+            DA.SetData(0, false);
+            DA.SetData(1, 0);
+            DA.SetData(2, 0);
+            DA.SetData(3, null);
+            DA.SetData(4, null);
         }
 
-        private async Task<UploadFileResult> UploadMultipartAsync(string url, string path, string fieldName, string fileName,
+        private async Task UploadMultipartAsync(string url, string path, string fieldName, string fileName,
             string contentType, List<DataModels.Implementations.MultipartField> fields,
             List<DataModels.Implementations.HttpHeader> headers, long fileSize, CancellationToken token)
         {
-            var result = new UploadFileResult { Progress = 0 };
-
             try
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Post, url))
                 {
-                    // Add headers
                     foreach (var header in headers)
                     {
                         request.Headers.TryAddWithoutValidation(header.Key, header.Value);
@@ -189,15 +225,17 @@ namespace Swiftlet.Components
 
                     var multipartContent = new MultipartFormDataContent();
 
-                    // Add the file with progress tracking
+                    // Create file stream with progress tracking
                     var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true);
                     var progressStream = new ProgressStream(fileStream, bytesRead =>
                     {
+                        _bytesUploaded = bytesRead;
                         if (fileSize > 0)
                         {
-                            result.Progress = (int)((bytesRead * 100) / fileSize);
+                            int newProgress = (int)((bytesRead * 100L) / fileSize);
+                            _progress = Math.Min(newProgress, 99);
                         }
-                        UpdateProgressMessage(bytesRead, fileSize);
+                        UpdateProgressMessage();
                     });
 
                     var streamContent = new StreamContent(progressStream, BufferSize);
@@ -234,65 +272,116 @@ namespace Swiftlet.Components
 
                     using (var response = await HttpClientFactory.SharedClient.SendAsync(request, token))
                     {
-                        result.StatusCode = (int)response.StatusCode;
-                        result.Content = await response.Content.ReadAsStringAsync();
-                        result.Success = response.IsSuccessStatusCode;
-                        result.Progress = 100;
+                        _statusCode = (int)response.StatusCode;
+                        _responseContent = await response.Content.ReadAsStringAsync();
+                        _success = response.IsSuccessStatusCode;
+                        _progress = 100;
 
-                        if (!result.Success)
+                        if (!_success)
                         {
-                            result.Error = $"HTTP {result.StatusCode}: {response.ReasonPhrase}";
+                            _error = $"HTTP {_statusCode}: {response.ReasonPhrase}";
                         }
                     }
                 }
+
+                _completed = true;
+                _isUploading = false;
+                ScheduleUiUpdate();
             }
             catch (OperationCanceledException)
             {
-                result.Success = false;
-                result.Error = "Upload cancelled";
+                _error = "Upload cancelled";
+                _completed = true;
+                _isUploading = false;
+                ScheduleUiUpdate();
             }
             catch (HttpRequestException ex)
             {
-                result.Success = false;
-                result.Error = $"HTTP error: {ex.Message}";
+                _error = $"HTTP error: {ex.Message}";
+                _completed = true;
+                _isUploading = false;
+                ScheduleUiUpdate();
             }
             catch (IOException ex)
             {
-                result.Success = false;
-                result.Error = $"File error: {ex.Message}";
+                _error = $"File error: {ex.Message}";
+                _completed = true;
+                _isUploading = false;
+                ScheduleUiUpdate();
             }
             catch (Exception ex)
             {
-                result.Success = false;
-                result.Error = ex.Message;
+                _error = ex.Message;
+                _completed = true;
+                _isUploading = false;
+                ScheduleUiUpdate();
             }
-
-            return result;
         }
 
-        private void UpdateProgressMessage(long bytesUploaded, long totalBytes)
+        private void UpdateProgressMessage()
         {
             var now = DateTime.Now;
-            if (now - _lastProgressUpdate < _progressUpdateInterval)
+            if (now - _lastUiUpdate < _uiUpdateInterval)
                 return;
 
-            _lastProgressUpdate = now;
+            _lastUiUpdate = now;
 
             string message;
-            if (totalBytes > 0)
+            if (_totalBytes > 0)
             {
-                int percent = (int)((bytesUploaded * 100) / totalBytes);
-                message = $"Uploading... {percent}% ({FormatBytes(bytesUploaded)} / {FormatBytes(totalBytes)})";
+                message = $"Uploading... {_progress}% ({FormatBytes(_bytesUploaded)} / {FormatBytes(_totalBytes)})";
             }
             else
             {
-                message = $"Uploading... {FormatBytes(bytesUploaded)}";
+                message = $"Uploading... {FormatBytes(_bytesUploaded)}";
             }
 
             Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
             {
                 this.Message = message;
+                ExpireSolution(true);
             }));
+        }
+
+        private void ScheduleUiUpdate()
+        {
+            Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+            {
+                ExpireSolution(true);
+            }));
+        }
+
+        private void CancelUpload()
+        {
+            try
+            {
+                _cancellationTokenSource?.Cancel();
+            }
+            catch
+            {
+                // Ignore cancellation errors
+            }
+        }
+
+        private void ResetState()
+        {
+            _isUploading = false;
+            _completed = false;
+            _success = false;
+            _progress = 0;
+            _bytesUploaded = 0;
+            _totalBytes = 0;
+            _error = null;
+            _statusCode = 0;
+            _responseContent = null;
+            _uploadTask = null;
+
+            try
+            {
+                _cancellationTokenSource?.Dispose();
+            }
+            catch { }
+            _cancellationTokenSource = null;
         }
 
         private static string FormatBytes(long bytes)
@@ -308,7 +397,24 @@ namespace Swiftlet.Components
             return $"{size:F1} {sizes[order]}";
         }
 
-        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_download_file; // TODO: Add icon
+        public override void RemovedFromDocument(GH_Document document)
+        {
+            CancelUpload();
+            ResetState();
+            base.RemovedFromDocument(document);
+        }
+
+        public override void DocumentContextChanged(GH_Document document, GH_DocumentContext context)
+        {
+            if (context == GH_DocumentContext.Close)
+            {
+                CancelUpload();
+                ResetState();
+            }
+            base.DocumentContextChanged(document, context);
+        }
+
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.Icons_upload_file_multipart;
 
         public override Guid ComponentGuid => new Guid("F3A4B5C6-D7E8-9F00-1122-334455667788");
     }
