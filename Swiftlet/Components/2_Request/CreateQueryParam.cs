@@ -22,6 +22,8 @@ namespace Swiftlet.Components
 
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.septenary;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>

@@ -1,4 +1,4 @@
-﻿using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Types;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,12 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
-            return "JSON Array";
+            if (this.Value == null)
+            {
+                return "JSON Array";
+            }
+
+            return $"JSON Array [{this.Value.Count} items]";
         }
 
         public override bool CastTo<Q>(ref Q target)

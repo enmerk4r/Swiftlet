@@ -13,6 +13,7 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -24,6 +25,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -332,3 +334,7 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# Claude Code
+CLAUDE.md
+.claude/

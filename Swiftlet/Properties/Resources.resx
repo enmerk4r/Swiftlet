@@ -172,6 +172,9 @@
   <data name="Icons_create_csv_line_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_csv_line_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_create_form_url_encoded_body" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_create_form_url_encoded_body.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_create_http_header_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_http_header_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -183,6 +186,15 @@
   </data>
   <data name="Icons_create_json_value_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_json_value_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_create_multipart_feild_text" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_create_multipart_feild_text.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_create_multipart_field_bytes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_create_multipart_field_bytes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_create_multipart_form_body" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_create_multipart_form_body.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_create_multipart_form_data_named_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_multipart_form_data_named_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -199,8 +211,14 @@
   <data name="Icons_create_text_body_custom_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_create_text_body_custom_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_create_xml_element" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_create_xml_element.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_decompress_data_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_decompress_data_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_deconstruct_body" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_deconstruct_body.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_deconstruct_http_header_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_deconstruct_http_header_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -208,14 +226,29 @@
   <data name="Icons_deconstruct_query_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_deconstruct_query_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_deconstruct_request" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_deconstruct_request.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_deconstruct_response_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_deconstruct_response_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_deconstruct_tool_call" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_deconstruct_tool_call.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_deconstruct_url_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_deconstruct_url_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_define_tool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_define_tool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_define_tool_parameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_define_tool_parameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_delete_request_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_delete_request_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_download_file" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_download_file.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_file_to_byte_array_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_file_to_byte_array_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -262,6 +295,24 @@
   <data name="Icons_get_request_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_get_request_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_get_xml_attributes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_attributes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_get_xml_attribute_value" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_attribute_value.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_get_xml_child_nodes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_child_nodes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_get_xml_elements_by_tag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_elements_by_tag.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_get_xml_elements_by_xpath" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_elements_by_xpath.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_get_xml_inner_text" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_get_xml_inner_text.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_hex_to_color_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_hex_to_color_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -276,6 +327,9 @@
   </data>
   <data name="Icons_http_request_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_http_request_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_http_request_param" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_http_request_param.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_http_response_param_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_http_response_param_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -295,8 +349,32 @@
   <data name="Icons_list_to_byte_array_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_list_to_byte_array_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_mcp_request_param" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_mcp_request_param.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_mcp_server" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_mcp_server.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_mcp_tool_definition" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_mcp_tool_definition.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_mcp_tool_parameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_mcp_tool_parameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_mcp_tool_response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_mcp_tool_response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_oauth_authorize" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_oauth_authorize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_oauth_token" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_oauth_token.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_parse_json_string_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_parse_json_string_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_parse_xml" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_parse_xml.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_patch_request_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_patch_request_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -346,11 +424,20 @@
   <data name="Icons_separate_json_tokens_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_separate_json_tokens_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_server_input" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_server_input.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_server_response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_server_response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_set_json_key_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_set_json_key_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_socket_listener_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_socket_listener_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_socket_server" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_socket_server.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_split_text_into_lines_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_split_text_into_lines_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -360,6 +447,9 @@
   </data>
   <data name="Icons_stringify_json_token_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_stringify_json_token_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_stringify_xml_node" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_stringify_xml_node.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Icons_text_to_base64_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_text_to_base64_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -373,8 +463,29 @@
   <data name="Icons_token_auth_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_token_auth_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Icons_udp_listener" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_udp_listener.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_udp_stream" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_udp_stream.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_upload_file" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_upload_file.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_upload_file_multipart" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_upload_file_multipart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Icons_url_encode_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Icons_url_encode_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_websocket_connection_param" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_websocket_connection_param.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_websocket_send" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_websocket_send.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Icons_xml_node" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Icons_xml_node.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Logo_16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Logo_16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
