@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>SwiftletBridge</RootNamespace>
     <AssemblyName>SwiftletBridge</AssemblyName>
     <Version>0.2.0</Version>
@@ -21,13 +21,13 @@
 
     <!-- Application metadata -->
     <Product>Swiftlet MCP Bridge</Product>
-    <Description>Bridge for connecting Claude Desktop to Swiftlet MCP Server via stdio-to-HTTP translation</Description>
+    <Description>Bridge for connecting stdio-based MCP hosts to Swiftlet MCP Server via stdio-to-HTTP translation</Description>
     <Copyright>Copyright 2024</Copyright>
   </PropertyGroup>
 
-  <!-- Runtime identifiers for cross-platform publishing -->
+  <!-- Runtime identifier for Windows-only publishing -->
   <PropertyGroup>
-    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,13 +7,13 @@ namespace SwiftletBridge;
 /// <summary>
 /// SwiftletBridge - A stdio-to-HTTP bridge for MCP (Model Context Protocol)
 ///
-/// This bridge allows Claude Desktop (which uses stdio-based MCP) to communicate
+/// This bridge allows stdio-based MCP hosts (e.g., Claude Desktop) to communicate
 /// with Swiftlet's HTTP-based MCP server running in Grasshopper.
 ///
 /// Usage: SwiftletBridge.exe [server-url]
 ///   server-url: The URL of the MCP server (default: http://localhost:3001/mcp/)
 ///
-/// Configuration for Claude Desktop (claude_desktop_config.json):
+/// Example MCP host configuration:
 /// {
 ///   "mcpServers": {
 ///     "Swiftlet": {
