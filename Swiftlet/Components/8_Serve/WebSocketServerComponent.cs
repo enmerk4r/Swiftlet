@@ -124,9 +124,9 @@ namespace Swiftlet.Components._7_Serve
             }
 
             // Output status
-            string status = _run ? $"Listening on port {port}" : "Stopped";
+            string status = _run ? $"Listening on ws://localhost:{port}/" : "Stopped";
             int clientCount = _activeConnections.Count;
-            this.Message = _run ? $":{port} ({clientCount} clients)" : "Stopped";
+            this.Message = _run ? $"ws://localhost:{port}/ ({clientCount} clients)" : "Stopped";
 
             // Output connection context for the most recent message
             if (_lastConnection != null)
@@ -222,11 +222,14 @@ namespace Swiftlet.Components._7_Serve
 
                         _activeConnections[connection.ConnectionId] = connection;
 
+                        // Set as last connection so it's available immediately
+                        _lastConnection = connection;
+
                         // Start a task to handle this client's messages
                         var clientTask = Task.Run(() => HandleClient(connection, cancellationToken));
                         _clientTasks[connection.ConnectionId] = clientTask;
 
-                        // Trigger solve to update client count
+                        // Trigger solve to update client count and output connection
                         TriggerSolve();
                     }
                     else

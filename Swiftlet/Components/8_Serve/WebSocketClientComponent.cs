@@ -30,6 +30,7 @@ namespace Swiftlet.Components._7_Serve
         private string _lastMessage;
         private List<string> _messageBuffer;
         private bool _freeze;
+        private string _error;
 
         public WebSocketClientComponent()
           : base("WebSocket Client", "WS Client",
@@ -84,6 +85,15 @@ namespace Swiftlet.Components._7_Serve
                 return;
             }
 
+            // Validate URL scheme
+            if (!url.StartsWith("ws://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("wss://", StringComparison.OrdinalIgnoreCase))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "URL must start with ws:// or wss://");
+                DA.SetData(3, "Error: Invalid URL scheme (use ws:// or wss://)");
+                return;
+            }
+
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
             bool urlChanged = _fullUrl != fullUrl;
 
@@ -97,6 +107,7 @@ namespace Swiftlet.Components._7_Serve
                 _messageBuffer.Clear();
                 _lastMessage = null;
                 _connection = null;
+                _error = null;
                 StartListener();
             }
             else if (!run && _run)
@@ -117,8 +128,17 @@ namespace Swiftlet.Components._7_Serve
             _run = run;
 
             // Output status
-            string status = _connection?.GetStatusString() ?? "Disconnected";
-            this.Message = status;
+            string status;
+            if (!string.IsNullOrEmpty(_error))
+            {
+                status = $"Error: {_error}";
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, _error);
+            }
+            else
+            {
+                status = _connection?.GetStatusString() ?? "Disconnected";
+            }
+            this.Message = _connection?.GetStatusString() ?? (_error != null ? "Error" : "Disconnected");
 
             // Copy buffer to output and clear
             List<string> outputMessages = new List<string>(_messageBuffer);
@@ -254,15 +274,19 @@ namespace Swiftlet.Components._7_Serve
             {
                 // Expected during cancellation
             }
-            catch (WebSocketException)
+            catch (WebSocketException wsEx)
             {
-                // Connection closed
+                _error = $"WebSocket error: {wsEx.Message}";
+                Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
+                {
+                    ExpireSolution(true);
+                });
             }
             catch (Exception ex)
             {
+                _error = ex.Message;
                 Rhino.RhinoApp.InvokeOnUiThread((Action)delegate
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
                     ExpireSolution(true);
                 });
             }
