@@ -21,6 +21,6 @@ namespace Swiftlet.Params
 
         public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-4D0E-1F2A-3B4C5D6E7F8A");
 
-        protected override Bitmap Icon => null;
+        protected override Bitmap Icon => Properties.Resources.Icons_websocket_connection_param;
     }
 }

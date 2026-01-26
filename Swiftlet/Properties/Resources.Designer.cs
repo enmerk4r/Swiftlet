@@ -763,6 +763,16 @@ namespace Swiftlet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Icons_http_request_param {
+            get {
+                object obj = ResourceManager.GetObject("Icons_http_request_param", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Icons_http_response_param_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_http_response_param_24x24", resourceCulture);
@@ -816,6 +826,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_list_to_byte_array_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_list_to_byte_array_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_mcp_request_param {
+            get {
+                object obj = ResourceManager.GetObject("Icons_mcp_request_param", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1236,6 +1256,16 @@ namespace Swiftlet.Properties {
         internal static System.Drawing.Bitmap Icons_url_encode_24x24 {
             get {
                 object obj = ResourceManager.GetObject("Icons_url_encode_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Icons_websocket_connection_param {
+            get {
+                object obj = ResourceManager.GetObject("Icons_websocket_connection_param", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
