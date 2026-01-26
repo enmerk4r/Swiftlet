@@ -11,6 +11,9 @@ Swiftlet is a free, open source Grasshopper plugin that allows users to construc
 * You can find example files [here](https://github.com/enmerk4r/Swiftlet/tree/main/Examples)
 * Also check out this [McNeel Webinar](https://www.youtube.com/watch?v=j1Y7mkPRmXE)
 
+## Questions?
+Check out the [Wiki](https://github.com/enmerk4r/Swiftlet/wiki)!
+
 ## Get Swiftlet
 Swiftlet is available on [food4rhino](https://www.food4rhino.com/en/app/swiftlet) and via the [Yak](https://developer.rhino3d.com/guides/yak/what-is-yak/) package manager
 
