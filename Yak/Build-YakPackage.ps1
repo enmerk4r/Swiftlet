@@ -7,8 +7,7 @@
     It creates a dist-X.X.X folder, copies the necessary files, generates manifest.yml
     from the template, and runs yak build to create the .yak package.
 
-    It also publishes the SwiftletBridge MCP bridge for all supported platforms
-    (Windows, macOS Intel, macOS ARM).
+    NOTE: Swiftlet is Windows-only due to System.Drawing (GDI+) and WinForms dependencies.
 
 .PARAMETER Configuration
     The build configuration (e.g., Release-Rhino6, Release-Rhino7, Release-Rhino8)
@@ -56,11 +55,14 @@ if ($Configuration -match "Rhino(\d+)") {
 
 # The Rhino version (rh6_x, rh7_0, rh8_0) is automatically inferred by yak
 # from the RhinoCommon version embedded in the compiled .gha assembly.
-# We only need to specify the platform (win, mac, or any).
-$Platform = "any"  # Cross-platform (the .gha will work on both Windows and Mac)
+# NOTE: Using "win" because Swiftlet has Windows-only dependencies:
+#   - System.Drawing (GDI+) for bitmap components
+#   - System.Windows.Forms for clipboard/menu operations
+#   - Windows-specific process APIs for OAuth browser launch
+$Platform = "win"
 
-# Normalize version (remove trailing .0 if present, e.g., 0.1.9.0 -> 0.1.9)
-$NormalizedVersion = $Version -replace '\.0$', ''
+# Use version as-is (keep full semver format)
+$NormalizedVersion = $Version
 
 # Find yak.exe in common Rhino installation paths
 $YakExe = $null
@@ -90,7 +92,7 @@ if (-not $YakExe) {
     Write-Warning "Please install Yak or add it to your PATH."
     Write-Warning "Yak is typically found in: C:\Program Files\Rhino X\System\Yak.exe"
     Write-Warning "Files have been copied to dist folder, but .yak package was not created."
-    Write-Warning "You can run 'yak build --platform=any' manually from the dist folder."
+    Write-Warning "You can run 'yak build --platform=win' manually from the dist folder."
     Write-Warning "============================================"
     exit 0  # Exit with success so build doesn't fail
 }
@@ -103,7 +105,6 @@ $DistDir = Join-Path $YakDir "dist-$NormalizedVersion"
 $TemplateFile = Join-Path $YakDir "manifest-template.yml"
 $ManifestFile = Join-Path $DistDir "manifest.yml"
 $BridgeProjectDir = Join-Path $ProjectDir "..\SwiftletBridge"
-$McpDir = Join-Path $DistDir "mcp"
 
 Write-Host "============================================"
 Write-Host "Building Yak Package"
@@ -122,10 +123,19 @@ if (-not (Test-Path $DistDir)) {
     New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
 }
 
-# Create mcp folder for bridge executables
-if (-not (Test-Path $McpDir)) {
-    Write-Host "Creating directory: $McpDir"
-    New-Item -ItemType Directory -Path $McpDir -Force | Out-Null
+# Clean up old mcp folder and macOS files from previous builds
+$McpDir = Join-Path $DistDir "mcp"
+if (Test-Path $McpDir) {
+    Write-Host "Removing old mcp folder..."
+    Remove-Item -Recurse -Force $McpDir
+}
+$oldMacFiles = @("SwiftletBridge-macos-x64", "SwiftletBridge-macos-arm64")
+foreach ($oldFile in $oldMacFiles) {
+    $oldPath = Join-Path $DistDir $oldFile
+    if (Test-Path $oldPath) {
+        Write-Host "Removing old file: $oldFile"
+        Remove-Item -Force $oldPath
+    }
 }
 
 # Files to copy (relative to OutputDir)
@@ -148,7 +158,7 @@ foreach ($file in $FilesToCopy) {
     }
 }
 
-# ==================== Build SwiftletBridge for all platforms ====================
+# ==================== Build SwiftletBridge (Windows only) ====================
 Write-Host ""
 Write-Host "============================================"
 Write-Host "Building SwiftletBridge MCP Bridge"
@@ -157,53 +167,37 @@ Write-Host "============================================"
 $BridgeCsproj = Join-Path $BridgeProjectDir "SwiftletBridge.csproj"
 
 if (Test-Path $BridgeCsproj) {
-    # Define target platforms
-    $BridgePlatforms = @(
-        @{ Rid = "win-x64"; OutputName = "SwiftletBridge.exe" },
-        @{ Rid = "osx-x64"; OutputName = "SwiftletBridge-macos-x64" },
-        @{ Rid = "osx-arm64"; OutputName = "SwiftletBridge-macos-arm64" }
+    $publishDir = Join-Path $BridgeProjectDir "bin\publish\win-x64"
+
+    Write-Host "  Publishing SwiftletBridge for win-x64..."
+
+    # Publish as self-contained single file
+    $publishArgs = @(
+        "publish",
+        $BridgeCsproj,
+        "-c", "Release",
+        "-r", "win-x64",
+        "--self-contained", "true",
+        "-p:PublishSingleFile=true",
+        "-p:PublishTrimmed=true",
+        "-p:EnableCompressionInSingleFile=true",
+        "-o", $publishDir
     )
 
-    foreach ($platform in $BridgePlatforms) {
-        $rid = $platform.Rid
-        $outputName = $platform.OutputName
-        $publishDir = Join-Path $BridgeProjectDir "bin\publish\$rid"
+    $process = Start-Process -FilePath "dotnet" -ArgumentList $publishArgs -Wait -NoNewWindow -PassThru
 
-        Write-Host "  Publishing SwiftletBridge for $rid..."
+    if ($process.ExitCode -eq 0) {
+        $sourceExe = Join-Path $publishDir "SwiftletBridge.exe"
 
-        # Publish as self-contained single file
-        $publishArgs = @(
-            "publish",
-            $BridgeCsproj,
-            "-c", "Release",
-            "-r", $rid,
-            "--self-contained", "true",
-            "-p:PublishSingleFile=true",
-            "-p:PublishTrimmed=true",
-            "-p:EnableCompressionInSingleFile=true",
-            "-o", $publishDir
-        )
-
-        $process = Start-Process -FilePath "dotnet" -ArgumentList $publishArgs -Wait -NoNewWindow -PassThru
-
-        if ($process.ExitCode -eq 0) {
-            # Find the published executable
-            $sourceExe = if ($rid -like "win-*") {
-                Join-Path $publishDir "SwiftletBridge.exe"
-            } else {
-                Join-Path $publishDir "SwiftletBridge"
-            }
-
-            if (Test-Path $sourceExe) {
-                $destPath = Join-Path $McpDir $outputName
-                Copy-Item $sourceExe $destPath -Force
-                Write-Host "    Created: $outputName"
-            } else {
-                Write-Warning "    Published executable not found: $sourceExe"
-            }
+        if (Test-Path $sourceExe) {
+            $destPath = Join-Path $DistDir "SwiftletBridge.exe"
+            Copy-Item $sourceExe $destPath -Force
+            Write-Host "    Created: SwiftletBridge.exe"
         } else {
-            Write-Warning "    Failed to publish for $rid (exit code: $($process.ExitCode))"
+            Write-Warning "    Published executable not found: $sourceExe"
         }
+    } else {
+        Write-Warning "    Failed to publish SwiftletBridge (exit code: $($process.ExitCode))"
     }
 } else {
     Write-Warning "SwiftletBridge project not found at: $BridgeCsproj"
@@ -223,40 +217,59 @@ if (Test-Path $TemplateFile) {
     exit 1
 }
 
-# ==================== Run yak build ====================
+# ==================== Run yak build or create ZIP ====================
 Write-Host ""
-Write-Host "Building Yak package..."
-Push-Location $DistDir
-try {
-    # Build the yak package with the specified platform
-    # The Rhino version (rh6_x, rh7_0, rh8_0) is auto-detected from the .gha assembly
-    $yakArgs = @("build", "--platform=$Platform")
-    Write-Host "  Running: yak $($yakArgs -join ' ')"
 
-    $process = Start-Process -FilePath $YakExe -ArgumentList $yakArgs -Wait -NoNewWindow -PassThru
+if ($RhinoMajor -eq "6") {
+    # Rhino 6 doesn't have Yak CLI - create a ZIP file instead
+    Write-Host "Building ZIP package for Rhino 6 (Yak CLI not available)..."
 
-    if ($process.ExitCode -eq 0) {
-        Write-Host "Yak package created successfully!"
+    $zipFileName = "swiftlet-$NormalizedVersion-rh6_18-win.zip"
+    $zipFilePath = Join-Path $DistDir $zipFileName
 
-        # List the created .yak files
-        $yakFiles = Get-ChildItem -Path $DistDir -Filter "*.yak"
-        foreach ($yakFile in $yakFiles) {
-            Write-Host "  Created: $($yakFile.Name)"
-        }
-    } else {
-        Write-Error "Yak build failed with exit code: $($process.ExitCode)"
-        exit $process.ExitCode
+    # Remove existing zip if present
+    if (Test-Path $zipFilePath) {
+        Remove-Item $zipFilePath -Force
     }
-} finally {
-    Pop-Location
+
+    # Create ZIP from dist folder contents
+    $filesToZip = Get-ChildItem -Path $DistDir -Exclude "*.zip", "*.yak"
+    Compress-Archive -Path $filesToZip.FullName -DestinationPath $zipFilePath -Force
+
+    Write-Host "ZIP package created successfully!"
+    Write-Host "  Created: $zipFileName"
+    Write-Host ""
+    Write-Host "Note: Rename .zip to .yak before publishing to Yak."
+} else {
+    # Rhino 7+ has Yak CLI
+    Write-Host "Building Yak package..."
+    Push-Location $DistDir
+    try {
+        # Build the yak package with the specified platform
+        # The Rhino version (rh6_x, rh7_0, rh8_0) is auto-detected from the .gha assembly
+        $yakArgs = @("build", "--platform=$Platform")
+        Write-Host "  Running: yak $($yakArgs -join ' ')"
+
+        $process = Start-Process -FilePath $YakExe -ArgumentList $yakArgs -Wait -NoNewWindow -PassThru
+
+        if ($process.ExitCode -eq 0) {
+            Write-Host "Yak package created successfully!"
+
+            # List the created .yak files
+            $yakFiles = Get-ChildItem -Path $DistDir -Filter "*.yak"
+            foreach ($yakFile in $yakFiles) {
+                Write-Host "  Created: $($yakFile.Name)"
+            }
+        } else {
+            Write-Error "Yak build failed with exit code: $($process.ExitCode)"
+            exit $process.ExitCode
+        }
+    } finally {
+        Pop-Location
+    }
 }
 
 Write-Host "============================================"
 Write-Host "Yak package build complete!"
 Write-Host "============================================"
-Write-Host ""
-Write-Host "MCP Bridge executables are in: $McpDir"
-Write-Host "  - SwiftletBridge.exe (Windows)"
-Write-Host "  - SwiftletBridge-macos-x64 (macOS Intel)"
-Write-Host "  - SwiftletBridge-macos-arm64 (macOS Apple Silicon)"
 Write-Host ""
