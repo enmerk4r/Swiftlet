@@ -23,14 +23,15 @@ namespace Swiftlet.Components
               NamingUtility.CATEGORY, NamingUtility.REQUEST)
         {
         }
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        public override GH_Exposure Exposure => GH_Exposure.quinary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Value", "V", "A string, integer, number, DateTime or boolean", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Value", "V", "A string, integer, number, DateTime or boolean. Leave empty for null.", GH_ParamAccess.item);
+            pManager[0].Optional = true;
         }
 
         /// <summary>
@@ -50,7 +51,12 @@ namespace Swiftlet.Components
             object obj = null;
             DA.GetData(0, ref obj);
 
-            if (obj == null) return;
+            // Output null JValue when no input is provided
+            if (obj == null)
+            {
+                DA.SetData(0, new JValueGoo(JValue.CreateNull()));
+                return;
+            }
 
             if (obj is GH_String)
             {

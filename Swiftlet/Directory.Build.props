@@ -1,0 +1,44 @@
+<Project>
+  <!--
+    Centralized Version Management for Swiftlet
+    ============================================
+    Update the RhinoCommon and Grasshopper versions here to change them across all configurations.
+
+    To find the latest versions:
+    - Rhino 6: https://www.nuget.org/packages/RhinoCommon/6.*
+    - Rhino 7: https://www.nuget.org/packages/RhinoCommon/7.*
+    - Rhino 8: https://www.nuget.org/packages/RhinoCommon/8.*
+
+    You can also get the version from your installed Rhino:
+    - Run Rhino > Type _SystemInfo > Look for "Rhino version"
+  -->
+
+  <!-- ==================== Rhino 6 Versions ==================== -->
+  <!-- Using earliest stable 6.x for maximum backwards compatibility -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino6'))">
+    <RhinoCommonVersion>6.0.18016.23451</RhinoCommonVersion>
+    <GrasshopperVersion>6.0.18016.23451</GrasshopperVersion>
+  </PropertyGroup>
+
+  <!-- ==================== Rhino 7 Versions ==================== -->
+  <!-- Using earliest stable 7.x for maximum backwards compatibility -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino7'))">
+    <RhinoCommonVersion>7.0.20314.3001</RhinoCommonVersion>
+    <GrasshopperVersion>7.0.20314.3001</GrasshopperVersion>
+  </PropertyGroup>
+
+  <!-- ==================== Rhino 8 Versions ==================== -->
+  <!-- Using earliest stable 8.x for maximum backwards compatibility -->
+  <PropertyGroup Condition="$(Configuration.Contains('Rhino8'))">
+    <RhinoCommonVersion>8.0.23304.9001</RhinoCommonVersion>
+    <GrasshopperVersion>8.0.23304.9001</GrasshopperVersion>
+  </PropertyGroup>
+
+  <!-- ==================== Other Dependencies ==================== -->
+  <PropertyGroup>
+    <HtmlAgilityPackVersion>1.11.43</HtmlAgilityPackVersion>
+    <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
+    <QRCoderVersion>1.4.3</QRCoderVersion>
+  </PropertyGroup>
+
+</Project>

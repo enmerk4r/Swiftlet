@@ -92,9 +92,25 @@ namespace Swiftlet.Components
                     txt = tokenGoo.Value.ToString();
                 }
             }
+            else if (input is XmlNodeGoo)
+            {
+                XmlNodeGoo xmlGoo = input as XmlNodeGoo;
+                if (xmlGoo != null && xmlGoo.Value != null)
+                {
+                    txt = xmlGoo.Value.OuterXml;
+                }
+            }
+            else if (input is HtmlNodeGoo)
+            {
+                HtmlNodeGoo htmlGoo = input as HtmlNodeGoo;
+                if (htmlGoo != null && htmlGoo.Value != null)
+                {
+                    txt = htmlGoo.Value.OuterHtml;
+                }
+            }
             else
             {
-                throw new Exception(" Content must be a string, a JObject or a JArray");
+                throw new Exception("Content must be a string, JObject, JArray, XML Node, or HTML Node");
             }
 
             RequestBodyText txtBody = new RequestBodyText(contentType, txt);

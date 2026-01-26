@@ -50,22 +50,23 @@ namespace Swiftlet.Components
             pManager.AddParameter(new HttpWebResponseParam(), "Response", "R", "Full Http response object (with metadata)", GH_ParamAccess.item);
         }
 
-        public HttpResponseDTO SendRequest(string url, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders)
+        public HttpResponseDTO SendRequest(string url, List<QueryParamGoo> queryParams, List<HttpHeaderGoo> httpHeaders, int timeoutSeconds)
         {
             ValidateUrl(url);
             string fullUrl = UrlUtility.AddQueryParams(url, queryParams.Select(o => o.Value).ToList());
 
             if (!string.IsNullOrEmpty(fullUrl))
             {
-                HttpClient client = new HttpClient();
+                // Use HttpRequestMessage with shared client (add headers to request, not client)
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, fullUrl);
 
-                // Add headers
+                // Add headers to the request message
                 foreach (HttpHeaderGoo header in httpHeaders)
                 {
-                    client.DefaultRequestHeaders.Add(header.Value.Key, header.Value.Value);
+                    request.Headers.TryAddWithoutValidation(header.Value.Key, header.Value.Value);
                 }
 
-                var result = client.GetAsync(fullUrl).Result;
+                var result = HttpClientFactory.SendWithTimeout(request, timeoutSeconds);
                 HttpResponseDTO dto = new HttpResponseDTO(result);
                 return dto;
             }
@@ -93,8 +94,9 @@ namespace Swiftlet.Components
 
                 ValidateUrl(url);
 
+                int timeout = TimeoutSeconds;
                 this.TaskList.Add(Task.Run(
-                    () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) }; },
+                    () => { return new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders, timeout) }; },
                     CancelToken
                     ));
                 return;
@@ -112,7 +114,7 @@ namespace Swiftlet.Components
 
                 ValidateUrl(url);
 
-                result = new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders) };
+                result = new HttpRequestSolveResults() { Value = this.SendRequest(url, queryParams, httpHeaders, TimeoutSeconds) };
             }
 
 

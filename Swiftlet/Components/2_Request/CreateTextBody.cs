@@ -91,10 +91,14 @@ namespace Swiftlet.Components
         {
             object input = null;
             string txt = string.Empty;
+            string detectedContentType = null;
 
             DA.GetData(0, ref input);
 
-            if (input == null) { } // Do nothing
+            if (input == null)
+            {
+                // No input - use current selection
+            }
             else if (input is GH_String)
             {
                 GH_String str = input as GH_String;
@@ -102,6 +106,7 @@ namespace Swiftlet.Components
                 {
                     txt = str.ToString();
                 }
+                // For strings, keep user's current selection
             }
             else if (input is JArrayGoo)
             {
@@ -109,6 +114,7 @@ namespace Swiftlet.Components
                 if (arrayGoo != null)
                 {
                     txt = arrayGoo.Value.ToString();
+                    detectedContentType = ContentTypeUtility.ApplicationJson;
                 }
             }
             else if (input is JObjectGoo)
@@ -117,6 +123,7 @@ namespace Swiftlet.Components
                 if (objectGoo != null)
                 {
                     txt = objectGoo.Value.ToString();
+                    detectedContentType = ContentTypeUtility.ApplicationJson;
                 }
             }
             else if (input is JTokenGoo)
@@ -125,11 +132,36 @@ namespace Swiftlet.Components
                 if (tokenGoo != null)
                 {
                     txt = tokenGoo.Value.ToString();
+                    detectedContentType = ContentTypeUtility.ApplicationJson;
+                }
+            }
+            else if (input is XmlNodeGoo)
+            {
+                XmlNodeGoo xmlGoo = input as XmlNodeGoo;
+                if (xmlGoo != null && xmlGoo.Value != null)
+                {
+                    txt = xmlGoo.Value.OuterXml;
+                    detectedContentType = ContentTypeUtility.ApplicationXml;
+                }
+            }
+            else if (input is HtmlNodeGoo)
+            {
+                HtmlNodeGoo htmlGoo = input as HtmlNodeGoo;
+                if (htmlGoo != null && htmlGoo.Value != null)
+                {
+                    txt = htmlGoo.Value.OuterHtml;
+                    detectedContentType = ContentTypeUtility.TextHtml;
                 }
             }
             else
             {
-                throw new Exception(" Content must be a string, a JObject or a JArray");
+                throw new Exception("Content must be a string, JObject, JArray, XML Node, or HTML Node");
+            }
+
+            // Auto-detect content type for typed inputs
+            if (detectedContentType != null)
+            {
+                SetContentType(detectedContentType);
             }
 
             RequestBodyText txtBody = new RequestBodyText(this._cType, txt);
@@ -137,6 +169,35 @@ namespace Swiftlet.Components
 
             DA.SetData(0, goo);
             this.Message = ContentTypeUtility.ContentTypeToMessage(this._cType);
+        }
+
+        /// <summary>
+        /// Sets the content type and updates the corresponding checkbox state.
+        /// This method does not trigger a re-solve, making it safe for headless operation.
+        /// </summary>
+        private void SetContentType(string contentType)
+        {
+            this._cType = contentType;
+            UncheckAll();
+
+            switch (contentType)
+            {
+                case ContentTypeUtility.TextPlain:
+                    this.IsTextChecked = true;
+                    break;
+                case ContentTypeUtility.JavaScript:
+                    this.IsJavascriptChecked = true;
+                    break;
+                case ContentTypeUtility.ApplicationJson:
+                    this.IsJsonChecked = true;
+                    break;
+                case ContentTypeUtility.TextHtml:
+                    this.IsHtmlChecked = true;
+                    break;
+                case ContentTypeUtility.ApplicationXml:
+                    this.IsXmlChecked = true;
+                    break;
+            }
         }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

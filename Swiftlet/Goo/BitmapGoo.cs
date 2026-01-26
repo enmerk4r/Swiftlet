@@ -36,7 +36,45 @@ namespace Swiftlet.Goo
 
         public override string ToString()
         {
+            if (this.Value == null) return "Null Bitmap";
             return $"BITMAP [ {this.Value.Width} x {this.Value.Height} ]";
+        }
+
+        public override bool CastTo<Q>(ref Q target)
+        {
+            // Cast to System.Drawing.Bitmap
+            if (typeof(Q).IsAssignableFrom(typeof(Bitmap)))
+            {
+                if (this.Value != null)
+                {
+                    object obj = this.Value;
+                    target = (Q)obj;
+                    return true;
+                }
+            }
+
+            return base.CastTo(ref target);
+        }
+
+        public override bool CastFrom(object source)
+        {
+            if (source == null) return false;
+
+            // Cast from System.Drawing.Bitmap
+            if (source is Bitmap bitmap)
+            {
+                this.Value = bitmap;
+                return true;
+            }
+
+            // Cast from another BitmapGoo
+            if (source is BitmapGoo goo)
+            {
+                this.Value = goo.Value;
+                return true;
+            }
+
+            return base.CastFrom(source);
         }
     }
 }
