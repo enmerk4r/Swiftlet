@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Swiftlet.Gh.Rhino6</RootNamespace>
+    <AssemblyName>Swiftlet.Gh.Rhino6</AssemblyName>
+    <Description>Legacy Rhino 6 Grasshopper shell for Swiftlet.</Description>
+  </PropertyGroup>
+</Project>

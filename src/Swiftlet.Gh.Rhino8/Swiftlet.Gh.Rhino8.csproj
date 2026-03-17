@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <LangVersion>12.0</LangVersion>
+    <BuildInParallel>false</BuildInParallel>
+    <RootNamespace>Swiftlet.Gh.Rhino8</RootNamespace>
+    <AssemblyName>Swiftlet.Gh.Rhino8</AssemblyName>
+    <Version>0.2.0</Version>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <FileVersion>0.2.0.0</FileVersion>
+    <InformationalVersion>0.2.0</InformationalVersion>
+    <Description>Modern Rhino 8 Grasshopper shell for the Swiftlet Linux port.</Description>
+    <RhinoCommonPackageVersion>8.0.23304.9001</RhinoCommonPackageVersion>
+    <GrasshopperPackageVersion>8.0.23304.9001</GrasshopperPackageVersion>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(NuGetPackageRoot)' != '' and '$(OS)' == 'Windows_NT'">$(NuGetPackageRoot)microsoft.windowsdesktop.app.ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(OS)' == 'Windows_NT'">$(ProgramFiles)\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+    <PackageReference Include="RhinoCommon" Version="$(RhinoCommonPackageVersion)">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+    <PackageReference Include="Grasshopper" Version="$(GrasshopperPackageVersion)">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('$(WindowsDesktopRefDir)\System.Drawing.Common.dll')">
+    <Reference Include="System.Drawing.Common">
+      <HintPath>$(WindowsDesktopRefDir)\System.Drawing.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' and Exists('$(WindowsDesktopRefDir)\System.Windows.Forms.dll')">
+    <Reference Include="System.Windows.Forms">
+      <HintPath>$(WindowsDesktopRefDir)\System.Windows.Forms.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
+    <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\*.WindowsMenu.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\Swiftlet\Resources\*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CopyGha" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)$(TargetName).gha" />
+  </Target>
+</Project>
