@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <BuildInParallel>false</BuildInParallel>
+    <UseAppHost>false</UseAppHost>
+    <RootNamespace>Swiftlet.Integration.Tests</RootNamespace>
+    <AssemblyName>Swiftlet.Integration.Tests</AssemblyName>
+    <Description>Placeholder integration test project for the new Swiftlet architecture.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Gh.Rhino8\Swiftlet.Gh.Rhino8.csproj" />
+  </ItemGroup>
+</Project>
