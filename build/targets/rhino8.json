@@ -1,0 +1,27 @@
+{
+  "id": "rhino8",
+  "rhinoMajor": 8,
+  "packagePlatform": "win",
+  "pluginProject": "src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj",
+  "pluginAssemblyName": "Swiftlet.Gh.Rhino8",
+  "pluginArtifactName": "Swiftlet.Gh.Rhino8.gha",
+  "bridgeProject": "src/SwiftletBridge/SwiftletBridge.csproj",
+  "bridgeAssemblyName": "SwiftletBridge",
+  "versionSourceProject": "Swiftlet/Swiftlet.csproj",
+  "bridgePublishes": [
+    {
+      "id": "win-x64",
+      "rid": "win-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPlugin": "SwiftletBridge.exe"
+    },
+    {
+      "id": "linux-x64",
+      "rid": "linux-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPlugin": null
+    }
+  ]
+}
