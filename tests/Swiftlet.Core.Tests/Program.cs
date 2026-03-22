@@ -19,6 +19,9 @@ internal static class TestRunner
             ("RequestBodyFormUrlEncoded serializes form values", RequestBodyFormUrlEncodedSerializesValues),
             ("MultipartField preserves text and bytes in duplicates", MultipartFieldDuplicatesSafely),
             ("RequestBodyMultipartForm compiles multipart content", RequestBodyMultipartFormCompiles),
+            ("MultipartBodyParser preserves text newlines and binary payloads", MultipartBodyParserPreservesContent),
+            ("MultipartBodyParser keeps byte fields without filenames as bytes", MultipartBodyParserKeepsAnonymousByteFieldsBinary),
+            ("MultipartBodyParser ignores boundary-like data inside part content", MultipartBodyParserIgnoresBoundaryLikePayloadData),
             ("HttpResponseData duplicates and preserves headers", HttpResponseDataDuplicates),
             ("HttpResponseData preserves legacy header surface from HttpResponseMessage", HttpResponseDataFromResponseMessagePreservesLegacyHeaders),
             ("OAuth PKCE produces URL-safe verifier, challenge, and state", OAuthPkceGeneratesUrlSafeValues),
@@ -120,6 +123,59 @@ internal static class TestRunner
         Assert.True(body.ContentType.StartsWith("multipart/form-data;", StringComparison.OrdinalIgnoreCase));
         Assert.True(body.ToByteArray().Length > 0);
         Assert.Equal(2, body.Fields.Count);
+    }
+
+    private static void MultipartBodyParserPreservesContent()
+    {
+        byte[] payload = [0, 255, 13, 10, 45, 45, 98, 111, 117, 110, 100, 97, 114, 121, 45, 108, 105, 107, 101];
+        var body = new RequestBodyMultipartForm(
+            [
+                new MultipartField("message", "hello\r\n", ContentTypes.TextPlain),
+                new MultipartField("payload", payload, "payload.bin", ContentTypes.ApplicationOctetStream),
+            ]);
+
+        List<MultipartField> fields = MultipartBodyParser.Parse(body.ToByteArray(), body.ContentType);
+
+        Assert.Equal(2, fields.Count);
+        Assert.True(fields[0].IsText);
+        Assert.Equal("hello\r\n", fields[0].Text);
+        Assert.Equal(ContentTypes.TextPlain, fields[0].ContentType);
+        Assert.False(fields[1].IsText);
+        Assert.Equal("payload.bin", fields[1].FileName);
+        Assert.True(payload.SequenceEqual(fields[1].Bytes));
+    }
+
+    private static void MultipartBodyParserKeepsAnonymousByteFieldsBinary()
+    {
+        byte[] payload = [1, 2, 3, 4, 5];
+        var body = new RequestBodyMultipartForm(
+            [
+                new MultipartField("payload", payload, contentType: ContentTypes.ApplicationOctetStream),
+            ]);
+
+        List<MultipartField> fields = MultipartBodyParser.Parse(body.ToByteArray(), body.ContentType);
+
+        Assert.Equal(1, fields.Count);
+        Assert.False(fields[0].IsText);
+        Assert.True(payload.SequenceEqual(fields[0].Bytes));
+    }
+
+    private static void MultipartBodyParserIgnoresBoundaryLikePayloadData()
+    {
+        const string boundary = "test-boundary";
+        byte[] payload = System.Text.Encoding.ASCII.GetBytes("line one\r\n--test-boundary-extra\r\nline two");
+        byte[] prefix = System.Text.Encoding.ASCII.GetBytes(
+            "--test-boundary\r\n"
+            + "Content-Disposition: form-data; name=\"payload\"; filename=\"payload.bin\"\r\n"
+            + "Content-Type: application/octet-stream\r\n\r\n");
+        byte[] suffix = System.Text.Encoding.ASCII.GetBytes("\r\n--test-boundary--\r\n");
+        byte[] body = [.. prefix, .. payload, .. suffix];
+
+        List<MultipartField> fields = MultipartBodyParser.Parse(body, $"multipart/form-data; boundary={boundary}");
+
+        Assert.Equal(1, fields.Count);
+        Assert.False(fields[0].IsText);
+        Assert.True(payload.SequenceEqual(fields[0].Bytes));
     }
 
     private static void HttpResponseDataDuplicates()
