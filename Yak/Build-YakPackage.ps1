@@ -45,6 +45,28 @@ if (-not $Configuration.StartsWith("Release")) {
     exit 0
 }
 
+function Get-ReferencedAssemblyVersion {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$AssemblyPath,
+
+        [Parameter(Mandatory=$true)]
+        [string]$ReferenceName
+    )
+
+    if (-not (Test-Path $AssemblyPath)) {
+        throw "Assembly not found: $AssemblyPath"
+    }
+
+    $assembly = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($AssemblyPath)
+    $reference = $assembly.GetReferencedAssemblies() | Where-Object { $_.Name -eq $ReferenceName } | Select-Object -First 1
+    if ($null -eq $reference) {
+        throw "Assembly '$AssemblyPath' does not reference '$ReferenceName'."
+    }
+
+    return $reference.Version
+}
+
 # Determine Rhino version from configuration
 if ($Configuration -match "Rhino(\d+)") {
     $RhinoMajor = $Matches[1]
@@ -101,10 +123,12 @@ Write-Host "Using Yak: $YakExe"
 
 # Paths
 $YakDir = Join-Path $ProjectDir "..\Yak"
-$DistDir = Join-Path $YakDir "dist-$NormalizedVersion"
+$DistRootDir = Join-Path $YakDir "dist-$NormalizedVersion"
+$DistDir = Join-Path $DistRootDir "rhino$RhinoMajor"
 $TemplateFile = Join-Path $YakDir "manifest-template.yml"
 $ManifestFile = Join-Path $DistDir "manifest.yml"
 $BridgeProjectDir = Join-Path $ProjectDir "..\SwiftletBridge"
+$PluginAssemblyPath = Join-Path $OutputDir "Swiftlet.gha"
 
 Write-Host "============================================"
 Write-Host "Building Yak Package"
@@ -114,14 +138,35 @@ Write-Host "Version: $NormalizedVersion"
 Write-Host "Rhino Version: $RhinoMajor (auto-detected from RhinoCommon in .gha)"
 Write-Host "Platform: $Platform"
 Write-Host "Output Dir: $OutputDir"
+Write-Host "Dist Root: $DistRootDir"
 Write-Host "Dist Dir: $DistDir"
 Write-Host "============================================"
 
-# Create dist folder if it doesn't exist
-if (-not (Test-Path $DistDir)) {
-    Write-Host "Creating directory: $DistDir"
-    New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
+# Validate that the built plugin references the expected Rhino major version.
+try {
+    $rhinoCommonVersion = Get-ReferencedAssemblyVersion -AssemblyPath $PluginAssemblyPath -ReferenceName "RhinoCommon"
+    $grasshopperVersion = Get-ReferencedAssemblyVersion -AssemblyPath $PluginAssemblyPath -ReferenceName "Grasshopper"
+} catch {
+    Write-Error $_
+    exit 1
 }
+
+Write-Host "RhinoCommon reference: $rhinoCommonVersion"
+Write-Host "Grasshopper reference: $grasshopperVersion"
+
+if ($rhinoCommonVersion.Major.ToString() -ne $RhinoMajor -or $grasshopperVersion.Major.ToString() -ne $RhinoMajor) {
+    Write-Error "Built plugin references Rhino $($rhinoCommonVersion.Major)/Grasshopper $($grasshopperVersion.Major), but configuration requested Rhino $RhinoMajor."
+    exit 1
+}
+
+# Recreate the per-Rhino staging folder so staged artifacts cannot bleed between Rhino versions.
+if (Test-Path $DistDir) {
+    Write-Host "Removing existing staging directory: $DistDir"
+    Remove-Item -Recurse -Force $DistDir
+}
+
+Write-Host "Creating directory: $DistDir"
+New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
 
 # Clean up old mcp folder and macOS files from previous builds
 $McpDir = Join-Path $DistDir "mcp"
