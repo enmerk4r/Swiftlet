@@ -1,22 +1,20 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Net.WebSockets;
 
 namespace Swiftlet.Gh.Rhino8;
 
 public sealed class ModernWebSocketServerTransport : IAsyncDisposable
 {
     private readonly ModernWebSocketServer _server;
-    private WebApplication? _application;
+    private HttpListener? _listener;
+    private Task? _listenTask;
 
     public ModernWebSocketServerTransport(ModernWebSocketServer server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public bool IsRunning => _application is not null;
+    public bool IsRunning => _listener?.IsListening == true;
 
     public int Port { get; private set; }
 
@@ -29,44 +27,38 @@ public sealed class ModernWebSocketServerTransport : IAsyncDisposable
 
         await StopAsync().ConfigureAwait(false);
 
-        var builder = WebApplication.CreateBuilder();
-        builder.Logging.ClearProviders();
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            options.ListenLocalhost(port, listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http1;
-            });
-        });
+        var listener = new HttpListener();
+        listener.Prefixes.Add($"http://localhost:{port}/");
+        listener.Start();
 
-        WebApplication app = builder.Build();
-        app.UseWebSockets();
-        app.Run(HandleRequestAsync);
-
-        await app.StartAsync(cancellationToken).ConfigureAwait(false);
-        _application = app;
+        _listener = listener;
         Port = port;
+        _listenTask = Task.Run(() => ListenLoopAsync(listener));
     }
 
     public async Task StopAsync()
     {
         await _server.StopAsync().ConfigureAwait(false);
 
-        if (_application is null)
+        HttpListener? listener = _listener;
+        _listener = null;
+
+        if (listener is not null)
         {
-            return;
+            try { listener.Stop(); }
+            catch { }
+            try { listener.Close(); }
+            catch { }
         }
 
-        try
+        if (_listenTask is not null)
         {
-            await _application.StopAsync().ConfigureAwait(false);
+            try { await _listenTask.ConfigureAwait(false); }
+            catch { }
+            _listenTask = null;
         }
-        finally
-        {
-            await _application.DisposeAsync().ConfigureAwait(false);
-            _application = null;
-            Port = 0;
-        }
+
+        Port = 0;
     }
 
     public async ValueTask DisposeAsync()
@@ -74,25 +66,60 @@ public sealed class ModernWebSocketServerTransport : IAsyncDisposable
         await StopAsync().ConfigureAwait(false);
     }
 
-    private async Task HandleRequestAsync(HttpContext context)
+    private async Task ListenLoopAsync(HttpListener listener)
     {
-        if (!context.WebSockets.IsWebSocketRequest)
+        while (listener.IsListening)
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            HttpListenerContext context;
+            try
+            {
+                context = await listener.GetContextAsync().ConfigureAwait(false);
+            }
+            catch (HttpListenerException)
+            {
+                break;
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+
+            _ = Task.Run(() => HandleRequestAsync(context));
+        }
+    }
+
+    private async Task HandleRequestAsync(HttpListenerContext context)
+    {
+        if (!context.Request.IsWebSocketRequest)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Close();
             return;
         }
 
-        using System.Net.WebSockets.WebSocket socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
-        string remoteEndpoint = context.Connection.RemoteIpAddress is null
-            ? "unknown"
-            : context.Connection.RemoteIpAddress + ":" + context.Connection.RemotePort;
+        HttpListenerWebSocketContext wsContext;
+        try
+        {
+            wsContext = await context.AcceptWebSocketAsync(null).ConfigureAwait(false);
+        }
+        catch
+        {
+            try { context.Response.Close(); }
+            catch { }
+            return;
+        }
+
+        WebSocket socket = wsContext.WebSocket;
+        string remoteEndpoint = context.Request.RemoteEndPoint is not null
+            ? context.Request.RemoteEndPoint.ToString()
+            : "unknown";
         string localEndpoint = ":" + Port;
 
-        await _server.AcceptConnectionAsync(socket, remoteEndpoint, localEndpoint, context.RequestAborted).ConfigureAwait(false);
+        await _server.AcceptConnectionAsync(socket, remoteEndpoint, localEndpoint, CancellationToken.None).ConfigureAwait(false);
 
-        while (socket.State == System.Net.WebSockets.WebSocketState.Open && !context.RequestAborted.IsCancellationRequested)
+        while (socket.State == WebSocketState.Open)
         {
-            await Task.Delay(50, context.RequestAborted).ConfigureAwait(false);
+            await Task.Delay(50).ConfigureAwait(false);
         }
     }
 }

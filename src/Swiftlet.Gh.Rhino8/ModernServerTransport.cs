@@ -1,8 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Logging;
+using System.Net;
 using Swiftlet.Core.Http;
 
 namespace Swiftlet.Gh.Rhino8;
@@ -10,14 +6,15 @@ namespace Swiftlet.Gh.Rhino8;
 public sealed class ModernServerTransport : IAsyncDisposable
 {
     private readonly ModernServer _server;
-    private WebApplication? _application;
+    private HttpListener? _listener;
+    private Task? _listenTask;
 
     public ModernServerTransport(ModernServer server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public bool IsRunning => _application is not null;
+    public bool IsRunning => _listener?.IsListening == true;
 
     public int Port { get; private set; }
 
@@ -30,41 +27,36 @@ public sealed class ModernServerTransport : IAsyncDisposable
 
         await StopAsync().ConfigureAwait(false);
 
-        var builder = WebApplication.CreateBuilder();
-        builder.Logging.ClearProviders();
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            options.ListenLocalhost(port, listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http1;
-            });
-        });
+        var listener = new HttpListener();
+        listener.Prefixes.Add($"http://localhost:{port}/");
+        listener.Start();
 
-        WebApplication application = builder.Build();
-        application.Map("/{**path}", HandleRequestAsync);
-        await application.StartAsync(cancellationToken).ConfigureAwait(false);
-
-        _application = application;
+        _listener = listener;
         Port = port;
+        _listenTask = Task.Run(() => ListenLoopAsync(listener));
     }
 
     public async Task StopAsync()
     {
-        if (_application is null)
+        HttpListener? listener = _listener;
+        _listener = null;
+
+        if (listener is not null)
         {
-            return;
+            try { listener.Stop(); }
+            catch { }
+            try { listener.Close(); }
+            catch { }
         }
 
-        try
+        if (_listenTask is not null)
         {
-            await _application.StopAsync().ConfigureAwait(false);
+            try { await _listenTask.ConfigureAwait(false); }
+            catch { }
+            _listenTask = null;
         }
-        finally
-        {
-            await _application.DisposeAsync().ConfigureAwait(false);
-            _application = null;
-            Port = 0;
-        }
+
+        Port = 0;
     }
 
     public async ValueTask DisposeAsync()
@@ -72,24 +64,56 @@ public sealed class ModernServerTransport : IAsyncDisposable
         await StopAsync().ConfigureAwait(false);
     }
 
-    private async Task HandleRequestAsync(HttpContext context)
+    private async Task ListenLoopAsync(HttpListener listener)
+    {
+        while (listener.IsListening)
+        {
+            HttpListenerContext context;
+            try
+            {
+                context = await listener.GetContextAsync().ConfigureAwait(false);
+            }
+            catch (HttpListenerException)
+            {
+                break;
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+
+            _ = Task.Run(() => HandleRequestAsync(context));
+        }
+    }
+
+    private async Task HandleRequestAsync(HttpListenerContext context)
     {
         try
         {
             byte[] bodyBytes;
             using (var memoryStream = new MemoryStream())
             {
-                await context.Request.Body.CopyToAsync(memoryStream, context.RequestAborted).ConfigureAwait(false);
+                await context.Request.InputStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                 bodyBytes = memoryStream.ToArray();
             }
 
-            var headers = context.Request.Headers
-                .Select(static header => new HttpHeader(header.Key, header.Value.FirstOrDefault() ?? string.Empty))
-                .ToArray();
+            var headers = new List<HttpHeader>();
+            foreach (string? key in context.Request.Headers.AllKeys)
+            {
+                if (key is not null)
+                {
+                    headers.Add(new HttpHeader(key, context.Request.Headers[key] ?? string.Empty));
+                }
+            }
 
-            var queryParameters = context.Request.Query
-                .Select(static parameter => new QueryParameter(parameter.Key, parameter.Value.FirstOrDefault() ?? string.Empty))
-                .ToArray();
+            var queryParameters = new List<QueryParameter>();
+            foreach (string? key in context.Request.QueryString.AllKeys)
+            {
+                if (key is not null)
+                {
+                    queryParameters.Add(new QueryParameter(key, context.Request.QueryString[key] ?? string.Empty));
+                }
+            }
 
             var body = new RequestBodyBytes(
                 string.IsNullOrWhiteSpace(context.Request.ContentType)
@@ -97,14 +121,16 @@ public sealed class ModernServerTransport : IAsyncDisposable
                     : context.Request.ContentType,
                 bodyBytes);
 
+            string path = context.Request.Url?.AbsolutePath ?? "/";
+
             ModernServerHttpResponse response = await _server
                 .HandleHttpRequestAsync(
-                    context.Request.Method,
-                    context.Request.Path.Value ?? "/",
+                    context.Request.HttpMethod,
+                    path,
                     headers,
                     queryParameters,
                     body,
-                    context.RequestAborted)
+                    CancellationToken.None)
                 .ConfigureAwait(false);
 
             context.Response.StatusCode = response.StatusCode;
@@ -115,19 +141,29 @@ public sealed class ModernServerTransport : IAsyncDisposable
 
             foreach (HttpHeader header in response.Headers)
             {
-                context.Response.Headers[header.Key] = header.Value;
+                context.Response.AddHeader(header.Key, header.Value);
             }
 
             if (response.Body.Length > 0)
             {
-                await context.Response.Body.WriteAsync(response.Body, context.RequestAborted).ConfigureAwait(false);
+                await context.Response.OutputStream.WriteAsync(response.Body).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = $"{ContentTypes.TextPlain}; charset=utf-8";
-            await context.Response.WriteAsync(ex.ToString(), context.RequestAborted).ConfigureAwait(false);
+            try
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = $"{ContentTypes.TextPlain}; charset=utf-8";
+                byte[] errorBytes = System.Text.Encoding.UTF8.GetBytes(ex.ToString());
+                await context.Response.OutputStream.WriteAsync(errorBytes).ConfigureAwait(false);
+            }
+            catch { }
+        }
+        finally
+        {
+            try { context.Response.Close(); }
+            catch { }
         }
     }
 }

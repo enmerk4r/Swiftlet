@@ -1,23 +1,19 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Swiftlet.Gh.Rhino8;
 
 public sealed class ModernMcpServerTransport : IAsyncDisposable
 {
     private readonly ModernMcpServer _server;
-    private WebApplication? _application;
+    private HttpListener? _listener;
+    private Task? _listenTask;
 
     public ModernMcpServerTransport(ModernMcpServer server)
     {
         _server = server ?? throw new ArgumentNullException(nameof(server));
     }
 
-    public bool IsRunning => _application is not null;
+    public bool IsRunning => _listener?.IsListening == true;
 
     public int Port { get; private set; }
 
@@ -30,91 +26,121 @@ public sealed class ModernMcpServerTransport : IAsyncDisposable
 
         await StopAsync().ConfigureAwait(false);
 
-        var builder = WebApplication.CreateBuilder();
-        builder.Logging.ClearProviders();
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            options.ListenLocalhost(port, listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http1;
-            });
-        });
+        var listener = new HttpListener();
+        listener.Prefixes.Add($"http://localhost:{port}/");
+        listener.Start();
 
-        WebApplication application = builder.Build();
-
-        application.Map("/{**path}", async context =>
-        {
-            try
-            {
-                if (!context.Request.Path.StartsWithSegments("/mcp", StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Response.StatusCode = StatusCodes.Status404NotFound;
-                    return;
-                }
-
-                string? sessionId = context.Request.Headers["Mcp-Session-Id"].FirstOrDefault();
-                string body;
-                using (var reader = new StreamReader(context.Request.Body))
-                {
-                    body = await reader.ReadToEndAsync(context.RequestAborted).ConfigureAwait(false);
-                }
-
-                ModernMcpHttpResponse response = await _server
-                    .HandleHttpRequestAsync(context.Request.Method, sessionId, body, context.RequestAborted)
-                    .ConfigureAwait(false);
-
-                context.Response.StatusCode = response.StatusCode;
-
-                if (!string.IsNullOrWhiteSpace(response.ContentType))
-                {
-                    context.Response.ContentType = response.ContentType;
-                }
-
-                foreach (KeyValuePair<string, string> header in response.Headers)
-                {
-                    context.Response.Headers[header.Key] = header.Value;
-                }
-
-                if (!string.IsNullOrEmpty(response.Body))
-                {
-                    await context.Response.WriteAsync(response.Body, context.RequestAborted).ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                context.Response.ContentType = "text/plain; charset=utf-8";
-                await context.Response.WriteAsync(ex.ToString(), context.RequestAborted).ConfigureAwait(false);
-            }
-        });
-
-        await application.StartAsync(cancellationToken).ConfigureAwait(false);
-
-        _application = application;
+        _listener = listener;
         Port = port;
+        _listenTask = Task.Run(() => ListenLoopAsync(listener));
     }
 
     public async Task StopAsync()
     {
-        if (_application is null)
+        HttpListener? listener = _listener;
+        _listener = null;
+
+        if (listener is not null)
         {
-            return;
+            try { listener.Stop(); }
+            catch { }
+            try { listener.Close(); }
+            catch { }
         }
 
-        try
+        if (_listenTask is not null)
         {
-            await _application.StopAsync().ConfigureAwait(false);
+            try { await _listenTask.ConfigureAwait(false); }
+            catch { }
+            _listenTask = null;
         }
-        finally
-        {
-            await _application.DisposeAsync().ConfigureAwait(false);
-            _application = null;
-            Port = 0;
-        }
+
+        Port = 0;
     }
 
     public async ValueTask DisposeAsync()
     {
         await StopAsync().ConfigureAwait(false);
+    }
+
+    private async Task ListenLoopAsync(HttpListener listener)
+    {
+        while (listener.IsListening)
+        {
+            HttpListenerContext context;
+            try
+            {
+                context = await listener.GetContextAsync().ConfigureAwait(false);
+            }
+            catch (HttpListenerException)
+            {
+                break;
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+
+            _ = Task.Run(() => HandleRequestAsync(context));
+        }
+    }
+
+    private async Task HandleRequestAsync(HttpListenerContext context)
+    {
+        try
+        {
+            string path = context.Request.Url?.AbsolutePath ?? "/";
+            if (!path.StartsWith("/mcp", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Response.StatusCode = 404;
+                context.Response.Close();
+                return;
+            }
+
+            string? sessionId = context.Request.Headers["Mcp-Session-Id"];
+            string body;
+            using (var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+            {
+                body = await reader.ReadToEndAsync().ConfigureAwait(false);
+            }
+
+            ModernMcpHttpResponse response = await _server
+                .HandleHttpRequestAsync(context.Request.HttpMethod, sessionId, body, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            context.Response.StatusCode = response.StatusCode;
+
+            if (!string.IsNullOrWhiteSpace(response.ContentType))
+            {
+                context.Response.ContentType = response.ContentType;
+            }
+
+            foreach (KeyValuePair<string, string> header in response.Headers)
+            {
+                context.Response.AddHeader(header.Key, header.Value);
+            }
+
+            if (!string.IsNullOrEmpty(response.Body))
+            {
+                byte[] responseBytes = System.Text.Encoding.UTF8.GetBytes(response.Body);
+                await context.Response.OutputStream.WriteAsync(responseBytes).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "text/plain; charset=utf-8";
+                byte[] errorBytes = System.Text.Encoding.UTF8.GetBytes(ex.ToString());
+                await context.Response.OutputStream.WriteAsync(errorBytes).ConfigureAwait(false);
+            }
+            catch { }
+        }
+        finally
+        {
+            try { context.Response.Close(); }
+            catch { }
+        }
     }
 }

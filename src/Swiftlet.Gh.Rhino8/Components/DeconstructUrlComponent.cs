@@ -1,5 +1,6 @@
+using System.Collections.Specialized;
+using System.Web;
 using Grasshopper.Kernel;
-using Microsoft.AspNetCore.WebUtilities;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
 
@@ -42,11 +43,14 @@ public sealed class DeconstructUrlComponent : GH_Component
         }
 
         Uri uri = new(url);
-        var query = QueryHelpers.ParseQuery(uri.Query);
+        NameValueCollection query = HttpUtility.ParseQueryString(uri.Query);
         List<QueryParameterGoo> parameters = [];
-        foreach ((string key, var value) in query)
+        foreach (string? key in query.AllKeys)
         {
-            parameters.Add(new QueryParameterGoo(key, value.ToString()));
+            if (key is not null)
+            {
+                parameters.Add(new QueryParameterGoo(key, query[key] ?? string.Empty));
+            }
         }
 
         string baseUri = url.Split('?').First();
@@ -61,4 +65,3 @@ public sealed class DeconstructUrlComponent : GH_Component
 
     public override Guid ComponentGuid => new("6240a6fa-f6fa-47af-a796-0a2fc3dd6cc1");
 }
-
