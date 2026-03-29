@@ -47,7 +47,7 @@ public sealed class DeconstructMultipartFieldComponent : GH_Component
         DA.SetData(4, goo.Value.ContentType);
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
     public override Guid ComponentGuid => new("9eb68bee-b47d-4832-9b17-569844977a9f");
 }
