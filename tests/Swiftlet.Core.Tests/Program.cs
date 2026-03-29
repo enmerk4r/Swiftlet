@@ -2,8 +2,10 @@ using System.Net;
 using System.Net.Http;
 using Swiftlet.Core.Auth;
 using Swiftlet.Core.Http;
+using Swiftlet.Core.Json;
 using Swiftlet.Core.Mcp;
 using Swiftlet.Core.Security;
+using System.Text.Json.Nodes;
 
 return TestRunner.Run();
 
@@ -32,6 +34,10 @@ internal static class TestRunner
             ("OAuth token client parses successful token responses", OAuthTokenClientParsesSuccessfulResponses),
             ("HttpRequestDefinition builds full URL and preserves headers", HttpRequestDefinitionBuildsRequestData),
             ("HttpRequestExecutor returns response data from handler", HttpRequestExecutorReturnsResponseData),
+            ("JSON object merger recursively merges nested objects", JsonObjectMergerRecursivelyMergesNestedObjects),
+            ("JSON object merger supports null-aware conflict modes", JsonObjectMergerSupportsNullAwareConflictModes),
+            ("JSON object merger treats arrays and type mismatches as conflicts", JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts),
+            ("JSON object merger parses valid and invalid modes", JsonObjectMergerParsesModes),
             ("MCP tool definition builds expected input schema", McpToolDefinitionBuildsInputSchema),
             ("MCP client config builder serializes command and args", McpClientConfigBuilderSerializesLaunchCommand),
             ("IpBlacklist matches configured IPv4 and IPv6 ranges", IpBlacklistMatchesConfiguredRanges),
@@ -355,6 +361,135 @@ internal static class TestRunner
         Assert.Equal("abc", response.Headers.Single(header => header.Key == "X-Test").Value);
     }
 
+    private static void JsonObjectMergerRecursivelyMergesNestedObjects()
+    {
+        JsonObject objectA = ParseJsonObject("""
+            {
+              "name": "base",
+              "settings": {
+                "enabled": true,
+                "theme": "light"
+              },
+              "count": 1
+            }
+            """);
+        JsonObject objectB = ParseJsonObject("""
+            {
+              "settings": {
+                "theme": "dark",
+                "timeout": 30
+              },
+              "count": 2,
+              "extra": "value"
+            }
+            """);
+
+        JsonObject merged = JsonObjectMerger.Merge(objectA, objectB, JsonObjectMergeConflictMode.PreferA);
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "name": "base",
+                  "settings": {
+                    "enabled": true,
+                    "theme": "light",
+                    "timeout": 30
+                  },
+                  "count": 1,
+                  "extra": "value"
+                }
+                """),
+            merged);
+    }
+
+    private static void JsonObjectMergerSupportsNullAwareConflictModes()
+    {
+        JsonObject objectA = ParseJsonObject("""
+            {
+              "keepA": "a",
+              "preferBWhenANull": null,
+              "nested": {
+                "preferBWhenANull": null,
+                "keepA": "left"
+              }
+            }
+            """);
+        JsonObject objectB = ParseJsonObject("""
+            {
+              "keepA": "b",
+              "preferBWhenANull": "filled",
+              "nested": {
+                "preferBWhenANull": 99,
+                "keepA": "right"
+              }
+            }
+            """);
+
+        JsonObject preferAUnlessNull = JsonObjectMerger.Merge(objectA, objectB, JsonObjectMergeConflictMode.PreferAUnlessNull);
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "keepA": "a",
+                  "preferBWhenANull": "filled",
+                  "nested": {
+                    "preferBWhenANull": 99,
+                    "keepA": "left"
+                  }
+                }
+                """),
+            preferAUnlessNull);
+
+        JsonObject preferBUnlessNull = JsonObjectMerger.Merge(
+            ParseJsonObject("""{ "value": "left", "other": 1 }"""),
+            ParseJsonObject("""{ "value": null, "other": 2 }"""),
+            JsonObjectMergeConflictMode.PreferBUnlessNull);
+
+        AssertJsonEqual(
+            ParseJsonObject("""{ "value": "left", "other": 2 }"""),
+            preferBUnlessNull);
+    }
+
+    private static void JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts()
+    {
+        JsonObject objectA = ParseJsonObject("""
+            {
+              "items": [1, 2],
+              "shape": {
+                "kind": "circle"
+              }
+            }
+            """);
+        JsonObject objectB = ParseJsonObject("""
+            {
+              "items": [3],
+              "shape": "square"
+            }
+            """);
+
+        JsonObject merged = JsonObjectMerger.Merge(objectA, objectB, JsonObjectMergeConflictMode.PreferB);
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "items": [3],
+                  "shape": "square"
+                }
+                """),
+            merged);
+    }
+
+    private static void JsonObjectMergerParsesModes()
+    {
+        Assert.True(JsonObjectMerger.TryParseConflictMode(0, out JsonObjectMergeConflictMode preferA));
+        Assert.Equal(JsonObjectMergeConflictMode.PreferA, preferA);
+
+        Assert.True(JsonObjectMerger.TryParseConflictMode(3, out JsonObjectMergeConflictMode preferBUnlessNull));
+        Assert.Equal(JsonObjectMergeConflictMode.PreferBUnlessNull, preferBUnlessNull);
+
+        Assert.False(JsonObjectMerger.TryParseConflictMode(42, out JsonObjectMergeConflictMode fallback));
+        Assert.Equal(JsonObjectMerger.DefaultConflictMode, fallback);
+    }
+
     private static void McpClientConfigBuilderSerializesLaunchCommand()
     {
         string json = McpClientConfigBuilder.Build(
@@ -438,6 +573,19 @@ internal static class TestRunner
 
         Assert.True(allowedDns.IsValid);
         Assert.Null(allowedDns.ErrorMessage);
+    }
+
+    private static JsonObject ParseJsonObject(string json)
+    {
+        return JsonNode.Parse(json)?.AsObject() ?? throw new InvalidOperationException("Failed to parse JSON object.");
+    }
+
+    private static void AssertJsonEqual(JsonObject expected, JsonObject actual)
+    {
+        if (!JsonNode.DeepEquals(expected, actual))
+        {
+            throw new InvalidOperationException($"Expected '{expected.ToJsonString()}' but got '{actual.ToJsonString()}'.");
+        }
     }
 }
 

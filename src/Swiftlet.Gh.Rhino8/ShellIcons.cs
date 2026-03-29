@@ -101,6 +101,7 @@ internal static class ShellIcons
             "McpToolDefinitionParam" => "Icons_mcp_tool_definition.png",
             "McpToolParameterParam" => "Icons_mcp_tool_parameter.png",
             "McpToolResponseComponent" => "Icons_mcp_tool_response.png",
+            "MergeJsonObjectsComponent" => "Icons_create_json_object_24x24.png",
             "MultipartFieldParam" => "Icons_multipart_field_param_24x24.png",
             "OAuthAuthorizeComponent" => "Icons_oauth_authorize.png",
             "OAuthTokenComponent" => "Icons_oauth_token.png",
