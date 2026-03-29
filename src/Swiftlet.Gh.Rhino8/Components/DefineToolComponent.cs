@@ -8,7 +8,7 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class DefineToolComponent : GH_Component
 {
     public DefineToolComponent()
-        : base("Define Tool", "Tool", "Defines an MCP tool that can be called by AI clients.", ShellNaming.Category, ShellNaming.Mcp)
+        : base("Define Tool", "Tool", "Defines one tool that the MCP Server can expose. Use it to describe what the tool is called, what it does, and which arguments it accepts.", ShellNaming.Category, ShellNaming.Mcp)
     {
     }
 
@@ -16,15 +16,15 @@ public sealed class DefineToolComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Name", "N", "Tool name (e.g., 'compute_area')", GH_ParamAccess.item);
-        pManager.AddTextParameter("Description", "D", "Description of what the tool does", GH_ParamAccess.item);
-        pManager.AddParameter(new McpToolParameterParam(), "Parameters", "P", "Tool parameter definitions", GH_ParamAccess.list);
+        pManager.AddTextParameter("Name", "N", "Tool name used by the MCP client when calling this tool. Example: 'compute_area'.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Description", "D", "Plain-language description of what the tool does and when the AI client should use it.", GH_ParamAccess.item);
+        pManager.AddParameter(new McpToolParameterParam(), "Parameters", "P", "Parameter definitions that describe the JSON arguments this tool accepts.", GH_ParamAccess.list);
         pManager[2].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddParameter(new McpToolDefinitionParam(), "Tool", "T", "The tool definition", GH_ParamAccess.item);
+        pManager.AddParameter(new McpToolDefinitionParam(), "Tool", "T", "Tool definition to connect to MCP Server.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

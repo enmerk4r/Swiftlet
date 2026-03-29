@@ -7,7 +7,7 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class DeconstructToolCallComponent : GH_Component
 {
     public DeconstructToolCallComponent()
-        : base("Deconstruct Tool Call", "DeCall", "Extracts data from an incoming MCP tool call.", ShellNaming.Category, ShellNaming.Mcp)
+        : base("Deconstruct Tool Call", "DeCall", "Breaks an incoming MCP tool call into the original request, the tool name, and the JSON arguments sent by the MCP client.", ShellNaming.Category, ShellNaming.Mcp)
     {
     }
 
@@ -15,14 +15,14 @@ public sealed class DeconstructToolCallComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddParameter(new McpToolCallRequestParam(), "Request", "R", "The tool call request from MCP Server", GH_ParamAccess.item);
+        pManager.AddParameter(new McpToolCallRequestParam(), "Request", "R", "Pending tool-call request emitted by MCP Server.", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddParameter(new McpToolCallRequestParam(), "Request", "R", "Pass-through request for MCP Tool Response", GH_ParamAccess.item);
-        pManager.AddTextParameter("Tool", "T", "Tool name that was called", GH_ParamAccess.item);
-        pManager.AddParameter(new JsonObjectParam(), "Arguments", "A", "The arguments as a JSON object", GH_ParamAccess.item);
+        pManager.AddParameter(new McpToolCallRequestParam(), "Request", "R", "Pass-through request object to send into MCP Tool Response after your Grasshopper logic finishes.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Tool", "T", "Name of the tool that the MCP client called.", GH_ParamAccess.item);
+        pManager.AddParameter(new JsonObjectParam(), "Arguments", "A", "Arguments supplied by the MCP client as a JSON object.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

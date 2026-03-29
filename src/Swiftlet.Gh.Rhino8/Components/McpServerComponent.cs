@@ -16,7 +16,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private bool _requestTriggeredSolve;
 
     public McpServerComponent()
-        : base("MCP Server", "MCP", "An MCP server that exposes Grasshopper tools to AI clients like Claude.", ShellNaming.Category, ShellNaming.Mcp)
+        : base("MCP Server", "MCP", "Starts an MCP server and exposes the connected tools to MCP clients. Each connected tool appears as its own output and emits a request when that tool is called.", ShellNaming.Category, ShellNaming.Mcp)
     {
         _session.RequestQueued += OnRequestQueued;
     }
@@ -25,9 +25,9 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (default: 3001)", GH_ParamAccess.item, 3001);
-        pManager.AddParameter(new McpToolDefinitionParam(), "Tools", "T", "Tool definitions to expose", GH_ParamAccess.list);
-        pManager.AddTextParameter("Server Name", "N", "Server name for MCP protocol", GH_ParamAccess.item, "Swiftlet");
+        pManager.AddIntegerParameter("Port", "P", "Local TCP port for the MCP server. Use this port when connecting an MCP client to Swiftlet. Default: 3001.", GH_ParamAccess.item, 3001);
+        pManager.AddParameter(new McpToolDefinitionParam(), "Tools", "T", "Tool definitions to expose to the MCP client. Each connected tool creates a matching request output on this component.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Server Name", "N", "Server name reported to the MCP client in the MCP connection info.", GH_ParamAccess.item, "Swiftlet");
         pManager[1].Optional = true;
         pManager[2].Optional = true;
     }
@@ -179,7 +179,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
             {
                 Name = tool.Name,
                 NickName = tool.Name,
-                Description = $"Tool call request for '{tool.Name}'",
+                Description = $"Emits a request when the MCP client calls '{tool.Name}'. Connect it to Deconstruct Tool Call, process the request, then finish with MCP Tool Response.",
                 Access = GH_ParamAccess.item,
             };
 

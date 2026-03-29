@@ -39,6 +39,9 @@ internal static class TestRunner
             ("JSON object merger treats arrays and type mismatches as conflicts", JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts),
             ("JSON object merger parses valid and invalid modes", JsonObjectMergerParsesModes),
             ("MCP tool definition builds expected input schema", McpToolDefinitionBuildsInputSchema),
+            ("MCP tool result serializes typed content blocks", McpToolResultSerializesTypedContentBlocks),
+            ("MCP resource content blocks serialize to spec shapes", McpResourceContentBlocksSerializeToSpecShapes),
+            ("MCP tool result duplicates structured content safely", McpToolResultDuplicatesStructuredContentSafely),
             ("MCP client config builder serializes command and args", McpClientConfigBuilderSerializesLaunchCommand),
             ("IpBlacklist matches configured IPv4 and IPv6 ranges", IpBlacklistMatchesConfiguredRanges),
             ("IpBlacklist falls back to block-all for invalid environment configuration", IpBlacklistBlocksAllOnInvalidEnvironmentConfig),
@@ -517,6 +520,112 @@ internal static class TestRunner
         Assert.Contains("\"description\":\"Fetches data.\"", json);
         Assert.Contains("\"required\":[\"url\"]", json);
         Assert.Contains("\"timeout\":{\"type\":\"integer\"", json);
+    }
+
+    private static void McpToolResultSerializesTypedContentBlocks()
+    {
+        var result = new McpToolResult(
+            [
+                new McpTextContentBlock("Viewport captured."),
+                new McpImageContentBlock("image/png", "AQID"),
+            ],
+            ParseJsonObject("""{ "viewport": "Perspective", "width": 1920 }"""),
+            isError: true);
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Viewport captured."
+                    },
+                    {
+                      "type": "image",
+                      "mimeType": "image/png",
+                      "data": "AQID"
+                    }
+                  ],
+                  "structuredContent": {
+                    "viewport": "Perspective",
+                    "width": 1920
+                  },
+                  "isError": true
+                }
+                """),
+            result.ToJson());
+    }
+
+    private static void McpToolResultDuplicatesStructuredContentSafely()
+    {
+        JsonObject structuredContent = ParseJsonObject("""{ "viewport": "Top" }""");
+        var result = new McpToolResult([new McpTextContentBlock("ok")], structuredContent);
+
+        structuredContent["viewport"] = "Perspective";
+        McpToolResult duplicate = result.Duplicate();
+        duplicate.StructuredContent!["viewport"] = "Right";
+
+        Assert.Equal("Top", result.StructuredContent!["viewport"]!.GetValue<string>());
+        Assert.Equal("Right", duplicate.StructuredContent!["viewport"]!.GetValue<string>());
+    }
+
+    private static void McpResourceContentBlocksSerializeToSpecShapes()
+    {
+        var resourceLink = new McpResourceLinkContentBlock(
+            "swiftlet://viewport/perspective",
+            "Perspective View",
+            title: "Perspective",
+            description: "Latest perspective viewport capture",
+            mimeType: "image/png");
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "type": "resource_link",
+                  "uri": "swiftlet://viewport/perspective",
+                  "name": "Perspective View",
+                  "title": "Perspective",
+                  "description": "Latest perspective viewport capture",
+                  "mimeType": "image/png"
+                }
+                """),
+            resourceLink.ToJson());
+
+        var embeddedText = new McpEmbeddedTextResourceContentBlock(
+            "swiftlet://reports/summary.txt",
+            "All checks passed.",
+            "text/plain");
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "type": "resource",
+                  "resource": {
+                    "uri": "swiftlet://reports/summary.txt",
+                    "text": "All checks passed.",
+                    "mimeType": "text/plain"
+                  }
+                }
+                """),
+            embeddedText.ToJson());
+
+        var embeddedBinary = new McpEmbeddedBinaryResourceContentBlock(
+            "swiftlet://exports/preview.bin",
+            [1, 2, 3],
+            "application/octet-stream");
+
+        AssertJsonEqual(
+            ParseJsonObject("""
+                {
+                  "type": "resource",
+                  "resource": {
+                    "uri": "swiftlet://exports/preview.bin",
+                    "blob": "AQID",
+                    "mimeType": "application/octet-stream"
+                  }
+                }
+                """),
+            embeddedBinary.ToJson());
     }
 
     private static void IpBlacklistMatchesConfiguredRanges()

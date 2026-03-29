@@ -6,7 +6,7 @@ namespace Swiftlet.Gh.Rhino8.Params;
 public sealed class McpToolCallRequestParam : GH_Param<McpToolCallRequestGoo>
 {
     public McpToolCallRequestParam()
-        : base("MCP Tool Call Request", "R", "Request for a pending MCP tool call", ShellNaming.Category, ShellNaming.Mcp, GH_ParamAccess.item)
+        : base("MCP Tool Call Request", "R", "Pending MCP tool-call request.", ShellNaming.Category, ShellNaming.Mcp, GH_ParamAccess.item)
     {
     }
 

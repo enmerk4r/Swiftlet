@@ -8,7 +8,7 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class DefineToolParameterComponent : GH_Component
 {
     public DefineToolParameterComponent()
-        : base("Define Tool Parameter", "Param", "Defines a parameter for an MCP tool.", ShellNaming.Category, ShellNaming.Mcp)
+        : base("Define Tool Parameter", "Param", "Defines one input parameter for an MCP tool. These parameter definitions become the schema for the tool's JSON arguments.", ShellNaming.Category, ShellNaming.Mcp)
     {
     }
 
@@ -16,15 +16,15 @@ public sealed class DefineToolParameterComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Name", "N", "Parameter name", GH_ParamAccess.item);
-        pManager.AddTextParameter("Type", "T", "JSON Schema type: string, number, integer, boolean, object, array", GH_ParamAccess.item, "string");
-        pManager.AddTextParameter("Description", "D", "Parameter description", GH_ParamAccess.item, string.Empty);
-        pManager.AddBooleanParameter("Required", "R", "Is this parameter required?", GH_ParamAccess.item, true);
+        pManager.AddTextParameter("Name", "N", "JSON property name for this argument.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Type", "T", "JSON value type for this argument: string, number, integer, boolean, object, or array.", GH_ParamAccess.item, "string");
+        pManager.AddTextParameter("Description", "D", "Plain-language explanation of what this argument means.", GH_ParamAccess.item, string.Empty);
+        pManager.AddBooleanParameter("Required", "R", "If true, the MCP client is expected to provide this argument.", GH_ParamAccess.item, true);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddParameter(new McpToolParameterParam(), "Parameter", "P", "The parameter definition", GH_ParamAccess.item);
+        pManager.AddParameter(new McpToolParameterParam(), "Parameter", "P", "Tool-parameter definition to connect to Define Tool.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

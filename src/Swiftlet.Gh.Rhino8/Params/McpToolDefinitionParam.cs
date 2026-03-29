@@ -6,7 +6,7 @@ namespace Swiftlet.Gh.Rhino8.Params;
 public sealed class McpToolDefinitionParam : GH_Param<McpToolDefinitionGoo>
 {
     public McpToolDefinitionParam()
-        : base("MCP Tool Definition", "T", "A tool definition for an MCP server", ShellNaming.Category, ShellNaming.Mcp, GH_ParamAccess.item)
+        : base("MCP Tool Definition", "T", "Definition of one MCP tool.", ShellNaming.Category, ShellNaming.Mcp, GH_ParamAccess.item)
     {
     }
 

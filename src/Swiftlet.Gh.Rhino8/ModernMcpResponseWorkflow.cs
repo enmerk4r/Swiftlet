@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Swiftlet.Core.Mcp;
 
 namespace Swiftlet.Gh.Rhino8;
 
@@ -21,6 +22,23 @@ public static class ModernMcpResponseWorkflow
         return isError
             ? request.TryRespondWithError(-32000, ToErrorMessage(normalizedContent))
             : request.TryRespondWithJson(normalizedContent);
+    }
+
+    public static bool TrySendResponse(
+        ModernMcpToolCallContext request,
+        IEnumerable<McpContentBlock>? contentBlocks,
+        JsonObject? structuredContent,
+        bool isError)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (request.HasResponded)
+        {
+            return false;
+        }
+
+        var result = new McpToolResult(contentBlocks, structuredContent, isError);
+        return request.TryRespondWithToolResult(result);
     }
 
     public static (ModernMcpToolCallContext Request, string ToolName, JsonObject Arguments) Deconstruct(
