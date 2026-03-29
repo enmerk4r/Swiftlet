@@ -1,8 +1,10 @@
 # Linux Port Architecture
 
+Note: this document captures the original migration plan. The active repository direction is now a single modern Rhino 8+ shell on Windows, Mac, and Linux, with legacy Rhino 6/7 support removed from the main solution story.
+
 ## Goal
 
-Make Swiftlet run on Linux with feature parity for the current Windows plugin, while still supporting Rhino 6, 7, 8, and eventually 9 without turning the solution into an unmaintainable build matrix.
+Make Swiftlet run on Linux with feature parity for the current Windows plugin, while supporting the modern Rhino 8+ line without turning the solution into an unmaintainable build matrix.
 
 This plan is based on the current repository structure and code hotspots:
 

@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\Version.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,6 +7,10 @@
     <Nullable>enable</Nullable>
     <RootNamespace>SwiftletBridge</RootNamespace>
     <AssemblyName>SwiftletBridge</AssemblyName>
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(SwiftletVersion)</InformationalVersion>
     <Description>Cross-platform MCP bridge scaffold for the new Swiftlet architecture.</Description>
   </PropertyGroup>
 

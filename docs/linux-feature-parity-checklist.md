@@ -1,5 +1,7 @@
 # Linux Feature Parity Checklist
 
+Note: the active repository direction is now Rhino 8+ only. Older Rhino references below are historical cleanup items from the original migration plan.
+
 This checklist translates the current Windows implementation into explicit cross-platform work items.
 
 ## Build and Packaging
@@ -9,7 +11,7 @@ This checklist translates the current Windows implementation into explicit cross
 - [ ] Remove Yak packaging from plugin post-build steps.
 - [ ] Publish `SwiftletBridge` independently by RID.
 - [ ] Add Linux staging output for Rhino 8+ package generation.
-- [ ] Keep Rhino 6 and Rhino 7 as Windows-only distributions.
+- [ ] Remove legacy Rhino 6 and Rhino 7 from the active development path.
 
 ## Core Extraction
 

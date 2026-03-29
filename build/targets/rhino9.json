@@ -1,8 +1,9 @@
 {
-  "id": "rhino8",
-  "minimumRhinoMajor": 8,
-  "supportedRhinoMajors": [8, 9],
-  "yakRhinoMajor": 8,
+  "id": "rhino9",
+  "minimumRhinoMajor": 9,
+  "supportedRhinoMajors": [9],
+  "yakRhinoMajor": 9,
+  "yakDistributionAppVersionOverride": "rh9",
   "pluginProject": "src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj",
   "pluginAssemblyName": "Swiftlet.Gh.Rhino8",
   "pluginArtifactName": "Swiftlet.Gh.Rhino8.gha",

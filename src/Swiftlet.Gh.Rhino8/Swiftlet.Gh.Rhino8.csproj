@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\Version.props" />
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <OutputType>Library</OutputType>
@@ -9,11 +10,11 @@
     <BuildInParallel>false</BuildInParallel>
     <RootNamespace>Swiftlet.Gh.Rhino8</RootNamespace>
     <AssemblyName>Swiftlet.Gh.Rhino8</AssemblyName>
-    <Version>0.2.0</Version>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
-    <InformationalVersion>0.2.0</InformationalVersion>
-    <Description>Modern Rhino 8 Grasshopper shell for the Swiftlet Linux port.</Description>
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(SwiftletVersion)</InformationalVersion>
+    <Description>Modern Grasshopper shell for the Rhino 8+ Swiftlet line.</Description>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RhinoCommonPackageVersion>8.0.23304.9001</RhinoCommonPackageVersion>
     <GrasshopperPackageVersion>8.0.23304.9001</GrasshopperPackageVersion>
