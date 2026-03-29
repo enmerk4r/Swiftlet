@@ -4,23 +4,39 @@ internal static class FileWriteUtility
 {
     public static long WriteBytes(string path, byte[] bytes)
     {
-        EnsureDirectory(path);
-        File.WriteAllBytes(path, bytes ?? Array.Empty<byte>());
-        return new FileInfo(path).Length;
+        string normalizedPath = NormalizePath(path);
+        EnsureDirectory(normalizedPath);
+        File.WriteAllBytes(normalizedPath, bytes ?? Array.Empty<byte>());
+        return new FileInfo(normalizedPath).Length;
     }
 
     public static long WriteText(string path, string content)
     {
-        EnsureDirectory(path);
-        File.WriteAllText(path, content ?? string.Empty);
-        return new FileInfo(path).Length;
+        string normalizedPath = NormalizePath(path);
+        EnsureDirectory(normalizedPath);
+        File.WriteAllText(normalizedPath, content ?? string.Empty);
+        return new FileInfo(normalizedPath).Length;
     }
 
     public static long WriteLines(string path, IEnumerable<string> lines)
     {
-        EnsureDirectory(path);
-        File.WriteAllLines(path, lines ?? Array.Empty<string>());
-        return new FileInfo(path).Length;
+        string normalizedPath = NormalizePath(path);
+        EnsureDirectory(normalizedPath);
+        File.WriteAllLines(normalizedPath, lines ?? Array.Empty<string>());
+        return new FileInfo(normalizedPath).Length;
+    }
+
+    private static string NormalizePath(string path)
+    {
+        string candidate = (path ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            throw new ArgumentException("Path is required.", nameof(path));
+        }
+
+        candidate = candidate.Trim('"');
+        candidate = Environment.ExpandEnvironmentVariables(candidate);
+        return Path.GetFullPath(candidate);
     }
 
     private static void EnsureDirectory(string path)
