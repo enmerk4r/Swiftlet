@@ -58,5 +58,5 @@ public sealed class MergeJsonObjectsComponent : GH_Component
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("D0FD4B4D-EC77-4471-8087-31B0B6446A01");
+    public override Guid ComponentGuid => new("0DECA619-B911-42C3-906D-36F2BCD7A61E");
 }

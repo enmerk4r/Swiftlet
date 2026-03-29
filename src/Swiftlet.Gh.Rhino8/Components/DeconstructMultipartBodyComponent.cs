@@ -73,5 +73,5 @@ public sealed class DeconstructMultipartBodyComponent : GH_Component
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("8ebec12d-ad0b-487d-b55f-61b6f9cd4e74");
+    public override Guid ComponentGuid => new("F38C3EC8-A611-46C3-8C79-A1B38DE62D00");
 }
