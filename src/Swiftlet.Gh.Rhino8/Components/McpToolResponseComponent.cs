@@ -90,5 +90,5 @@ public sealed class McpToolResponseComponent : GH_Component
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("8F6B9587-D230-4CEB-8248-7DE136FED7AD");
+    public override Guid ComponentGuid => new("08814CBB-0F3D-44CC-B3D8-41B2053101DE");
 }

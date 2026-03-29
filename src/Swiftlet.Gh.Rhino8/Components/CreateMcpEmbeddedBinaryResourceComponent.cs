@@ -45,7 +45,7 @@ public sealed class CreateMcpEmbeddedBinaryResourceComponent : GH_Component
             new McpEmbeddedBinaryResourceContentBlock(uri, bytesGoo.Value, mimeType)));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("67DD0493-0140-454B-A8C0-AD7556E2DA80");
+    public override Guid ComponentGuid => new("327F8C2D-3964-41A6-BBB6-994441616A3C");
 }

@@ -52,7 +52,7 @@ public sealed class CreateMcpResourceLinkComponent : GH_Component
             new McpResourceLinkContentBlock(uri, name, title, description, mimeType)));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("93033C5E-ABDE-4D99-9E9E-F06D79D55D12");
+    public override Guid ComponentGuid => new("3E0F8FF7-F684-465C-A46A-F74DDDEF1DF2");
 }

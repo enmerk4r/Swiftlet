@@ -45,7 +45,7 @@ public sealed class CreateMcpEmbeddedTextResourceComponent : GH_Component
             new McpEmbeddedTextResourceContentBlock(uri, text, mimeType)));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("06B53CA3-0313-451C-9871-790737B9D884");
+    public override Guid ComponentGuid => new("4E1E3FFB-0592-4DE3-A3AA-1ADB000526DA");
 }

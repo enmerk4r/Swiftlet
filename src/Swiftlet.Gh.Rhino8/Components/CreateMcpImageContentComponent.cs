@@ -58,7 +58,7 @@ public sealed class CreateMcpImageContentComponent : GH_Component
         DA.SetData(0, new McpContentBlockGoo(new McpImageContentBlock(mimeType, base64)));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("DD28DADA-2361-4373-ADE3-BDB99A10D6FE");
+    public override Guid ComponentGuid => new("B33BEF39-9140-4881-A562-EAC060946C5D");
 }

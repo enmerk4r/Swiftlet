@@ -48,7 +48,7 @@ public sealed class ScreenCaptureViewportComponent : GH_Component
         DA.SetData(0, new BitmapGoo(image));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("D76D9EA9-FFB0-4D05-B73D-38B72D73C29E");
+    public override Guid ComponentGuid => new("808B6C0C-E4D7-4451-984A-D4A77C4C83EB");
 }
