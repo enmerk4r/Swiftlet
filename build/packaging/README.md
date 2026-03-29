@@ -88,5 +88,4 @@ Key folders:
 ## Notes
 
 - `build/packaging/Publish-Rhino8.ps1` remains as a compatibility wrapper that forwards to `Publish-Target.ps1 -Target rhino8`.
-- The legacy `Yak/Build-YakPackage.ps1` script is still for the old Windows-only plugin and should not be used for the modern shell.
 - The `rhino9` target is a packaging-layer compatibility target. It does not change the compiled shell project.

@@ -1,16 +1,16 @@
 # Linux Port Architecture
 
-Note: this document captures the original migration plan. The active repository direction is now a single modern Rhino 8+ shell on Windows, Mac, and Linux, with legacy Rhino 6/7 support removed from the main solution story.
+Note: this document captures the original migration plan. The active repository direction is now a single modern Rhino 8+ shell on Windows, Mac, and Linux, with the old `Swiftlet/` legacy tree removed from the repository. Legacy paths mentioned below are historical context only.
 
 ## Goal
 
 Make Swiftlet run on Linux with feature parity for the current Windows plugin, while supporting the modern Rhino 8+ line without turning the solution into an unmaintainable build matrix.
 
-This plan is based on the current repository structure and code hotspots:
+This plan is based on the original repository structure and code hotspots:
 
-- Build and packaging are currently encoded into a single project: `Swiftlet/Swiftlet.csproj`
-- Rhino version selection is currently encoded in solution configurations: `Swiftlet/Swiftlet.sln`
-- Packaging is Windows-specific today: `Yak/Build-YakPackage.ps1`
+- Build and packaging were encoded into a single project: `Swiftlet/Swiftlet.csproj`
+- Rhino version selection was encoded in solution configurations: `Swiftlet/Swiftlet.sln`
+- Packaging was Windows-specific: `Yak/Build-YakPackage.ps1`
 - The plugin currently depends on Windows-only or Windows-biased APIs in several places:
   - `System.Drawing` for bitmap features and resource handling
   - `System.Windows.Forms` for clipboard and menu-related code

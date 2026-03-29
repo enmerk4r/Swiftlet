@@ -60,7 +60,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\..\Swiftlet\Resources\*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\Assets\Logo\Logo_*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\Assets\ComponentIcons\*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyGha" AfterTargets="Build">

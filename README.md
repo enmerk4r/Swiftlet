@@ -3,7 +3,7 @@
 # Swiftlet
 Swiftlet is a free, open source Grasshopper plugin that allows users to construct and send web requests, as well as parse JSON responses from API endpoints.
 
-The active codebase targets the modern Rhino 8+ line across Windows, Mac, and Linux. The main development entry point is `Swiftlet.CrossPlatform.sln`.
+The active codebase targets the modern Rhino 8+ line across Windows, Mac, and Linux. The main development entry point is `Swiftlet.sln`.
 
 ## Prerequisites
 * Rhino 8 or up

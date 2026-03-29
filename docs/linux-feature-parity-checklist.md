@@ -11,7 +11,7 @@ This checklist translates the current Windows implementation into explicit cross
 - [ ] Remove Yak packaging from plugin post-build steps.
 - [ ] Publish `SwiftletBridge` independently by RID.
 - [ ] Add Linux staging output for Rhino 8+ package generation.
-- [ ] Remove legacy Rhino 6 and Rhino 7 from the active development path.
+- [x] Remove legacy Rhino 6 and Rhino 7 from the active development path.
 
 ## Core Extraction
 

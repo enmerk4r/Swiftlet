@@ -582,10 +582,61 @@ internal static class TestRunner
 
     private static void AssertJsonEqual(JsonObject expected, JsonObject actual)
     {
-        if (!JsonNode.DeepEquals(expected, actual))
+        if (!AreEquivalent(expected, actual))
         {
             throw new InvalidOperationException($"Expected '{expected.ToJsonString()}' but got '{actual.ToJsonString()}'.");
         }
+    }
+
+    private static bool AreEquivalent(JsonNode? left, JsonNode? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null)
+        {
+            return false;
+        }
+
+        if (left is JsonObject leftObject && right is JsonObject rightObject)
+        {
+            if (leftObject.Count != rightObject.Count)
+            {
+                return false;
+            }
+
+            foreach ((string key, JsonNode? leftValue) in leftObject)
+            {
+                if (!rightObject.TryGetPropertyValue(key, out JsonNode? rightValue) || !AreEquivalent(leftValue, rightValue))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (left is JsonArray leftArray && right is JsonArray rightArray)
+        {
+            if (leftArray.Count != rightArray.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < leftArray.Count; index++)
+            {
+                if (!AreEquivalent(leftArray[index], rightArray[index]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return string.Equals(left.ToJsonString(), right.ToJsonString(), StringComparison.Ordinal);
     }
 }
 
