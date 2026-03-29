@@ -14,8 +14,10 @@
     <FileVersion>0.2.0.0</FileVersion>
     <InformationalVersion>0.2.0</InformationalVersion>
     <Description>Modern Rhino 8 Grasshopper shell for the Swiftlet Linux port.</Description>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RhinoCommonPackageVersion>8.0.23304.9001</RhinoCommonPackageVersion>
     <GrasshopperPackageVersion>8.0.23304.9001</GrasshopperPackageVersion>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(NUGET_PACKAGES)' != '' and '$(OS)' == 'Windows_NT'">$(NUGET_PACKAGES)\microsoft.windowsdesktop.app.ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
     <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(NuGetPackageRoot)' != '' and '$(OS)' == 'Windows_NT'">$(NuGetPackageRoot)microsoft.windowsdesktop.app.ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
     <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(OS)' == 'Windows_NT'">$(ProgramFiles)\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
   </PropertyGroup>

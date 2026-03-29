@@ -129,6 +129,25 @@ function Resolve-PackageLibraryPath {
     return $packageLibraryPath
 }
 
+function Copy-RuntimeDependencies {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DestinationDirectory,
+
+        [Parameter(Mandatory = $true)]
+        [object[]]$RuntimeDependencies
+    )
+
+    foreach ($runtimeDependency in $RuntimeDependencies) {
+        $runtimeDependencyPath = Resolve-PackageLibraryPath `
+            -ProjectPath $runtimeDependency.ProjectPath `
+            -PackageId $runtimeDependency.PackageId `
+            -LibraryRelativePath $runtimeDependency.LibraryRelativePath
+
+        Copy-Item -Path $runtimeDependencyPath -Destination (Join-Path $DestinationDirectory ([System.IO.Path]::GetFileName($runtimeDependencyPath))) -Force
+    }
+}
+
 function New-YakManifest {
     param(
         [Parameter(Mandatory = $true)]
@@ -144,6 +163,19 @@ function New-YakManifest {
     $content = Get-Content -Path $TemplatePath -Raw
     $content = $content -replace '\{\{VERSION\}\}', $VersionValue
     Set-Content -Path $ManifestPath -Value $content -NoNewline
+}
+
+function Write-Utf8NoBomWithLf {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Content
+    )
+
+    $normalizedContent = $Content -replace "`r`n", "`n" -replace "`r", "`n"
+    [System.IO.File]::WriteAllText($Path, $normalizedContent, [System.Text.UTF8Encoding]::new($false))
 }
 
 function Resolve-YakExecutable {
@@ -290,8 +322,6 @@ else {
     Invoke-Dotnet -Arguments $pluginBuildArguments
 }
 
-Copy-DirectoryContents -Source $pluginBuildDirectory -Destination $pluginStageDirectory
-
 $runtimeDependencies = @(
     [pscustomobject]@{
         ProjectPath = $pluginProjectPath
@@ -310,14 +340,8 @@ $runtimeDependencies = @(
     }
 )
 
-foreach ($runtimeDependency in $runtimeDependencies) {
-    $runtimeDependencyPath = Resolve-PackageLibraryPath `
-        -ProjectPath $runtimeDependency.ProjectPath `
-        -PackageId $runtimeDependency.PackageId `
-        -LibraryRelativePath $runtimeDependency.LibraryRelativePath
-
-    Copy-Item -Path $runtimeDependencyPath -Destination (Join-Path $pluginStageDirectory ([System.IO.Path]::GetFileName($runtimeDependencyPath))) -Force
-}
+Copy-RuntimeDependencies -DestinationDirectory $pluginBuildDirectory -RuntimeDependencies $runtimeDependencies
+Copy-DirectoryContents -Source $pluginBuildDirectory -Destination $pluginStageDirectory
 
 $pluginArtifactPath = Join-Path $pluginStageDirectory $targetMetadata.pluginArtifactName
 if (-not (Test-Path $pluginArtifactPath)) {
@@ -532,10 +556,10 @@ $linuxConfigTemplate = @'
 }
 '@
 
-Set-Content -Path $linuxReadmePath -Value $linuxReadme
-Set-Content -Path $linuxInstallScriptPath -Value $linuxInstallScript
-Set-Content -Path $linuxComputeInstallScriptPath -Value $linuxComputeInstallScript
-Set-Content -Path $linuxConfigTemplatePath -Value $linuxConfigTemplate
+Write-Utf8NoBomWithLf -Path $linuxReadmePath -Content $linuxReadme
+Write-Utf8NoBomWithLf -Path $linuxInstallScriptPath -Content $linuxInstallScript
+Write-Utf8NoBomWithLf -Path $linuxComputeInstallScriptPath -Content $linuxComputeInstallScript
+Write-Utf8NoBomWithLf -Path $linuxConfigTemplatePath -Content $linuxConfigTemplate
 
 Copy-DirectoryContents -Source $pluginStageDirectory -Destination $yakStageDirectory
 New-YakManifest -TemplatePath $manifestTemplatePath -ManifestPath (Join-Path $yakStageDirectory "manifest.yml") -VersionValue $Version
