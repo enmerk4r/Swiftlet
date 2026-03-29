@@ -1,4 +1,3 @@
-using System.IO;
 using Grasshopper.Kernel;
 
 namespace Swiftlet.Gh.Rhino8.Components;
@@ -28,16 +27,15 @@ public sealed class SaveCsvComponent : GH_Component
         DA.GetDataList(0, lines);
         DA.GetData(1, ref path);
 
-        using (StreamWriter writer = new(path))
+        try
         {
-            foreach (string line in lines)
-            {
-                writer.WriteLine(line);
-            }
+            long length = FileWriteUtility.WriteLines(path, lines);
+            DA.SetData(0, length);
         }
-
-        long length = new FileInfo(path).Length;
-        DA.SetData(0, length);
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to save file: {ex.Message}");
+        }
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

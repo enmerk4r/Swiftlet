@@ -1,4 +1,3 @@
-using System.IO;
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -37,13 +36,15 @@ public sealed class ByteArrayToFileComponent : GH_Component
             return;
         }
 
-        using (BinaryWriter writer = new(new FileStream(path, FileMode.Create)))
+        try
         {
-            writer.Write(goo.Value);
+            long length = FileWriteUtility.WriteBytes(path, goo.Value);
+            DA.SetData(0, length);
         }
-
-        long length = new FileInfo(path).Length;
-        DA.SetData(0, length);
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to save file: {ex.Message}");
+        }
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

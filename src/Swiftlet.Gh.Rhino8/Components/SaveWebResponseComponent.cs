@@ -1,6 +1,5 @@
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using System.IO;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
 
@@ -61,21 +60,28 @@ public sealed partial class SaveWebResponseComponent : GH_Component
 
         if (_binaryChecked)
         {
-            using (BinaryWriter writer = new(new FileStream(path, FileMode.Create)))
+            try
             {
-                writer.Write(goo.Value.Bytes);
+                long length = FileWriteUtility.WriteBytes(path, goo.Value.Bytes);
+                DA.SetData(0, length);
+            }
+            catch (Exception ex)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to save file: {ex.Message}");
             }
         }
         else if (_textChecked)
         {
-            using (StreamWriter writer = new(path))
+            try
             {
-                writer.Write(goo.Value.Content);
+                long length = FileWriteUtility.WriteText(path, goo.Value.Content);
+                DA.SetData(0, length);
+            }
+            catch (Exception ex)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to save file: {ex.Message}");
             }
         }
-
-        long length = new FileInfo(path).Length;
-        DA.SetData(0, length);
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

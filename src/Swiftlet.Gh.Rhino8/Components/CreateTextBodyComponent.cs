@@ -9,6 +9,12 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed partial class CreateTextBodyComponent : GH_Component
 {
+    private const string LegacyIsTextCheckedKey = "IsTextChecked";
+    private const string LegacyIsJavascriptCheckedKey = "IsJavascriptChecked";
+    private const string LegacyIsJsonCheckedKey = "IsJsonChecked";
+    private const string LegacyIsHtmlCheckedKey = "IsHtmlChecked";
+    private const string LegacyIsXmlCheckedKey = "IsXmlChecked";
+
     private string _contentType;
     private bool _isTextChecked;
     private bool _isJavascriptChecked;
@@ -27,11 +33,11 @@ public sealed partial class CreateTextBodyComponent : GH_Component
 
     public override bool Read(GH_IReader reader)
     {
-        _isTextChecked = reader.GetBoolean(nameof(_isTextChecked));
-        _isJavascriptChecked = reader.GetBoolean(nameof(_isJavascriptChecked));
-        _isJsonChecked = reader.GetBoolean(nameof(_isJsonChecked));
-        _isHtmlChecked = reader.GetBoolean(nameof(_isHtmlChecked));
-        _isXmlChecked = reader.GetBoolean(nameof(_isXmlChecked));
+        _isTextChecked = ReadBoolean(reader, LegacyIsTextCheckedKey, nameof(_isTextChecked));
+        _isJavascriptChecked = ReadBoolean(reader, LegacyIsJavascriptCheckedKey, nameof(_isJavascriptChecked));
+        _isJsonChecked = ReadBoolean(reader, LegacyIsJsonCheckedKey, nameof(_isJsonChecked));
+        _isHtmlChecked = ReadBoolean(reader, LegacyIsHtmlCheckedKey, nameof(_isHtmlChecked));
+        _isXmlChecked = ReadBoolean(reader, LegacyIsXmlCheckedKey, nameof(_isXmlChecked));
 
         if (_isTextChecked)
         {
@@ -60,11 +66,11 @@ public sealed partial class CreateTextBodyComponent : GH_Component
 
     public override bool Write(GH_IWriter writer)
     {
-        writer.SetBoolean(nameof(_isTextChecked), _isTextChecked);
-        writer.SetBoolean(nameof(_isJavascriptChecked), _isJavascriptChecked);
-        writer.SetBoolean(nameof(_isJsonChecked), _isJsonChecked);
-        writer.SetBoolean(nameof(_isHtmlChecked), _isHtmlChecked);
-        writer.SetBoolean(nameof(_isXmlChecked), _isXmlChecked);
+        writer.SetBoolean(LegacyIsTextCheckedKey, _isTextChecked);
+        writer.SetBoolean(LegacyIsJavascriptCheckedKey, _isJavascriptChecked);
+        writer.SetBoolean(LegacyIsJsonCheckedKey, _isJsonChecked);
+        writer.SetBoolean(LegacyIsHtmlCheckedKey, _isHtmlChecked);
+        writer.SetBoolean(LegacyIsXmlCheckedKey, _isXmlChecked);
         return base.Write(writer);
     }
 
@@ -175,5 +181,20 @@ public sealed partial class CreateTextBodyComponent : GH_Component
         _isJsonChecked = false;
         _isHtmlChecked = false;
         _isXmlChecked = false;
+    }
+
+    private static bool ReadBoolean(GH_IReader reader, string preferredKey, string fallbackKey)
+    {
+        if (reader.ItemExists(preferredKey))
+        {
+            return reader.GetBoolean(preferredKey);
+        }
+
+        if (reader.ItemExists(fallbackKey))
+        {
+            return reader.GetBoolean(fallbackKey);
+        }
+
+        return false;
     }
 }
