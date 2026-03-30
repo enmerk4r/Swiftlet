@@ -51,9 +51,12 @@ public static class ModernOAuthWorkflow
 
         if (result.RequiresManualAction)
         {
+            string notificationMessage = string.IsNullOrWhiteSpace(result.ManualActionText)
+                ? result.Message
+                : $"{result.Message} {result.ManualActionText}";
             hostServices.Notifications.Notify(new HostNotification(
-                HostNotificationSeverity.Info,
-                result.ManualActionText ?? result.Message));
+                HostNotificationSeverity.Warning,
+                notificationMessage));
         }
         else if (!result.IsSuccess)
         {

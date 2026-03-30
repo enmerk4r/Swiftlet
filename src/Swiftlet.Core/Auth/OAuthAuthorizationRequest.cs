@@ -10,12 +10,15 @@ public sealed class OAuthAuthorizationRequest
         string state,
         string codeChallenge)
     {
-        AuthorizationUrl = authorizationUrl ?? throw new ArgumentNullException(nameof(authorizationUrl));
-        ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
-        RedirectUri = redirectUri ?? throw new ArgumentNullException(nameof(redirectUri));
-        Scopes = scopes?.ToArray() ?? [];
-        State = state ?? throw new ArgumentNullException(nameof(state));
-        CodeChallenge = codeChallenge ?? throw new ArgumentNullException(nameof(codeChallenge));
+        AuthorizationUrl = (authorizationUrl ?? throw new ArgumentNullException(nameof(authorizationUrl))).Trim();
+        ClientId = (clientId ?? throw new ArgumentNullException(nameof(clientId))).Trim();
+        RedirectUri = (redirectUri ?? throw new ArgumentNullException(nameof(redirectUri))).Trim();
+        Scopes = scopes?
+            .Where(static scope => !string.IsNullOrWhiteSpace(scope))
+            .Select(static scope => scope.Trim())
+            .ToArray() ?? [];
+        State = (state ?? throw new ArgumentNullException(nameof(state))).Trim();
+        CodeChallenge = (codeChallenge ?? throw new ArgumentNullException(nameof(codeChallenge))).Trim();
     }
 
     public string AuthorizationUrl { get; }

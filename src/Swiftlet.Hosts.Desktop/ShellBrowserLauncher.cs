@@ -12,15 +12,13 @@ public sealed class ShellBrowserLauncher : IBrowserLauncher
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(url));
         }
 
+        string normalizedUrl = url.Trim();
+
         cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true,
-            });
+            Launch(normalizedUrl);
 
             return Task.FromResult(HostActionResult.Success("Browser launch requested."));
         }
@@ -28,7 +26,46 @@ public sealed class ShellBrowserLauncher : IBrowserLauncher
         {
             return Task.FromResult(HostActionResult.Manual(
                 $"Automatic browser launch failed: {ex.Message}",
-                url));
+                normalizedUrl));
         }
+    }
+
+    private static void Launch(string url)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true,
+            });
+            return;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "open",
+                ArgumentList = { url },
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+            return;
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "xdg-open",
+                ArgumentList = { url },
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+            return;
+        }
+
+        throw new InvalidOperationException("Automatic browser launch is not available for this host.");
     }
 }

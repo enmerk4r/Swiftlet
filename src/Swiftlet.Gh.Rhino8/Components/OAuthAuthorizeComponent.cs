@@ -8,6 +8,8 @@ public sealed class OAuthAuthorizeComponent : GH_Component
     private readonly RhinoHostServices _hostServices = new();
     private readonly ModernOAuthAuthorizationFlow _flow;
     private int _runId;
+    private int _updateScheduled;
+    private bool _previousAuthorize;
     private string? _launchMessage;
     private string? _componentError;
 
@@ -58,6 +60,8 @@ public sealed class OAuthAuthorizeComponent : GH_Component
         DA.GetDataList(2, scopes);
         DA.GetData(3, ref port);
         DA.GetData(4, ref authorize);
+        bool authorizeTriggered = authorize && !_previousAuthorize;
+        _previousAuthorize = authorize;
 
         string redirectUri = $"http://localhost:{port}/callback/";
 
@@ -82,13 +86,10 @@ public sealed class OAuthAuthorizeComponent : GH_Component
             return;
         }
 
-        if (authorize && !_flow.IsWaiting && !_flow.IsCompleted)
-        {
-            StartAuthorizationFlow(authorizationUrl, clientId, redirectUri, scopes);
-        }
-        else if (!authorize && (_flow.IsWaiting || _flow.IsCompleted || !string.IsNullOrWhiteSpace(_componentError)))
+        if (authorizeTriggered)
         {
             ResetFlow();
+            StartAuthorizationFlow(authorizationUrl, clientId, redirectUri, scopes);
         }
 
         string status = GetStatusMessage();
@@ -155,14 +156,16 @@ public sealed class OAuthAuthorizeComponent : GH_Component
 
             if (launchResult.RequiresManualAction)
             {
-                _launchMessage = launchResult.ManualActionText ?? launchResult.Message;
+                _launchMessage = string.IsNullOrWhiteSpace(launchResult.ManualActionText)
+                    ? launchResult.Message
+                    : $"{launchResult.Message} {launchResult.ManualActionText}";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, _launchMessage);
             }
 
             int runId = ++_runId;
             _ = WaitForAuthorizationAsync(runId);
 
-            Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+            ScheduleComponentUpdate();
         }
         catch (Exception ex)
         {
@@ -186,7 +189,7 @@ public sealed class OAuthAuthorizeComponent : GH_Component
         }
         finally
         {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+            ScheduleComponentUpdate();
         }
     }
 
@@ -207,6 +210,11 @@ public sealed class OAuthAuthorizeComponent : GH_Component
             return $"Error: {_componentError}";
         }
 
+        if (!string.IsNullOrWhiteSpace(_launchMessage))
+        {
+            return _launchMessage;
+        }
+
         if (_flow.IsWaiting)
         {
             return "Waiting for authorization... (check your browser)";
@@ -222,6 +230,30 @@ public sealed class OAuthAuthorizeComponent : GH_Component
         _launchMessage = null;
         _componentError = null;
         Message = string.Empty;
+    }
+
+    private void ScheduleComponentUpdate()
+    {
+        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
+        {
+            return;
+        }
+
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            GH_Document? document = OnPingDocument();
+            if (document is null)
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                return;
+            }
+
+            document.ScheduleSolution(5, _ =>
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                ExpireSolution(false);
+            });
+        }));
     }
 }
 
