@@ -15,21 +15,24 @@
       "rid": "win-x64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": "SwiftletBridge.exe"
+      "copyIntoPlugin": "SwiftletBridge.exe",
+      "packagePlatform": "win"
     },
     {
       "id": "linux-x64",
       "rid": "linux-x64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": null
+      "copyIntoPlugin": "SwiftletBridge",
+      "packagePlatform": "any"
     },
     {
       "id": "osx-arm64",
       "rid": "osx-arm64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": null
+      "copyIntoPlugin": "SwiftletBridge",
+      "packagePlatform": "mac"
     }
   ]
 }

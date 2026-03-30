@@ -27,10 +27,10 @@ The script:
 
 - builds the target shell into a staged plugin folder
 - publishes `SwiftletBridge` by RID
-- builds local `.yak` packages for both `win` and `any`
+- builds local `.yak` packages for `win`, `mac`, and `any`
 - assembles a Linux Compute package layout with setup docs and an MCP config template
 - stages a Rhino.Compute install helper that installs the local `.yak` for the `rhino-compute` user
-- copies the Windows bridge beside the `.gha` so MCP config generation works out of the box
+- copies the matching bridge beside the `.gha` in each installable package stage
 - writes a machine-readable `artifact-manifest.json`
 
 ## Current Target Model
@@ -62,9 +62,17 @@ artifacts/publish/rhino8/<version>/
 Key folders:
 
 - `plugin/windows`
-  - loadable Grasshopper payload
+  - Windows plugin payload
   - includes `Swiftlet.Gh.Rhino8.gha`
   - includes `SwiftletBridge.exe`
+- `plugin/mac`
+  - macOS plugin payload
+  - includes `Swiftlet.Gh.Rhino8.gha`
+  - includes `SwiftletBridge`
+- `plugin/any`
+  - cross-platform plugin payload used for Linux/headless distribution
+  - includes `Swiftlet.Gh.Rhino8.gha`
+  - includes `SwiftletBridge`
 - `linux/compute`
   - Linux-facing package layout for Rhino.Compute and other headless hosts
   - includes `packages/*.yak`
@@ -80,6 +88,8 @@ Key folders:
   - self-contained macOS Apple Silicon bridge publish
 - `yak/win`
   - Windows Yak staging folder with generated `manifest.yml`
+- `yak/mac`
+  - macOS Yak staging folder with generated `manifest.yml`
 - `yak/any`
   - cross-platform Yak staging folder for Linux/Compute installs
 - `artifact-manifest.json`

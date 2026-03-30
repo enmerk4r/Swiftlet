@@ -81,6 +81,30 @@ function Get-VersionFromProject {
     return $versionNode.Trim()
 }
 
+function Remove-BridgeArtifacts {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Directory
+    )
+
+    $bridgeArtifactNames = @(
+        "SwiftletBridge.exe",
+        "SwiftletBridge",
+        "SwiftletBridge.dll",
+        "SwiftletBridge.deps.json",
+        "SwiftletBridge.runtimeconfig.json",
+        "createdump.exe",
+        "createdump"
+    )
+
+    foreach ($artifactName in $bridgeArtifactNames) {
+        $artifactPath = Join-Path $Directory $artifactName
+        if (Test-Path $artifactPath) {
+            Remove-Item -Path $artifactPath -Force
+        }
+    }
+}
+
 function Get-VersionFromProps {
     param(
         [Parameter(Mandatory = $true)]
@@ -319,12 +343,20 @@ $imagingProjectPath = Resolve-RepoPath -BasePath $repoRoot -RelativePath "src\Sw
 $artifactsBase = Resolve-RepoPath -BasePath $repoRoot -RelativePath $ArtifactsRoot
 $stageRoot = Join-Path $artifactsBase (Join-Path $Target $Version)
 $pluginBuildDirectory = Join-Path $stageRoot "intermediate\plugin-build"
-$pluginStageDirectory = Join-Path $stageRoot "plugin\windows"
+$pluginStageRoot = Join-Path $stageRoot "plugin"
 $bridgeStageRoot = Join-Path $stageRoot "bridge"
 $linuxPackageDirectory = Join-Path $stageRoot "linux\compute"
 $linuxPackagesDirectory = Join-Path $linuxPackageDirectory "packages"
-$yakStageDirectory = Join-Path $stageRoot "yak\win"
-$yakAnyStageDirectory = Join-Path $stageRoot "yak\any"
+$pluginStageDirectories = @{
+    win = (Join-Path $pluginStageRoot "windows")
+    mac = (Join-Path $pluginStageRoot "mac")
+    any = (Join-Path $pluginStageRoot "any")
+}
+$yakStageDirectories = @{
+    win = (Join-Path $stageRoot "yak\win")
+    mac = (Join-Path $stageRoot "yak\mac")
+    any = (Join-Path $stageRoot "yak\any")
+}
 $manifestTemplatePath = Resolve-RepoPath -BasePath $repoRoot -RelativePath "Yak\manifest-template.yml"
 $summaryPath = Join-Path $stageRoot "artifact-manifest.json"
 
@@ -347,11 +379,14 @@ Write-Host "Stage root: $stageRoot"
 Write-Host "============================================"
 
 New-CleanDirectory -Path $pluginBuildDirectory
-New-CleanDirectory -Path $pluginStageDirectory
+foreach ($pluginStageDirectory in $pluginStageDirectories.Values) {
+    New-CleanDirectory -Path $pluginStageDirectory
+}
 New-CleanDirectory -Path $bridgeStageRoot
 New-CleanDirectory -Path $linuxPackageDirectory
-New-CleanDirectory -Path $yakStageDirectory
-New-CleanDirectory -Path $yakAnyStageDirectory
+foreach ($yakStageDirectory in $yakStageDirectories.Values) {
+    New-CleanDirectory -Path $yakStageDirectory
+}
 
 if (-not [string]::IsNullOrWhiteSpace($PluginOutputDir)) {
     $resolvedPluginOutputDir = if ([System.IO.Path]::IsPathRooted($PluginOutputDir)) {
@@ -372,7 +407,8 @@ else {
         "build",
         $pluginProjectPath,
         "-c", $Configuration,
-        "-o", $pluginBuildDirectory
+        "-o", $pluginBuildDirectory,
+        "-p:StageBridgeOnBuild=false"
     )
 
     if ($NoRestore) {
@@ -381,6 +417,8 @@ else {
 
     Invoke-Dotnet -Arguments $pluginBuildArguments
 }
+
+Remove-BridgeArtifacts -Directory $pluginBuildDirectory
 
 $runtimeDependencies = @(
     [pscustomobject]@{
@@ -401,11 +439,18 @@ $runtimeDependencies = @(
 )
 
 Copy-RuntimeDependencies -DestinationDirectory $pluginBuildDirectory -RuntimeDependencies $runtimeDependencies
-Copy-DirectoryContents -Source $pluginBuildDirectory -Destination $pluginStageDirectory
+foreach ($pluginStageDirectory in $pluginStageDirectories.Values) {
+    Copy-DirectoryContents -Source $pluginBuildDirectory -Destination $pluginStageDirectory
+}
 
-$pluginArtifactPath = Join-Path $pluginStageDirectory $targetMetadata.pluginArtifactName
-if (-not (Test-Path $pluginArtifactPath)) {
-    throw "Expected plugin artifact was not produced: $pluginArtifactPath"
+$pluginArtifacts = @{}
+foreach ($platform in $pluginStageDirectories.Keys) {
+    $pluginArtifactPath = Join-Path $pluginStageDirectories[$platform] $targetMetadata.pluginArtifactName
+    if (-not (Test-Path $pluginArtifactPath)) {
+        throw "Expected plugin artifact was not produced: $pluginArtifactPath"
+    }
+
+    $pluginArtifacts[$platform] = $pluginArtifactPath
 }
 
 $bridgePublishes = @()
@@ -444,12 +489,17 @@ if (-not $SkipBridgePublish) {
         }
 
         if (-not [string]::IsNullOrWhiteSpace([string]$publishTarget.copyIntoPlugin)) {
+            $packagePlatform = [string]$publishTarget.packagePlatform
+            if ([string]::IsNullOrWhiteSpace($packagePlatform) -or -not $pluginStageDirectories.ContainsKey($packagePlatform)) {
+                throw "Bridge publish target '$publishId' must define a valid packagePlatform."
+            }
+
             $sourceBridgePath = Join-Path $publishDirectory ([string]$publishTarget.copyIntoPlugin)
             if (-not (Test-Path $sourceBridgePath)) {
                 throw "Bridge artifact was not produced: $sourceBridgePath"
             }
 
-            Copy-Item -Path $sourceBridgePath -Destination (Join-Path $pluginStageDirectory ([string]$publishTarget.copyIntoPlugin)) -Force
+            Copy-Item -Path $sourceBridgePath -Destination (Join-Path $pluginStageDirectories[$packagePlatform] ([string]$publishTarget.copyIntoPlugin)) -Force
         }
     }
 }
@@ -621,25 +671,31 @@ Write-Utf8NoBomWithLf -Path $linuxInstallScriptPath -Content $linuxInstallScript
 Write-Utf8NoBomWithLf -Path $linuxComputeInstallScriptPath -Content $linuxComputeInstallScript
 Write-Utf8NoBomWithLf -Path $linuxConfigTemplatePath -Content $linuxConfigTemplate
 
-Copy-DirectoryContents -Source $pluginStageDirectory -Destination $yakStageDirectory
+$yakStageDirectory = $yakStageDirectories["win"]
+$yakMacStageDirectory = $yakStageDirectories["mac"]
+$yakAnyStageDirectory = $yakStageDirectories["any"]
+
+Copy-DirectoryContents -Source $pluginStageDirectories["win"] -Destination $yakStageDirectory
 New-YakManifest -TemplatePath $manifestTemplatePath -ManifestPath (Join-Path $yakStageDirectory "manifest.yml") -VersionValue $Version
 
-Copy-DirectoryContents -Source $pluginStageDirectory -Destination $yakAnyStageDirectory
-$yakAnyBridgePath = Join-Path $yakAnyStageDirectory "SwiftletBridge.exe"
-if (Test-Path $yakAnyBridgePath) {
-    Remove-Item -Path $yakAnyBridgePath -Force
-}
+Copy-DirectoryContents -Source $pluginStageDirectories["mac"] -Destination $yakMacStageDirectory
+New-YakManifest -TemplatePath $manifestTemplatePath -ManifestPath (Join-Path $yakMacStageDirectory "manifest.yml") -VersionValue $Version
+
+Copy-DirectoryContents -Source $pluginStageDirectories["any"] -Destination $yakAnyStageDirectory
 New-YakManifest -TemplatePath $manifestTemplatePath -ManifestPath (Join-Path $yakAnyStageDirectory "manifest.yml") -VersionValue $Version
 
 $yakExecutable = Resolve-YakExecutable
 $yakWinPackagePath = $null
+$yakMacPackagePath = $null
 $yakAnyPackagePath = $null
 if (-not [string]::IsNullOrWhiteSpace($yakExecutable)) {
     $yakWinPackagePath = Invoke-YakBuild -YakExecutable $yakExecutable -WorkingDirectory $yakStageDirectory -Platform "win"
+    $yakMacPackagePath = Invoke-YakBuild -YakExecutable $yakExecutable -WorkingDirectory $yakMacStageDirectory -Platform "mac"
     $yakAnyPackagePath = Invoke-YakBuild -YakExecutable $yakExecutable -WorkingDirectory $yakAnyStageDirectory -Platform "any"
 
     if (-not [string]::IsNullOrWhiteSpace([string]$targetMetadata.yakDistributionAppVersionOverride)) {
         $yakWinPackagePath = Set-YakDistributionAppVersion -PackagePath $yakWinPackagePath -AppVersion ([string]$targetMetadata.yakDistributionAppVersionOverride)
+        $yakMacPackagePath = Set-YakDistributionAppVersion -PackagePath $yakMacPackagePath -AppVersion ([string]$targetMetadata.yakDistributionAppVersionOverride)
         $yakAnyPackagePath = Set-YakDistributionAppVersion -PackagePath $yakAnyPackagePath -AppVersion ([string]$targetMetadata.yakDistributionAppVersionOverride)
     }
 }
@@ -666,8 +722,18 @@ $summary = [pscustomobject]@{
     version = $Version
     generatedAtUtc = [DateTime]::UtcNow.ToString("o")
     plugin = [pscustomobject]@{
-        path = $pluginStageDirectory
-        artifact = $pluginArtifactPath
+        win = [pscustomobject]@{
+            path = $pluginStageDirectories["win"]
+            artifact = $pluginArtifacts["win"]
+        }
+        mac = [pscustomobject]@{
+            path = $pluginStageDirectories["mac"]
+            artifact = $pluginArtifacts["mac"]
+        }
+        any = [pscustomobject]@{
+            path = $pluginStageDirectories["any"]
+            artifact = $pluginArtifacts["any"]
+        }
     }
     bridgePublishes = $bridgePublishes
     linuxPackage = [pscustomobject]@{
@@ -683,6 +749,11 @@ $summary = [pscustomobject]@{
         manifest = (Join-Path $yakStageDirectory "manifest.yml")
         package = $yakWinPackagePath
     }
+    yakMacStage = [pscustomobject]@{
+        path = $yakMacStageDirectory
+        manifest = (Join-Path $yakMacStageDirectory "manifest.yml")
+        package = $yakMacPackagePath
+    }
     yakAnyStage = [pscustomobject]@{
         path = $yakAnyStageDirectory
         manifest = (Join-Path $yakAnyStageDirectory "manifest.yml")
@@ -694,16 +765,21 @@ $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $summaryPath
 
 Write-Host ""
 Write-Host "Created artifacts:"
-Write-Host "  Plugin: $pluginArtifactPath"
-Write-Host "  Plugin stage: $pluginStageDirectory"
+Write-Host "  Plugin (win): $($pluginArtifacts["win"])"
+Write-Host "  Plugin (mac): $($pluginArtifacts["mac"])"
+Write-Host "  Plugin (any): $($pluginArtifacts["any"])"
 foreach ($publish in $bridgePublishes) {
     Write-Host "  Bridge ($($publish.rid)): $($publish.path)"
 }
 Write-Host "  Linux package: $linuxPackageDirectory"
-Write-Host "  Yak stage: $yakStageDirectory"
+Write-Host "  Yak stage (win): $yakStageDirectory"
+Write-Host "  Yak stage (mac): $yakMacStageDirectory"
 Write-Host "  Yak any stage: $yakAnyStageDirectory"
 if ($null -ne $yakWinPackagePath) {
     Write-Host "  Yak package (win): $yakWinPackagePath"
+}
+if ($null -ne $yakMacPackagePath) {
+    Write-Host "  Yak package (mac): $yakMacPackagePath"
 }
 if ($null -ne $yakAnyPackagePath) {
     Write-Host "  Yak package (any): $yakAnyPackagePath"
