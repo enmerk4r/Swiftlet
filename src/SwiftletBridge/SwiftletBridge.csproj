@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
   </ItemGroup>
 </Project>

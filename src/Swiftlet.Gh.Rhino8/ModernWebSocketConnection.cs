@@ -6,6 +6,10 @@ namespace Swiftlet.Gh.Rhino8;
 public sealed class ModernWebSocketConnection
 {
     private readonly SemaphoreSlim _sendLock = new(1, 1);
+    private readonly WebSocket? _webSocket;
+    private readonly Func<string, CancellationToken, Task<bool>>? _proxySendAsync;
+    private readonly Func<WebSocketState>? _proxyStateProvider;
+    private WebSocketState _proxyState = WebSocketState.None;
 
     public ModernWebSocketConnection(
         WebSocket webSocket,
@@ -13,7 +17,7 @@ public sealed class ModernWebSocketConnection
         string remoteEndpoint,
         string localEndpoint)
     {
-        WebSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
+        _webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
         ConnectionId = Guid.NewGuid().ToString("N")[..8];
         IsServer = isServer;
         RemoteEndpoint = remoteEndpoint ?? string.Empty;
@@ -21,7 +25,27 @@ public sealed class ModernWebSocketConnection
         ConnectedAt = DateTime.UtcNow;
     }
 
-    public WebSocket WebSocket { get; }
+    public ModernWebSocketConnection(
+        string connectionId,
+        bool isServer,
+        string remoteEndpoint,
+        string localEndpoint,
+        Func<string, CancellationToken, Task<bool>> proxySendAsync,
+        Func<WebSocketState>? proxyStateProvider = null)
+    {
+        ConnectionId = string.IsNullOrWhiteSpace(connectionId)
+            ? throw new ArgumentException("Value cannot be null or whitespace.", nameof(connectionId))
+            : connectionId;
+        IsServer = isServer;
+        RemoteEndpoint = remoteEndpoint ?? string.Empty;
+        LocalEndpoint = localEndpoint ?? string.Empty;
+        ConnectedAt = DateTime.UtcNow;
+        _proxySendAsync = proxySendAsync ?? throw new ArgumentNullException(nameof(proxySendAsync));
+        _proxyStateProvider = proxyStateProvider;
+        _proxyState = WebSocketState.Open;
+    }
+
+    public WebSocket WebSocket => _webSocket ?? throw new InvalidOperationException("This WebSocket connection is bridge-backed and does not expose a raw WebSocket.");
 
     public string ConnectionId { get; }
 
@@ -33,9 +57,9 @@ public sealed class ModernWebSocketConnection
 
     public DateTime ConnectedAt { get; }
 
-    public WebSocketState State => WebSocket.State;
+    public WebSocketState State => _webSocket?.State ?? _proxyStateProvider?.Invoke() ?? _proxyState;
 
-    public bool IsOpen => WebSocket.State == WebSocketState.Open;
+    public bool IsOpen => State == WebSocketState.Open;
 
     public bool SendMessage(string message)
     {
@@ -52,9 +76,19 @@ public sealed class ModernWebSocketConnection
         await _sendLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(message);
-            await WebSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
-            return true;
+            if (_webSocket is not null)
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes(message);
+                await _webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
+                return true;
+            }
+
+            if (_proxySendAsync is not null)
+            {
+                return await _proxySendAsync(message, cancellationToken).ConfigureAwait(false);
+            }
+
+            return false;
         }
         catch
         {
@@ -66,9 +100,14 @@ public sealed class ModernWebSocketConnection
         }
     }
 
+    internal void UpdateProxyState(WebSocketState state)
+    {
+        _proxyState = state;
+    }
+
     public string GetStatusString()
     {
-        return WebSocket.State switch
+        return State switch
         {
             WebSocketState.None => "Not connected",
             WebSocketState.Connecting => "Connecting...",

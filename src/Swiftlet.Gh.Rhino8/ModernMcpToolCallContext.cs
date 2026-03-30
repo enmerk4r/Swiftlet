@@ -5,29 +5,33 @@ namespace Swiftlet.Gh.Rhino8;
 
 public sealed class ModernMcpToolCallContext
 {
-    private readonly TaskCompletionSource<ModernMcpHttpResponse> _completionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly Func<McpToolResult, bool> _resultSender;
+    private readonly object _responseSync = new();
+    private bool _hasResponded;
 
-    public ModernMcpToolCallContext(string? sessionId, JsonNode? requestId, string toolName, JsonObject arguments)
+    public ModernMcpToolCallContext(
+        string callId,
+        string toolName,
+        JsonObject arguments,
+        Func<McpToolResult, bool> resultSender)
     {
-        SessionId = sessionId;
-        RequestId = JsonNodeCloner.Clone(requestId);
+        CallId = string.IsNullOrWhiteSpace(callId)
+            ? throw new ArgumentException("Value cannot be null or whitespace.", nameof(callId))
+            : callId;
         ToolName = toolName ?? throw new ArgumentNullException(nameof(toolName));
         Arguments = arguments is null
             ? throw new ArgumentNullException(nameof(arguments))
             : JsonNodeCloner.CloneObject(arguments);
+        _resultSender = resultSender ?? throw new ArgumentNullException(nameof(resultSender));
     }
 
-    public string? SessionId { get; }
-
-    public JsonNode? RequestId { get; }
+    public string CallId { get; }
 
     public string ToolName { get; }
 
     public JsonObject Arguments { get; }
 
-    public Task<ModernMcpHttpResponse> ResponseTask => _completionSource.Task;
-
-    public bool HasResponded => _completionSource.Task.IsCompleted;
+    public bool HasResponded => _hasResponded;
 
     public bool TryRespondWithText(string textContent)
     {
@@ -44,35 +48,28 @@ public sealed class ModernMcpToolCallContext
     public bool TryRespondWithToolResult(McpToolResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
-        return _completionSource.TrySetResult(CreateResultResponse(result));
+
+        lock (_responseSync)
+        {
+            if (_hasResponded)
+            {
+                return false;
+            }
+
+            bool sent = _resultSender(result.Duplicate());
+            if (sent)
+            {
+                _hasResponded = true;
+            }
+
+            return sent;
+        }
     }
 
     public bool TryRespondWithError(int code, string message)
     {
-        var response = new JsonObject
-        {
-            ["jsonrpc"] = "2.0",
-            ["id"] = JsonNodeCloner.Clone(RequestId),
-            ["error"] = new JsonObject
-            {
-                ["code"] = code,
-                ["message"] = message ?? string.Empty,
-            },
-        };
-
-        return _completionSource.TrySetResult(ModernMcpHttpResponse.Json(
-            response.ToJsonString()));
-    }
-
-    private ModernMcpHttpResponse CreateResultResponse(McpToolResult result)
-    {
-        var response = new JsonObject
-        {
-            ["jsonrpc"] = "2.0",
-            ["id"] = JsonNodeCloner.Clone(RequestId),
-            ["result"] = result.ToJson(),
-        };
-
-        return ModernMcpHttpResponse.Json(response.ToJsonString());
+        return TryRespondWithToolResult(new McpToolResult(
+            [new McpTextContentBlock(message ?? string.Empty)],
+            isError: true));
     }
 }
