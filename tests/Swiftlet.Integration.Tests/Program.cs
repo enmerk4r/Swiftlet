@@ -303,17 +303,16 @@ internal static class IntegrationTestRunner
     private static async Task ModernMcpServerHandlesJsonRpcOverHttpAsync()
     {
         int port = GetAvailablePort();
-        var server = new ModernMcpServer(
+        await using var session = new ModernMcpServerSession();
+        await session.ReconfigureAsync(
+            port,
             "Swiftlet",
             [
                 new McpToolDefinition(
                     "echo",
                     "Echoes text.",
                     [new McpToolParameter("message", "string", "Message to echo")]),
-            ]);
-
-        await using var transport = new ModernMcpServerTransport(server);
-        await transport.StartAsync(port).ConfigureAwait(false);
+            ]).ConfigureAwait(false);
 
         using var client = new HttpClient
         {
@@ -363,9 +362,8 @@ internal static class IntegrationTestRunner
 
         Task<HttpResponseMessage> callResponseTask = client.SendAsync(callRequest);
 
-        ModernMcpToolCallContext pendingCall = await WaitForPendingCallAsync(server, "echo").ConfigureAwait(false);
+        ModernMcpToolCallContext pendingCall = await WaitForPendingCallAsync(session, "echo").ConfigureAwait(false);
         Assert.Equal("hello", pendingCall.Arguments["message"]!.GetValue<string>());
-        Assert.Equal(sessionId, pendingCall.SessionId);
 
         Assert.True(pendingCall.TryRespondWithText("echo: hello"));
 
@@ -418,13 +416,18 @@ internal static class IntegrationTestRunner
 
     private static async Task ModernMcpResponseWorkflowPreservesSemanticsAsync()
     {
+        McpToolResult? sentResult = null;
         var request = new ModernMcpToolCallContext(
-            "session-1",
-            JsonValue.Create(42),
+            "call-1",
             "echo",
             new JsonObject
             {
                 ["message"] = "hello",
+            },
+            result =>
+            {
+                sentResult = result.Duplicate();
+                return true;
             });
 
         (ModernMcpToolCallContext passThrough, string toolName, JsonObject arguments) = ModernMcpResponseWorkflow.Deconstruct(request);
@@ -442,24 +445,25 @@ internal static class IntegrationTestRunner
 
         Assert.True(firstSuccess);
         Assert.False(ModernMcpResponseWorkflow.TrySendResponse(request, JsonValue.Create("again"), isError: false));
+        Assert.NotNull(sentResult);
+        Assert.False(sentResult!.IsError);
+        Assert.Equal("{\"ok\":true}", sentResult.Content[0].ToJson()["text"]!.GetValue<string>());
 
-        ModernMcpHttpResponse response = await request.ResponseTask.ConfigureAwait(false);
-        JsonObject responseJson = JsonNode.Parse(response.Body!)!.AsObject();
-        Assert.Equal(42, responseJson["id"]!.GetValue<int>());
-        Assert.Equal("{\"ok\":true}", responseJson["result"]!["content"]![0]!["text"]!.GetValue<string>());
-
+        McpToolResult? sentError = null;
         var errorRequest = new ModernMcpToolCallContext(
-            "session-2",
-            JsonValue.Create("abc"),
+            "call-2",
             "echo",
-            new JsonObject());
+            new JsonObject(),
+            result =>
+            {
+                sentError = result.Duplicate();
+                return true;
+            });
 
         Assert.True(ModernMcpResponseWorkflow.TrySendResponse(errorRequest, JsonValue.Create("boom"), isError: true));
-
-        ModernMcpHttpResponse errorResponse = await errorRequest.ResponseTask.ConfigureAwait(false);
-        JsonObject errorJson = JsonNode.Parse(errorResponse.Body!)!.AsObject();
-        Assert.Equal(-32000, errorJson["error"]!["code"]!.GetValue<int>());
-        Assert.Equal("boom", errorJson["error"]!["message"]!.GetValue<string>());
+        Assert.NotNull(sentError);
+        Assert.True(sentError!.IsError);
+        Assert.Equal("boom", sentError.Content[0].ToJson()["text"]!.GetValue<string>());
     }
 
     private static async Task ModernServerRoutesRequestsAndCompletesResponsesAsync()
@@ -467,8 +471,8 @@ internal static class IntegrationTestRunner
         int port = GetAvailablePort();
         var server = new ModernServer(["/", "/api", "/api/v1"]);
 
-        await using var transport = new ModernServerTransport(server);
-        await transport.StartAsync(port).ConfigureAwait(false);
+        await using var session = new ModernServerSession(server: server);
+        await session.ReconfigureAsync(port, ["/", "/api", "/api/v1"]).ConfigureAwait(false);
 
         using var client = new HttpClient
         {
@@ -521,6 +525,9 @@ internal static class IntegrationTestRunner
 
         Assert.True(clientSession.IsConnected);
         Assert.NotNull(clientSession.Connection);
+        Assert.True(serverSession.TryGetAnyOpenConnection(out ModernWebSocketConnection? serverConnectionBeforeMessage));
+        Assert.NotNull(serverConnectionBeforeMessage);
+        Assert.Equal("Connected", serverConnectionBeforeMessage!.GetStatusString());
 
         bool sentToServer = await clientSession.Connection!.SendMessageAsync("hello from client").ConfigureAwait(false);
         Assert.True(sentToServer);
@@ -528,6 +535,7 @@ internal static class IntegrationTestRunner
         ModernWebSocketReceivedMessage serverMessage = await WaitForWebSocketServerMessageAsync(serverSession).ConfigureAwait(false);
         Assert.Equal("hello from client", serverMessage.Message);
         Assert.True(serverSession.ActiveClientCount > 0);
+        Assert.Equal("Connected", serverMessage.Connection.GetStatusString());
 
         bool sentToClient = await serverMessage.Connection.SendMessageAsync("hello from server").ConfigureAwait(false);
         Assert.True(sentToClient);
@@ -628,13 +636,13 @@ internal static class IntegrationTestRunner
     }
 
     private static async Task<ModernMcpToolCallContext> WaitForPendingCallAsync(
-        ModernMcpServer server,
+        ModernMcpServerSession session,
         string toolName,
         int maxAttempts = 100)
     {
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            if (server.TryDequeuePendingCall(toolName, out ModernMcpToolCallContext? context) &&
+            if (session.TryDequeuePendingCall(toolName, out ModernMcpToolCallContext? context) &&
                 context is not null)
             {
                 return context;

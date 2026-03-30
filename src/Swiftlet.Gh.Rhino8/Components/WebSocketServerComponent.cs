@@ -10,6 +10,7 @@ public sealed class WebSocketServerComponent : GH_Component
     private string? _lastMessage;
     private ModernWebSocketConnection? _lastConnection;
     private bool _freeze;
+    private int _updateScheduled;
 
     public WebSocketServerComponent()
         : base(
@@ -86,6 +87,11 @@ public sealed class WebSocketServerComponent : GH_Component
             _lastConnection = message.Connection;
         }
 
+        if (_lastConnection is null || !_lastConnection.IsOpen)
+        {
+            _session.TryGetAnyOpenConnection(out _lastConnection);
+        }
+
         string status = run ? $"Listening on ws://localhost:{port}/" : "Stopped";
         Message = run ? $"ws://localhost:{port}/ ({_session.ActiveClientCount} clients)" : "Stopped";
 
@@ -134,7 +140,31 @@ public sealed class WebSocketServerComponent : GH_Component
             return;
         }
 
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+        ScheduleComponentUpdate();
+    }
+
+    private void ScheduleComponentUpdate()
+    {
+        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
+        {
+            return;
+        }
+
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            GH_Document? document = OnPingDocument();
+            if (document is null)
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                return;
+            }
+
+            document.ScheduleSolution(5, _ =>
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                ExpireSolution(false);
+            });
+        }));
     }
 }
 

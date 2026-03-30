@@ -14,6 +14,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private readonly RhinoHostServices _hostServices = new();
     private IReadOnlyList<McpToolDefinition> _tools = [];
     private bool _requestTriggeredSolve;
+    private int _updateScheduled;
 
     public McpServerComponent()
         : base("MCP Server", "MCP", "Starts an MCP server and exposes the connected tools to MCP clients. Each connected tool appears as its own output and emits a request when that tool is called.", ShellNaming.Category, ShellNaming.Mcp)
@@ -197,7 +198,31 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private void OnRequestQueued(object? sender, EventArgs e)
     {
         _requestTriggeredSolve = true;
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+        ScheduleComponentUpdate();
+    }
+
+    private void ScheduleComponentUpdate()
+    {
+        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
+        {
+            return;
+        }
+
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            GH_Document? document = OnPingDocument();
+            if (document is null)
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                return;
+            }
+
+            document.ScheduleSolution(5, _ =>
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                ExpireSolution(false);
+            });
+        }));
     }
 
     private bool TryBuildConfig(out string? config, out string? error)

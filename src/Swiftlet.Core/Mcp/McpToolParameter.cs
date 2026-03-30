@@ -25,8 +25,16 @@ public sealed class McpToolParameter
         return type?.ToLowerInvariant() switch
         {
             "string" => "string",
+            "double" => "number",
+            "float" => "number",
+            "decimal" => "number",
             "number" => "number",
+            "int" => "integer",
+            "int32" => "integer",
+            "int64" => "integer",
+            "long" => "integer",
             "integer" => "integer",
+            "bool" => "boolean",
             "boolean" => "boolean",
             "object" => "object",
             "array" => "array",

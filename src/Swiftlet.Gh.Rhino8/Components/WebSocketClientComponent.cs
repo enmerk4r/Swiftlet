@@ -12,6 +12,7 @@ public sealed class WebSocketClientComponent : GH_Component
     private bool _run;
     private bool _freeze;
     private string? _lastMessage;
+    private int _updateScheduled;
 
     public WebSocketClientComponent()
         : base(
@@ -170,7 +171,31 @@ public sealed class WebSocketClientComponent : GH_Component
             return;
         }
 
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+        ScheduleComponentUpdate();
+    }
+
+    private void ScheduleComponentUpdate()
+    {
+        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
+        {
+            return;
+        }
+
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            GH_Document? document = OnPingDocument();
+            if (document is null)
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                return;
+            }
+
+            document.ScheduleSolution(5, _ =>
+            {
+                Interlocked.Exchange(ref _updateScheduled, 0);
+                ExpireSolution(false);
+            });
+        }));
     }
 }
 

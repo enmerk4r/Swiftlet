@@ -39,6 +39,7 @@ internal static class TestRunner
             ("JSON object merger treats arrays and type mismatches as conflicts", JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts),
             ("JSON object merger parses valid and invalid modes", JsonObjectMergerParsesModes),
             ("MCP tool definition builds expected input schema", McpToolDefinitionBuildsInputSchema),
+            ("MCP tool parameter normalizes numeric aliases", McpToolParameterNormalizesNumericAliases),
             ("MCP tool result serializes typed content blocks", McpToolResultSerializesTypedContentBlocks),
             ("MCP resource content blocks serialize to spec shapes", McpResourceContentBlocksSerializeToSpecShapes),
             ("MCP tool result duplicates structured content safely", McpToolResultDuplicatesStructuredContentSafely),
@@ -520,6 +521,14 @@ internal static class TestRunner
         Assert.Contains("\"description\":\"Fetches data.\"", json);
         Assert.Contains("\"required\":[\"url\"]", json);
         Assert.Contains("\"timeout\":{\"type\":\"integer\"", json);
+    }
+
+    private static void McpToolParameterNormalizesNumericAliases()
+    {
+        Assert.Equal("number", new McpToolParameter("heading", "double", string.Empty).Type);
+        Assert.Equal("number", new McpToolParameter("altitude", "float", string.Empty).Type);
+        Assert.Equal("integer", new McpToolParameter("count", "int", string.Empty).Type);
+        Assert.Equal("boolean", new McpToolParameter("enabled", "bool", string.Empty).Type);
     }
 
     private static void McpToolResultSerializesTypedContentBlocks()
