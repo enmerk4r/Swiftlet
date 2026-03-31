@@ -25,26 +25,7 @@ public sealed class BridgeArtifactLocator
             throw new DirectoryNotFoundException($"Bridge directory not found: {assemblyDirectory}");
         }
 
-        foreach (string candidate in GetCandidates())
-        {
-            string fullPath = Path.Combine(assemblyDirectory, candidate);
-            if (!File.Exists(fullPath))
-            {
-                continue;
-            }
-
-            if (candidate.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-            {
-                return new BridgeLaunchCommand("dotnet", [fullPath, serverUrl]);
-            }
-
-            return new BridgeLaunchCommand(fullPath, [serverUrl]);
-        }
-
-        throw new FileNotFoundException(
-            $"SwiftletBridge was not found in '{assemblyDirectory}'. " +
-            "Expected one of: SwiftletBridge, SwiftletBridge.exe, SwiftletBridge.dll. " +
-            "A normal Rhino 8 build should stage the bridge beside the plugin output.");
+        return ResolveCommand(assemblyDirectory, [serverUrl]);
     }
 
     public BridgeLaunchCommand ResolveServerCommand(string assemblyDirectory, int port)
@@ -89,26 +70,79 @@ public sealed class BridgeArtifactLocator
             throw new DirectoryNotFoundException($"Bridge directory not found: {assemblyDirectory}");
         }
 
-        foreach (string candidate in GetCandidates())
+        return ResolveCommand(assemblyDirectory, args);
+    }
+
+    private static BridgeLaunchCommand ResolveCommand(string assemblyDirectory, IReadOnlyList<string> args)
+    {
+        string? bridgePath = FindBridgePath(assemblyDirectory);
+        if (bridgePath is null)
         {
-            string fullPath = Path.Combine(assemblyDirectory, candidate);
-            if (!File.Exists(fullPath))
-            {
-                continue;
-            }
-
-            if (candidate.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-            {
-                return new BridgeLaunchCommand("dotnet", [fullPath, .. args]);
-            }
-
-            return new BridgeLaunchCommand(fullPath, args);
+            throw new FileNotFoundException(
+                $"SwiftletBridge was not found in '{assemblyDirectory}'. " +
+                "Expected either a root-level bridge artifact for local builds or a packaged bridge under bridge/<rid>/.");
         }
 
-        throw new FileNotFoundException(
-            $"SwiftletBridge was not found in '{assemblyDirectory}'. " +
-            "Expected one of: SwiftletBridge, SwiftletBridge.exe, SwiftletBridge.dll. " +
-            "A normal Rhino 8 build should stage the bridge beside the plugin output.");
+        if (bridgePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            return new BridgeLaunchCommand("dotnet", [bridgePath, .. args]);
+        }
+
+        return new BridgeLaunchCommand(bridgePath, args);
+    }
+
+    private static string? FindBridgePath(string assemblyDirectory)
+    {
+        foreach (string candidate in GetCandidates())
+        {
+            string rootLevelPath = Path.Combine(assemblyDirectory, candidate);
+            if (File.Exists(rootLevelPath))
+            {
+                return rootLevelPath;
+            }
+        }
+
+        string? packagedBridgeDirectory = GetPackagedBridgeDirectory(assemblyDirectory);
+        if (packagedBridgeDirectory is null)
+        {
+            return null;
+        }
+
+        foreach (string candidate in GetCandidates())
+        {
+            string packagedBridgePath = Path.Combine(packagedBridgeDirectory, candidate);
+            if (File.Exists(packagedBridgePath))
+            {
+                return packagedBridgePath;
+            }
+        }
+
+        return null;
+    }
+
+    private static string? GetPackagedBridgeDirectory(string assemblyDirectory)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Path.Combine(assemblyDirectory, "bridge", "win-x64");
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+            {
+                return Path.Combine(assemblyDirectory, "bridge", "osx-arm64");
+            }
+
+            return Path.Combine(assemblyDirectory, "bridge", "osx-x64");
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return Path.Combine(assemblyDirectory, "bridge", "linux-x64");
+        }
+
+        return null;
     }
 
     private static IReadOnlyList<string> GetCandidates()

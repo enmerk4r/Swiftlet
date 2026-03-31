@@ -27,10 +27,10 @@ The script:
 
 - builds the target shell into a staged plugin folder
 - publishes `SwiftletBridge` by RID
-- builds local `.yak` packages for `win`, `mac`, and `any`
+- builds one local `.yak` package for `any`
 - assembles a Linux Compute package layout with setup docs and an MCP config template
 - stages a Rhino.Compute install helper that installs the local `.yak` for the `rhino-compute` user
-- copies the matching bridge beside the `.gha` in each installable package stage
+- copies the bridge binaries into `bridge/<rid>/` inside the packaged plugin payload
 - writes a machine-readable `artifact-manifest.json`
 
 ## Current Target Model
@@ -38,12 +38,12 @@ The script:
 - `rhino8`
   - builds from `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
   - represents the active Rhino 8+ line
-  - currently publishes bridge artifacts for `win-x64`, `linux-x64`, and `osx-arm64`
-  - produces an `rh8` Yak package because Yak compatibility is derived from the referenced RhinoCommon SDK
+  - currently publishes bridge artifacts for `win-x64`, `linux-x64`, `osx-arm64`, and `osx-x64`
+  - produces a single `rh8-any` Yak package because Yak compatibility is derived from the referenced RhinoCommon SDK
 - `rhino9`
   - builds from the same `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
   - stages the same binary for Rhino 9 discovery
-  - re-tags the generated Yak packages to `rh9-*` after `yak build`
+  - re-tags the generated `any` package to `rh9-*` after `yak build`
 
 ## Output Layout
 
@@ -61,18 +61,13 @@ artifacts/publish/rhino8/<version>/
 
 Key folders:
 
-- `plugin/windows`
-  - Windows plugin payload
-  - includes `Swiftlet.Gh.Rhino8.gha`
-  - includes `SwiftletBridge.exe`
-- `plugin/mac`
-  - macOS plugin payload
-  - includes `Swiftlet.Gh.Rhino8.gha`
-  - includes `SwiftletBridge`
 - `plugin/any`
-  - cross-platform plugin payload used for Linux/headless distribution
+  - cross-platform plugin payload used for all Yak distribution
   - includes `Swiftlet.Gh.Rhino8.gha`
-  - includes `SwiftletBridge`
+  - includes `bridge/win-x64/SwiftletBridge.exe`
+  - includes `bridge/linux-x64/SwiftletBridge`
+  - includes `bridge/osx-arm64/SwiftletBridge`
+  - includes `bridge/osx-x64/SwiftletBridge`
 - `linux/compute`
   - Linux-facing package layout for Rhino.Compute and other headless hosts
   - includes `packages/*.yak`
@@ -86,12 +81,10 @@ Key folders:
   - self-contained Linux bridge publish
 - `bridge/osx-arm64`
   - self-contained macOS Apple Silicon bridge publish
-- `yak/win`
-  - Windows Yak staging folder with generated `manifest.yml`
-- `yak/mac`
-  - macOS Yak staging folder with generated `manifest.yml`
+- `bridge/osx-x64`
+  - self-contained macOS Intel bridge publish
 - `yak/any`
-  - cross-platform Yak staging folder for Linux/Compute installs
+  - cross-platform Yak staging folder for Windows, Mac, and Linux installs
 - `artifact-manifest.json`
   - summary of the staged outputs
 

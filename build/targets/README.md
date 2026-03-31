@@ -10,10 +10,11 @@ This folder contains target metadata for the staged packaging pipeline.
   - Yak compatibility major inferred from the referenced RhinoCommon SDK
   - plugin project and artifact names
   - bridge project and runtime publish targets
+  - packaged bridge layout inside the single `any` Yak payload
   - shared version source file
 - `rhino9.json`
   - packages the same Rhino 8 shell for Rhino 9 discovery on Yak
-  - re-tags the generated package files to `rh9-*` after `yak build`
+  - re-tags the generated `any` package file to `rh9-*` after `yak build`
   - keeps the shell/build project unchanged while Rhino 8 binaries remain compatible in Rhino 9
 
 The packaging scripts read this metadata instead of hard-coding Rhino-specific paths directly in project post-build targets.

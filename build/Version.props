@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <SwiftletVersion>0.2.0</SwiftletVersion>
-    <SwiftletAssemblyVersion>0.2.0.0</SwiftletAssemblyVersion>
+    <SwiftletVersion>0.3.0</SwiftletVersion>
+    <SwiftletAssemblyVersion>0.3.0.0</SwiftletAssemblyVersion>
   </PropertyGroup>
 </Project>

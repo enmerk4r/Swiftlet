@@ -15,24 +15,32 @@
       "rid": "win-x64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": "SwiftletBridge.exe",
-      "packagePlatform": "win"
+      "copyIntoPackage": "SwiftletBridge.exe",
+      "packageRelativePath": "bridge/win-x64/SwiftletBridge.exe"
     },
     {
       "id": "linux-x64",
       "rid": "linux-x64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": "SwiftletBridge",
-      "packagePlatform": "any"
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/linux-x64/SwiftletBridge"
     },
     {
       "id": "osx-arm64",
       "rid": "osx-arm64",
       "selfContained": true,
       "singleFile": true,
-      "copyIntoPlugin": "SwiftletBridge",
-      "packagePlatform": "mac"
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/osx-arm64/SwiftletBridge"
+    },
+    {
+      "id": "osx-x64",
+      "rid": "osx-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/osx-x64/SwiftletBridge"
     }
   ]
 }
