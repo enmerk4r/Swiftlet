@@ -32,7 +32,6 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
     private sealed class LoopbackHttpCallbackSession : ILocalHttpCallbackSession
     {
         private readonly Uri _callbackUri;
-        private readonly IReadOnlyList<TcpListener> _listeners;
         private TcpClient? _client;
         private NetworkStream? _stream;
         private bool _responseSent;
@@ -40,7 +39,6 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
         public LoopbackHttpCallbackSession(Uri callbackUri)
         {
             _callbackUri = callbackUri;
-            _listeners = CreateListeners(callbackUri.Port);
         }
 
         public Uri CallbackUri => _callbackUri;
@@ -52,8 +50,10 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                 throw new InvalidOperationException("This callback session has already accepted a request.");
             }
 
-            _client = await AcceptClientAsync(cancellationToken).ConfigureAwait(false);
-            _stream = _client.GetStream();
+            TcpClient client = await AcceptClientAsync(cancellationToken).ConfigureAwait(false);
+            _client = client;
+            _stream = client.GetStream();
+            _responseSent = false;
 
             using var reader = new StreamReader(_stream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
 
@@ -64,6 +64,7 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                 throw new InvalidOperationException("Received an invalid HTTP request line.");
             }
 
+            Dictionary<string, string> headers = new(StringComparer.OrdinalIgnoreCase);
             while (true)
             {
                 string? headerLine = await reader.ReadLineAsync().ConfigureAwait(false);
@@ -71,13 +72,18 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                 {
                     break;
                 }
+
+                TryAddHeader(headerLine, headers);
             }
 
+            string requestBody = await ReadRequestBodyAsync(reader, headers).ConfigureAwait(false);
             Uri requestUri = BuildRequestUri(parts[1]);
             return new LocalHttpCallbackRequest(
                 requestUri,
                 parts[0],
-                ParseQueryParameters(requestUri));
+                ParseCallbackParameters(requestUri, parts[0], headers, requestBody),
+                headers,
+                requestBody);
         }
 
         public async Task SendResponseAsync(LocalHttpCallbackResponse response, CancellationToken cancellationToken = default)
@@ -132,17 +138,6 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
             {
             }
 
-            foreach (TcpListener listener in _listeners)
-            {
-                try
-                {
-                    listener.Stop();
-                }
-                catch
-                {
-                }
-            }
-
             return ValueTask.CompletedTask;
         }
 
@@ -175,33 +170,57 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
 
         private async Task<TcpClient> AcceptClientAsync(CancellationToken cancellationToken)
         {
+            IReadOnlyList<TcpListener> listeners = CreateListeners(_callbackUri.Port);
             List<Task<TcpClient>> acceptTasks = [];
-            foreach (TcpListener listener in _listeners)
+            foreach (TcpListener listener in listeners)
             {
                 acceptTasks.Add(listener.AcceptTcpClientAsync(cancellationToken).AsTask());
             }
 
-            Task<TcpClient> completed = await Task.WhenAny(acceptTasks).ConfigureAwait(false);
-
-            foreach (TcpListener listener in _listeners)
+            try
             {
-                try
+                Task<TcpClient> completed = await Task.WhenAny(acceptTasks).ConfigureAwait(false);
+                return await completed.ConfigureAwait(false);
+            }
+            finally
+            {
+                foreach (TcpListener listener in listeners)
                 {
-                    listener.Stop();
-                }
-                catch
-                {
+                    try
+                    {
+                        listener.Stop();
+                    }
+                    catch
+                    {
+                    }
                 }
             }
-
-            return await completed.ConfigureAwait(false);
         }
 
         private Uri BuildRequestUri(string target)
         {
             if (Uri.TryCreate(target, UriKind.Absolute, out Uri? absolute))
             {
-                return absolute;
+                if (string.Equals(absolute.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(absolute.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                {
+                    return absolute;
+                }
+
+                // Some macOS browser/provider combinations send a malformed absolute
+                // target like file:///callback/%3Fcode=... to the loopback listener.
+                // Reinterpret that file path against the expected callback base so the
+                // encoded query marker becomes a real query string again.
+                if (string.Equals(absolute.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+                {
+                    string fileTarget = Uri.UnescapeDataString(absolute.AbsolutePath);
+                    if (!fileTarget.StartsWith("/", StringComparison.Ordinal))
+                    {
+                        fileTarget = "/" + fileTarget;
+                    }
+
+                    return new Uri(_callbackUri, fileTarget);
+                }
             }
 
             if (!target.StartsWith("/", StringComparison.Ordinal))
@@ -209,6 +228,7 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                 target = "/" + target;
             }
 
+            target = Uri.UnescapeDataString(target);
             return new Uri(_callbackUri, target);
         }
 
@@ -248,6 +268,92 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
             }
 
             return values;
+        }
+
+        private static IReadOnlyDictionary<string, string?> ParseCallbackParameters(
+            Uri requestUri,
+            string httpMethod,
+            IReadOnlyDictionary<string, string> headers,
+            string requestBody)
+        {
+            Dictionary<string, string?> values = new(ParseQueryParameters(requestUri), StringComparer.OrdinalIgnoreCase);
+
+            if (string.Equals(httpMethod, "POST", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(requestBody) &&
+                headers.TryGetValue("Content-Type", out string? contentType) &&
+                IsFormUrlEncoded(contentType))
+            {
+                foreach ((string key, string? value) in ParseFormParameters(requestBody))
+                {
+                    values[key] = value;
+                }
+            }
+
+            return values;
+        }
+
+        private static IEnumerable<KeyValuePair<string, string?>> ParseFormParameters(string body)
+        {
+            if (string.IsNullOrEmpty(body))
+            {
+                yield break;
+            }
+
+            foreach (string segment in body.Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] parts = segment.Split('=', 2);
+                string key = Uri.UnescapeDataString(parts[0].Replace('+', ' '));
+                string? value = parts.Length > 1 ? Uri.UnescapeDataString(parts[1].Replace('+', ' ')) : string.Empty;
+                yield return new KeyValuePair<string, string?>(key, value);
+            }
+        }
+
+        private static bool IsFormUrlEncoded(string contentType)
+        {
+            return contentType.StartsWith("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void TryAddHeader(string headerLine, IDictionary<string, string> headers)
+        {
+            int separatorIndex = headerLine.IndexOf(':');
+            if (separatorIndex <= 0)
+            {
+                return;
+            }
+
+            string name = headerLine[..separatorIndex].Trim();
+            string value = headerLine[(separatorIndex + 1)..].Trim();
+            if (name.Length > 0)
+            {
+                headers[name] = value;
+            }
+        }
+
+        private static async Task<string> ReadRequestBodyAsync(
+            StreamReader reader,
+            IReadOnlyDictionary<string, string> headers)
+        {
+            if (!headers.TryGetValue("Content-Length", out string? contentLengthText) ||
+                !int.TryParse(contentLengthText, out int contentLength) ||
+                contentLength <= 0)
+            {
+                return string.Empty;
+            }
+
+            char[] buffer = new char[contentLength];
+            int totalRead = 0;
+            while (totalRead < contentLength)
+            {
+                int read = await reader.ReadAsync(buffer, totalRead, contentLength - totalRead).ConfigureAwait(false);
+                if (read == 0)
+                {
+                    break;
+                }
+
+                totalRead += read;
+            }
+
+            return totalRead == 0 ? string.Empty : new string(buffer, 0, totalRead);
         }
 
         private static string GetReasonPhrase(int statusCode)

@@ -33,6 +33,14 @@ The script:
 - copies the bridge binaries into `bridge/<rid>/` inside the packaged plugin payload
 - writes a machine-readable `artifact-manifest.json`
 
+## Automatic Release Packaging
+
+`src/Swiftlet.Gh.Rhino8` now invokes `Publish-Target.ps1` automatically after a Windows `Release` build.
+
+- It packages from the existing build output via `-PluginOutputDir`, so it does not rebuild the plug-in.
+- It passes `-NoRestore`, so it reuses the already-restored packages from the build machine.
+- To disable this behavior for a specific build, pass `/p:AutoPackageOnReleaseBuild=false`.
+
 ## Current Target Model
 
 - `rhino8`

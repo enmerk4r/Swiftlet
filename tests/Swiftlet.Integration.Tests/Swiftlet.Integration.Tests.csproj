@@ -11,7 +11,7 @@
     <AssemblyName>Swiftlet.Integration.Tests</AssemblyName>
     <Description>Placeholder integration test project for the new Swiftlet architecture.</Description>
     <BridgeProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\src\SwiftletBridge\SwiftletBridge.csproj'))</BridgeProjectPath>
-    <BridgePublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\bridge-publish\'))</BridgePublishDir>
+    <BridgePublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\bridge-publish'))</BridgePublishDir>
     <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</BridgeRuntimeIdentifier>
     <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(NETCoreSdkRuntimeIdentifier)' != ''">$(NETCoreSdkRuntimeIdentifier)</BridgeRuntimeIdentifier>
     <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT'">win-x64</BridgeRuntimeIdentifier>
@@ -37,7 +37,7 @@
     <Exec Command="dotnet publish &quot;$(BridgeProjectPath)&quot; -c $(Configuration) -r $(BridgeRuntimeIdentifier) --self-contained true -p:PublishSingleFile=true -o &quot;$(BridgePublishDir)&quot; -nologo"
           WorkingDirectory="$(MSBuildProjectDirectory)" />
 
-    <Copy SourceFiles="$(BridgePublishDir)$(BridgeExecutableName)"
+    <Copy SourceFiles="$(BridgePublishDir)\$(BridgeExecutableName)"
           DestinationFiles="$(TargetDir)$(BridgeExecutableName)"
           SkipUnchangedFiles="true" />
   </Target>

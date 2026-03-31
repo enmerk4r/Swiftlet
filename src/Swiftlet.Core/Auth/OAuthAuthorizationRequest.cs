@@ -38,6 +38,7 @@ public sealed class OAuthAuthorizationRequest
         List<string> queryParameters =
         [
             "response_type=code",
+            "response_mode=query",
             $"client_id={Uri.EscapeDataString(ClientId)}",
             $"redirect_uri={Uri.EscapeDataString(RedirectUri)}",
             $"state={Uri.EscapeDataString(State)}",

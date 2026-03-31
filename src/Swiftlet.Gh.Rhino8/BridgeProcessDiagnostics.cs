@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Swiftlet.Gh.Rhino8;
 
@@ -36,6 +37,12 @@ internal sealed class BridgeProcessDiagnostics
 
         if (process.HasExited)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && process.ExitCode == 137)
+            {
+                return new InvalidOperationException(
+                    $"{defaultMessage}. SwiftletBridge exited with code 137. macOS likely killed the bridge process; this is commonly caused by a quarantined or unsigned bridge binary. Try running: xattr -dr com.apple.quarantine \"<Swiftlet package>/bridge\" && codesign --force --sign - \"<Swiftlet package>/bridge/osx-arm64/SwiftletBridge\"");
+            }
+
             return new InvalidOperationException($"{defaultMessage}. SwiftletBridge exited with code {process.ExitCode}.");
         }
 

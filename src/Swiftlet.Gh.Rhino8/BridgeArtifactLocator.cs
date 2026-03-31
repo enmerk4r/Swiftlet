@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Swiftlet.Core.Mcp;
 
@@ -88,6 +90,7 @@ public sealed class BridgeArtifactLocator
             return new BridgeLaunchCommand("dotnet", [bridgePath, .. args]);
         }
 
+        EnsureNativeBridgeIsLaunchable(bridgePath);
         return new BridgeLaunchCommand(bridgePath, args);
     }
 
@@ -150,5 +153,128 @@ public sealed class BridgeArtifactLocator
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? WindowsCandidates
             : UnixCandidates;
+    }
+
+    private static void EnsureNativeBridgeIsLaunchable(string bridgePath)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return;
+        }
+
+        EnsureNativeBridgeIsExecutable(bridgePath);
+        ClearMacQuarantineAttribute(bridgePath);
+        AdHocSignMacBinary(bridgePath);
+    }
+
+    private static void EnsureNativeBridgeIsExecutable(string bridgePath)
+    {
+        try
+        {
+            UnixFileMode currentMode = File.GetUnixFileMode(bridgePath);
+            UnixFileMode expectedMode = currentMode |
+                                        UnixFileMode.UserExecute |
+                                        UnixFileMode.GroupExecute |
+                                        UnixFileMode.OtherExecute;
+
+            if (expectedMode != currentMode)
+            {
+                File.SetUnixFileMode(bridgePath, expectedMode);
+            }
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            throw new InvalidOperationException(
+                $"SwiftletBridge at '{bridgePath}' is not executable and Swiftlet could not update its Unix permissions automatically.",
+                ex);
+        }
+    }
+
+    private static void ClearMacQuarantineAttribute(string bridgePath)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return;
+        }
+
+        string bridgeDirectory = Path.GetDirectoryName(bridgePath) ?? bridgePath;
+        RunMacXattr("-r", "-d", "com.apple.quarantine", bridgeDirectory);
+        RunMacXattr("-d", "com.apple.quarantine", bridgePath);
+    }
+
+    private static void RunMacXattr(params string[] arguments)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "/usr/bin/xattr",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            };
+            foreach (string argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+            using var process = new Process
+            {
+                StartInfo = startInfo,
+            };
+
+            if (!process.Start())
+            {
+                return;
+            }
+
+            process.WaitForExit(2000);
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+        }
+    }
+
+    private static void AdHocSignMacBinary(string bridgePath)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return;
+        }
+
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "/usr/bin/codesign",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            };
+            startInfo.ArgumentList.Add("--force");
+            startInfo.ArgumentList.Add("--sign");
+            startInfo.ArgumentList.Add("-");
+            startInfo.ArgumentList.Add(bridgePath);
+
+            using var process = new Process
+            {
+                StartInfo = startInfo,
+            };
+
+            if (!process.Start())
+            {
+                return;
+            }
+
+            process.WaitForExit(5000);
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+        }
     }
 }

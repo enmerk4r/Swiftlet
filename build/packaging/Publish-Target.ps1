@@ -396,7 +396,8 @@ else {
         $pluginProjectPath,
         "-c", $Configuration,
         "-o", $pluginBuildDirectory,
-        "-p:StageBridgeOnBuild=false"
+        "-p:StageBridgeOnBuild=false",
+        "-p:AutoPackageOnReleaseBuild=false"
     )
 
     if ($NoRestore) {

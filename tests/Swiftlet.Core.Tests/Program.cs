@@ -253,7 +253,7 @@ internal static class TestRunner
         string url = request.BuildUrl();
 
         Assert.Equal(
-            "https://accounts.example.com/oauth2/authorize?response_type=code&client_id=swiftlet-client&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fcallback%2F&state=state-123&code_challenge=challenge-456&code_challenge_method=S256&scope=read%20write",
+            "https://accounts.example.com/oauth2/authorize?response_type=code&response_mode=query&client_id=swiftlet-client&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fcallback%2F&state=state-123&code_challenge=challenge-456&code_challenge_method=S256&scope=read%20write",
             url);
     }
 

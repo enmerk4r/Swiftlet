@@ -29,6 +29,9 @@ internal static class IntegrationTestRunner
             ("Desktop host workflow exposes desktop capabilities", DesktopWorkflowExposesCapabilitiesAsync),
             ("Modern OAuth authorization flow tracks state through callback completion", OAuthAuthorizationFlowTracksStateAsync),
             ("OAuth callback listener completes a loopback authorization round-trip", OAuthLoopbackCallbackRoundTripAsync),
+            ("OAuth callback listener accepts form-post authorization responses", OAuthLoopbackCallbackFormPostRoundTripAsync),
+            ("OAuth callback listener completes fragment-style browser relay callbacks", OAuthLoopbackCallbackFragmentRelayRoundTripAsync),
+            ("OAuth callback listener normalizes malformed file-style callback targets", OAuthLoopbackCallbackMalformedFileTargetRoundTripAsync),
             ("Modern MCP server handles initialize, tools/list, and tools/call over HTTP", ModernMcpServerHandlesJsonRpcOverHttpAsync),
             ("Modern MCP server session manages lifecycle and config export", ModernMcpServerSessionManagesLifecycleAsync),
             ("Modern MCP response workflow preserves deconstruct and one-shot semantics", ModernMcpResponseWorkflowPreservesSemanticsAsync),
@@ -36,6 +39,7 @@ internal static class IntegrationTestRunner
             ("Simple HTTP listener captures requests and returns configured content", SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync),
             ("Modern WebSocket server and client exchange messages", ModernWebSocketServerAndClientExchangeMessagesAsync),
             ("MCP config generation resolves platform bridge artifacts", McpConfigGenerationResolvesBridgeArtifactsAsync),
+            ("Bridge artifact resolution repairs Unix execute permissions for native binaries", BridgeArtifactResolutionRepairsUnixExecutePermissionsAsync),
             ("MCP export reports manual clipboard guidance through notifications", McpExportReportsManualClipboardGuidanceAsync),
         ];
 
@@ -267,6 +271,98 @@ internal static class IntegrationTestRunner
         Assert.Null(flow.AuthorizationCode);
     }
 
+    private static async Task OAuthLoopbackCallbackFormPostRoundTripAsync()
+    {
+        int port = GetAvailablePort();
+        var services = new DesktopHostServices(
+            browserLauncher: new StubBrowserLauncher(HostActionResult.Success("Browser launch simulated.")));
+
+        OAuthAuthorizationSession session = ModernOAuthWorkflow.CreateAuthorizationSession(
+            "https://accounts.example.com/authorize",
+            "client-id",
+            $"http://localhost:{port}/callback/",
+            ["openid", "profile"]);
+
+        await using ILocalHttpCallbackSession callbackSession = await services.LocalCallbacks
+            .StartAsync(new Uri(session.RedirectUri))
+            .ConfigureAwait(false);
+
+        Task<OAuthCallbackResult> callbackTask = ModernOAuthWorkflow.WaitForAuthorizationCodeAsync(callbackSession, session);
+        string responseText = await SendFormPostCallbackAsync(
+            port,
+            "/callback/",
+            $"code=form-post-code&state={Uri.EscapeDataString(session.State)}").ConfigureAwait(false);
+
+        OAuthCallbackResult result = await callbackTask.ConfigureAwait(false);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("form-post-code", result.AuthorizationCode);
+        Assert.Contains("Authorization Successful", responseText);
+    }
+
+    private static async Task OAuthLoopbackCallbackFragmentRelayRoundTripAsync()
+    {
+        int port = GetAvailablePort();
+        var services = new DesktopHostServices(
+            browserLauncher: new StubBrowserLauncher(HostActionResult.Success("Browser launch simulated.")));
+
+        OAuthAuthorizationSession session = ModernOAuthWorkflow.CreateAuthorizationSession(
+            "https://accounts.example.com/authorize",
+            "client-id",
+            $"http://localhost:{port}/callback/",
+            ["openid", "profile"]);
+
+        await using ILocalHttpCallbackSession callbackSession = await services.LocalCallbacks
+            .StartAsync(new Uri(session.RedirectUri))
+            .ConfigureAwait(false);
+
+        Task<OAuthCallbackResult> callbackTask = ModernOAuthWorkflow.WaitForAuthorizationCodeAsync(callbackSession, session);
+
+        string continuationPage = await SendCallbackAsync(port, "/callback/").ConfigureAwait(false);
+        Assert.Contains("Completing Authorization", continuationPage);
+
+        string relayFailurePage = await SendFormPostCallbackAsync(
+            port,
+            "/callback/",
+            $"swiftlet_relay=1&swiftlet_relay_status=relayed_hash_params&code=fragment-code&state={Uri.EscapeDataString(session.State)}").ConfigureAwait(false);
+
+        OAuthCallbackResult result = await callbackTask.ConfigureAwait(false);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("fragment-code", result.AuthorizationCode);
+        Assert.Contains("Authorization Successful", relayFailurePage);
+    }
+
+    private static async Task OAuthLoopbackCallbackMalformedFileTargetRoundTripAsync()
+    {
+        int port = GetAvailablePort();
+        var services = new DesktopHostServices(
+            browserLauncher: new StubBrowserLauncher(HostActionResult.Success("Browser launch simulated.")));
+
+        OAuthAuthorizationSession session = ModernOAuthWorkflow.CreateAuthorizationSession(
+            "https://accounts.example.com/authorize",
+            "client-id",
+            $"http://localhost:{port}/callback/",
+            ["openid", "profile"]);
+
+        await using ILocalHttpCallbackSession callbackSession = await services.LocalCallbacks
+            .StartAsync(new Uri(session.RedirectUri))
+            .ConfigureAwait(false);
+
+        Task<OAuthCallbackResult> callbackTask = ModernOAuthWorkflow.WaitForAuthorizationCodeAsync(callbackSession, session);
+        string responseText = await SendRawCallbackAsync(
+            port,
+            "GET file:///callback/%3Fcode=file-target-code%26state=" + Uri.EscapeDataString(session.State) + " HTTP/1.1\r\n" +
+            $"Host: localhost:{port}\r\n" +
+            "Connection: close\r\n\r\n").ConfigureAwait(false);
+
+        OAuthCallbackResult result = await callbackTask.ConfigureAwait(false);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("file-target-code", result.AuthorizationCode);
+        Assert.Contains("Authorization Successful", responseText);
+    }
+
     private static Task McpConfigGenerationResolvesBridgeArtifactsAsync()
     {
         string tempDirectory = Path.Combine(Path.GetTempPath(), "SwiftletTests", Guid.NewGuid().ToString("N"));
@@ -291,6 +387,43 @@ internal static class IntegrationTestRunner
             string nativeConfig = ModernMcpWorkflow.GenerateConfig(assemblyLocation, "Swiftlet", 3002);
             Assert.Contains("SwiftletBridge", nativeConfig);
             Assert.Contains("\"http://localhost:3002/mcp/\"", nativeConfig);
+
+            return Task.CompletedTask;
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, recursive: true);
+        }
+    }
+
+    private static Task BridgeArtifactResolutionRepairsUnixExecutePermissionsAsync()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return Task.CompletedTask;
+        }
+
+        string tempDirectory = Path.Combine(Path.GetTempPath(), "SwiftletTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            string bridgePath = Path.Combine(tempDirectory, "SwiftletBridge");
+            File.WriteAllText(bridgePath, string.Empty);
+            File.SetUnixFileMode(
+                bridgePath,
+                UnixFileMode.UserRead |
+                UnixFileMode.UserWrite |
+                UnixFileMode.GroupRead |
+                UnixFileMode.OtherRead);
+
+            BridgeLaunchCommand command = new BridgeArtifactLocator().ResolveServerCommand(tempDirectory, 3010);
+            UnixFileMode mode = File.GetUnixFileMode(bridgePath);
+
+            Assert.Equal(bridgePath, command.Command);
+            Assert.True(mode.HasFlag(UnixFileMode.UserExecute));
+            Assert.True(mode.HasFlag(UnixFileMode.GroupExecute));
+            Assert.True(mode.HasFlag(UnixFileMode.OtherExecute));
 
             return Task.CompletedTask;
         }
@@ -613,15 +746,33 @@ internal static class IntegrationTestRunner
 
     private static async Task<string> SendCallbackAsync(int port, string pathAndQuery)
     {
+        return await SendRawCallbackAsync(
+            port,
+            $"GET {pathAndQuery} HTTP/1.1\r\n" +
+            $"Host: localhost:{port}\r\n" +
+            "Connection: close\r\n\r\n").ConfigureAwait(false);
+    }
+
+    private static async Task<string> SendFormPostCallbackAsync(int port, string path, string body)
+    {
+        byte[] bodyBytes = Encoding.ASCII.GetBytes(body);
+        string request =
+            $"POST {path} HTTP/1.1\r\n" +
+            $"Host: localhost:{port}\r\n" +
+            "Content-Type: application/x-www-form-urlencoded\r\n" +
+            $"Content-Length: {bodyBytes.Length}\r\n" +
+            "Connection: close\r\n\r\n" +
+            body;
+
+        return await SendRawCallbackAsync(port, request).ConfigureAwait(false);
+    }
+
+    private static async Task<string> SendRawCallbackAsync(int port, string request)
+    {
         using var client = new TcpClient();
         await client.ConnectAsync(IPAddress.Loopback, port).ConfigureAwait(false);
 
         using NetworkStream stream = client.GetStream();
-        string request =
-            $"GET {pathAndQuery} HTTP/1.1\r\n" +
-            $"Host: localhost:{port}\r\n" +
-            "Connection: close\r\n\r\n";
-
         byte[] requestBytes = Encoding.ASCII.GetBytes(request);
         await stream.WriteAsync(requestBytes).ConfigureAwait(false);
         await stream.FlushAsync().ConfigureAwait(false);
