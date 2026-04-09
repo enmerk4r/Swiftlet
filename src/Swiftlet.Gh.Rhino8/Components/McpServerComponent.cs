@@ -225,11 +225,11 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         }));
     }
 
-    private bool TryBuildConfig(out string? config, out string? error)
+    private bool TryBuildConfig(McpClientConfigTarget target, out string? config, out string? error)
     {
         try
         {
-            config = _session.GenerateConfig(GetType().Assembly.Location);
+            config = _session.GenerateConfig(GetType().Assembly.Location, target);
             error = null;
             return true;
         }
@@ -241,15 +241,15 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         }
     }
 
-    private bool CopyConfigToClipboard()
+    private bool CopyConfigToClipboard(McpClientConfigTarget target)
     {
-        if (!TryBuildConfig(out string? config, out string? configError) || string.IsNullOrWhiteSpace(config))
+        if (!TryBuildConfig(target, out string? config, out string? configError) || string.IsNullOrWhiteSpace(config))
         {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, configError ?? "Failed to generate MCP config.");
             return false;
         }
 
-        HostActionResult result = _session.ExportConfigAsync(_hostServices, GetType().Assembly.Location).GetAwaiter().GetResult();
+        HostActionResult result = _session.ExportConfigAsync(_hostServices, GetType().Assembly.Location, target).GetAwaiter().GetResult();
 
         GH_RuntimeMessageLevel level = result.IsSuccess
             ? GH_RuntimeMessageLevel.Remark

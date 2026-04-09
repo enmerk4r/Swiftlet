@@ -21,6 +21,21 @@ public static class ModernMcpWorkflow
         int port,
         BridgeArtifactLocator? bridgeLocator = null)
     {
+        return GenerateConfig(
+            assemblyLocation,
+            serverName,
+            port,
+            McpClientConfigTarget.ClaudeDesktop,
+            bridgeLocator);
+    }
+
+    public static string GenerateConfig(
+        string assemblyLocation,
+        string serverName,
+        int port,
+        McpClientConfigTarget target,
+        BridgeArtifactLocator? bridgeLocator = null)
+    {
         if (string.IsNullOrWhiteSpace(assemblyLocation))
         {
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(assemblyLocation));
@@ -37,10 +52,18 @@ public static class ModernMcpWorkflow
             throw new InvalidOperationException($"Could not determine assembly directory from '{assemblyLocation}'.");
         }
 
-        BridgeLaunchCommand bridgeCommand = (bridgeLocator ?? new BridgeArtifactLocator())
-            .Resolve(assemblyDirectory, BuildServerUrl(port));
-
-        return McpClientConfigBuilder.Build(serverName, bridgeCommand);
+        string serverUrl = BuildServerUrl(port);
+        return target switch
+        {
+            McpClientConfigTarget.ClaudeDesktop => McpClientConfigBuilder.Build(
+                serverName,
+                (bridgeLocator ?? new BridgeArtifactLocator()).Resolve(assemblyDirectory, serverUrl)),
+            McpClientConfigTarget.LmStudio => McpClientConfigBuilder.BuildLmStudio(serverName, serverUrl),
+            McpClientConfigTarget.VsCode => McpClientConfigBuilder.BuildVsCode(serverName, serverUrl),
+            McpClientConfigTarget.ClaudeCode => McpClientConfigBuilder.BuildClaudeCode(serverName, serverUrl),
+            McpClientConfigTarget.Codex => McpClientConfigBuilder.BuildCodex(serverName, serverUrl),
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unsupported MCP client config target."),
+        };
     }
 
     public static async Task<HostActionResult> ExportConfigAsync(

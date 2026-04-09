@@ -1,4 +1,5 @@
 using System.Windows.Forms;
+using Swiftlet.Core.Mcp;
 
 namespace Swiftlet.Gh.Rhino8.Components;
 
@@ -8,11 +9,30 @@ public sealed partial class McpServerComponent
     {
         base.AppendAdditionalComponentMenuItems(menu);
         Menu_AppendSeparator(menu);
-        Menu_AppendItem(menu, "Copy MCP Config", OnCopyMcpConfig, true);
+
+        ToolStripMenuItem configMenu = new("MCP Config");
+        configMenu.DropDownItems.Add(CreateConfigMenuItem("Copy Claude Desktop config", McpClientConfigTarget.ClaudeDesktop));
+        configMenu.DropDownItems.Add(CreateConfigMenuItem("Copy LM Studio config", McpClientConfigTarget.LmStudio));
+        configMenu.DropDownItems.Add(CreateConfigMenuItem("Copy VS Code config", McpClientConfigTarget.VsCode));
+        configMenu.DropDownItems.Add(CreateConfigMenuItem("Copy Claude Code config", McpClientConfigTarget.ClaudeCode));
+        configMenu.DropDownItems.Add(CreateConfigMenuItem("Copy Codex config", McpClientConfigTarget.Codex));
+        menu.Items.Add(configMenu);
     }
 
     private void OnCopyMcpConfig(object? sender, EventArgs e)
     {
-        CopyConfigToClipboard();
+        McpClientConfigTarget target = sender is ToolStripMenuItem { Tag: McpClientConfigTarget taggedTarget }
+            ? taggedTarget
+            : McpClientConfigTarget.ClaudeDesktop;
+
+        CopyConfigToClipboard(target);
+    }
+
+    private ToolStripMenuItem CreateConfigMenuItem(string label, McpClientConfigTarget target)
+    {
+        return new ToolStripMenuItem(label, null, OnCopyMcpConfig)
+        {
+            Tag = target,
+        };
     }
 }

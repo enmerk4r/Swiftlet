@@ -90,12 +90,28 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
         return ModernMcpWorkflow.GenerateConfig(assemblyLocation, ServerName, configPort);
     }
 
+    public string GenerateConfig(string assemblyLocation, McpClientConfigTarget target)
+    {
+        int configPort = Port > 0 ? Port : 3001;
+        return ModernMcpWorkflow.GenerateConfig(assemblyLocation, ServerName, configPort, target);
+    }
+
     public Task<HostActionResult> ExportConfigAsync(
         IHostServices hostServices,
         string assemblyLocation,
         CancellationToken cancellationToken = default)
     {
         string config = GenerateConfig(assemblyLocation);
+        return ModernMcpWorkflow.ExportConfigAsync(hostServices, config, cancellationToken);
+    }
+
+    public Task<HostActionResult> ExportConfigAsync(
+        IHostServices hostServices,
+        string assemblyLocation,
+        McpClientConfigTarget target,
+        CancellationToken cancellationToken = default)
+    {
+        string config = GenerateConfig(assemblyLocation, target);
         return ModernMcpWorkflow.ExportConfigAsync(hostServices, config, cancellationToken);
     }
 

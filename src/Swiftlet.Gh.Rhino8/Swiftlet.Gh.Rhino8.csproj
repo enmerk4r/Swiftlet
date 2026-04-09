@@ -69,7 +69,7 @@
     <ProjectReference Include="..\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
     <Compile Remove="Components\*.WindowsMenu.cs" />
   </ItemGroup>
 

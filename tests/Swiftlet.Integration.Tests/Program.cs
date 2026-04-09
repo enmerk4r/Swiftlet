@@ -376,6 +376,7 @@ internal static class IntegrationTestRunner
             File.WriteAllText(dllPath, string.Empty);
 
             string dllConfig = ModernMcpWorkflow.GenerateConfig(assemblyLocation, "Swiftlet", 3001);
+            Assert.Contains("\"type\": \"stdio\"", dllConfig);
             Assert.Contains("\"command\": \"dotnet\"", dllConfig);
             Assert.Contains("SwiftletBridge.dll", dllConfig);
             Assert.Contains("http://localhost:3001/mcp/", dllConfig);
@@ -385,8 +386,43 @@ internal static class IntegrationTestRunner
             File.WriteAllText(exePath, string.Empty);
 
             string nativeConfig = ModernMcpWorkflow.GenerateConfig(assemblyLocation, "Swiftlet", 3002);
+            Assert.Contains("\"type\": \"stdio\"", nativeConfig);
             Assert.Contains("SwiftletBridge", nativeConfig);
             Assert.Contains("\"http://localhost:3002/mcp/\"", nativeConfig);
+
+            string lmStudioConfig = ModernMcpWorkflow.GenerateConfig(
+                assemblyLocation,
+                "Swiftlet",
+                3003,
+                McpClientConfigTarget.LmStudio);
+            Assert.Contains("\"mcpServers\"", lmStudioConfig);
+            Assert.Contains("\"url\": \"http://localhost:3003/mcp/\"", lmStudioConfig);
+
+            string vsCodeConfig = ModernMcpWorkflow.GenerateConfig(
+                assemblyLocation,
+                "Swiftlet",
+                3004,
+                McpClientConfigTarget.VsCode);
+            Assert.Contains("\"servers\"", vsCodeConfig);
+            Assert.Contains("\"type\": \"http\"", vsCodeConfig);
+            Assert.Contains("\"url\": \"http://localhost:3004/mcp/\"", vsCodeConfig);
+
+            string claudeCodeConfig = ModernMcpWorkflow.GenerateConfig(
+                assemblyLocation,
+                "Swiftlet",
+                3005,
+                McpClientConfigTarget.ClaudeCode);
+            Assert.Contains("\"mcpServers\"", claudeCodeConfig);
+            Assert.Contains("\"type\": \"http\"", claudeCodeConfig);
+            Assert.Contains("\"url\": \"http://localhost:3005/mcp/\"", claudeCodeConfig);
+
+            string codexConfig = ModernMcpWorkflow.GenerateConfig(
+                assemblyLocation,
+                "Swiftlet",
+                3006,
+                McpClientConfigTarget.Codex);
+            Assert.Contains("[mcp_servers.\"Swiftlet\"]", codexConfig);
+            Assert.Contains("url = \"http://localhost:3006/mcp/\"", codexConfig);
 
             return Task.CompletedTask;
         }
@@ -534,7 +570,12 @@ internal static class IntegrationTestRunner
 
             string config = session.GenerateConfig(assemblyLocation);
             Assert.Contains("\"Swiftlet Session\"", config);
+            Assert.Contains("\"type\": \"stdio\"", config);
             Assert.Contains($"\"http://localhost:{port}/mcp/\"", config);
+
+            string lmStudioConfig = session.GenerateConfig(assemblyLocation, McpClientConfigTarget.LmStudio);
+            Assert.Contains("\"mcpServers\"", lmStudioConfig);
+            Assert.Contains($"\"url\": \"http://localhost:{port}/mcp/\"", lmStudioConfig);
         }
         finally
         {

@@ -43,7 +43,11 @@ internal static class TestRunner
             ("MCP tool result serializes typed content blocks", McpToolResultSerializesTypedContentBlocks),
             ("MCP resource content blocks serialize to spec shapes", McpResourceContentBlocksSerializeToSpecShapes),
             ("MCP tool result duplicates structured content safely", McpToolResultDuplicatesStructuredContentSafely),
-            ("MCP client config builder serializes command and args", McpClientConfigBuilderSerializesLaunchCommand),
+            ("MCP client config builder serializes Claude Desktop stdio config", McpClientConfigBuilderSerializesClaudeDesktopConfig),
+            ("MCP client config builder serializes LM Studio HTTP config", McpClientConfigBuilderSerializesLmStudioConfig),
+            ("MCP client config builder serializes VS Code HTTP config", McpClientConfigBuilderSerializesVsCodeConfig),
+            ("MCP client config builder serializes Claude Code HTTP config", McpClientConfigBuilderSerializesClaudeCodeConfig),
+            ("MCP client config builder serializes Codex TOML config", McpClientConfigBuilderSerializesCodexConfig),
             ("IpBlacklist matches configured IPv4 and IPv6 ranges", IpBlacklistMatchesConfiguredRanges),
             ("IpBlacklist falls back to block-all for invalid environment configuration", IpBlacklistBlocksAllOnInvalidEnvironmentConfig),
             ("UrlValidator rejects malformed input and blacklisted hosts", UrlValidatorRejectsInvalidAndBlacklistedUrls),
@@ -494,15 +498,50 @@ internal static class TestRunner
         Assert.Equal(JsonObjectMerger.DefaultConflictMode, fallback);
     }
 
-    private static void McpClientConfigBuilderSerializesLaunchCommand()
+    private static void McpClientConfigBuilderSerializesClaudeDesktopConfig()
     {
         string json = McpClientConfigBuilder.Build(
             "Swiftlet",
             new BridgeLaunchCommand("dotnet", ["/tmp/SwiftletBridge.dll", "http://localhost:3001/mcp/"]));
 
+        Assert.Contains("\"type\": \"stdio\"", json);
         Assert.Contains("\"command\": \"dotnet\"", json);
         Assert.Contains("\"Swiftlet\"", json);
         Assert.Contains("\"http://localhost:3001/mcp/\"", json);
+    }
+
+    private static void McpClientConfigBuilderSerializesLmStudioConfig()
+    {
+        string json = McpClientConfigBuilder.BuildLmStudio("Swiftlet", "http://localhost:3001/mcp/");
+
+        Assert.Contains("\"mcpServers\"", json);
+        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+    }
+
+    private static void McpClientConfigBuilderSerializesVsCodeConfig()
+    {
+        string json = McpClientConfigBuilder.BuildVsCode("Swiftlet", "http://localhost:3001/mcp/");
+
+        Assert.Contains("\"servers\"", json);
+        Assert.Contains("\"type\": \"http\"", json);
+        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+    }
+
+    private static void McpClientConfigBuilderSerializesClaudeCodeConfig()
+    {
+        string json = McpClientConfigBuilder.BuildClaudeCode("Swiftlet", "http://localhost:3001/mcp/");
+
+        Assert.Contains("\"mcpServers\"", json);
+        Assert.Contains("\"type\": \"http\"", json);
+        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+    }
+
+    private static void McpClientConfigBuilderSerializesCodexConfig()
+    {
+        string toml = McpClientConfigBuilder.BuildCodex("Swiftlet", "http://localhost:3001/mcp/");
+
+        Assert.Contains("[mcp_servers.\"Swiftlet\"]", toml);
+        Assert.Contains("url = \"http://localhost:3001/mcp/\"", toml);
     }
 
     private static void McpToolDefinitionBuildsInputSchema()
