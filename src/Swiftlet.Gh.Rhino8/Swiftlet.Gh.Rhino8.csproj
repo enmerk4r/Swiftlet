@@ -1,0 +1,105 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\Version.props" />
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <LangVersion>12.0</LangVersion>
+    <BuildInParallel>false</BuildInParallel>
+    <RootNamespace>Swiftlet.Gh.Rhino8</RootNamespace>
+    <AssemblyName>Swiftlet.Gh.Rhino8</AssemblyName>
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(SwiftletVersion)</InformationalVersion>
+    <Description>Modern Grasshopper shell for the Rhino 8+ Swiftlet line.</Description>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RhinoCommonPackageVersion>8.0.23304.9001</RhinoCommonPackageVersion>
+    <GrasshopperPackageVersion>8.0.23304.9001</GrasshopperPackageVersion>
+    <StageBridgeOnBuild Condition="'$(StageBridgeOnBuild)' == ''">true</StageBridgeOnBuild>
+    <BridgeProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\SwiftletBridge\SwiftletBridge.csproj'))</BridgeProjectPath>
+    <BridgePublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\bridge-publish'))</BridgePublishDir>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</BridgeRuntimeIdentifier>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(NETCoreSdkRuntimeIdentifier)' != ''">$(NETCoreSdkRuntimeIdentifier)</BridgeRuntimeIdentifier>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT'">win-x64</BridgeRuntimeIdentifier>
+    <BridgeExecutableName Condition="'$(BridgeExecutableName)' == '' and $([System.String]::Copy('$(BridgeRuntimeIdentifier)').StartsWith('win'))">SwiftletBridge.exe</BridgeExecutableName>
+    <BridgeExecutableName Condition="'$(BridgeExecutableName)' == ''">SwiftletBridge</BridgeExecutableName>
+    <BridgePublishNoRestoreArg Condition="'$(NoRestore)' == 'true'">--no-restore</BridgePublishNoRestoreArg>
+    <PackagingScriptPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\build\packaging\Publish-Target.ps1'))</PackagingScriptPath>
+    <PackagingTarget Condition="'$(PackagingTarget)' == ''">rhino8</PackagingTarget>
+    <AutoPackageOnReleaseBuild Condition="'$(AutoPackageOnReleaseBuild)' == '' and '$(OS)' == 'Windows_NT'">true</AutoPackageOnReleaseBuild>
+    <PackagePluginOutputDir Condition="'$(TargetPath)' != ''">$([System.IO.Path]::GetDirectoryName('$(TargetPath)'))</PackagePluginOutputDir>
+    <PackagePluginOutputDir Condition="'$(PackagePluginOutputDir)' == '' and '$(TargetDir)' != ''">$([System.String]::Copy('$(TargetDir)').TrimEnd('\'))</PackagePluginOutputDir>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(NUGET_PACKAGES)' != '' and '$(OS)' == 'Windows_NT'">$(NUGET_PACKAGES)\microsoft.windowsdesktop.app.ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(NuGetPackageRoot)' != '' and '$(OS)' == 'Windows_NT'">$(NuGetPackageRoot)microsoft.windowsdesktop.app.ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
+    <WindowsDesktopRefDir Condition="'$(WindowsDesktopRefDir)' == '' and '$(OS)' == 'Windows_NT'">$(ProgramFiles)\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\7.0.20\ref\net7.0</WindowsDesktopRefDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+    <PackageReference Include="RhinoCommon" Version="$(RhinoCommonPackageVersion)">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+    <PackageReference Include="Grasshopper" Version="$(GrasshopperPackageVersion)">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('$(WindowsDesktopRefDir)\System.Drawing.Common.dll')">
+    <Reference Include="System.Drawing.Common">
+      <HintPath>$(WindowsDesktopRefDir)\System.Drawing.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' and Exists('$(WindowsDesktopRefDir)\System.Windows.Forms.dll')">
+    <Reference Include="System.Windows.Forms">
+      <HintPath>$(WindowsDesktopRefDir)\System.Windows.Forms.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
+    <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <Compile Remove="Components\*.WindowsMenu.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\Assets\Logo\Logo_*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\Assets\ComponentIcons\*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CopyGha" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)$(TargetName).gha" />
+  </Target>
+
+  <Target Name="StageBridge" AfterTargets="CopyGha"
+          Condition="'$(StageBridgeOnBuild)' == 'true' and '$(DesignTimeBuild)' != 'true' and '$(IsCrossTargetingBuild)' != 'true'">
+    <Error Condition="'$(BridgeRuntimeIdentifier)' == ''"
+           Text="BridgeRuntimeIdentifier could not be resolved for this build. Set /p:BridgeRuntimeIdentifier=&lt;rid&gt; to stage SwiftletBridge." />
+
+    <MakeDir Directories="$(BridgePublishDir)" />
+
+    <Exec Command="dotnet publish &quot;$(BridgeProjectPath)&quot; -c $(Configuration) -r $(BridgeRuntimeIdentifier) --self-contained true -p:PublishSingleFile=true -o &quot;$(BridgePublishDir)&quot; -nologo $(BridgePublishNoRestoreArg)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+
+    <Copy SourceFiles="$(BridgePublishDir)\$(BridgeExecutableName)"
+          DestinationFiles="$(TargetDir)$(BridgeExecutableName)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AutoPackageRelease" AfterTargets="StageBridge"
+          Condition="'$(AutoPackageOnReleaseBuild)' == 'true' and '$(Configuration)' == 'Release' and '$(DesignTimeBuild)' != 'true' and '$(IsCrossTargetingBuild)' != 'true' and Exists('$(PackagingScriptPath)')">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(PackagingScriptPath)&quot; -Target $(PackagingTarget) -Configuration $(Configuration) -NoRestore -PluginOutputDir &quot;$(PackagePluginOutputDir)&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+</Project>

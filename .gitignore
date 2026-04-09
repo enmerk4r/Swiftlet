@@ -338,3 +338,4 @@ ASALocalRun/
 # Claude Code
 CLAUDE.md
 .claude/
+temp/

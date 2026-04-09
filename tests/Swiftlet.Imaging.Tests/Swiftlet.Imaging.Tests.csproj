@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Swiftlet.Imaging.Tests</RootNamespace>
+    <AssemblyName>Swiftlet.Imaging.Tests</AssemblyName>
+    <Description>Placeholder test project for Swiftlet.Imaging.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,46 @@
+{
+  "id": "rhino8",
+  "minimumRhinoMajor": 8,
+  "supportedRhinoMajors": [8, 9],
+  "yakRhinoMajor": 8,
+  "pluginProject": "src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj",
+  "pluginAssemblyName": "Swiftlet.Gh.Rhino8",
+  "pluginArtifactName": "Swiftlet.Gh.Rhino8.gha",
+  "bridgeProject": "src/SwiftletBridge/SwiftletBridge.csproj",
+  "bridgeAssemblyName": "SwiftletBridge",
+  "versionSourceFile": "build/Version.props",
+  "bridgePublishes": [
+    {
+      "id": "win-x64",
+      "rid": "win-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPackage": "SwiftletBridge.exe",
+      "packageRelativePath": "bridge/win-x64/SwiftletBridge.exe"
+    },
+    {
+      "id": "linux-x64",
+      "rid": "linux-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/linux-x64/SwiftletBridge"
+    },
+    {
+      "id": "osx-arm64",
+      "rid": "osx-arm64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/osx-arm64/SwiftletBridge"
+    },
+    {
+      "id": "osx-x64",
+      "rid": "osx-x64",
+      "selfContained": true,
+      "singleFile": true,
+      "copyIntoPackage": "SwiftletBridge",
+      "packageRelativePath": "bridge/osx-x64/SwiftletBridge"
+    }
+  ]
+}

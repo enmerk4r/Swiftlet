@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>Swiftlet.HostAbstractions</RootNamespace>
+    <AssemblyName>Swiftlet.HostAbstractions</AssemblyName>
+    <Description>Host capability and platform service abstractions for Swiftlet.</Description>
+  </PropertyGroup>
+</Project>
