@@ -10,7 +10,7 @@ This plan is based on the original repository structure and code hotspots:
 
 - Build and packaging were encoded into a single project: `Swiftlet/Swiftlet.csproj`
 - Rhino version selection was encoded in solution configurations: `Swiftlet/Swiftlet.sln`
-- Packaging was Windows-specific: `Yak/Build-YakPackage.ps1`
+- Packaging is handled by the cross-platform publish pipeline: `build/packaging/Publish-Target.ps1`
 - The plugin currently depends on Windows-only or Windows-biased APIs in several places:
   - `System.Drawing` for bitmap features and resource handling
   - `System.Windows.Forms` for clipboard and menu-related code

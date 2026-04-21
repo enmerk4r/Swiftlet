@@ -313,6 +313,26 @@ function Set-YakDistributionAppVersion {
     return $retaggedPath
 }
 
+function Publish-LocalYakDistribution {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot,
+
+        [Parameter(Mandatory = $true)]
+        [string]$VersionValue,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PackagePath
+    )
+
+    $distributionDirectory = Join-Path $RepoRoot "Yak\dist-$VersionValue"
+    New-CleanDirectory -Path $distributionDirectory
+
+    $destinationPath = Join-Path $distributionDirectory ([System.IO.Path]::GetFileName($PackagePath))
+    Copy-Item -Path $PackagePath -Destination $destinationPath -Force
+    return $distributionDirectory
+}
+
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-RepoPath -BasePath $scriptDirectory -RelativePath "..\.."
 $targetMetadataPath = Resolve-RepoPath -BasePath $repoRoot -RelativePath "build\targets\$Target.json"
@@ -349,7 +369,7 @@ $linuxPackageDirectory = Join-Path $stageRoot "linux\compute"
 $linuxPackagesDirectory = Join-Path $linuxPackageDirectory "packages"
 $pluginStageDirectory = Join-Path $pluginStageRoot "any"
 $yakStageDirectory = Join-Path $stageRoot "yak\any"
-$manifestTemplatePath = Resolve-RepoPath -BasePath $repoRoot -RelativePath "Yak\manifest-template.yml"
+$manifestTemplatePath = Resolve-RepoPath -BasePath $repoRoot -RelativePath "build\packaging\yak-manifest-template.yml"
 $summaryPath = Join-Path $stageRoot "artifact-manifest.json"
 
 Write-Host "============================================"
@@ -661,12 +681,15 @@ New-YakManifest -TemplatePath $manifestTemplatePath -ManifestPath (Join-Path $ya
 
 $yakExecutable = Resolve-YakExecutable
 $yakAnyPackagePath = $null
+$localYakDistributionPath = $null
 if (-not [string]::IsNullOrWhiteSpace($yakExecutable)) {
     $yakAnyPackagePath = Invoke-YakBuild -YakExecutable $yakExecutable -WorkingDirectory $yakStageDirectory -Platform "any"
 
     if (-not [string]::IsNullOrWhiteSpace([string]$targetMetadata.yakDistributionAppVersionOverride)) {
         $yakAnyPackagePath = Set-YakDistributionAppVersion -PackagePath $yakAnyPackagePath -AppVersion ([string]$targetMetadata.yakDistributionAppVersionOverride)
     }
+
+    $localYakDistributionPath = Publish-LocalYakDistribution -RepoRoot $repoRoot -VersionValue $Version -PackagePath $yakAnyPackagePath
 }
 else {
     Write-Warning "Yak CLI tool not found. Yak stage folders were created, but .yak files were not built."
@@ -710,6 +733,7 @@ $summary = [pscustomobject]@{
         manifest = (Join-Path $yakStageDirectory "manifest.yml")
         package = $yakAnyPackagePath
     }
+    localYakDistribution = $localYakDistributionPath
 }
 
 $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $summaryPath
@@ -724,5 +748,8 @@ Write-Host "  Linux package: $linuxPackageDirectory"
 Write-Host "  Yak stage (any): $yakStageDirectory"
 if ($null -ne $yakAnyPackagePath) {
     Write-Host "  Yak package (any): $yakAnyPackagePath"
+}
+if ($null -ne $localYakDistributionPath) {
+    Write-Host "  Local Yak dist: $localYakDistributionPath"
 }
 Write-Host "  Manifest: $summaryPath"
