@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Swiftlet.Hosts.Headless</RootNamespace>
+    <AssemblyName>Swiftlet.Hosts.Headless</AssemblyName>
+    <Description>Headless host services for Rhino.Compute and other non-interactive hosts.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+  </ItemGroup>
+</Project>

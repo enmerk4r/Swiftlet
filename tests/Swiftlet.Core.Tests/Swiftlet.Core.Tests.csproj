@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <UseAppHost>false</UseAppHost>
+    <RootNamespace>Swiftlet.Core.Tests</RootNamespace>
+    <AssemblyName>Swiftlet.Core.Tests</AssemblyName>
+    <Description>Placeholder test project for Swiftlet.Core.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Swiftlet.Core\Swiftlet.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+{
+  "ignorePatterns": [
+    "*.png",
+    "*.gh",
+    "*.props",
+    "*.ai"
+  ]
+}
