@@ -162,7 +162,7 @@ public sealed class WebSocketClientComponent : GH_Component
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
-    public override Guid ComponentGuid => new("A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D");
+    public override Guid ComponentGuid => new("1651f788-de9e-4ed5-bfe5-f043b8e37362");
 
     private void OnStateChanged(object? sender, EventArgs e)
     {
