@@ -11,6 +11,41 @@ powershell -ExecutionPolicy Bypass -File .\build\packaging\Publish-Target.ps1 -T
 powershell -ExecutionPolicy Bypass -File .\build\packaging\Publish-Target.ps1 -Target rhino9 -Configuration Release
 ```
 
+## One-Command Release Build
+
+Use `build/packaging/Build-YakPackage.ps1` when you want the local machine to drive the whole release packaging loop:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build\packaging\Build-YakPackage.ps1 -Target rhino8 -Configuration Release
+```
+
+The script:
+
+- requires a clean working tree by default
+- verifies `origin/<current-branch>` points at the local `HEAD`
+- optionally runs `dotnet test Swiftlet.sln -c Release`
+- manually triggers `.github/workflows/bridge-aot-artifacts.yml` with `gh workflow run`
+- waits for that build-only workflow to complete
+- downloads the Linux and Apple Silicon bridge artifacts
+- verifies the uploaded SHA-256 checksums
+- extracts them into `artifacts/prebuilt-bridge`
+- invokes `Publish-Target.ps1` with `-PrebuiltBridgeRoot`
+
+This keeps CI manual and build-only. The workflow still has read-only repository permissions and no Yak credentials or publishing secrets. Publishing to Yak remains a separate local step.
+
+Prerequisites:
+
+- GitHub CLI (`gh`) installed and authenticated
+- `git`, `dotnet`, `tar`, and Yak available locally
+- the branch pushed before running the script
+
+Useful options:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build\packaging\Build-YakPackage.ps1 -Target rhino8 -SkipTests
+powershell -ExecutionPolicy Bypass -File .\build\packaging\Build-YakPackage.ps1 -Target rhino8 -Branch your-branch-name
+```
+
 For release packaging, provide prebuilt CI bridge artifacts for the RIDs that cannot be built on the local host:
 
 ```powershell

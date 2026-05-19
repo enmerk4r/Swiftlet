@@ -3,7 +3,7 @@
     <PublishAot>false</PublishAot>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
+    <Nullable>annotations</Nullable>
     <LangVersion>12.0</LangVersion>
     <RootNamespace>Swiftlet.Core</RootNamespace>
     <AssemblyName>Swiftlet.Core</AssemblyName>
