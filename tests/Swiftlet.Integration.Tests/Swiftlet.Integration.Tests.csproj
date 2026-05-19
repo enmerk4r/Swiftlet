@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <BuildInParallel>false</BuildInParallel>
+    <UseAppHost>false</UseAppHost>
+    <RootNamespace>Swiftlet.Integration.Tests</RootNamespace>
+    <AssemblyName>Swiftlet.Integration.Tests</AssemblyName>
+    <Description>Placeholder integration test project for the new Swiftlet architecture.</Description>
+    <BridgeProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\src\SwiftletBridge\SwiftletBridge.csproj'))</BridgeProjectPath>
+    <BridgePublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\bridge-publish'))</BridgePublishDir>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</BridgeRuntimeIdentifier>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(NETCoreSdkRuntimeIdentifier)' != ''">$(NETCoreSdkRuntimeIdentifier)</BridgeRuntimeIdentifier>
+    <BridgeRuntimeIdentifier Condition="'$(BridgeRuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT'">win-x64</BridgeRuntimeIdentifier>
+    <BridgeExecutableName Condition="'$(BridgeExecutableName)' == '' and $([System.String]::Copy('$(BridgeRuntimeIdentifier)').StartsWith('win'))">SwiftletBridge.exe</BridgeExecutableName>
+    <BridgeExecutableName Condition="'$(BridgeExecutableName)' == ''">SwiftletBridge</BridgeExecutableName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Gh.Rhino8\Swiftlet.Gh.Rhino8.csproj" />
+  </ItemGroup>
+
+  <Target Name="StageBridgeForIntegrationTests" AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(IsCrossTargetingBuild)' != 'true'">
+    <Error Condition="'$(BridgeRuntimeIdentifier)' == ''"
+           Text="BridgeRuntimeIdentifier could not be resolved for this build. Set /p:BridgeRuntimeIdentifier=&lt;rid&gt; to stage SwiftletBridge for integration tests." />
+
+    <MakeDir Directories="$(BridgePublishDir)" />
+
+    <Exec Command="dotnet publish &quot;$(BridgeProjectPath)&quot; -c $(Configuration) -r $(BridgeRuntimeIdentifier) --self-contained true -p:PublishSingleFile=true -o &quot;$(BridgePublishDir)&quot; -nologo"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+
+    <Copy SourceFiles="$(BridgePublishDir)\$(BridgeExecutableName)"
+          DestinationFiles="$(TargetDir)$(BridgeExecutableName)"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

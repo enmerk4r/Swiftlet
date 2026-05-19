@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>Swiftlet.Hosts.Desktop</RootNamespace>
+    <AssemblyName>Swiftlet.Hosts.Desktop</AssemblyName>
+    <Description>Interactive desktop host services for Swiftlet.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+  </ItemGroup>
+</Project>
