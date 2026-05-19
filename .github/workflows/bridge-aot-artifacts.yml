@@ -6,6 +6,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build ${{ matrix.rid }}
@@ -18,10 +21,12 @@ jobs:
             runner: ubuntu-22.04
             artifact_name: swiftlet-bridge-linux-x64
             executable: SwiftletBridge
+            dotnet_architecture: x64
           - rid: osx-arm64
             runner: macos-15
             artifact_name: swiftlet-bridge-osx-arm64
             executable: SwiftletBridge
+            dotnet_architecture: arm64
 
     steps:
       - name: Check out repository
@@ -33,6 +38,15 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           dotnet-version: 8.0.x
+          architecture: ${{ matrix.dotnet_architecture }}
+
+      - name: Show build host
+        shell: bash
+        run: |
+          set -euo pipefail
+          uname -a
+          uname -m
+          dotnet --info
 
       - name: Install Linux Native AOT prerequisites
         if: runner.os == 'Linux'
