@@ -9,6 +9,7 @@ param(
     [switch]$SkipTests,
     [switch]$NoRestore,
     [switch]$AllowDirty,
+    [long]$RunId,
     [int]$RunDiscoveryTimeoutSeconds = 120,
     [int]$RunPollIntervalSeconds = 10
 )
@@ -115,9 +116,22 @@ function Get-WorkflowRunForHead {
         return $null
     }
 
-    $runs = @($json | ConvertFrom-Json)
+    $parsedRuns = $json | ConvertFrom-Json
+    $runs = if ($null -eq $parsedRuns) {
+        @()
+    }
+    elseif ($parsedRuns -is [array]) {
+        $parsedRuns
+    }
+    else {
+        @($parsedRuns)
+    }
+
     return $runs |
-        Where-Object { $_.headSha -eq $HeadSha -and ([DateTime]$_.createdAt) -ge $MinCreatedAtUtc } |
+        Where-Object {
+            $createdAt = [DateTime]::Parse([string]$_.createdAt).ToUniversalTime()
+            $_.headSha -eq $HeadSha -and $createdAt -ge $MinCreatedAtUtc
+        } |
         Sort-Object { [DateTime]$_.createdAt } -Descending |
         Select-Object -First 1
 }
@@ -162,7 +176,7 @@ function Wait-WorkflowRunCreated {
 function Get-CompletedWorkflowRun {
     param(
         [Parameter(Mandatory = $true)]
-        [int]$RunId
+        [long]$RunId
     )
 
     $json = Invoke-NativeCommandForOutput `
@@ -175,7 +189,7 @@ function Get-CompletedWorkflowRun {
 function Wait-WorkflowRunCompleted {
     param(
         [Parameter(Mandatory = $true)]
-        [int]$RunId,
+        [long]$RunId,
 
         [Parameter(Mandatory = $true)]
         [int]$PollIntervalSeconds
@@ -286,17 +300,24 @@ try {
         Invoke-NativeCommand -FilePath "dotnet" -Arguments $testArguments
     }
 
-    $workflowTriggerTimeUtc = [DateTime]::UtcNow.AddMinutes(-2)
-    Invoke-NativeCommand -FilePath "gh" -Arguments @("workflow", "run", $Workflow, "--ref", $Branch)
-    $run = Wait-WorkflowRunCreated `
-        -WorkflowName $Workflow `
-        -BranchName $Branch `
-        -HeadSha $headSha `
-        -MinCreatedAtUtc $workflowTriggerTimeUtc `
-        -TimeoutSeconds $RunDiscoveryTimeoutSeconds
+    if ($RunId -gt 0) {
+        Write-Host "Resuming workflow run: $RunId"
+        $runId = $RunId
+    }
+    else {
+        $workflowTriggerTimeUtc = [DateTime]::UtcNow.AddMinutes(-2)
+        Invoke-NativeCommand -FilePath "gh" -Arguments @("workflow", "run", $Workflow, "--ref", $Branch)
+        $run = Wait-WorkflowRunCreated `
+            -WorkflowName $Workflow `
+            -BranchName $Branch `
+            -HeadSha $headSha `
+            -MinCreatedAtUtc $workflowTriggerTimeUtc `
+            -TimeoutSeconds $RunDiscoveryTimeoutSeconds
 
-    $runId = [int]$run.databaseId
-    Write-Host "Workflow run created: $runId"
+        $runId = [long]$run.databaseId
+        Write-Host "Workflow run created: $runId"
+    }
+
     Wait-WorkflowRunCompleted -RunId $runId -PollIntervalSeconds $RunPollIntervalSeconds | Out-Null
 
     $downloadRoot = Join-Path $ciArtifactRootPath $runId
