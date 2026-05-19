@@ -21,12 +21,10 @@ jobs:
             runner: ubuntu-22.04
             artifact_name: swiftlet-bridge-linux-x64
             executable: SwiftletBridge
-            dotnet_architecture: x64
           - rid: osx-arm64
             runner: macos-15
             artifact_name: swiftlet-bridge-osx-arm64
             executable: SwiftletBridge
-            dotnet_architecture: arm64
 
     steps:
       - name: Check out repository
@@ -38,7 +36,19 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           dotnet-version: 8.0.x
-          architecture: ${{ matrix.dotnet_architecture }}
+
+      - name: Pin .NET 8 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_version="$(dotnet --list-sdks | awk '/^8\./ {print $1}' | tail -n 1)"
+          if [ -z "$sdk_version" ]; then
+            echo "No .NET 8 SDK was found after setup-dotnet." >&2
+            dotnet --list-sdks >&2
+            exit 1
+          fi
+          printf '{\n  "sdk": {\n    "version": "%s",\n    "rollForward": "latestFeature"\n  }\n}\n' "$sdk_version" > global.json
+          dotnet --version
 
       - name: Show build host
         shell: bash

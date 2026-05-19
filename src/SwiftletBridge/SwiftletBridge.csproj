@@ -17,6 +17,6 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" GlobalPropertiesToRemove="PublishAot" />
   </ItemGroup>
 </Project>
