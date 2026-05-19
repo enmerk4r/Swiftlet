@@ -304,16 +304,16 @@ internal sealed class BridgeHostedMcpHttpServer : IAsyncDisposable
 
     private static JsonObject CreateToolErrorResult(string message)
     {
+        var content = new JsonArray();
+        content.Add((JsonNode)new JsonObject
+        {
+            ["type"] = "text",
+            ["text"] = message ?? string.Empty,
+        });
+
         return new JsonObject
         {
-            ["content"] = new JsonArray
-            {
-                new JsonObject
-                {
-                    ["type"] = "text",
-                    ["text"] = message ?? string.Empty,
-                },
-            },
+            ["content"] = content,
             ["isError"] = true,
         };
     }

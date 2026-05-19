@@ -40,7 +40,7 @@ public sealed class McpToolDefinition
 
             if (parameter.Required)
             {
-                required.Add(parameter.Name);
+                required.Add((JsonNode)JsonValue.Create(parameter.Name)!);
             }
         }
 

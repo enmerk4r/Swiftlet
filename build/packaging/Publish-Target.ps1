@@ -6,6 +6,7 @@ param(
     [string]$ArtifactsRoot = "artifacts/publish",
     [switch]$NoRestore,
     [string]$PluginOutputDir,
+    [string]$PrebuiltBridgeRoot,
     [switch]$SkipBridgePublish
 )
 
@@ -313,6 +314,140 @@ function Set-YakDistributionAppVersion {
     return $retaggedPath
 }
 
+function Resolve-BridgePublishMode {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$PublishTarget
+    )
+
+    $publishMode = [string]$PublishTarget.publishMode
+    if (-not [string]::IsNullOrWhiteSpace($publishMode)) {
+        return $publishMode.Trim()
+    }
+
+    if ([bool]$PublishTarget.selfContained -and [bool]$PublishTarget.singleFile) {
+        return "selfContainedSingleFile"
+    }
+
+    if ([bool]$PublishTarget.selfContained) {
+        return "selfContained"
+    }
+
+    if ([bool]$PublishTarget.singleFile) {
+        return "frameworkDependentSingleFile"
+    }
+
+    return "frameworkDependent"
+}
+
+function Get-BridgePublishArguments {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$BuildConfiguration,
+
+        [Parameter(Mandatory = $true)]
+        [string]$OutputDirectory,
+
+        [Parameter(Mandatory = $true)]
+        [object]$PublishTarget,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PublishMode
+    )
+
+    $arguments = @(
+        "publish",
+        $ProjectPath,
+        "-c", $BuildConfiguration,
+        "-o", $OutputDirectory,
+        "-r", [string]$PublishTarget.rid
+    )
+
+    switch ($PublishMode) {
+        "nativeAot" {
+            $arguments += @(
+                "--self-contained", "true",
+                "-p:PublishAot=true",
+                "-p:StripSymbols=true"
+            )
+        }
+        "selfContainedSingleFile" {
+            $arguments += @(
+                "--self-contained", "true",
+                "-p:PublishSingleFile=true",
+                "-p:EnableCompressionInSingleFile=true"
+            )
+        }
+        "selfContained" {
+            $arguments += @(
+                "--self-contained", "true"
+            )
+        }
+        "frameworkDependentSingleFile" {
+            $arguments += @(
+                "--self-contained", "false",
+                "-p:PublishSingleFile=true",
+                "-p:RollForward=Major"
+            )
+        }
+        "frameworkDependent" {
+            $arguments += @(
+                "--self-contained", "false",
+                "-p:RollForward=Major"
+            )
+        }
+        default {
+            throw "Unsupported bridge publish mode '$PublishMode' for '$($PublishTarget.id)'."
+        }
+    }
+
+    if ($null -ne $PublishTarget.properties) {
+        foreach ($property in $PublishTarget.properties.PSObject.Properties) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$property.Name)) {
+                $arguments += "-p:$($property.Name)=$($property.Value)"
+            }
+        }
+    }
+
+    return $arguments
+}
+
+function Resolve-PrebuiltBridgeDirectory {
+    param(
+        [string]$Root,
+
+        [Parameter(Mandatory = $true)]
+        [object]$PublishTarget
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Root)) {
+        return $null
+    }
+
+    $resolvedRoot = [System.IO.Path]::GetFullPath($Root)
+    $candidateDirectories = @(
+        (Join-Path $resolvedRoot ([string]$PublishTarget.id)),
+        (Join-Path $resolvedRoot ([string]$PublishTarget.rid)),
+        $resolvedRoot
+    ) | Select-Object -Unique
+
+    foreach ($candidateDirectory in $candidateDirectories) {
+        if ([string]::IsNullOrWhiteSpace($candidateDirectory) -or -not (Test-Path $candidateDirectory)) {
+            continue
+        }
+
+        $artifactPath = Join-Path $candidateDirectory ([string]$PublishTarget.copyIntoPackage)
+        if (Test-Path $artifactPath) {
+            return $candidateDirectory
+        }
+    }
+
+    return $null
+}
+
 function Publish-LocalYakDistribution {
     param(
         [Parameter(Mandatory = $true)]
@@ -387,6 +522,9 @@ if ($null -ne $targetMetadata.supportedRhinoMajors) {
 if ($null -ne $targetMetadata.yakRhinoMajor) {
     Write-Host "Yak Rhino major: $($targetMetadata.yakRhinoMajor)"
 }
+if (-not [string]::IsNullOrWhiteSpace($PrebuiltBridgeRoot)) {
+    Write-Host "Prebuilt bridge root: $([System.IO.Path]::GetFullPath($PrebuiltBridgeRoot))"
+}
 Write-Host "Stage root: $stageRoot"
 Write-Host "============================================"
 
@@ -459,34 +597,36 @@ $bridgePublishes = @()
 if (-not $SkipBridgePublish) {
     foreach ($publishTarget in $targetMetadata.bridgePublishes) {
         $publishId = [string]$publishTarget.id
+        $publishMode = Resolve-BridgePublishMode -PublishTarget $publishTarget
         $publishDirectory = Join-Path $bridgeStageRoot $publishId
         New-CleanDirectory -Path $publishDirectory
 
-        $dotnetArguments = @(
-            "publish",
-            $bridgeProjectPath,
-            "-c", $Configuration,
-            "-o", $publishDirectory,
-            "-r", [string]$publishTarget.rid,
-            "--self-contained", ($publishTarget.selfContained.ToString().ToLowerInvariant())
-        )
-
-        if ([bool]$publishTarget.singleFile) {
-            $dotnetArguments += @(
-                "-p:PublishSingleFile=true",
-                "-p:EnableCompressionInSingleFile=true"
-            )
+        $prebuiltBridgeDirectory = Resolve-PrebuiltBridgeDirectory -Root $PrebuiltBridgeRoot -PublishTarget $publishTarget
+        if ($null -ne $prebuiltBridgeDirectory) {
+            Write-Host ""
+            Write-Host "Using prebuilt bridge '$publishId' from $prebuiltBridgeDirectory"
+            Copy-DirectoryContents -Source $prebuiltBridgeDirectory -Destination $publishDirectory
         }
+        else {
+            $dotnetArguments = Get-BridgePublishArguments `
+                -ProjectPath $bridgeProjectPath `
+                -BuildConfiguration $Configuration `
+                -OutputDirectory $publishDirectory `
+                -PublishTarget $publishTarget `
+                -PublishMode $publishMode
 
-        if ($NoRestore) {
-            $dotnetArguments += "--no-restore"
+            if ($NoRestore) {
+                $dotnetArguments += "--no-restore"
+            }
+
+            Invoke-Dotnet -Arguments $dotnetArguments
         }
-
-        Invoke-Dotnet -Arguments $dotnetArguments
 
         $bridgePublishes += [pscustomobject]@{
             id = $publishId
             rid = [string]$publishTarget.rid
+            mode = $publishMode
+            prebuilt = ($null -ne $prebuiltBridgeDirectory)
             path = $publishDirectory
         }
 

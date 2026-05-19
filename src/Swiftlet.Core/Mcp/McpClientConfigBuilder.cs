@@ -1,34 +1,34 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Swiftlet.Core.Mcp;
 
 public static class McpClientConfigBuilder
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+    };
+
     public static string Build(string serverName, BridgeLaunchCommand launchCommand)
     {
         Guard.ThrowIfNullOrWhiteSpace(serverName, nameof(serverName));
         ArgumentNullException.ThrowIfNull(launchCommand);
 
-        var payload = new Dictionary<string, object?>
+        var serverConfig = new JsonObject
         {
-            ["mcpServers"] = new Dictionary<string, object?>
-            {
-                [serverName] = new Dictionary<string, object?>
-                {
-                    ["type"] = "stdio",
-                    ["command"] = launchCommand.Command,
-                    ["args"] = launchCommand.Args,
-                },
-            },
+            ["type"] = "stdio",
+            ["command"] = launchCommand.Command,
+            ["args"] = CreateStringArray(launchCommand.Args),
         };
 
-        return SerializeJson(payload);
+        return BuildMcpServersJson(serverName, serverConfig);
     }
 
     public static string BuildLmStudio(string serverName, string serverUrl)
     {
-        return BuildMcpServersJson(serverName, new Dictionary<string, object?>
+        return BuildMcpServersJson(serverName, new JsonObject
         {
             ["url"] = ValidateServerUrl(serverUrl),
         });
@@ -36,7 +36,7 @@ public static class McpClientConfigBuilder
 
     public static string BuildClaudeCode(string serverName, string serverUrl)
     {
-        return BuildMcpServersJson(serverName, new Dictionary<string, object?>
+        return BuildMcpServersJson(serverName, new JsonObject
         {
             ["type"] = "http",
             ["url"] = ValidateServerUrl(serverUrl),
@@ -47,15 +47,17 @@ public static class McpClientConfigBuilder
     {
         Guard.ThrowIfNullOrWhiteSpace(serverName, nameof(serverName));
 
-        var payload = new Dictionary<string, object?>
+        var serverConfig = new JsonObject
         {
-            ["servers"] = new Dictionary<string, object?>
+            ["type"] = "http",
+            ["url"] = ValidateServerUrl(serverUrl),
+        };
+
+        var payload = new JsonObject
+        {
+            ["servers"] = new JsonObject
             {
-                [serverName] = new Dictionary<string, object?>
-                {
-                    ["type"] = "http",
-                    ["url"] = ValidateServerUrl(serverUrl),
-                },
+                [serverName] = serverConfig,
             },
         };
 
@@ -80,13 +82,13 @@ public static class McpClientConfigBuilder
         return builder.ToString();
     }
 
-    private static string BuildMcpServersJson(string serverName, IReadOnlyDictionary<string, object?> serverConfig)
+    private static string BuildMcpServersJson(string serverName, JsonObject serverConfig)
     {
         Guard.ThrowIfNullOrWhiteSpace(serverName, nameof(serverName));
 
-        var payload = new Dictionary<string, object?>
+        var payload = new JsonObject
         {
-            ["mcpServers"] = new Dictionary<string, object?>
+            ["mcpServers"] = new JsonObject
             {
                 [serverName] = serverConfig,
             },
@@ -101,12 +103,20 @@ public static class McpClientConfigBuilder
         return serverUrl;
     }
 
-    private static string SerializeJson(object payload)
+    private static string SerializeJson(JsonNode payload)
     {
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions
+        return payload.ToJsonString(SerializerOptions);
+    }
+
+    private static JsonArray CreateStringArray(IEnumerable<string> values)
+    {
+        var array = new JsonArray();
+        foreach (string value in values)
         {
-            WriteIndented = true,
-        });
+            array.Add((JsonNode)JsonValue.Create(value)!);
+        }
+
+        return array;
     }
 
     private static string EscapeTomlString(string value)

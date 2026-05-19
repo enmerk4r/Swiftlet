@@ -5,6 +5,7 @@ param(
     [string]$ArtifactsRoot = "artifacts/publish",
     [switch]$NoRestore,
     [string]$PluginOutputDir,
+    [string]$PrebuiltBridgeRoot,
     [switch]$SkipBridgePublish
 )
 
@@ -25,6 +26,10 @@ if ($PSBoundParameters.ContainsKey("NoRestore")) {
 
 if ($PSBoundParameters.ContainsKey("PluginOutputDir")) {
     $arguments.PluginOutputDir = $PluginOutputDir
+}
+
+if ($PSBoundParameters.ContainsKey("PrebuiltBridgeRoot")) {
+    $arguments.PrebuiltBridgeRoot = $PrebuiltBridgeRoot
 }
 
 if ($PSBoundParameters.ContainsKey("SkipBridgePublish")) {
