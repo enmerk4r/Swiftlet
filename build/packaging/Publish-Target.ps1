@@ -782,6 +782,11 @@ chown "$SERVICE_USER:$SERVICE_USER" "$SERVICE_HOME"
 su -s /bin/bash "$SERVICE_USER" -c "HOME='$SERVICE_HOME' yak uninstall swiftlet >/dev/null 2>&1 || true"
 su -s /bin/bash "$SERVICE_USER" -c "HOME='$SERVICE_HOME' yak install '$YAK_PACKAGE'"
 
+PACKAGE_ROOT="$SERVICE_HOME/.local/share/mcneel/rhinoceros/packages"
+if [[ -d "$PACKAGE_ROOT" ]]; then
+  find "$PACKAGE_ROOT" -path '*/swiftlet/*/bridge/linux-x64/SwiftletBridge' -type f -exec chmod +x {} \;
+fi
+
 if [[ -f "$COMPUTE_ENV_FILE" ]]; then
   if grep -Eq '^[#[:space:]]*RHINO_COMPUTE_LOAD_GRASSHOPPER=' "$COMPUTE_ENV_FILE"; then
     sed -i -E 's|^[#[:space:]]*RHINO_COMPUTE_LOAD_GRASSHOPPER=.*|RHINO_COMPUTE_LOAD_GRASSHOPPER=true|' "$COMPUTE_ENV_FILE"
