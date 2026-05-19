@@ -23,7 +23,7 @@ jobs:
             executable: SwiftletBridge
             dotnet_architecture: x64
           - rid: osx-arm64
-            runner: macos-15
+            runner: macos-15-xlarge
             artifact_name: swiftlet-bridge-osx-arm64
             executable: SwiftletBridge
             dotnet_architecture: arm64
@@ -47,6 +47,16 @@ jobs:
           uname -a
           uname -m
           dotnet --info
+
+      - name: Require Apple Silicon host
+        if: matrix.rid == 'osx-arm64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(uname -m)" != "arm64" ]; then
+            echo "osx-arm64 Native AOT must run on an arm64 macOS host. Current host: $(uname -m)" >&2
+            exit 1
+          fi
 
       - name: Install Linux Native AOT prerequisites
         if: runner.os == 'Linux'
