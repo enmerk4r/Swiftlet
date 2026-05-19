@@ -23,7 +23,7 @@ jobs:
             executable: SwiftletBridge
             dotnet_architecture: x64
           - rid: osx-arm64
-            runner: macos-15-xlarge
+            runner: macos-15
             artifact_name: swiftlet-bridge-osx-arm64
             executable: SwiftletBridge
             dotnet_architecture: arm64
