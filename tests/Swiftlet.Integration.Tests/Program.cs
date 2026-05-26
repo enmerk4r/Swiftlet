@@ -24,6 +24,7 @@ internal static class IntegrationTestRunner
             ("Utility CSV helpers preserve quoted delimiters and quotes", UtilityCsvHelpersRoundTripAsync),
             ("Utility compression round-trips bytes", UtilityCompressionRoundTripsAsync),
             ("Utility URL encoding preserves form encoding semantics", UtilityUrlEncodingProducesExpectedOutputAsync),
+            ("Archived legacy components keep 0.2.0 GUIDs hidden", ArchivedLegacyComponentsKeep020GuidsHiddenAsync),
             ("JSON null goos remain valid and preserve null semantics", JsonNullGoosPreserveNullSemanticsAsync),
             ("Headless host services require manual browser and clipboard actions", HeadlessServicesRequireManualActionsAsync),
             ("Desktop host workflow exposes desktop capabilities", DesktopWorkflowExposesCapabilitiesAsync),
@@ -144,6 +145,32 @@ internal static class IntegrationTestRunner
         string encoded = (string)utilityType.GetMethod("Encode")!.Invoke(null, ["cafe au lait+?", Encoding.UTF8])!;
 
         Assert.Equal("cafe+au+lait%2B%3F", encoded);
+        return Task.CompletedTask;
+    }
+
+    private static Task ArchivedLegacyComponentsKeep020GuidsHiddenAsync()
+    {
+        Dictionary<string, string> archivedComponentGuids = new()
+        {
+            ["CreateTextBodyComponent_ARCHIVED.cs"] = "87D53FB2-BA5D-46DC-BC7B-92EAC5AEBC6C",
+            ["CreateMultipartFormBodyNamedComponent_ARCHIVED.cs"] = "45321F4D-BB8E-4844-8B18-F663E3A95896",
+            ["CreateMultipartFormBodyUnnamedComponent_ARCHIVED.cs"] = "BFE253AA-AB8A-4424-872A-37F5CB1E7096",
+            ["SocketListenerComponent_ARCHIVED.cs"] = "2BAEA8DD-9496-4644-9077-67EF4910675E",
+        };
+
+        foreach ((string fileName, string expectedGuid) in archivedComponentGuids)
+        {
+            string source = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "ARCHIVED", fileName));
+
+            Assert.Contains("[Obsolete(", source);
+            Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.hidden;", source);
+            Assert.Contains($"public override Guid ComponentGuid => new(\"{expectedGuid}\");", source);
+        }
+
+        string currentTextBodySource = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "Components", "CreateTextBodyComponent.cs"));
+        Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.secondary;", currentTextBodySource);
+        Assert.Contains("public override Guid ComponentGuid => new(\"D5BF7D4A-9FC3-4984-90F7-FEB32AA96D9F\");", currentTextBodySource);
+
         return Task.CompletedTask;
     }
 
@@ -921,6 +948,23 @@ internal static class IntegrationTestRunner
     {
         return typeof(ModernServer).Assembly.GetType(fullName)
                ?? throw new InvalidOperationException($"Unable to find shell type '{fullName}'.");
+    }
+
+    private static string RepoPath(params string[] parts)
+    {
+        string? directory = Directory.GetCurrentDirectory();
+
+        while (directory is not null && !File.Exists(Path.Combine(directory, "Swiftlet.sln")))
+        {
+            directory = Directory.GetParent(directory)?.FullName;
+        }
+
+        if (directory is null)
+        {
+            throw new InvalidOperationException("Unable to find repository root.");
+        }
+
+        return Path.Combine([directory, .. parts]);
     }
 }
 
