@@ -124,7 +124,18 @@ public sealed class DownloadFileComponent : GH_Component
             return;
         }
 
-        if (File.Exists(path) && !overwrite)
+        string normalizedPath;
+        try
+        {
+            normalizedPath = FilePathUtility.NormalizePath(path);
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Invalid path: {ex.Message}");
+            return;
+        }
+
+        if (File.Exists(normalizedPath) && !overwrite)
         {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File already exists and Overwrite is false");
             return;
@@ -134,7 +145,7 @@ public sealed class DownloadFileComponent : GH_Component
             url,
             queryParams.Where(static p => p?.Value is not null).Select(static p => p!.Value!));
 
-        _downloadPath = path;
+        _downloadPath = normalizedPath;
         _isDownloading = true;
         _completed = false;
         _success = false;
@@ -148,7 +159,7 @@ public sealed class DownloadFileComponent : GH_Component
 
         HttpHeader[] headerValues = headers.Where(static h => h?.Value is not null).Select(static h => h!.Value!).ToArray();
         Message = "Starting...";
-        _downloadTask = Task.Run(() => DownloadAsync(fullUrl, path, headerValues, token), token);
+        _downloadTask = Task.Run(() => DownloadAsync(fullUrl, normalizedPath, headerValues, token), token);
 
         DA.SetData(0, false);
         DA.SetData(1, 0);

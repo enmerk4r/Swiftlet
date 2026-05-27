@@ -144,7 +144,9 @@ public static class ModernOAuthWorkflow
 
     private static bool ShouldContinueBrowserRelay(LocalHttpCallbackRequest request, OAuthCallbackResult result)
     {
-        if (result.IsSuccess || !string.Equals(result.Error, "No authorization code received", StringComparison.Ordinal))
+        if (result.IsSuccess ||
+            result.Error is null ||
+            !result.Error.StartsWith("No authorization code received", StringComparison.Ordinal))
         {
             return false;
         }

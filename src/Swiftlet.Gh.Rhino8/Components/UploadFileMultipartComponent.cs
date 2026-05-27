@@ -129,7 +129,18 @@ public sealed class UploadFileMultipartComponent : GH_Component
             return;
         }
 
-        if (!File.Exists(path))
+        string normalizedPath;
+        try
+        {
+            normalizedPath = FilePathUtility.NormalizePath(path);
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Invalid path: {ex.Message}");
+            return;
+        }
+
+        if (!File.Exists(normalizedPath))
         {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File does not exist");
             return;
@@ -142,17 +153,17 @@ public sealed class UploadFileMultipartComponent : GH_Component
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            fileName = Path.GetFileName(path);
+            fileName = Path.GetFileName(normalizedPath);
         }
 
         if (string.IsNullOrWhiteSpace(contentType))
         {
-            contentType = MimeTypeMap.GetMimeType(path);
+            contentType = MimeTypeMap.GetMimeType(normalizedPath);
         }
 
         HttpHeader[] headerValues = headers.Where(static h => h?.Value is not null).Select(static h => h!.Value!).ToArray();
         MultipartField[] fieldValues = fields.Where(static f => f?.Value is not null).Select(static f => f!.Value!).ToArray();
-        long fileSize = new FileInfo(path).Length;
+        long fileSize = new FileInfo(normalizedPath).Length;
 
         _isUploading = true;
         _completed = false;
@@ -167,7 +178,7 @@ public sealed class UploadFileMultipartComponent : GH_Component
         CancellationToken token = _cancellationTokenSource.Token;
 
         Message = $"Starting... ({TransferFormatting.FormatBytes(fileSize)})";
-        _uploadTask = Task.Run(() => UploadMultipartAsync(url, path, fieldName, fileName, contentType, fieldValues, headerValues, fileSize, token), token);
+        _uploadTask = Task.Run(() => UploadMultipartAsync(url, normalizedPath, fieldName, fileName, contentType, fieldValues, headerValues, fileSize, token), token);
 
         DA.SetData(0, false);
         DA.SetData(1, 0);

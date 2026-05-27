@@ -21,7 +21,7 @@ public sealed class ReplaceEmptyBranchesComponent : GH_Component
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddGenericParameter("Tree", "T", "Output tree with padded empty branches", GH_ParamAccess.item);
+        pManager.AddGenericParameter("Tree", "T", "Output tree with padded empty branches", GH_ParamAccess.tree);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)
