@@ -1,5 +1,7 @@
 using Grasshopper.Kernel.Types;
+using Swiftlet.Gh.Rhino8;
 using Swiftlet.Imaging;
+using System.Drawing;
 
 namespace Swiftlet.Gh.Rhino8.Goo;
 
@@ -42,6 +44,14 @@ public sealed class BitmapGoo : GH_Goo<SwiftletImage>
             return true;
         }
 
+        if (Value is not null &&
+            typeof(Q).IsAssignableFrom(typeof(Bitmap)) &&
+            SystemDrawingBitmapConverter.TryToBitmap(Value, out Bitmap? drawingBitmap))
+        {
+            target = (Q)(object)drawingBitmap!;
+            return true;
+        }
+
         return base.CastTo(ref target);
     }
 
@@ -51,6 +61,9 @@ public sealed class BitmapGoo : GH_Goo<SwiftletImage>
         {
             case SwiftletImage bitmap:
                 Value = bitmap;
+                return true;
+            case Bitmap bitmap when SystemDrawingBitmapConverter.TryToSwiftletImage(bitmap, out SwiftletImage? image):
+                Value = image;
                 return true;
             case BitmapGoo goo:
                 Value = goo.Value;

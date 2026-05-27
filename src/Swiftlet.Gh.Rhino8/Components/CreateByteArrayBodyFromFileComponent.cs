@@ -32,9 +32,16 @@ public sealed class CreateByteArrayBodyFromFileComponent : GH_Component
 
         DA.GetData(0, ref path);
         DA.GetData(1, ref contentType);
-        byte[] content = File.ReadAllBytes(path);
-        var body = new RequestBodyBytes(contentType, content);
-        DA.SetData(0, new RequestBodyGoo(body));
+        try
+        {
+            byte[] content = File.ReadAllBytes(FilePathUtility.NormalizePath(path));
+            var body = new RequestBodyBytes(contentType, content);
+            DA.SetData(0, new RequestBodyGoo(body));
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to read file: {ex.Message}");
+        }
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

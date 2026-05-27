@@ -65,7 +65,7 @@ internal static class RhinoViewportCapture
                     return;
                 }
 
-                capturedImage = ToSwiftletImage(bitmap);
+                capturedImage = SystemDrawingBitmapConverter.ToSwiftletImage(bitmap);
             }
             catch (Exception ex)
             {
@@ -82,27 +82,5 @@ internal static class RhinoViewportCapture
         image = capturedImage;
         errorMessage = capturedError;
         return image is not null;
-    }
-
-    private static SwiftletImage ToSwiftletImage(Bitmap bitmap)
-    {
-        int width = bitmap.Width;
-        int height = bitmap.Height;
-        var pixels = new byte[width * height * 4];
-
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                Color pixel = bitmap.GetPixel(x, y);
-                int offset = ((y * width) + x) * 4;
-                pixels[offset] = pixel.R;
-                pixels[offset + 1] = pixel.G;
-                pixels[offset + 2] = pixel.B;
-                pixels[offset + 3] = pixel.A;
-            }
-        }
-
-        return new SwiftletImage(width, height, pixels);
     }
 }

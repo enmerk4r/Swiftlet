@@ -1,5 +1,7 @@
+using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Nodes;
 using Swiftlet.Core.Auth;
@@ -20,6 +22,8 @@ internal static class IntegrationTestRunner
         List<(string Name, Func<Task> Test)> tests =
         [
             ("Image codec round-trips PNG pixel data", ImageCodecRoundTripsPngAsync),
+            ("Bitmap goo casts to System.Drawing.Bitmap and back", BitmapGooCastsSystemDrawingBitmapAsync),
+            ("File path utility normalizes native paths and rejects Windows paths off Windows", FilePathUtilityNormalizesPaths),
             ("QR generation returns a raster image with both dark and light pixels", QrGenerationProducesRasterAsync),
             ("Utility CSV helpers preserve quoted delimiters and quotes", UtilityCsvHelpersRoundTripAsync),
             ("Utility compression round-trips bytes", UtilityCompressionRoundTripsAsync),
@@ -71,6 +75,69 @@ internal static class IntegrationTestRunner
         Assert.Equal(1, decoded.Height);
         Assert.Equal(new SwiftletColor(255, 0, 0, 255), decoded.GetPixel(0, 0));
         Assert.Equal(new SwiftletColor(0, 255, 0, 255), decoded.GetPixel(1, 0));
+        return Task.CompletedTask;
+    }
+
+    private static Task BitmapGooCastsSystemDrawingBitmapAsync()
+    {
+        var image = new SwiftletImage(
+            2,
+            1,
+            [
+                10, 20, 30, 40,
+                200, 150, 100, 255,
+            ]);
+
+        var goo = new BitmapGoo(image);
+        EnsureSystemDrawingCommonAvailable();
+        Type bitmapType = GetShellType("Swiftlet.Gh.Rhino8.ShellIcons")
+            .GetMethod("Logo24", BindingFlags.Public | BindingFlags.Static)!
+            .ReturnType;
+        object? bitmap = null;
+
+        Assert.True(CastTo(goo, bitmapType, out bitmap));
+        Assert.NotNull(bitmap);
+
+        try
+        {
+            Assert.Equal(2, GetBitmapDimension(bitmap!, "Width"));
+            Assert.Equal(1, GetBitmapDimension(bitmap!, "Height"));
+            Assert.Equal(Color.FromArgb(40, 10, 20, 30).ToArgb(), GetBitmapPixel(bitmap!, 0, 0).ToArgb());
+            Assert.Equal(Color.FromArgb(255, 200, 150, 100).ToArgb(), GetBitmapPixel(bitmap!, 1, 0).ToArgb());
+
+            var fromBitmap = new BitmapGoo();
+            Assert.True(fromBitmap.CastFrom(bitmap!));
+            Assert.NotNull(fromBitmap.Value);
+            Assert.Equal(new SwiftletColor(10, 20, 30, 40), fromBitmap.Value.GetPixel(0, 0));
+            Assert.Equal(new SwiftletColor(200, 150, 100, 255), fromBitmap.Value.GetPixel(1, 0));
+        }
+        finally
+        {
+            (bitmap as IDisposable)?.Dispose();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static Task FilePathUtilityNormalizesPaths()
+    {
+        string relativePath = Path.Combine("SwiftletTests", "fixture.txt");
+        string expectedRelativePath = Path.GetFullPath(relativePath);
+        Assert.Equal(expectedRelativePath, NormalizePathForTest(relativePath, isWindows: OperatingSystem.IsWindows()));
+
+        string quotedPath = $"\"{relativePath}\"";
+        Assert.Equal(expectedRelativePath, NormalizePathForTest(quotedPath, isWindows: OperatingSystem.IsWindows()));
+
+        if (OperatingSystem.IsWindows())
+        {
+            string windowsPath = @"C:\Users\swiftlet\fixture.txt";
+            Assert.Equal(Path.GetFullPath(windowsPath), NormalizePathForTest(windowsPath, isWindows: true));
+        }
+
+        var exception = Assert.Throws<ArgumentException>(
+            static () => NormalizePathForTest(@"C:\Users\swiftlet\fixture.txt", isWindows: false));
+        Assert.Contains("Windows drive paths are only supported on Windows", exception.Message);
+
         return Task.CompletedTask;
     }
 
@@ -950,6 +1017,88 @@ internal static class IntegrationTestRunner
                ?? throw new InvalidOperationException($"Unable to find shell type '{fullName}'.");
     }
 
+    private static bool CastTo(BitmapGoo goo, Type targetType, out object? target)
+    {
+        MethodInfo castMethod = typeof(BitmapGoo)
+            .GetMethods()
+            .Single(static method => method.Name == nameof(BitmapGoo.CastTo) && method.IsGenericMethodDefinition);
+
+        object?[] args = [null];
+        bool result = (bool)castMethod.MakeGenericMethod(targetType).Invoke(goo, args)!;
+        target = args[0];
+        return result;
+    }
+
+    private static string NormalizePathForTest(string path, bool isWindows)
+    {
+        Type pathUtilityType = GetShellType("Swiftlet.Gh.Rhino8.FilePathUtility");
+        MethodInfo normalizeMethod = pathUtilityType.GetMethod(
+            "NormalizePath",
+            BindingFlags.NonPublic | BindingFlags.Static,
+            [typeof(string), typeof(bool)])!;
+
+        try
+        {
+            return (string)normalizeMethod.Invoke(null, [path, isWindows])!;
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        {
+            throw ex.InnerException;
+        }
+    }
+
+    private static void EnsureSystemDrawingCommonAvailable()
+    {
+        if (!OperatingSystem.IsWindows() ||
+            AppDomain.CurrentDomain.GetAssemblies().Any(static assembly => assembly.GetName().Name == "System.Drawing.Common"))
+        {
+            return;
+        }
+
+        DirectoryInfo? sharedRoot = Directory.GetParent(typeof(object).Assembly.Location)?.Parent?.Parent;
+        if (sharedRoot is null)
+        {
+            return;
+        }
+
+        string windowsDesktopRoot = Path.Combine(sharedRoot.FullName, "Microsoft.WindowsDesktop.App");
+        if (!Directory.Exists(windowsDesktopRoot))
+        {
+            return;
+        }
+
+        foreach (string directory in Directory.GetDirectories(windowsDesktopRoot).OrderByDescending(GetFrameworkPreference))
+        {
+            string assemblyPath = Path.Combine(directory, "System.Drawing.Common.dll");
+            if (!File.Exists(assemblyPath))
+            {
+                continue;
+            }
+
+            Assembly.LoadFrom(assemblyPath);
+            return;
+        }
+    }
+
+    private static (int PreferredMajor, Version Version) GetFrameworkPreference(string directory)
+    {
+        Version version = Version.TryParse(Path.GetFileName(directory), out Version? parsed)
+            ? parsed
+            : new Version();
+
+        return (version.Major == 7 ? 1 : 0, version);
+    }
+
+    private static int GetBitmapDimension(object bitmap, string propertyName)
+    {
+        return (int)bitmap.GetType().GetProperty(propertyName)!.GetValue(bitmap)!;
+    }
+
+    private static Color GetBitmapPixel(object bitmap, int x, int y)
+    {
+        return (Color)bitmap.GetType().GetMethod("GetPixel", [typeof(int), typeof(int)])!.Invoke(bitmap, [x, y])!;
+    }
+
     private static string RepoPath(params string[] parts)
     {
         string? directory = Directory.GetCurrentDirectory();
@@ -1058,6 +1207,21 @@ internal static class Assert
         catch (TException)
         {
             return;
+        }
+
+        throw new InvalidOperationException($"Expected exception of type '{typeof(TException).Name}'.");
+    }
+
+    public static TException Throws<TException>(Action action)
+        where TException : Exception
+    {
+        try
+        {
+            action();
+        }
+        catch (TException ex)
+        {
+            return ex;
         }
 
         throw new InvalidOperationException($"Expected exception of type '{typeof(TException).Name}'.");

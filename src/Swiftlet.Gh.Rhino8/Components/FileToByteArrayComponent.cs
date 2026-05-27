@@ -28,7 +28,14 @@ public sealed class FileToByteArrayComponent : GH_Component
     {
         string path = string.Empty;
         DA.GetData(0, ref path);
-        DA.SetData(0, new ByteArrayGoo(File.ReadAllBytes(path)));
+        try
+        {
+            DA.SetData(0, new ByteArrayGoo(File.ReadAllBytes(FilePathUtility.NormalizePath(path))));
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to read file: {ex.Message}");
+        }
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

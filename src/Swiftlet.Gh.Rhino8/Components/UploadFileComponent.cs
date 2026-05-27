@@ -124,7 +124,18 @@ public sealed class UploadFileComponent : GH_Component
             return;
         }
 
-        if (!File.Exists(path))
+        string normalizedPath;
+        try
+        {
+            normalizedPath = FilePathUtility.NormalizePath(path);
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Invalid path: {ex.Message}");
+            return;
+        }
+
+        if (!File.Exists(normalizedPath))
         {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "File does not exist");
             return;
@@ -139,14 +150,14 @@ public sealed class UploadFileComponent : GH_Component
 
         if (string.IsNullOrWhiteSpace(contentType))
         {
-            contentType = MimeTypeMap.GetMimeType(path);
+            contentType = MimeTypeMap.GetMimeType(normalizedPath);
         }
 
         string fullUrl = UrlBuilder.AddQueryParameters(
             url,
             queryParams.Where(static p => p?.Value is not null).Select(static p => p!.Value!));
         HttpHeader[] headerValues = headers.Where(static h => h?.Value is not null).Select(static h => h!.Value!).ToArray();
-        long fileSize = new FileInfo(path).Length;
+        long fileSize = new FileInfo(normalizedPath).Length;
 
         _isUploading = true;
         _completed = false;
@@ -161,7 +172,7 @@ public sealed class UploadFileComponent : GH_Component
         CancellationToken token = _cancellationTokenSource.Token;
 
         Message = $"Starting... ({TransferFormatting.FormatBytes(fileSize)})";
-        _uploadTask = Task.Run(() => UploadAsync(fullUrl, path, method, contentType, headerValues, fileSize, token), token);
+        _uploadTask = Task.Run(() => UploadAsync(fullUrl, normalizedPath, method, contentType, headerValues, fileSize, token), token);
 
         DA.SetData(0, false);
         DA.SetData(1, 0);
