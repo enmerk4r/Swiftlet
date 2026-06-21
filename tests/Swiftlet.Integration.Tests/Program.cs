@@ -4,6 +4,9 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Nodes;
+using Grasshopper.Kernel.Types;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Swiftlet.Core.Auth;
 using Swiftlet.Core.Mcp;
 using Swiftlet.Gh.Rhino8;
@@ -30,6 +33,8 @@ internal static class IntegrationTestRunner
             ("Utility URL encoding preserves form encoding semantics", UtilityUrlEncodingProducesExpectedOutputAsync),
             ("Archived legacy components keep 0.2.0 GUIDs hidden", ArchivedLegacyComponentsKeep020GuidsHiddenAsync),
             ("JSON null goos remain valid and preserve null semantics", JsonNullGoosPreserveNullSemanticsAsync),
+            ("JSON goos cast to Newtonsoft tokens for external serializers", JsonGoosCastToNewtonsoftTokensForExternalSerializersAsync),
+            ("JSON goos cast from Newtonsoft tokens for legacy interop", JsonGoosCastFromNewtonsoftTokensAsync),
             ("Headless host services require manual browser and clipboard actions", HeadlessServicesRequireManualActionsAsync),
             ("Desktop host workflow exposes desktop capabilities", DesktopWorkflowExposesCapabilitiesAsync),
             ("Modern OAuth authorization flow tracks state through callback completion", OAuthAuthorizationFlowTracksStateAsync),
@@ -258,6 +263,78 @@ internal static class IntegrationTestRunner
         Assert.True(duplicatedNode.RepresentsJsonNull);
         Assert.Null(duplicatedValue.Value);
         Assert.Null(duplicatedNode.Value);
+        return Task.CompletedTask;
+    }
+
+    private static Task JsonGoosCastToNewtonsoftTokensForExternalSerializersAsync()
+    {
+        JsonObjectGoo goo = new(CreateBoundaryFixture());
+
+        Assert.True(CastTo(goo, typeof(object), out object? externalObject));
+        Assert.True(externalObject is JObject);
+        Assert.Equal(
+            """{"boundary":{"points":[0,0,24,0,24,12,0,12,0,0],"mask":"XY"}}""",
+            JsonConvert.SerializeObject(externalObject, Formatting.None));
+        Assert.Equal(
+            """{"boundary":{"points":[0,0,24,0,24,12,0,12,0,0],"mask":"XY"}}""",
+            JsonConvert.SerializeObject(goo.ScriptVariable(), Formatting.None));
+        dynamic dynamicObjectGoo = goo;
+        Assert.Equal(
+            """{"boundary":{"points":[0,0,24,0,24,12,0,12,0,0],"mask":"XY"}}""",
+            JsonConvert.SerializeObject(dynamicObjectGoo.Value, Formatting.None));
+
+        Assert.True(CastTo(goo, typeof(JToken), out object? externalToken));
+        Assert.True(externalToken is JObject);
+        Assert.Equal(
+            """{"boundary":{"points":[0,0,24,0,24,12,0,12,0,0],"mask":"XY"}}""",
+            ((JToken)externalToken!).ToString(Formatting.None));
+        AssertDoesNotCastToRawJsonString(
+            goo,
+            """{"boundary":{"points":[0,0,24,0,24,12,0,12,0,0],"mask":"XY"}}""");
+
+        var arrayGoo = new JsonArrayGoo((JsonArray)CreateBoundaryFixture()["boundary"]!["points"]!);
+        Assert.True(CastTo(arrayGoo, typeof(object), out object? externalArray));
+        Assert.True(externalArray is JArray);
+        Assert.Equal("[0,0,24,0,24,12,0,12,0,0]", JsonConvert.SerializeObject(externalArray, Formatting.None));
+        Assert.Equal("[0,0,24,0,24,12,0,12,0,0]", JsonConvert.SerializeObject(arrayGoo.ScriptVariable(), Formatting.None));
+        dynamic dynamicArrayGoo = arrayGoo;
+        Assert.Equal("[0,0,24,0,24,12,0,12,0,0]", JsonConvert.SerializeObject(dynamicArrayGoo.Value, Formatting.None));
+        AssertDoesNotCastToRawJsonString(arrayGoo, "[0,0,24,0,24,12,0,12,0,0]");
+
+        JsonNodeGoo nullGoo = JsonNodeGoo.CreateJsonNull();
+        Assert.True(CastTo(nullGoo, typeof(object), out object? externalNull));
+        Assert.True(externalNull is JValue);
+        Assert.Equal("null", JsonConvert.SerializeObject(externalNull, Formatting.None));
+        Assert.Equal("null", JsonConvert.SerializeObject(nullGoo.ScriptVariable(), Formatting.None));
+        dynamic dynamicNullGoo = nullGoo;
+        Assert.Equal("null", JsonConvert.SerializeObject(dynamicNullGoo.Value, Formatting.None));
+        AssertDoesNotCastToRawJsonString(nullGoo, "null");
+
+        return Task.CompletedTask;
+    }
+
+    private static Task JsonGoosCastFromNewtonsoftTokensAsync()
+    {
+        var objectGoo = new JsonObjectGoo();
+        Assert.True(objectGoo.CastFrom(JObject.Parse("""{"boundary":{"points":[0,0],"mask":"XY"}}""")));
+        Assert.Equal("""{"boundary":{"points":[0,0],"mask":"XY"}}""", objectGoo.Value!.ToJsonString());
+
+        var arrayGoo = new JsonArrayGoo();
+        Assert.True(arrayGoo.CastFrom(JArray.Parse("[0,24,12]")));
+        Assert.Equal("[0,24,12]", arrayGoo.Value!.ToJsonString());
+
+        var nodeGoo = new JsonNodeGoo();
+        Assert.True(nodeGoo.CastFrom(JToken.Parse("""{"ok":true}""")));
+        Assert.Equal("""{"ok":true}""", nodeGoo.Value!.ToJsonString());
+
+        var valueGoo = new JsonValueGoo();
+        Assert.True(valueGoo.CastFrom(new JValue("XY")));
+        Assert.Equal("\"XY\"", valueGoo.Value!.ToJsonString());
+
+        Assert.True(valueGoo.CastFrom(JValue.CreateNull()));
+        Assert.True(valueGoo.RepresentsJsonNull);
+        Assert.Null(valueGoo.Value);
+
         return Task.CompletedTask;
     }
 
@@ -1017,9 +1094,9 @@ internal static class IntegrationTestRunner
                ?? throw new InvalidOperationException($"Unable to find shell type '{fullName}'.");
     }
 
-    private static bool CastTo(BitmapGoo goo, Type targetType, out object? target)
+    private static bool CastTo(IGH_Goo goo, Type targetType, out object? target)
     {
-        MethodInfo castMethod = typeof(BitmapGoo)
+        MethodInfo castMethod = goo.GetType()
             .GetMethods()
             .Single(static method => method.Name == nameof(BitmapGoo.CastTo) && method.IsGenericMethodDefinition);
 
@@ -1027,6 +1104,33 @@ internal static class IntegrationTestRunner
         bool result = (bool)castMethod.MakeGenericMethod(targetType).Invoke(goo, args)!;
         target = args[0];
         return result;
+    }
+
+    private static void AssertDoesNotCastToRawJsonString(IGH_Goo goo, string rawJson)
+    {
+        bool castsToRawJsonString = CastTo(goo, typeof(string), out object? target)
+            && target is string text
+            && string.Equals(text, rawJson, StringComparison.Ordinal);
+
+        Assert.False(castsToRawJsonString, "JSON goo should not cast directly to raw JSON text.");
+    }
+
+    private static JsonObject CreateBoundaryFixture()
+    {
+        var points = new JsonArray();
+        foreach (int value in new[] { 0, 0, 24, 0, 24, 12, 0, 12, 0, 0 })
+        {
+            points.Add(value);
+        }
+
+        return new JsonObject
+        {
+            ["boundary"] = new JsonObject
+            {
+                ["points"] = points,
+                ["mask"] = "XY",
+            },
+        };
     }
 
     private static string NormalizePathForTest(string path, bool isWindows)
