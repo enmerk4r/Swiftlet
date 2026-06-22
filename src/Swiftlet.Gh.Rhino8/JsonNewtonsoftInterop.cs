@@ -26,7 +26,10 @@ internal static class JsonNewtonsoftInterop
             return new JsonNodeConversion(null, RepresentsJsonNull: true);
         }
 
-        return new JsonNodeConversion(JsonNode.Parse(token.ToString(Formatting.None)), RepresentsJsonNull: false);
+        JsonNode? parsed = JsonNode.Parse(token.ToString(Formatting.None));
+        return parsed is null
+            ? new JsonNodeConversion(null, RepresentsJsonNull: true)
+            : new JsonNodeConversion(parsed, RepresentsJsonNull: false);
     }
 
     public readonly record struct JsonNodeConversion(JsonNode? Node, bool RepresentsJsonNull);
