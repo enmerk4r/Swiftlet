@@ -504,44 +504,89 @@ internal static class TestRunner
             "Swiftlet",
             new BridgeLaunchCommand("dotnet", ["/tmp/SwiftletBridge.dll", "http://localhost:3001/mcp/"]));
 
-        Assert.Contains("\"type\": \"stdio\"", json);
-        Assert.Contains("\"command\": \"dotnet\"", json);
-        Assert.Contains("\"Swiftlet\"", json);
-        Assert.Contains("\"http://localhost:3001/mcp/\"", json);
+        AssertJsonEqual(
+            new JsonObject
+            {
+                ["mcpServers"] = new JsonObject
+                {
+                    ["Swiftlet"] = new JsonObject
+                    {
+                        ["type"] = "stdio",
+                        ["command"] = "dotnet",
+                        ["args"] = new JsonArray
+                        {
+                            "/tmp/SwiftletBridge.dll",
+                            "http://localhost:3001/mcp/",
+                        },
+                    },
+                },
+            },
+            ParseJsonObject(json));
     }
 
     private static void McpClientConfigBuilderSerializesLmStudioConfig()
     {
         string json = McpClientConfigBuilder.BuildLmStudio("Swiftlet", "http://localhost:3001/mcp/");
 
-        Assert.Contains("\"mcpServers\"", json);
-        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+        AssertJsonEqual(
+            new JsonObject
+            {
+                ["mcpServers"] = new JsonObject
+                {
+                    ["Swiftlet"] = new JsonObject
+                    {
+                        ["url"] = "http://localhost:3001/mcp/",
+                    },
+                },
+            },
+            ParseJsonObject(json));
     }
 
     private static void McpClientConfigBuilderSerializesVsCodeConfig()
     {
         string json = McpClientConfigBuilder.BuildVsCode("Swiftlet", "http://localhost:3001/mcp/");
 
-        Assert.Contains("\"servers\"", json);
-        Assert.Contains("\"type\": \"http\"", json);
-        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+        AssertJsonEqual(
+            new JsonObject
+            {
+                ["servers"] = new JsonObject
+                {
+                    ["Swiftlet"] = new JsonObject
+                    {
+                        ["type"] = "http",
+                        ["url"] = "http://localhost:3001/mcp/",
+                    },
+                },
+            },
+            ParseJsonObject(json));
     }
 
     private static void McpClientConfigBuilderSerializesClaudeCodeConfig()
     {
         string json = McpClientConfigBuilder.BuildClaudeCode("Swiftlet", "http://localhost:3001/mcp/");
 
-        Assert.Contains("\"mcpServers\"", json);
-        Assert.Contains("\"type\": \"http\"", json);
-        Assert.Contains("\"url\": \"http://localhost:3001/mcp/\"", json);
+        AssertJsonEqual(
+            new JsonObject
+            {
+                ["mcpServers"] = new JsonObject
+                {
+                    ["Swiftlet"] = new JsonObject
+                    {
+                        ["type"] = "http",
+                        ["url"] = "http://localhost:3001/mcp/",
+                    },
+                },
+            },
+            ParseJsonObject(json));
     }
 
     private static void McpClientConfigBuilderSerializesCodexConfig()
     {
         string toml = McpClientConfigBuilder.BuildCodex("Swiftlet", "http://localhost:3001/mcp/");
 
-        Assert.Contains("[mcp_servers.\"Swiftlet\"]", toml);
-        Assert.Contains("url = \"http://localhost:3001/mcp/\"", toml);
+        Assert.Equal(
+            "[mcp_servers.\"Swiftlet\"]\nurl = \"http://localhost:3001/mcp/\"\n",
+            toml.ReplaceLineEndings("\n"));
     }
 
     private static void McpToolDefinitionBuildsInputSchema()

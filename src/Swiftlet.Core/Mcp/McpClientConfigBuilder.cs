@@ -28,6 +28,7 @@ public static class McpClientConfigBuilder
 
     public static string BuildLmStudio(string serverName, string serverUrl)
     {
+        // LM Studio follows Cursor's mcp.json shape for remote servers: url, without a type field.
         return BuildMcpServersJson(serverName, new JsonObject
         {
             ["url"] = ValidateServerUrl(serverUrl),

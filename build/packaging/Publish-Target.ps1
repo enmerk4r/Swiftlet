@@ -574,6 +574,11 @@ $runtimeDependencies = @(
         LibraryRelativePath = "lib\netstandard2.0\HtmlAgilityPack.dll"
     },
     [pscustomobject]@{
+        ProjectPath = $pluginProjectPath
+        PackageId = "Newtonsoft.Json"
+        LibraryRelativePath = "lib\netstandard2.0\Newtonsoft.Json.dll"
+    },
+    [pscustomobject]@{
         ProjectPath = $imagingProjectPath
         PackageId = "QRCoder"
         LibraryRelativePath = "lib\net6.0\QRCoder.dll"

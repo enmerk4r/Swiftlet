@@ -1,9 +1,12 @@
 using System.Text.Json.Nodes;
+using System.Dynamic;
+using System.Linq.Expressions;
 using Grasshopper.Kernel.Types;
+using Newtonsoft.Json.Linq;
 
 namespace Swiftlet.Gh.Rhino8.Goo;
 
-public class JsonNodeGoo : GH_Goo<JsonNode>
+public class JsonNodeGoo : GH_Goo<JsonNode>, IDynamicMetaObjectProvider
 {
     public bool RepresentsJsonNull { get; private set; }
 
@@ -33,6 +36,16 @@ public class JsonNodeGoo : GH_Goo<JsonNode>
 
     public override IGH_Goo Duplicate() => new JsonNodeGoo(Value, RepresentsJsonNull);
 
+    public override object ScriptVariable()
+    {
+        return JsonNewtonsoftInterop.ToJToken(Value, RepresentsJsonNull);
+    }
+
+    public DynamicMetaObject GetMetaObject(Expression parameter)
+    {
+        return new JsonGooDynamicMetaObject(parameter, this);
+    }
+
     public override bool CastTo<Q>(ref Q target)
     {
         Type targetType = typeof(Q);
@@ -59,6 +72,34 @@ public class JsonNodeGoo : GH_Goo<JsonNode>
 
             target = (Q)temp;
             return RepresentsJsonNull || Value is JsonValue;
+        }
+
+        if (targetType == typeof(JObject) && Value is JsonObject)
+        {
+            object temp = JsonNewtonsoftInterop.ToJToken(Value);
+            target = (Q)temp;
+            return true;
+        }
+
+        if (targetType == typeof(JArray) && Value is JsonArray)
+        {
+            object temp = JsonNewtonsoftInterop.ToJToken(Value);
+            target = (Q)temp;
+            return true;
+        }
+
+        if (targetType == typeof(JValue) && (RepresentsJsonNull || Value is JsonValue))
+        {
+            object temp = JsonNewtonsoftInterop.ToJToken(Value, RepresentsJsonNull);
+            target = (Q)temp;
+            return true;
+        }
+
+        if (targetType == typeof(JToken) || targetType == typeof(object))
+        {
+            object temp = JsonNewtonsoftInterop.ToJToken(Value, RepresentsJsonNull);
+            target = (Q)temp;
+            return true;
         }
 
         return base.CastTo(ref target);
@@ -94,6 +135,12 @@ public class JsonNodeGoo : GH_Goo<JsonNode>
                 }
 
                 break;
+
+            case JToken token:
+                JsonNewtonsoftInterop.JsonNodeConversion conversion = JsonNewtonsoftInterop.FromJToken(token);
+                Value = conversion.Node is null ? default! : JsonNodeCloner.Clone(conversion.Node)!;
+                RepresentsJsonNull = conversion.RepresentsJsonNull;
+                return true;
         }
 
         return base.CastFrom(source);
