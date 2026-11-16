@@ -22,6 +22,7 @@ if(action=="tools"){
  doc.UndoUtil.RecordWireEvent("Change Tools",c.Params.Input[1]);c.Params.Input[1].RemoveSource(source.Params.Output[0]);c.ExpireSolution(false);doc.NewSolution(false);
 }
 if(action=="undo"){doc.Undo();doc.NewSolution(false);}
+if(action=="redo"){doc.Redo();doc.NewSolution(false);}
 if(action=="close"){doc.RemoveObject(c,false);doc.Dispose();Console.WriteLine("GH1UNDO_JSON:{}");return;}
 var pins=new List<object>();foreach(dynamic pin in c.Params.Output)pins.Add(new{id=pin.InstanceGuid.ToString(),name=(string)pin.NickName});
 Console.WriteLine("GH1UNDO_JSON:"+JsonSerializer.Serialize(new{pins,wires=sink==null?0:(int)sink.SourceCount}));

@@ -53,7 +53,7 @@ Tests cover wrong state, empty/malformed/favicon traffic, two held idle connecti
 
 Store settings in CustomValues and through Store/IReader, calling the base methods. Eto picker handlers record `CustomValueAction` before changing a value. Native control events plus Undo/Redo were verified for six HTTP timeouts, text-body content type and Save Web Response mode, including archive clones and actual outputs/files.
 
-Server Input's real create/remove-parameter actions preserve pin identity and downstream wires through undo, including live route output. MCP Port/Name persistent-data undo restores the live session configuration. Automatic MCP tool removal instead recreates a new output on undo and loses its downstream wire in **both** GH1 and GH2; this is a documented existing limitation. Config-copy buttons are export actions, not saved options. Programmatic event tests do not prove mouse hit targets or popup focus.
+Server Input's real create/remove-parameter actions preserve pin identity and downstream wires through undo, including live route output. MCP Port/Name persistent-data undo restores the live session configuration. MCP tool outputs are removed automatically, outside any undo record, so both shells remember each removed output and the parameters it fed. When the tool comes back, the output reuses the same pin id and is rewired to recipients that still exist and are not already connected. Undo/Redo/Undo is verified with the native undo API in GH1 and GH2. Config-copy buttons are export actions, not saved options. Programmatic event tests do not prove mouse hit targets or popup focus.
 
 ## Migration and archived components
 

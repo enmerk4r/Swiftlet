@@ -9,7 +9,7 @@ Programmatic checks use each component's real `AppendToInputPanel`, materialise 
 | Save Web Response mode | Works | Binary ? Text ? Undo Binary ? Redo Text; exact file bytes and byte-count output alternate 3 / 12 / 3 / 12. Archive agrees. |
 | Server Input add/remove route | Works | Real DoCreateParameter/DoRemoveParameter and native history preserve pin IDs, route names, downstream wire and archive. Real requests switch between root and /new-route as outputs change. |
 | MCP Server Port / Server Name | Works | Native PersistentDataAction + Undo/Redo restore live session configuration; the active port accepts connections. |
-| MCP tool-driven output removal / Undo | Fails on tested baseline | Output name/count returns, but with a new pin ID; the downstream wire remains disconnected. GH1's native wire-undo baseline also restores only the output. This is shared pre-existing behaviour, not a GH2-only regression. |
+| MCP tool-driven output removal / Undo | Works | Undo/Redo/Undo with native document history: the output returns with its original pin ID and downstream wire, and is removed again on Redo. GH1's native wire undo gives the same result (`validate_gh1_mcp_undo.py`). |
 | MCP copy-config buttons | No saved option to undo | These export configuration; they do not change document settings. The panel has no saved options picker. Configuration generation/export has separate MCP tests. |
 
 Run against a freshly staged build in an explicitly owned Rhino slot:

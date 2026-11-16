@@ -22,6 +22,9 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
     private int _stopping;
     private int _updateOutputs;
     private long _generation;
+    // Outputs removed because their tool went away, with the wires they fed. A tool that comes back (typically
+    // through Undo) gets the same pin and its downstream wires back instead of a new, unwired output.
+    private readonly Dictionary<string, (IParameter Pin, Guid[] Targets)> _removedOutputs = new(StringComparer.Ordinal);
 
     public McpServerComponent() : base("MCP Server", "Starts an MCP server and exposes the connected tools to MCP clients. Each connected tool appears as its own output and emits a request when that tool is called.", Sections.Mcp) => Initialize();
     public McpServerComponent(IReader reader) : base(reader) => Initialize();
@@ -76,11 +79,27 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
         var tools = Volatile.Read(ref _desiredTools);
         var names = tools.Select(t => t.Name).ToHashSet(StringComparer.Ordinal);
         for (int index = Parameters.OutputCount - 1; index >= 0; index--)
-            if (!names.Contains(Parameters.Output(index).UserName)) Parameters.RemoveOutput(index, null!);
+        {
+            var output = Parameters.Output(index);
+            if (names.Contains(output.UserName)) continue;
+            _removedOutputs[output.UserName] = (output, output.Outputs.ToArray());
+            Parameters.RemoveOutput(index, null!);
+        }
         var current = Parameters.Outputs.Select(p => p.UserName).ToHashSet(StringComparer.Ordinal);
         foreach (var tool in tools)
-            if (current.Add(tool.Name)) Parameters.AddOutput(new McpToolCallRequestParameter(tool.Name, tool.Name,
+        {
+            if (!current.Add(tool.Name)) continue;
+            if (_removedOutputs.Remove(tool.Name, out var removed) && Document?.Objects.FindParameter(removed.Pin.InstanceId) is null)
+            {
+                Parameters.AddOutput(removed.Pin, null!);
+                foreach (var id in removed.Targets)
+                    if (Document?.Objects.FindParameter(id) is { } target && target.Inputs.IndexOf(removed.Pin.InstanceId) < 0)
+                        Connections.Connect(removed.Pin, target, null!);
+                continue;
+            }
+            Parameters.AddOutput(new McpToolCallRequestParameter(tool.Name, tool.Name,
                 $"Emits a request when the MCP client calls '{tool.Name}'. Connect it to Deconstruct Tool Call, process the request, then finish with MCP Tool Response."), null!);
+        }
         InvalidateExistingLayout();
     }
     private void OnRequestQueued(object? sender, EventArgs args)
@@ -102,7 +121,7 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
     public void PrepareForRemoval(ActionList undo) => StopServer();
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)
     {
-        if (args.OldDocument is { } old) { old.StateChanged -= OnDocumentStateChanged; StopServer(); }
+        if (args.OldDocument is { } old) { old.StateChanged -= OnDocumentStateChanged; StopServer(); _removedOutputs.Clear(); }
         if (args.NewDocument is { } current) { current.StateChanged += OnDocumentStateChanged; Volatile.Write(ref _stopping, 0); }
     }
     private void OnDocumentStateChanged(object? sender, DocumentStateEventArgs args)

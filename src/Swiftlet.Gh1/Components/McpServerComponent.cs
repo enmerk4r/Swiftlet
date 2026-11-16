@@ -17,6 +17,9 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private int _stopping;
     private long _generation;
     private int _updateScheduled;
+    // Outputs removed because their tool went away, with the wires they fed. A tool that comes back (typically
+    // through Undo) gets the same pin id and its downstream wires back instead of a new, unwired output.
+    private readonly Dictionary<string, (Guid Id, Guid[] Recipients)> _removedOutputs = new(StringComparer.Ordinal);
 
     public McpServerComponent()
         : base("MCP Server", "MCP", "Starts an MCP server and exposes the connected tools to MCP clients. Each connected tool appears as its own output and emits a request when that tool is called.", ShellNaming.Category, ShellNaming.Mcp)
@@ -130,6 +133,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         _session.RequestQueued -= OnRequestQueued;
         _calls.RequestReady -= OnRequestQueued;
         StopServer();
+        _removedOutputs.Clear();
         base.RemovedFromDocument(document);
     }
 
@@ -170,7 +174,9 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         {
             if (!desiredOutputs.Contains(Params.Output[i].NickName))
             {
-                Params.UnregisterOutputParameter(Params.Output[i]);
+                IGH_Param output = Params.Output[i];
+                _removedOutputs[output.NickName] = (output.InstanceGuid, output.Recipients.Select(static r => r.InstanceGuid).ToArray());
+                Params.UnregisterOutputParameter(output);
                 changed = true;
             }
         }
@@ -191,7 +197,17 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
                 Access = GH_ParamAccess.item,
             };
 
+            GH_Document? document = OnPingDocument();
+            Guid[] recipients = [];
+            if (_removedOutputs.Remove(tool.Name, out var removed) && document?.FindParameter(removed.Id) is null)
+            {
+                param.NewInstanceGuid(removed.Id);
+                recipients = removed.Recipients;
+            }
+
             Params.RegisterOutputParam(param);
+            foreach (Guid id in recipients)
+                if (document?.FindParameter(id) is { } recipient && !recipient.Sources.Contains(param)) recipient.AddSource(param);
             changed = true;
         }
 

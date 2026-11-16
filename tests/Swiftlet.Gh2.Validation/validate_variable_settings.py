@@ -50,10 +50,12 @@ try:
  call(action="tools",tools=["first","second"]);r=settled(["first","second"],other);pin_id=r["pins"][1]["id"]
  call(action="wire");r=settled(["first","second"],other);assert r["wires"]==1,r
  call(action="tools",tools=["first"]);settled(["first"],other)
- call(action="undo");r=settled(["first","second"],other)
- passed=r["wires"]==1 and r["pins"][1]["id"]==pin_id
- evidence.append({"case":"MCP tool removal Undo restores downstream wire and pin ID","passed":passed,"beforePin":pin_id,"snapshot":r})
- print(("PASS" if passed else "FAIL")+" MCP tool removal Undo restores downstream wire and pin ID",flush=True)
+ for action,names in [("undo",["first","second"]),("redo",["first"]),("undo",["first","second"])]:
+  call(action=action);r=settled(names,other)
+  passed=r["wires"]==1 and r["pins"][1]["id"]==pin_id if len(names)==2 else r["wires"]==0
+  evidence.append({"case":"MCP tool removal "+action,"passed":passed,"beforePin":pin_id,"snapshot":r})
+ passed=all(e["passed"] for e in evidence if e["case"].startswith("MCP tool removal"))
+ print(("PASS" if passed else "FAIL")+" MCP tool removal Undo/Redo/Undo restores downstream wire and pin ID",flush=True)
 finally:
  try:call(action="close")
  except Exception as error:print("Cleanup",error,file=sys.stderr)
