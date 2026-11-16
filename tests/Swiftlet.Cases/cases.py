@@ -19,7 +19,11 @@ Case file: a JSON array of cases:
     "gh1Skip": "reason"                        # optional: GH2-only case
   }
 Value specs: {"text"}, {"int"}, {"num"}, {"bool"}, {"query": [k, v]}, {"header": [k, v]}, {"bytes": b64},
-{"json"|"jobject"|"jarray"|"jvalue": "<json text>"}.
+{"json"|"jobject"|"jarray"|"jvalue": "<json text>"}, {"html"|"htmlel"|"xml": "<markup>"},
+{"bodytext": [contentType, text]}, {"bodybytes": [contentType, b64]}, {"form": [[keys], [values]]},
+{"field": {"name", "text", "contentType"?}} or {"field": {"name", "bytes": b64, "fileName"?, "contentType"?}},
+{"multipart": [field objects]}, {"response": {"version", "status", "reason", "headers": [[k, v]], "success",
+"content", "bytes": b64}} (all keys optional). A GH2 Process that throws (faulted solve) counts as an error.
 
 Pass rules: GH1 and GH2 outputs (paths, null slots, canonical values) must be identical, both hosts must
 agree on whether an error was reported, and any "expect"/"expectError" must hold. Exit status 0 only if
@@ -178,7 +182,9 @@ def main():
         return 0
     cases = []
     for f in a.files:
-        cases += json.load(open(f, encoding="utf-8"))
+        # "__REPO__" in a case file stands for the repository root (forward slashes), e.g. for file paths.
+        text = open(f, encoding="utf-8").read().replace("__REPO__", REPO.as_posix())
+        cases += json.loads(text)
     if a.only:
         cases = [c for c in cases if a.only in c["name"]]
     template = (HERE / "runner.cs").read_text(encoding="utf-8")
