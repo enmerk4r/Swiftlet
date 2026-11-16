@@ -133,6 +133,12 @@ class Validation:
             wait_closed(listener)
             self.checks.append("port change releases old port and starts new listener")
 
+            self.script('c.Activity=(dynamic)Enum.Parse(gh.GetType("Grasshopper2.Doc.ObjectActivity"),"Disabled");')
+            wait_closed(changed)
+            self.script('c.Activity=(dynamic)Enum.Parse(gh.GetType("Grasshopper2.Doc.ObjectActivity"),"Enabled");c.Expire();')
+            assert self.client.call("g2_solve_canvas")["solved"]
+            self.checks.append("disable releases port; re-enable starts a fresh listener generation")
+
             pending = pool.submit(request, changed, "/api/close")
             self.wait_context("/api/close")
             self.script("doc.Close();")

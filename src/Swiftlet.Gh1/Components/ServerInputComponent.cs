@@ -9,6 +9,7 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
     private readonly ModernServerSession _session = new();
     private readonly ServerInputRequestState _requestState = new();
     private int _stopping;
+    private long _generation;
 
     public ServerInputComponent()
         : base(
@@ -115,6 +116,7 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
     public override void RemovedFromDocument(GH_Document document)
     {
         Volatile.Write(ref _stopping, 1);
+        Interlocked.Increment(ref _generation);
         _session.RequestQueued -= OnRequestQueued;
         _requestState.RequestReady -= OnRequestQueued;
         _requestState.Clear();
@@ -127,6 +129,7 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
         if (context == GH_DocumentContext.Close)
         {
             Volatile.Write(ref _stopping, 1);
+        Interlocked.Increment(ref _generation);
             _requestState.Clear();
             _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
@@ -140,10 +143,11 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
 
     private void OnRequestQueued(object? sender, EventArgs e)
     {
+        long generation = Volatile.Read(ref _generation);
         if (Volatile.Read(ref _stopping) != 0) return;
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
-            if (Volatile.Read(ref _stopping) == 0 && OnPingDocument() is not null)
+            if (generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0 && OnPingDocument() is not null)
                 ExpireSolution(true);
         }));
     }
