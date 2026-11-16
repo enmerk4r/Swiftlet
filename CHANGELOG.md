@@ -10,6 +10,7 @@
 - Converts archived Create Text Body to the current component and archived three-input MCP Tool Response to a hidden native compatibility component with its original result format. [42fe962](https://github.com/enmerk4r/Swiftlet/commit/42fe962ec715dbd0b5e1ed351713350d07196d9a) [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
 - Leaves archived Socket Listener and Create Multipart Form Body Named/Unnamed on GH1 interop hosts; third-party and scripting components may also need GH1 hosting. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
 - Adds 15 `.ghz` example counterparts, retaining the original `.gh` files and recreating their notes; the OpenAI example was reopened but not executed without a key. [c3d55bb](https://github.com/enmerk4r/Swiftlet/commit/c3d55bb38f2a865610b6a1007f3668df2b271cc6)
+- Keeps GH1's optional-input behavior for HTML Recursive, CSV Delimiter, Byte Array To Text Encoding and the four QR settings, including fallback values when their pin data is cleared. [65baefe](https://github.com/enmerk4r/Swiftlet/commit/65baefeb9c75c9d8e7403ccfb4d7bf8ab07ace4d)
 - Uses vector icons and palette groups matching GH1's exposure rows. [d731741](https://github.com/enmerk4r/Swiftlet/commit/d731741bd924810768678b3d7e90e15125853a19) [f54cddc](https://github.com/enmerk4r/Swiftlet/commit/f54cddc104f72c8fb067ae1852a24f10a404856c)
 
 ### Changes affecting Grasshopper 1
