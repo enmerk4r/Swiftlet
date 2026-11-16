@@ -14,6 +14,7 @@ public sealed class ModernServerSession : IAsyncDisposable
     private StreamWriter? _bridgeInput;
     private Task? _bridgeOutputTask;
     private Task? _bridgeErrorTask;
+    private CancellationTokenSource? _requestsLifetime;
 
     public ModernServerSession(IEnumerable<string>? routes = null, ModernServer? server = null)
     {
@@ -63,6 +64,9 @@ public sealed class ModernServerSession : IAsyncDisposable
 
     public async Task StopAsync()
     {
+        var lifetime = _requestsLifetime;
+        _requestsLifetime = null;
+        lifetime?.Cancel();
         Process? bridgeProcess = _bridgeProcess;
         StreamWriter? bridgeInput = _bridgeInput;
         Task? bridgeOutputTask = _bridgeOutputTask;
@@ -119,6 +123,7 @@ public sealed class ModernServerSession : IAsyncDisposable
             try { await bridgeErrorTask.ConfigureAwait(false); } catch { }
         }
 
+        lifetime?.Dispose();
         Port = 0;
     }
 
@@ -173,7 +178,10 @@ public sealed class ModernServerSession : IAsyncDisposable
 
         _bridgeProcess = process;
         _bridgeInput = process.StandardInput;
-        _bridgeOutputTask = Task.Run(() => ReadBridgeOutputAsync(process, readySource, diagnostics), CancellationToken.None);
+        _requestsLifetime = new CancellationTokenSource();
+        var requestToken = _requestsLifetime.Token;
+        var requestWriter = _bridgeInput;
+        _bridgeOutputTask = Task.Run(() => ReadBridgeOutputAsync(process, readySource, diagnostics, requestToken, requestWriter), CancellationToken.None);
         _bridgeErrorTask = Task.Run(() => DrainBridgeErrorAsync(process, diagnostics), CancellationToken.None);
 
         try
@@ -187,7 +195,7 @@ public sealed class ModernServerSession : IAsyncDisposable
         }
     }
 
-    private async Task ReadBridgeOutputAsync(Process process, TaskCompletionSource<bool> readySource, BridgeProcessDiagnostics diagnostics)
+    private async Task ReadBridgeOutputAsync(Process process, TaskCompletionSource<bool> readySource, BridgeProcessDiagnostics diagnostics, CancellationToken requestToken, StreamWriter requestWriter)
     {
         try
         {
@@ -220,7 +228,7 @@ public sealed class ModernServerSession : IAsyncDisposable
                         break;
 
                     case "http_request":
-                        _ = Task.Run(() => HandleIncomingRequestAsync(message));
+                        _ = Task.Run(() => HandleIncomingRequestAsync(message, requestToken, requestWriter));
                         break;
                 }
             }
@@ -250,7 +258,7 @@ public sealed class ModernServerSession : IAsyncDisposable
         }
     }
 
-    private async Task HandleIncomingRequestAsync(JsonObject message)
+    private async Task HandleIncomingRequestAsync(JsonObject message, CancellationToken requestToken, StreamWriter requestWriter)
     {
         string requestId = message["requestId"]?.GetValue<string>() ?? string.Empty;
         try
@@ -267,7 +275,7 @@ public sealed class ModernServerSession : IAsyncDisposable
                     path,
                     ParseHeaders(message["headers"] as JsonArray),
                     ParseQueryParameters(message["queryParameters"] as JsonArray),
-                    new RequestBodyBytes(string.IsNullOrWhiteSpace(contentType) ? ContentTypes.ApplicationOctetStream : contentType, bodyBytes))
+                    new RequestBodyBytes(string.IsNullOrWhiteSpace(contentType) ? ContentTypes.ApplicationOctetStream : contentType, bodyBytes), requestToken)
                 .ConfigureAwait(false);
 
             TryWriteMessage(new JsonObject
@@ -282,7 +290,7 @@ public sealed class ModernServerSession : IAsyncDisposable
                     ["value"] = header.Value,
                 }).ToArray()),
                 ["bodyBase64"] = Convert.ToBase64String(response.Body),
-            });
+            }, requestWriter);
         }
         catch (Exception ex)
         {
@@ -294,7 +302,7 @@ public sealed class ModernServerSession : IAsyncDisposable
                 ["contentType"] = "text/plain; charset=utf-8",
                 ["headers"] = new JsonArray(),
                 ["bodyBase64"] = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ex.ToString())),
-            });
+            }, requestWriter);
         }
     }
 
