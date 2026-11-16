@@ -16,9 +16,9 @@ Run against a freshly staged build in an explicitly owned Rhino slot:
 
 ```
 python tests/Swiftlet.Cases/cases.py --port PORT --load
-python src/Swiftlet.Gh2/Validation/validate_settings.py --port PORT --report artifacts/ui-settings.json
-python src/Swiftlet.Gh2/Validation/validate_variable_settings.py --port PORT --report artifacts/ui-variable.json
-python src/Swiftlet.Gh2/Validation/validate_gh1_mcp_undo.py --port PORT --report artifacts/ui-gh1-baseline.json
+python tests/Swiftlet.Gh2.Validation/validate_settings.py --port PORT --report artifacts/ui-settings.json
+python tests/Swiftlet.Gh2.Validation/validate_variable_settings.py --port PORT --report artifacts/ui-variable.json
+python tests/Swiftlet.Gh2.Validation/validate_gh1_mcp_undo.py --port PORT --report artifacts/ui-gh1-baseline.json
 ```
 
 `validate_variable_settings.py` deliberately exits nonzero while MCP output-wire restoration fails. It preserves an explicit failing repro for the shared GH1/GH2 limitation. The coordinator has deferred a behaviour change for pigac to review; it is separate from the passing GH2 parity gates. The GH1 baseline uses two real Define Tool components, records the native wire action before disconnecting the second tool, and then invokes GH1 document Undo. It avoids serialising custom tool goos into a generic persistent-data undo record.

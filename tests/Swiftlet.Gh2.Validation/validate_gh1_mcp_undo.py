@@ -1,7 +1,7 @@
 """GH1 baseline: remove a connected tool, native wire Undo, inspect downstream wire."""
 import argparse,json,socket,sys,time
 from pathlib import Path
-HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[2];sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1];sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
 ap=argparse.ArgumentParser();ap.add_argument("--port",required=True,type=int);ap.add_argument("--report",required=True,type=Path);a=ap.parse_args()
 source=(HERE/"Gh1McpUndoHarness.csx").read_text();rows=[]
 def call(**cmd):

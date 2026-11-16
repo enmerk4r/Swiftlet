@@ -3,7 +3,7 @@ import argparse,json,socket,sys,threading,time,urllib.parse,urllib.request
 from collections import Counter
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
-HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[2]
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1]
 sys.path.insert(0,str(ROOT/"tests/Swiftlet.Parity"))
 from parity import RhinoMcp
 requests=Counter()
