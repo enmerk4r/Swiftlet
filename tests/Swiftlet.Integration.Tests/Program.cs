@@ -1181,6 +1181,13 @@ internal static class IntegrationTestRunner
 
         foreach (string directory in Directory.GetDirectories(windowsDesktopRoot).OrderByDescending(GetFrameworkPreference))
         {
+            // A desktop framework newer than the running runtime cannot be loaded into it.
+            if (Version.TryParse(Path.GetFileName(directory), out Version? frameworkVersion) &&
+                frameworkVersion.Major > Environment.Version.Major)
+            {
+                continue;
+            }
+
             string assemblyPath = Path.Combine(directory, "System.Drawing.Common.dll");
             if (!File.Exists(assemblyPath))
             {
