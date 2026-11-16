@@ -18,7 +18,9 @@ Use plain domain types with TypeAssistant<T> and Parameter<T>. Public parameterl
 
 DescribePrimary provides the human-facing description (use the GH1 wording where relevant). Rhino AI graph snapshots currently sample raw ToString and may display the CLR type name. Compare typed fields and exact trees for behavior; do not change domain objects merely to make sampled strings look like GH1. Text conversion to another parameter is a separate conversion contract that may require ConversionRepository; DescribePrimary alone is not proof of every cast.
 
-**Optional list trap:** Access.Twig + Requirement.MayBeMissing without persistent data produced zero Process iterations, with Completed/zero diagnostics/empty output. Calling Set(Array.Empty<T>()) creates an explicit empty twig and makes an unconnected optional list participate. GET's query and header inputs use this. Test both empty and nonempty lists; also test connected empty trees during each full port. A diagnostic-free solution is not enough: assert output count and contents.
+**Optional custom input rule:** `InputAdder.Add(parameter)` overwrites a pre-set parameter.Requirement with its default MustExist. Pass `inputs.Add(parameter, Requirement.MayBeMissing)` explicitly for optional custom pins (or set the requirement after adding). Inspect the constructed component, not only its initializer. This was the root cause of earlier zero-iteration solves. Do not add empty twigs, empty objects or one-null persistent values unless GH1 has that persistent default. Real network regressions prove optional Item (IRequestBody) and Twig (QueryParameter/HttpHeader) inputs execute with genuinely empty persistent trees once MayBeMissing is retained. `validate_send_http.py --clear-optional-defaults` explicitly verifies that absence. Missing bytes in UDP are mapped to empty bytes inside Process, matching GH1, rather than stored as a new default.
+
+When GH1 lets an exception escape, it has empty output trees. When it reports an error and returns, outputs hold null slots. Preserve that distinction (throw versus AddError) in GH2; the strict parity runner detects it.
 
 An output with no data appears as one null slot in the canonical tree, rather than an empty list. Item inputs with `.Set(default)` reproduce GH1 optional inputs with a persistent default.
 
@@ -32,7 +34,9 @@ Process is synchronous but runs on worker threads by default. GET calls the shar
 
 Shared HttpRequestExecutor previously swallowed caller cancellation as a status -1 response. It now propagates OperationCanceledException only when the caller token was canceled. Timeout/ordinary transport errors retain the existing failure-response contract. Core tests cover both paths. Audit found only one GH1 executor caller, HttpRequestComponentBase.Execute, which supplies no token; it does not depend on caller cancellation becoming a response.
 
-The live slow-request check cancels a ten-second local endpoint after 300 ms. Observed completion was approximately 303 ms with Phase=Cancelled. GH2 ObjectSolutionState.Data intentionally retains the most recent successful result, even after cancellation. CurrentId identifies that cached result; ProcessId identifies the newer canceled/faulted computation. Require a successful phase/current solution before reading outputs. The cancellation test verifies the previous successful-data ID is unchanged, rather than incorrectly requiring the cache to be empty.
+The live slow-request check cancels a ten-second local endpoint after 300 ms. Observed completion was approximately 303 ms with Phase=Cancelled. GH2 ObjectSolutionState.Data intentionally retains the most recent successful result, even after cancellation. CurrentId identifies that cached result; ProcessId identifies the newer canceled/faulted computation. Require a successful phase/current solution before reading outputs. The shared executor also uses ConfigureAwait(false): a GH1 graph solved programmatically on Rhino's UI thread deadlocked when the synchronous Execute adapter awaited a continuation on that blocked context. The live graph completes after this fix, and a controlled no-pump-context Core test fails on the old code and passes with it. Manual canvas-click reproduction has not been tested.
+
+The cancellation test verifies the previous successful-data ID is unchanged, rather than incorrectly requiring the cache to be empty.
 
 DNS validation currently uses the shared synchronous UrlValidator; token checks surround validation, but DNS resolution itself is not interruptible by this adapter. Do not describe cancellation as instantaneous for every network stage.
 
@@ -77,6 +81,8 @@ Build in an isolated worktree. Use tests/Swiftlet.Parity/load_plugin.py to copy 
 Use the current Rhino 9 router. Current-session legacy native MCP tool inventories may be stale; the direct loopback helper/harness reaches g2 tools. Always target the dedicated port.
 
 Header checks: src/Swiftlet.Gh2/Validation/README.md.
+HTTP bulk checks: `Validation/validate_send_http.py --port <slot> --clear-optional-defaults` checks exact loopback HTTP method/query/header/body values, all six saved HTTP timeout migrations, actual UDP datagrams from both shells, and Throttle cancellation. Auth and Send pure/data cases are in tests/Swiftlet.Cases/cases/{auth,send}.json.
+
 GET checks: run Validation/validate_get.py --port <dedicated-port> --gh1 <built-gh1.gha> with the latest GH2 build already loaded. It creates/removes its own GET component and serves only a temporary loopback HTTP fixture. Assertions cover default optional lists, exact typed query/header handling, Unicode query escaping, response byte persistence, timeout persistence, cancellation, and original GH1 saved-state migration. The optional --output saves evidence.
 
 The parity harness reads full tree paths and typed values and fails on unsupported types. Extend canonicalization deliberately per domain type; never fall back to ToString equality or sample-only comparison. Maintain exact pins/defaults/null semantics and behavior in docs/parity.json. Archived components need an explicit disposition, not silent omissions.

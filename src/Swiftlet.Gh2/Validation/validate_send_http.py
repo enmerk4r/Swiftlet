@@ -18,7 +18,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.command!="HEAD":self.wfile.write(encoded)
     do_GET=do_DELETE=do_POST=do_PUT=do_PATCH=do_OPTIONS=do_HEAD=handle_request
     def log_message(self,*args):pass
-p=argparse.ArgumentParser(description=__doc__);p.add_argument("--port",required=True,type=int);p.add_argument("--report",type=Path)
+p=argparse.ArgumentParser(description=__doc__);p.add_argument("--port",required=True,type=int);p.add_argument("--report",type=Path);p.add_argument("--clear-optional-defaults",action="store_true")
 a=p.parse_args()
 server=ThreadingHTTPServer(("127.0.0.1",0),Handler)
 threading.Thread(target=server.serve_forever,daemon=True).start()
@@ -29,16 +29,29 @@ try:
     print(evidence,end="")
     cases=[];expected={}
     for cls,method in [("GetRequest","GET"),("DeleteRequest","DELETE"),("PostRequest","POST"),("PutRequest","PUT"),("PatchRequest","PATCH"),("HttpRequest","OPTIONS"),("HttpRequest","GET"),("HttpRequest","HEAD")]:
-        body="hello ?" if method in ["POST","PUT","PATCH"] else ""
+        body="hello \u03bb" if method in ["POST","PUT","PATCH"] else ""
         inputs=[{"text":f"http://127.0.0.1:{server.server_port}/echo"}]
         if cls=="HttpRequest":inputs += [{"text":method},None]
         elif body:inputs += [{"bodytext":["text/plain",body]}]
-        inputs += [[{"query":["q","a & ?"]}],[{"header":["X-Swiftlet","typed-header"]}]]
+        inputs += [[{"query":["q","a & \u03bb"]}],[{"header":["X-Swiftlet","typed-header"]}]]
         name=f"{cls}: {method}"
         cases.append({"name":name,"gh1":cls+"Component","inputs":inputs})
         expected[name]="" if method=="HEAD" else json.dumps({"method":method,"path":"/echo?q=a%20%26%20%CE%BB","body":body,"header":"typed-header"})
+    cases.append({"name":"GetRequest: empty optional lists","gh1":"GetRequestComponent","inputs":[{"text":f"http://127.0.0.1:{server.server_port}/echo"},None,None]})
+    expected["GetRequest: empty optional lists"]=json.dumps({"method":"GET","path":"/echo","body":"","header":None})
     cases.append({"name":"UDP exact datagrams","gh1":"UdpStreamComponent","inputs":[{"text":"127.0.0.1"},{"int":udp.getsockname()[1]},{"bytes":"AP9oZWxsbw=="}],"expect":[[{"bool":True}],[{"int":7}]]})
     source=(ROOT/"tests/Swiftlet.Cases/runner.cs").read_text(encoding="utf-8").replace("__CASES_JSON__",json.dumps(cases).replace('"','""'))
+    if a.clear_optional_defaults:
+        source=source.replace("comp.Expire();", r'''
+        for(int pin=0;pin<inputs.Count;pin++) if(inputs[pin] is null) {
+            object param=comp.Parameters.Input(pin);Type pt=param.GetType();
+            while(pt!=null&&!(pt.IsGenericType&&pt.GetGenericTypeDefinition().Name=="Parameter`1"))pt=pt.BaseType;
+            var treeType=gh2.GetType("Grasshopper2.Data.Tree`1").MakeGenericType(pt.GetGenericArguments()[0]);
+            var empty=treeType.GetProperty("Empty",BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
+            param.GetType().GetMethods().Single(m=>m.Name=="Set"&&m.GetParameters()[0].ParameterType==treeType).Invoke(param,new object[]{empty});
+            ((dynamic)param).Expire();
+        }
+        comp.Expire();''')
     out=run_csharp(a.port,source)
     marker="SWIFTLET_CASES_JSON:"
     line=next((x for x in out.splitlines() if x.startswith(marker)),None)

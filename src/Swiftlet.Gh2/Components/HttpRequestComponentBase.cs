@@ -53,15 +53,12 @@ public abstract class HttpRequestComponentBase : Component
         if (SupportsBody)
         {
             var body = new RequestBodyParameter("Body", "B", BodyDescription);
-            if (FixedMethod is null) body.Requirement = Requirement.MayBeMissing;
-            inputs.Add(body);
+            inputs.Add(body, FixedMethod is null ? Requirement.MayBeMissing : Requirement.MustExist);
         }
-        var query = new QueryParameterParameter("Params", "P", "Query Params", Access.Twig) { Requirement = Requirement.MayBeMissing };
-        var headers = new HttpHeaderParameter("Headers", "H", "Http Headers", Access.Twig) { Requirement = Requirement.MayBeMissing };
-        query.Set(Array.Empty<QueryParameter>());
-        headers.Set(Array.Empty<HttpHeader>());
-        inputs.Add(query);
-        inputs.Add(headers);
+        var query = new QueryParameterParameter("Params", "P", "Query Params", Access.Twig);
+        var headers = new HttpHeaderParameter("Headers", "H", "Http Headers", Access.Twig);
+        inputs.Add(query, Requirement.MayBeMissing);
+        inputs.Add(headers, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs)

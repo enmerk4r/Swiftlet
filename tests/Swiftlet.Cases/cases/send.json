@@ -6,7 +6,7 @@
       {
         "header": [
           "X-Key",
-          "?"
+          "\u03bb"
         ]
       }
     ],
@@ -18,7 +18,7 @@
       ],
       [
         {
-          "text": "?"
+          "text": "\u03bb"
         }
       ]
     ]
@@ -30,7 +30,7 @@
       {
         "query": [
           "q",
-          "a & ?"
+          "a & \u03bb"
         ]
       }
     ],
@@ -42,7 +42,7 @@
       ],
       [
         {
-          "text": "a & ?"
+          "text": "a & \u03bb"
         }
       ]
     ]
@@ -109,7 +109,7 @@
       {
         "bodytext": [
           "text/plain",
-          "hello ?"
+          "hello \u03bb"
         ]
       }
     ],
@@ -121,12 +121,12 @@
       ],
       [
         {
-          "text": "hello ?"
+          "text": "hello \u03bb"
         }
       ],
       [
         {
-          "bytes": "aGVsbG8gPw=="
+          "bytes": "aGVsbG8gzrs="
         }
       ]
     ]
@@ -150,7 +150,7 @@
       {
         "field": {
           "name": "a",
-          "text": "?"
+          "text": "\u03bb"
         }
       }
     ]
@@ -211,7 +211,7 @@
           "headers": [
             [
               "X-Swiftlet",
-              "?"
+              "\u03bb"
             ]
           ],
           "success": true,
@@ -226,14 +226,14 @@
     "gh1": "ThrottleComponent",
     "inputs": [
       {
-        "text": "hello ?"
+        "text": "hello \u03bb"
       },
       null
     ],
     "expect": [
       [
         {
-          "text": "hello ?"
+          "text": "hello \u03bb"
         }
       ]
     ]
