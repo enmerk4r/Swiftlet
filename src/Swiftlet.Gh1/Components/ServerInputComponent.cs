@@ -7,7 +7,8 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterComponent
 {
     private readonly ModernServerSession _session = new();
-    private bool _requestTriggeredSolve;
+    private readonly ServerInputRequestState _requestState = new();
+    private int _stopping;
 
     public ServerInputComponent()
         : base(
@@ -18,6 +19,7 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
             ShellNaming.Server)
     {
         _session.RequestQueued += OnRequestQueued;
+        _requestState.RequestReady += OnRequestQueued;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -66,40 +68,13 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
             return;
         }
 
-        if (!_requestTriggeredSolve)
-        {
-            foreach (string route in routes)
-            {
-                while (_session.TryDequeuePendingRequest(route, out _))
-                {
-                }
-            }
-        }
-
-        for (int i = 0; i < Params.Output.Count; i++)
-        {
-            if (!_requestTriggeredSolve)
-            {
-                DA.SetData(i, null);
-                continue;
-            }
-
-            string route = ModernServerRouteMatcher.NormalizeRoute(Params.Output[i].NickName);
-            if (_session.TryDequeuePendingRequest(route, out ModernServerRequestContext? context) &&
-                context is not null)
-            {
-                DA.SetData(i, new ListenerRequestGoo(context));
-            }
-            else
-            {
-                DA.SetData(i, null);
-            }
-        }
-
-        _requestTriggeredSolve = false;
+        var requests = _requestState.Capture(routes,
+            route => _session.TryDequeuePendingRequest(route, out var request) ? request : null);
+        for (int index = 0; index < requests.Length; index++)
+            DA.SetData(index, requests[index] is { } request ? new ListenerRequestGoo(request) : null);
     }
 
-    public bool CanInsertParameter(GH_ParameterSide side, int index) => side == GH_ParameterSide.Output;
+    public bool CanInsertParameter(GH_ParameterSide side, int index) => side == GH_ParameterSide.Output && index > 0;
 
     public bool CanRemoveParameter(GH_ParameterSide side, int index) => side == GH_ParameterSide.Output && index > 0;
 
@@ -127,9 +102,22 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
         }
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        Volatile.Write(ref _stopping, 0);
+        _session.RequestQueued -= OnRequestQueued;
+        _session.RequestQueued += OnRequestQueued;
+        _requestState.RequestReady -= OnRequestQueued;
+        _requestState.RequestReady += OnRequestQueued;
+    }
+
     public override void RemovedFromDocument(GH_Document document)
     {
+        Volatile.Write(ref _stopping, 1);
         _session.RequestQueued -= OnRequestQueued;
+        _requestState.RequestReady -= OnRequestQueued;
+        _requestState.Clear();
         _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
         base.RemovedFromDocument(document);
     }
@@ -138,6 +126,8 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
     {
         if (context == GH_DocumentContext.Close)
         {
+            Volatile.Write(ref _stopping, 1);
+            _requestState.Clear();
             _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
 
@@ -150,8 +140,12 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
 
     private void OnRequestQueued(object? sender, EventArgs e)
     {
-        _requestTriggeredSolve = true;
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
+        if (Volatile.Read(ref _stopping) != 0) return;
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            if (Volatile.Read(ref _stopping) == 0 && OnPingDocument() is not null)
+                ExpireSolution(true);
+        }));
     }
 }
 

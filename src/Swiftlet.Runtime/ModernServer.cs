@@ -38,7 +38,9 @@ public sealed class ModernServer
             {
                 if (!_routes.Contains(route, StringComparer.Ordinal))
                 {
-                    _pendingRequests.TryRemove(route, out _);
+                    if (_pendingRequests.TryRemove(route, out var removed))
+                        while (removed.TryDequeue(out var request))
+                            request.TrySetResponse(ModernServerHttpResponse.PlainText(503, "Route was removed."));
                 }
             }
         }
@@ -85,10 +87,15 @@ public sealed class ModernServer
             queryParameters,
             body);
 
-        ConcurrentQueue<ModernServerRequestContext> queue = _pendingRequests.GetOrAdd(
-            matchedRoute,
-            static _ => new ConcurrentQueue<ModernServerRequestContext>());
-        queue.Enqueue(requestContext);
+        lock (_sync)
+        {
+            // Route removal cannot race enqueue and leave an unreachable response waiter.
+            if (!_routes.Contains(matchedRoute, StringComparer.Ordinal))
+                return ModernServerHttpResponse.PlainText(503, "Route was removed.");
+            ConcurrentQueue<ModernServerRequestContext> queue = _pendingRequests.GetOrAdd(
+                matchedRoute, static _ => new ConcurrentQueue<ModernServerRequestContext>());
+            queue.Enqueue(requestContext);
+        }
         RequestQueued?.Invoke(this, EventArgs.Empty);
 
         try
@@ -97,7 +104,9 @@ public sealed class ModernServer
         }
         catch (OperationCanceledException)
         {
-            return ModernServerHttpResponse.PlainText(408, "Request timed out waiting for a Grasshopper response.");
+            var timeout = ModernServerHttpResponse.PlainText(408, "Request timed out waiting for a Grasshopper response.");
+            requestContext.TrySetResponse(timeout);
+            return timeout;
         }
     }
 }

@@ -47,6 +47,8 @@ internal static class IntegrationTestRunner
             ("Modern MCP server session manages lifecycle and config export", ModernMcpServerSessionManagesLifecycleAsync),
             ("Modern MCP response workflow preserves deconstruct and one-shot semantics", ModernMcpResponseWorkflowPreservesSemanticsAsync),
             ("Modern HTTP server routes requests and completes one-shot responses", ModernServerRoutesRequestsAndCompletesResponsesAsync),
+            ("Server input retains requests across retries and advances after responses", ServerInputRetainsRequestsAcrossRetriesAsync),
+            ("Modern HTTP server cancellation releases a pending response handle", ModernServerCancellationReleasesHandleAsync),
             ("Simple HTTP listener captures requests and returns configured content", SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync),
             ("Modern WebSocket server and client exchange messages", ModernWebSocketServerAndClientExchangeMessagesAsync),
             ("MCP config generation resolves platform bridge artifacts", McpConfigGenerationResolvesBridgeArtifactsAsync),
@@ -810,6 +812,52 @@ internal static class IntegrationTestRunner
         Assert.NotNull(sentError);
         Assert.True(sentError!.IsError);
         Assert.Equal("boom", sentError.Content[0].ToJson()["text"]!.GetValue<string>());
+    }
+
+    private static async Task ServerInputRetainsRequestsAcrossRetriesAsync()
+    {
+        static ModernServerRequestContext Context(string path) => new("/", path, "GET", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []));
+        var first = Context("/first");
+        var second = Context("/second");
+        var queued = new Queue<ModernServerRequestContext>([first, second]);
+        var state = new ServerInputRequestState();
+        var notified = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        state.RequestReady += (_, _) => notified.TrySetResult(true);
+        ModernServerRequestContext? Dequeue(string _) => queued.TryDequeue(out var request) ? request : null;
+        Assert.True(ReferenceEquals(first, state.Capture(["/"], Dequeue)[0]));
+        Assert.True(ReferenceEquals(first, state.Capture(["/"], Dequeue)[0]));
+        Assert.Equal(1, queued.Count);
+        Assert.True(first.TrySetResponse(ModernServerHttpResponse.Empty()));
+        await notified.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.True(ReferenceEquals(second, state.Capture(["/"], Dequeue)[0]));
+        state.Clear();
+        Assert.Equal(503, (await second.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+        Assert.True(state.Capture(["/"], Dequeue)[0] is null);
+
+        var removed = Context("/removed");
+        queued.Enqueue(removed);
+        state.Capture(["/"], Dequeue);
+        state.Capture(["/other"], _ => null);
+        Assert.Equal(503, (await removed.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+    }
+
+    private static async Task ModernServerCancellationReleasesHandleAsync()
+    {
+        var server = new ModernServer(["/"]);
+        using var cancelled = new CancellationTokenSource();
+        var pending = server.HandleHttpRequestAsync("GET", "/", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []), cancelled.Token);
+        Assert.True(server.TryDequeuePendingRequest("/", out var context));
+        Assert.True(context is not null);
+        cancelled.Cancel();
+        Assert.Equal(408, (await pending.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+        Assert.True(context!.HasResponded);
+        Assert.False(context.TrySetResponse(ModernServerHttpResponse.Empty()));
+        var removed = server.HandleHttpRequestAsync("GET", "/queued", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []));
+        server.ConfigureRoutes(["/other"]);
+        Assert.Equal(503, (await removed.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
     }
 
     private static async Task ModernServerRoutesRequestsAndCompletesResponsesAsync()
