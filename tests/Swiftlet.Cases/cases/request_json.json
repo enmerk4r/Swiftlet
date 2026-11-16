@@ -1,0 +1,403 @@
+[
+ {
+  "name": "CreateJsonArray: tokens",
+  "gh1": "CreateJsonArrayComponent",
+  "inputs": [
+   [
+    {
+     "json": "1"
+    },
+    {
+     "json": "\"a\""
+    },
+    {
+     "json": "null"
+    },
+    {
+     "json": "{\"k\":true}"
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "json": "[1,\"a\",null,{\"k\":true}]"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonArray: single",
+  "gh1": "CreateJsonArrayComponent",
+  "inputs": [
+   [
+    {
+     "json": "[]"
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "json": "[[]]"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonObject: pairs",
+  "gh1": "CreateJsonObjectComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "json": "1"
+    },
+    {
+     "json": "[2]"
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":1,\"b\":[2]}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonObject: no inputs gives empty object",
+  "gh1": "CreateJsonObjectComponent",
+  "inputs": [
+   null,
+   null
+  ],
+  "expect": [
+   [
+    {
+     "json": "{}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonObject: count mismatch is an error",
+  "gh1": "CreateJsonObjectComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "json": "1"
+    }
+   ]
+  ],
+  "expectError": true
+ },
+ {
+  "name": "CreateJsonObject: duplicate key is an error",
+  "gh1": "CreateJsonObjectComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "a"
+    }
+   ],
+   [
+    {
+     "json": "1"
+    },
+    {
+     "json": "2"
+    }
+   ]
+  ],
+  "expectError": true
+ },
+ {
+  "name": "CreateJsonValue: text",
+  "gh1": "CreateJsonValueComponent",
+  "inputs": [
+   {
+    "text": "hi"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "\"hi\""
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonValue: integer",
+  "gh1": "CreateJsonValueComponent",
+  "inputs": [
+   {
+    "int": 7
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "7"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonValue: number",
+  "gh1": "CreateJsonValueComponent",
+  "inputs": [
+   {
+    "num": 2.5
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "2.5"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonValue: bool",
+  "gh1": "CreateJsonValueComponent",
+  "inputs": [
+   {
+    "bool": true
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "true"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateJsonValue: empty is JSON null",
+  "gh1": "CreateJsonValueComponent",
+  "inputs": [
+   null
+  ],
+  "expect": [
+   [
+    {
+     "json": "null"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Merge: default B wins, recursive",
+  "gh1": "MergeJsonObjectsComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1,\"n\":{\"x\":1,\"y\":1}}"
+   },
+   {
+    "jobject": "{\"a\":2,\"n\":{\"y\":2}}"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":2,\"n\":{\"x\":1,\"y\":2}}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Merge: mode 0 A wins",
+  "gh1": "MergeJsonObjectsComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1}"
+   },
+   {
+    "jobject": "{\"a\":2,\"b\":3}"
+   },
+   {
+    "int": 0
+   }
+  ]
+ },
+ {
+  "name": "Merge: mode 2 A unless null",
+  "gh1": "MergeJsonObjectsComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":null,\"b\":1}"
+   },
+   {
+    "jobject": "{\"a\":2,\"b\":3}"
+   },
+   {
+    "int": 2
+   }
+  ]
+ },
+ {
+  "name": "Merge: mode 3 B unless null",
+  "gh1": "MergeJsonObjectsComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1,\"b\":1}"
+   },
+   {
+    "jobject": "{\"a\":null,\"b\":3}"
+   },
+   {
+    "int": 3
+   }
+  ]
+ },
+ {
+  "name": "Merge: invalid mode warns and uses B",
+  "gh1": "MergeJsonObjectsComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1}"
+   },
+   {
+    "jobject": "{\"a\":2}"
+   },
+   {
+    "int": 9
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":2}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "RemoveKey: present",
+  "gh1": "RemoveJsonKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1,\"b\":2}"
+   },
+   {
+    "text": "a"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"b\":2}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "RemoveKey: absent",
+  "gh1": "RemoveJsonKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1}"
+   },
+   {
+    "text": "z"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":1}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "SetKey: add",
+  "gh1": "SetJsonKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1}"
+   },
+   {
+    "text": "b"
+   },
+   {
+    "json": "[true]"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":1,\"b\":[true]}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "SetKey: replace",
+  "gh1": "SetJsonKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1,\"b\":2}"
+   },
+   {
+    "text": "a"
+   },
+   {
+    "json": "\"x\""
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":\"x\",\"b\":2}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "SetKey: JSON null",
+  "gh1": "SetJsonKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{}"
+   },
+   {
+    "text": "a"
+   },
+   {
+    "json": "null"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":null}"
+    }
+   ]
+  ]
+ }
+]

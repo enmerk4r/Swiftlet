@@ -29,7 +29,7 @@ Pass rules: GH1 and GH2 outputs (paths, null slots, canonical values) must be id
 agree on whether an error was reported, and any "expect"/"expectError" must hold. Exit status 0 only if
 every case passes. --report writes the full raw results.
 """
-import argparse, json, os, pathlib, shutil, subprocess, sys, tempfile, uuid
+import argparse, json, os, pathlib, re, shutil, subprocess, sys, tempfile, uuid
 import urllib.request
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -101,6 +101,13 @@ def stage_and_load(port):
     print(run_csharp(port, LOAD_SCRIPT.replace("__DIR__", str(stage))))
 
 
+def normalise(outputs):
+    """Mask values that are random by design (multipart boundaries)."""
+    text = json.dumps(outputs, sort_keys=True)
+    text = re.sub(r'boundary=\\"[0-9a-f]{32}\\"', 'boundary=*', text)
+    return text
+
+
 def flatten(branches):
     return [v for b in branches for v in b["values"]]
 
@@ -119,7 +126,9 @@ def evaluate(case, r):
         return problems
     ran = [(n, h) for n, h in (("gh1", g1), ("gh2", g2)) if "skipped" not in h]
     if len(ran) == 2:
-        if g1["outputs"] != g2["outputs"]:
+        # Output trees are compared strictly, also after errors: a GH1 exception leaves no branch, an
+        # AddError-and-return leaves one null slot, and GH2 must match (see docs/gh2-porting.md).
+        if normalise(g1["outputs"]) != normalise(g2["outputs"]):
             problems.append("GH1/GH2 outputs differ:\n    gh1 " + json.dumps(g1["outputs"]) + "\n    gh2 " + json.dumps(g2["outputs"]))
         if has_error(g1) != has_error(g2):
             problems.append(f"error mismatch: gh1 {g1['messages']} gh2 {g2['messages']}")
@@ -169,6 +178,9 @@ def main():
     ap.add_argument("--load", action="store_true")
     ap.add_argument("--report")
     ap.add_argument("--only", help="run only cases whose name contains this text")
+    ap.add_argument("--script", action="append", default=[], metavar="CS",
+                    help="run a C# check script (e.g. checks/*.cs) in the slot and print its output; "
+                         "it fails if the output contains FAIL")
     ap.add_argument("--migrations", nargs="*", metavar="PANEL",
                     help="check every GH2 migration rule; with panel names (e.g. '2. Request'), also list GH1 "
                          "components in those panels (docs/parity.json) that have no rule")
@@ -176,6 +188,13 @@ def main():
     a = ap.parse_args()
     if a.load:
         stage_and_load(a.port)
+    if a.script:
+        bad = 0
+        for f in a.script:
+            out = run_csharp(a.port, pathlib.Path(f).read_text(encoding="utf-8"))
+            print(out)
+            bad += "FAIL" in out
+        return 1 if bad else 0
     if a.migrations is not None:
         return check_migrations(a.port, a.migrations)
     if not a.files:

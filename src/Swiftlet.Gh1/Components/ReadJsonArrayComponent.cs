@@ -34,7 +34,7 @@ public sealed class ReadJsonArrayComponent : GH_Component
             JsonNode token = goo.Value;
             if (token is JsonArray array)
             {
-                DA.SetDataList(0, array.Select(static o => new JsonNodeGoo(o)));
+                DA.SetDataList(0, array.Select(static o => o is null ? JsonNodeGoo.CreateJsonNull() : new JsonNodeGoo(o)));
             }
             else
             {

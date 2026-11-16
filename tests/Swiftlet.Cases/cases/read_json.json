@@ -59,5 +59,414 @@
    }
   ],
   "expectError": true
+ },
+ {
+  "name": "ParseJson: object",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{\"a\":1,\"b\":\"x\"}"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":1,\"b\":\"x\"}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ParseJson: unicode",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{\"k\":\"λ\"}"
+   }
+  ]
+ },
+ {
+  "name": "ParseJson: array",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "[1, true, null]"
+   }
+  ]
+ },
+ {
+  "name": "ParseJson: scalar string",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "\"hi\""
+   }
+  ]
+ },
+ {
+  "name": "ParseJson: null literal",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "null"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "null"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ParseJson: invalid",
+  "gh1": "ParseJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{x"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "GetKey: present",
+  "gh1": "GetJsonObjectKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":{\"b\":[1,2]}}"
+   },
+   {
+    "text": "a"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"b\":[1,2]}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "GetKey: null value",
+  "gh1": "GetJsonObjectKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":null}"
+   },
+   {
+    "text": "a"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "null"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "GetKey: missing key",
+  "gh1": "GetJsonObjectKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":1}"
+   },
+   {
+    "text": "zz"
+   }
+  ]
+ },
+ {
+  "name": "GetKey: case sensitive",
+  "gh1": "GetJsonObjectKeyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"A\":1}"
+   },
+   {
+    "text": "a"
+   }
+  ]
+ },
+ {
+  "name": "ReadArray: mixed",
+  "gh1": "ReadJsonArrayComponent",
+  "inputs": [
+   {
+    "json": "[1,\"x\",null,{\"k\":[]}]"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "json": "1"
+    },
+    {
+     "json": "\"x\""
+    },
+    {
+     "json": "null"
+    },
+    {
+     "json": "{\"k\":[]}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ReadArray: empty",
+  "gh1": "ReadJsonArrayComponent",
+  "inputs": [
+   {
+    "json": "[]"
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "ReadArray: not an array warns",
+  "gh1": "ReadJsonArrayComponent",
+  "inputs": [
+   {
+    "json": "{\"a\":1}"
+   }
+  ]
+ },
+ {
+  "name": "ReadObject: keys and values",
+  "gh1": "ReadJsonObjectComponent",
+  "inputs": [
+   {
+    "json": "{\"b\":2,\"a\":[true],\"c\":null}"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "b"
+    },
+    {
+     "text": "a"
+    },
+    {
+     "text": "c"
+    }
+   ],
+   [
+    {
+     "json": "2"
+    },
+    {
+     "json": "[true]"
+    },
+    {
+     "json": "null"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ReadObject: not an object is an error",
+  "gh1": "ReadJsonObjectComponent",
+  "inputs": [
+   {
+    "json": "[1]"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "ReadValue: string",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "\"abc\""
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: number",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "1.5"
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: integer",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "42"
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: bool",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "true"
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: JSON null",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "null"
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: object",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "{\"a\":1}"
+   }
+  ]
+ },
+ {
+  "name": "ReadValue: numeric string",
+  "gh1": "ReadJsonValueComponent",
+  "inputs": [
+   {
+    "json": "\"12\""
+   }
+  ]
+ },
+ {
+  "name": "Separate: all kinds",
+  "gh1": "SeparateJsonTokensComponent",
+  "inputs": [
+   [
+    {
+     "json": "{\"a\":1}"
+    },
+    {
+     "json": "[1]"
+    },
+    {
+     "json": "3"
+    },
+    {
+     "json": "null"
+    },
+    {
+     "json": "{}"
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "json": "{\"a\":1}"
+    },
+    {
+     "json": "{}"
+    }
+   ],
+   [
+    {
+     "json": "[1]"
+    }
+   ],
+   [
+    {
+     "json": "3"
+    },
+    {
+     "json": "null"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Separate: only values",
+  "gh1": "SeparateJsonTokensComponent",
+  "inputs": [
+   [
+    {
+     "json": "\"s\""
+    },
+    {
+     "json": "false"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Stringify: object indented",
+  "gh1": "StringifyJsonTokenComponent",
+  "inputs": [
+   {
+    "json": "{\"a\":[1,2]}"
+   }
+  ]
+ },
+ {
+  "name": "Stringify: string unquoted",
+  "gh1": "StringifyJsonTokenComponent",
+  "inputs": [
+   {
+    "json": "\"q\""
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "q"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Stringify: number",
+  "gh1": "StringifyJsonTokenComponent",
+  "inputs": [
+   {
+    "json": "10.25"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "10.25"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Stringify: bool",
+  "gh1": "StringifyJsonTokenComponent",
+  "inputs": [
+   {
+    "json": "false"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "False"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Stringify: JSON null",
+  "gh1": "StringifyJsonTokenComponent",
+  "inputs": [
+   {
+    "json": "null"
+   }
+  ]
  }
 ]
