@@ -13,6 +13,8 @@ Rhino down (the router closes the Rhino it spawned when it exits). Run it as a b
 (point it at the folder that holds the plug-in files, not its parent). Without it you get a clean Rhino
 with no Swiftlet loaded, ready for `cases.py --load`.
 
+The router log is written to <stop-file>.router.log.
+
 Each agent owns the slots it starts. Never close or reuse another agent's port.
 """
 import argparse, json, os, queue, subprocess, sys, threading, time
@@ -30,8 +32,10 @@ if args.package_dir:
 if os.path.exists(args.stop_file):
     os.remove(args.stop_file)
 
+# The router's own log (slot adoption, reaping, closes) is kept next to the stop file for diagnosis.
+router_log = open(args.stop_file + '.router.log', 'w', encoding='utf-8', errors='replace')
 proc = subprocess.Popen([ROUTER, '--default-version', '9'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                        stderr=subprocess.DEVNULL, text=True, bufsize=1, env=env,
+                        stderr=router_log, text=True, bufsize=1, env=env,
                         creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
 replies = queue.Queue()
 
