@@ -56,6 +56,7 @@ internal static class IntegrationTestRunner
             ("Modern HTTP server cancellation releases a pending response handle", ModernServerCancellationReleasesHandleAsync),
             ("Simple HTTP listener captures requests and returns configured content", SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync),
             ("Modern WebSocket server and client exchange messages", ModernWebSocketServerAndClientExchangeMessagesAsync),
+            ("WebSocket client connect times out on an endpoint that never completes the handshake", WebSocketClientConnectTimesOutWithoutHandshakeAsync),
             ("MCP config generation resolves platform bridge artifacts", McpConfigGenerationResolvesBridgeArtifactsAsync),
             ("Bridge artifact resolution repairs Unix execute permissions for native binaries", BridgeArtifactResolutionRepairsUnixExecutePermissionsAsync),
             ("MCP export reports manual clipboard guidance through notifications", McpExportReportsManualClipboardGuidanceAsync),
@@ -991,6 +992,84 @@ internal static class IntegrationTestRunner
 
         string clientMessage = await WaitForWebSocketClientMessageAsync(clientSession).ConfigureAwait(false);
         Assert.Equal("hello from server", clientMessage);
+    }
+
+    private static async Task WebSocketClientConnectTimesOutWithoutHandshakeAsync()
+    {
+        // A listener that accepts TCP connections and never answers the WebSocket upgrade.
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        var accepted = new List<TcpClient>();
+        using var stopAccepting = new CancellationTokenSource();
+        Task acceptLoop = Task.Run(async () =>
+        {
+            try
+            {
+                while (true)
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync(stopAccepting.Token).ConfigureAwait(false);
+                    lock (accepted) accepted.Add(client);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        });
+
+        try
+        {
+            await using var session = new ModernWebSocketClientSession();
+            int notifications = 0;
+            session.StateChanged += (_, _) => Interlocked.Increment(ref notifications);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            Exception? failure = null;
+            try
+            {
+                await session.ReconnectAsync($"ws://127.0.0.1:{port}/", parameters: null)
+                    .WaitAsync(ModernWebSocketClient.ConnectTimeout + TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            }
+            catch (Exception error)
+            {
+                failure = error;
+            }
+
+            watch.Stop();
+            Assert.True(failure is TimeoutException, $"expected TimeoutException from the client, got {failure?.GetType().Name ?? "success"}: {failure?.Message}");
+            Assert.True(watch.Elapsed >= ModernWebSocketClient.ConnectTimeout - TimeSpan.FromSeconds(1)
+                && watch.Elapsed < ModernWebSocketClient.ConnectTimeout + TimeSpan.FromSeconds(3),
+                $"connect gave up after {watch.Elapsed.TotalSeconds:0.0} s, expected about {ModernWebSocketClient.ConnectTimeout.TotalSeconds} s");
+            Assert.False(session.IsConnected);
+            Assert.Null(session.Connection);
+            Assert.True(session.LastError?.StartsWith("Connection timed out", StringComparison.Ordinal) == true, $"LastError: {session.LastError}");
+            lock (accepted) Assert.True(accepted.Count >= 1, "the listener should have accepted the TCP connection");
+            // A failed connect must not notify: the components would answer by reconnecting straight away.
+            Assert.Equal(0, Volatile.Read(ref notifications));
+
+            // A refused port fails fast with an error as well.
+            int closedPort = GetAvailablePort();
+            watch.Restart();
+            failure = null;
+            try
+            {
+                await session.ReconnectAsync($"ws://127.0.0.1:{closedPort}/", parameters: null).ConfigureAwait(false);
+            }
+            catch (Exception error)
+            {
+                failure = error;
+            }
+
+            Assert.True(failure is not null and not TimeoutException, $"refused connect: {failure?.GetType().Name}");
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), $"refused connect took {watch.Elapsed.TotalSeconds:0.0} s");
+            Assert.True(!string.IsNullOrEmpty(session.LastError), "refused connect sets LastError");
+        }
+        finally
+        {
+            stopAccepting.Cancel();
+            listener.Stop();
+            try { await acceptLoop.ConfigureAwait(false); } catch { }
+            lock (accepted) foreach (TcpClient client in accepted) client.Dispose();
+        }
     }
 
     private static async Task SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync()
