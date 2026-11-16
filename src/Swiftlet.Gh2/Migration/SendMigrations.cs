@@ -30,6 +30,9 @@ public sealed class SendMigrationTable : IMigrationTable
 {
     public IEnumerable<IMigrateBase> CreateMigrators()
     {
+        foreach (var rule in TransferMigrationRules.Create())
+            yield return rule;
+
         yield return new RequestMigration("18931e0e-bb79-4863-8e0f-4a0f13a137a6", ComponentIds.PostRequest, 4);
         yield return new RequestMigration("8192683a-a7a2-4c59-84ab-93c1f066b52e", ComponentIds.PutRequest, 4);
         yield return new RequestMigration("2ebe4cc3-334b-4e80-bd1d-59e66e70da46", ComponentIds.PatchRequest, 4);

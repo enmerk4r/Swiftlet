@@ -39,6 +39,7 @@ object CoreValue(JsonObject spec)
         case "int": return (int)v!;
         case "num": return (double)v!;
         case "bool": return (bool)v!;
+        case "mcptext": case "mcplink": case "mcpembeddedtext": case "mcpbinary": case "mcpimage": case "mcpparam": case "mcptool": case "mcpcall": case "listenerrequest": return McpValue(kind,v);
         case "query": return Activator.CreateInstance(core.GetType("Swiftlet.Core.Http.QueryParameter", true), (string)v![0], (string)v[1]);
         case "header": return Activator.CreateInstance(core.GetType("Swiftlet.Core.Http.HttpHeader", true), (string)v![0], (string)v[1]);
         case "bytes": return Convert.FromBase64String((string)v!);
@@ -80,6 +81,39 @@ object CoreValue(JsonObject spec)
         case "image": // [width, height, base64 RGBA]
             return SwiftletImage(v!);
         default: throw new NotSupportedException("value kind " + kind);
+    }
+}
+
+
+object McpValue(string kind, JsonNode value)
+{
+    Type M(string name) => core.GetType("Swiftlet.Core.Mcp." + name, true);
+    string Text(string name, string fallback = "") => (string)value?[name] ?? fallback;
+    switch(kind)
+    {
+        case "mcptext": return Activator.CreateInstance(M("McpTextContentBlock"), (string)value);
+        case "mcplink": return Activator.CreateInstance(M("McpResourceLinkContentBlock"),new object[]{Text("uri"),Text("name"),Text("title"),Text("description"),Text("mime")});
+        case "mcpembeddedtext": return Activator.CreateInstance(M("McpEmbeddedTextResourceContentBlock"),new object[]{Text("uri"),Text("text"),Text("mime","text/plain")});
+        case "mcpbinary": return Activator.CreateInstance(M("McpEmbeddedBinaryResourceContentBlock"),new object[]{Text("uri"),Convert.FromBase64String(Text("bytes")),Text("mime","application/octet-stream")});
+        case "mcpimage": return Activator.CreateInstance(M("McpImageContentBlock"),new object[]{Text("mime","image/png"),Text("data")});
+        case "mcpparam": return Activator.CreateInstance(M("McpToolParameter"),new object[]{Text("name"),Text("type","string"),Text("description"),(bool?)value?["required"]??true});
+        case "mcptool":
+            var specifications=(value?["parameters"] as JsonArray)??new JsonArray();
+            var parameters=Array.CreateInstance(M("McpToolParameter"),specifications.Count);
+            for(int i=0;i<specifications.Count;i++)parameters.SetValue(McpValue("mcpparam",specifications[i]),i);
+            return Activator.CreateInstance(M("McpToolDefinition"),new object[]{Text("name"),Text("description"),parameters});
+        case "mcpcall":
+            var runtime=Asm("Swiftlet.Runtime");
+            var parameter=System.Linq.Expressions.Expression.Parameter(M("McpToolResult"),"result");
+            var sender=System.Linq.Expressions.Expression.Lambda(System.Linq.Expressions.Expression.GetFuncType(M("McpToolResult"),typeof(bool)),System.Linq.Expressions.Expression.Constant(true),parameter).Compile();
+            return Activator.CreateInstance(runtime.GetType("Swiftlet.Runtime.ModernMcpToolCallContext"),new object[]{Text("id","case-call"),Text("tool","case_tool"),JsonNode.Parse(Text("arguments","{}")),sender});
+        case "listenerrequest":
+            var rt=Asm("Swiftlet.Runtime");
+            var headers=Array.CreateInstance(core.GetType("Swiftlet.Core.Http.HttpHeader"),0);
+            var query=Array.CreateInstance(core.GetType("Swiftlet.Core.Http.QueryParameter"),0);
+            var body=Activator.CreateInstance(core.GetType("Swiftlet.Core.Http.RequestBodyBytes"),new object[]{Text("mime","text/plain"),System.Text.Encoding.UTF8.GetBytes(Text("body","hello"))});
+            return Activator.CreateInstance(rt.GetType("Swiftlet.Runtime.ModernServerRequestContext"),new object[]{Text("route","/"),Text("path","/case"),Text("method","POST"),headers,query,body});
+        default:throw new NotSupportedException(kind);
     }
 }
 
@@ -139,6 +173,11 @@ object Gh1Goo(JsonObject spec)
         case "int": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Integer", true), (int)v!);
         case "num": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Number", true), (double)v!);
         case "bool": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Boolean", true), new object[] { (bool)v! }); // object[]: a bare bool selects the (Type, bool nonPublic) overload
+        case "mcptext": case "mcplink": case "mcpembeddedtext": case "mcpbinary": case "mcpimage": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.McpContentBlockGoo",true),CoreValue(spec));
+        case "mcpparam": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.McpToolParameterGoo",true),CoreValue(spec));
+        case "mcptool": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.McpToolDefinitionGoo",true),CoreValue(spec));
+        case "mcpcall": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.McpToolCallRequestGoo",true),CoreValue(spec));
+        case "listenerrequest": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.ListenerRequestGoo",true),CoreValue(spec));
         case "query": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.QueryParameterGoo", true), CoreValue(spec));
         case "header": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HttpHeaderGoo", true), CoreValue(spec));
         case "bytes": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.ByteArrayGoo", true), CoreValue(spec));
@@ -214,6 +253,12 @@ object Canon(object o, int depth = 0)
         var sha = System.Security.Cryptography.SHA256.Create();
         return new Dictionary<string, object> { ["image"] = new object[] { (int)img.Width, (int)img.Height, Convert.ToHexString(sha.ComputeHash(px)).Substring(0, 16) } };
     }
+    if (t.Namespace == "Swiftlet.Core.Mcp" && t.GetMethod("ToJson",Type.EmptyTypes) is MethodInfo jsonMethod)
+        return new Dictionary<string,object>{["mcp"] = JsonSerializer.Deserialize<JsonElement>(((JsonNode)jsonMethod.Invoke(o,null)).ToJsonString())};
+    if (t.FullName == "Swiftlet.Runtime.ModernServerRequestContext")
+        return new Dictionary<string,object>{["request"] = new Dictionary<string,object>{["method"]=Canon(t.GetProperty("Method").GetValue(o)),["route"]=Canon(t.GetProperty("MatchedRoute").GetValue(o)),["path"]=Canon(t.GetProperty("Path").GetValue(o)),["body"]=Canon(t.GetProperty("Body").GetValue(o)),["responded"]=Canon(t.GetProperty("HasResponded").GetValue(o))}};
+    if (t.FullName == "Swiftlet.Runtime.ModernMcpToolCallContext")
+        return new Dictionary<string,object>{["call"] = new Dictionary<string,object>{["tool"]=Canon(t.GetProperty("ToolName").GetValue(o)),["arguments"]=Canon(t.GetProperty("Arguments").GetValue(o)),["responded"]=Canon(t.GetProperty("HasResponded").GetValue(o))}};
     if (t.FullName == "HtmlAgilityPack.HtmlNode")
         return new Dictionary<string, object> { ["html"] = (string)t.GetProperty("OuterHtml").GetValue(o) };
     if (t.Namespace == "Swiftlet.Core.Json")

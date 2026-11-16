@@ -18,6 +18,7 @@ Case file: a JSON array of cases:
     "expectError": true,                       # optional: both hosts must report an error and no data
     "gh1Skip": "reason"                        # optional: GH2-only case
   }
+MCP specs: mcptext, mcplink, mcpembeddedtext, mcpbinary, mcpimage, mcpparam, mcptool, mcpcall; listenerrequest supplies a deterministic live request handle. MCP payloads compare parsed full ToJson data (including binary bytes), not display summaries.
 Value specs: {"text"}, {"int"}, {"num"}, {"bool"}, {"query": [k, v]}, {"header": [k, v]}, {"bytes": b64},
 {"json"|"jobject"|"jarray"|"jvalue": "<json text>"}, {"html"|"htmlel"|"xml": "<markup>"},
 {"bodytext": [contentType, text]}, {"bodybytes": [contentType, b64]}, {"form": [[keys], [values]]},
