@@ -135,44 +135,17 @@ public sealed partial class CreateTextBodyComponent : GH_Component
             throw new Exception("Content must be a string, JObject, JArray, XML Node, or HTML Node");
         }
 
-        if (detectedContentType is not null)
-        {
-            SetContentType(detectedContentType);
-        }
-
-        RequestBodyText body = new(_contentType, text);
+        // JSON, XML and HTML content selects its own content type for this output only. The menu choice
+        // is kept, so plain text goes back to it (same as the Grasshopper 2 component).
+        string contentType = detectedContentType ?? _contentType;
+        RequestBodyText body = new(contentType, text);
         DA.SetData(0, new RequestBodyGoo(body));
-        Message = ContentTypes.ToDisplayName(_contentType);
+        Message = ContentTypes.ToDisplayName(contentType);
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
     public override Guid ComponentGuid => new("D5BF7D4A-9FC3-4984-90F7-FEB32AA96D9F");
-
-    private void SetContentType(string contentType)
-    {
-        _contentType = contentType;
-        UncheckAll();
-
-        switch (contentType)
-        {
-            case ContentTypes.TextPlain:
-                _isTextChecked = true;
-                break;
-            case ContentTypes.JavaScript:
-                _isJavascriptChecked = true;
-                break;
-            case ContentTypes.ApplicationJson:
-                _isJsonChecked = true;
-                break;
-            case ContentTypes.TextHtml:
-                _isHtmlChecked = true;
-                break;
-            case ContentTypes.ApplicationXml:
-                _isXmlChecked = true;
-                break;
-        }
-    }
 
     private void UncheckAll()
     {
