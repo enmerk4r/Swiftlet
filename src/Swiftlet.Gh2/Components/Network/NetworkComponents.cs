@@ -14,8 +14,9 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.HttpListener)]
 public sealed class HttpListenerComponent : ListenerComponent
 {
+    private readonly Outbox<SimpleHttpListenerRequest> _requests = new();
+    private readonly System.Collections.Concurrent.ConcurrentQueue<SimpleHttpListenerRequest> _arrived = new();
     private SimpleHttpListenerSession? _session;
-    private int _requestTriggeredSolve;
 
     public HttpListenerComponent()
         : base("HTTP Listener", "A simple HTTP listener component that can receive HTTP requests. \nThis component is VERY ALPHA. Use at your own risk.", Sections.Server) { }
@@ -66,22 +67,24 @@ public sealed class HttpListenerComponent : ListenerComponent
             return;
         }
 
-        // Request data is published only by the solve that the request itself triggered.
-        if (Interlocked.Exchange(ref _requestTriggeredSolve, 0) == 0)
+        // Request data is published only by the solve that a request triggered; other solves publish
+        // nothing. If several requests arrived before this solve, the most recent one is shown.
+        SimpleHttpListenerRequest[] pending = _requests.Publish(access.Solution, _arrived.TryDequeue!);
+        if (pending.Length == 0)
         {
             access.SetTwig(1, Array.Empty<HttpHeader>());
             access.SetTwig(2, Array.Empty<QueryParameter>());
             return;
         }
 
-        if (_session.LatestRequest is { } request)
-        {
-            access.SetItem(0, request.Method);
-            access.SetTwig(1, request.Headers.ToArray());
-            access.SetTwig(2, request.QueryParameters.ToArray());
-            access.SetItem(3, request.Content);
-        }
+        SimpleHttpListenerRequest request = pending[^1];
+        access.SetItem(0, request.Method);
+        access.SetTwig(1, request.Headers.ToArray());
+        access.SetTwig(2, request.QueryParameters.ToArray());
+        access.SetItem(3, request.Content);
     }
+
+    protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _requests.Commit(solution);
 
     protected override void StopResource()
     {
@@ -89,6 +92,8 @@ public sealed class HttpListenerComponent : ListenerComponent
             return;
 
         _session = null;
+        _arrived.Clear();
+        _requests.Clear();
         session.RequestReceived -= OnRequestReceived;
         session.DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
@@ -102,10 +107,10 @@ public sealed class HttpListenerComponent : ListenerComponent
 
     private void OnRequestReceived(object? sender, EventArgs e)
     {
-        if (!ReferenceEquals(sender, _session))
+        if (!ReferenceEquals(sender, _session) || _session?.LatestRequest is not { } request)
             return;
 
-        Interlocked.Exchange(ref _requestTriggeredSolve, 1);
+        _arrived.Enqueue(request);
         RequestRecompute();
     }
 }
@@ -199,6 +204,7 @@ public sealed class UdpListenerComponent : ListenerComponent
 [IoId(ComponentIds.WebSocketClient)]
 public sealed class WebSocketClientComponent : ListenerComponent
 {
+    private readonly Outbox<string> _received = new();
     private ModernWebSocketClientSession? _session;
     private string? _currentUrl;
     private bool _run;
@@ -288,12 +294,15 @@ public sealed class WebSocketClientComponent : ListenerComponent
 
         _run = run;
 
-        List<string> messages = [];
-        while (session.TryDequeueMessage(out string? message) && !string.IsNullOrEmpty(message))
+        // Messages stay in the outbox until this solve is confirmed complete, so a cancelled solve loses none.
+        string[] messages = _received.Publish(access.Solution, (out string item) =>
         {
-            messages.Add(message);
-            _lastMessage = message;
-        }
+            bool found = session.TryDequeueMessage(out string? next) && !string.IsNullOrEmpty(next);
+            item = next ?? string.Empty;
+            return found;
+        });
+        if (messages.Length > 0)
+            _lastMessage = messages[^1];
 
         if (session.Connection is not null)
             access.SetItem(0, session.Connection);
@@ -304,14 +313,17 @@ public sealed class WebSocketClientComponent : ListenerComponent
 
         if (_lastMessage is not null)
             access.SetItem(1, _lastMessage);
-        access.SetTwig(2, messages.ToArray());
+        access.SetTwig(2, messages);
         access.SetItem(3, status);
     }
+
+    protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _received.Commit(solution);
 
     protected override void StopResource()
     {
         _run = false;
         _currentUrl = null;
+        _received.Clear();
         if (_session is not { } session)
             return;
 
@@ -333,6 +345,7 @@ public sealed class WebSocketClientComponent : ListenerComponent
 [IoId(ComponentIds.WebSocketServer)]
 public sealed class WebSocketServerComponent : ListenerComponent
 {
+    private readonly Outbox<ModernWebSocketReceivedMessage> _received = new();
     private ModernWebSocketServerSession? _session;
     private string? _lastMessage;
     private ModernWebSocketConnection? _lastConnection;
@@ -389,12 +402,18 @@ public sealed class WebSocketServerComponent : ListenerComponent
             return;
         }
 
-        List<string> messages = [];
-        while (session.TryDequeueMessage(out ModernWebSocketReceivedMessage? message) && message is not null)
+        // Messages stay in the outbox until this solve is confirmed complete, so a cancelled solve loses none.
+        ModernWebSocketReceivedMessage[] received = _received.Publish(access.Solution, (out ModernWebSocketReceivedMessage item) =>
         {
-            messages.Add(message.Message);
-            _lastMessage = message.Message;
-            _lastConnection = message.Connection;
+            bool found = session.TryDequeueMessage(out ModernWebSocketReceivedMessage? next) && next is not null;
+            item = next!;
+            return found;
+        });
+        string[] messages = received.Select(static message => message.Message).ToArray();
+        if (received.Length > 0)
+        {
+            _lastMessage = received[^1].Message;
+            _lastConnection = received[^1].Connection;
         }
 
         if (_lastConnection is null || !_lastConnection.IsOpen)
@@ -404,14 +423,17 @@ public sealed class WebSocketServerComponent : ListenerComponent
             access.SetItem(0, _lastConnection);
         if (_lastMessage is not null)
             access.SetItem(1, _lastMessage);
-        access.SetTwig(2, messages.ToArray());
+        access.SetTwig(2, messages);
         access.SetItem(3, session.ActiveClientCount);
         access.SetItem(4, run ? $"Listening on ws://localhost:{port}/" : "Stopped");
     }
 
+    protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _received.Commit(solution);
+
     protected override void StopResource()
     {
         _lastConnection = null;
+        _received.Clear();
         if (_session is not { } session)
             return;
 

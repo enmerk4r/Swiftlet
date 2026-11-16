@@ -104,17 +104,86 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
 
     public void PrepareForRemoval(ActionList undo) => StopListener();
 
+    /// <summary>
+    /// Called when a solution has completed successfully, i.e. the outputs this component set in it
+    /// have really been delivered. Use it to forget data that was only waiting for that confirmation.
+    /// </summary>
+    protected virtual void OnSolutionCommitted(SolutionId solution) { }
+
+    private void OnSolutionCompleted(object? sender, SolutionEventArgs args) => OnSolutionCommitted(args.SolutionId);
+
+    /// <summary>
+    /// Items received from the network that must reach the outputs exactly once.
+    ///
+    /// A GH2 solution can be cancelled after Process has set its outputs (for example when another
+    /// component expires). Outputs of a cancelled solution are discarded, so anything taken off a
+    /// queue during it would be lost. An outbox keeps what a solve published until that solve is
+    /// confirmed complete; a solve that follows a cancelled one publishes the same items again,
+    /// followed by anything newer.
+    /// </summary>
+    protected sealed class Outbox<T>
+    {
+        private readonly object _sync = new();
+        private readonly List<T> _items = [];
+        private SolutionId _publishedIn = SolutionId.None;
+        private int _publishedCount;
+
+        /// <summary>
+        /// Moves newly arrived items into the outbox and returns everything not yet confirmed, oldest first.
+        /// </summary>
+        public T[] Publish(Solution solution, TryDequeue dequeue)
+        {
+            lock (_sync)
+            {
+                while (dequeue(out T item))
+                    _items.Add(item);
+
+                _publishedIn = solution.Id;
+                _publishedCount = _items.Count;
+                return _items.ToArray();
+            }
+        }
+
+        /// <summary>Forgets the items published in <paramref name="solution"/>, if that was the latest publication.</summary>
+        public void Commit(SolutionId solution)
+        {
+            lock (_sync)
+            {
+                if (_publishedCount == 0 || _publishedIn != solution)
+                    return;
+
+                _items.RemoveRange(0, _publishedCount);
+                _publishedCount = 0;
+                _publishedIn = SolutionId.None;
+            }
+        }
+
+        public void Clear()
+        {
+            lock (_sync)
+            {
+                _items.Clear();
+                _publishedCount = 0;
+                _publishedIn = SolutionId.None;
+            }
+        }
+
+        public delegate bool TryDequeue(out T item);
+    }
+
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)
     {
         if (args.OldDocument is { } old)
         {
             old.StateChanged -= OnDocumentStateChanged;
+            old.Solution.SolutionCompleted -= OnSolutionCompleted;
             StopListener();
         }
 
         if (args.NewDocument is { } current)
         {
             current.StateChanged += OnDocumentStateChanged;
+            current.Solution.SolutionCompleted += OnSolutionCompleted;
             Volatile.Write(ref _stopping, 0);
         }
     }
