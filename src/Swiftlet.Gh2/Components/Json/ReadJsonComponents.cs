@@ -41,9 +41,9 @@ public sealed class ParseJsonStringComponent : Component
 
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Text", "Tx", "JSON-formatted string to be parsed");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Text", "T", "JSON-formatted string to be parsed");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new JsonNodeParameter("JToken", "Jt", "Parsed JSON Token"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new JsonNodeParameter("JToken", "JT", "Parsed JSON Token"));
 
     protected override void Process(IDataAccess access)
     {
@@ -72,11 +72,11 @@ public sealed class GetJsonObjectKeyComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new JsonObjectParameter("JObject", "Jo", "JSON object to fetch the key from"));
-        inputs.AddText("Key", "Ky", "Key to fetch from JObject");
+        inputs.Add(new JsonObjectParameter("JObject", "JO", "JSON object to fetch the key from"));
+        inputs.AddText("Key", "K", "Key to fetch from JObject");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new JsonNodeParameter("JToken", "Jt", "Fetched JToken"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new JsonNodeParameter("JToken", "JT", "Fetched JToken"));
 
     protected override void Process(IDataAccess access)
     {
@@ -99,10 +99,10 @@ public sealed class ReadJsonArrayComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("Array", "Ja", "JSON Array to be broken down into individual JSON objects"));
+        inputs.Add(new JsonNodeParameter("Array", "JA", "JSON Array to be broken down into individual JSON objects"));
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonNodeParameter("JTokens", "Jt", "JSON tokens as list", Access.Twig));
+        outputs.Add(new JsonNodeParameter("JTokens", "JT", "JSON tokens as list", Access.Twig));
 
     protected override void Process(IDataAccess access)
     {
@@ -128,12 +128,12 @@ public sealed class ReadJsonObjectComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("JObject", "Jo", "JObject to get the keys and values from"));
+        inputs.Add(new JsonNodeParameter("JObject", "JO", "JObject to get the keys and values from"));
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Keys", "Ks", "JObject keys", Access.Twig);
-        outputs.Add(new JsonNodeParameter("JTokens", "Jt", "Parsed JSON Tokens", Access.Twig));
+        outputs.AddText("Keys", "K", "JObject keys", Access.Twig);
+        outputs.Add(new JsonNodeParameter("JTokens", "JT", "Parsed JSON Tokens", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -167,13 +167,13 @@ public sealed class ReadJsonValueComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("JValue", "Jv", "JSON Value to be read"));
+        inputs.Add(new JsonNodeParameter("JValue", "JV", "JSON Value to be read"));
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("AsString", "As", "JSON value as string");
-        outputs.AddNumber("AsNumber", "An", "JSON value as number");
-        outputs.AddBoolean("AsBool", "Ab", "JSON value as boolean");
+        outputs.AddText("AsString", "S", "JSON value as string");
+        outputs.AddNumber("AsNumber", "N", "JSON value as number");
+        outputs.AddBoolean("AsBool", "B", "JSON value as boolean");
     }
 
     protected override void Process(IDataAccess access)
@@ -206,13 +206,13 @@ public sealed class SeparateJsonTokensComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("JTokens", "Jt", "JTokens to be separated", Access.Twig));
+        inputs.Add(new JsonNodeParameter("JTokens", "JT", "JTokens to be separated", Access.Twig));
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new JsonObjectParameter("JObjects", "Jo", "Separated JObjects", Access.Twig));
-        outputs.Add(new JsonArrayParameter("JArrays", "Ja", "Separated JArrays", Access.Twig));
-        outputs.Add(new JsonValueParameter("JValues", "Jv", "Separated JValues", Access.Twig));
+        outputs.Add(new JsonObjectParameter("JObjects", "JO", "Separated JObjects", Access.Twig));
+        outputs.Add(new JsonArrayParameter("JArrays", "JA", "Separated JArrays", Access.Twig));
+        outputs.Add(new JsonValueParameter("JValues", "JV", "Separated JValues", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -254,9 +254,9 @@ public sealed class StringifyJsonTokenComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("JToken", "Jt", "JToken to be converted to a string"));
+        inputs.Add(new JsonNodeParameter("JToken", "JT", "JToken to be converted to a string"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "Tx", "JSON String");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "T", "JSON String");
 
     protected override void Process(IDataAccess access)
     {

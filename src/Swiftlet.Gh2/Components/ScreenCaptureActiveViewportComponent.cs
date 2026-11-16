@@ -20,12 +20,12 @@ public sealed class ScreenCaptureActiveViewportComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddBoolean("Capture", "Cp", "Set to true to capture the active viewport.").Set(false);
+        inputs.AddBoolean("Capture", "C", "Set to true to capture the active viewport.").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new BitmapParameter("Bitmap", "Bm", "Captured active viewport bitmap."));
+        outputs.Add(new BitmapParameter("Bitmap", "B", "Captured active viewport bitmap."));
     }
 
     protected override void Process(IDataAccess access)

@@ -36,11 +36,11 @@ public sealed class ByteArrayToFileComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new ByteArrayParameter("Byte Array", "By", "Byte Array to save"));
-        inputs.AddText("Path", "Pt", "Output filepath");
+        inputs.Add(new ByteArrayParameter("Byte Array", "A", "Byte Array to save"));
+        inputs.AddText("Path", "P", "Output filepath");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "Bt", "Saved file size in bytes");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "B", "Saved file size in bytes");
 
     protected override void Process(IDataAccess access)
     {
@@ -66,9 +66,9 @@ public sealed class FileToByteArrayComponent : SwiftletComponent
     public FileToByteArrayComponent() : base("File To Byte Array", "Read a file into a byte array", Sections.Utilities) { }
     public FileToByteArrayComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Path", "Pt", "Input File");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Path", "P", "Input File");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Byte Array"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "A", "Byte Array"));
 
     protected override void Process(IDataAccess access)
     {
@@ -92,11 +92,11 @@ public sealed class SaveCsvComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Lines", "Ln", "CSV-formatted lines (use the \"Create CSV Line\" component)", Access.Twig);
-        inputs.AddText("Path", "Pt", "Output path");
+        inputs.AddText("Lines", "L", "CSV-formatted lines (use the \"Create CSV Line\" component)", Access.Twig);
+        inputs.AddText("Path", "P", "Output path");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "Bt", "Size of saved file in bytes");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "B", "Size of saved file in bytes");
 
     protected override void Process(IDataAccess access)
     {
@@ -122,11 +122,11 @@ public sealed class SaveTextComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Content", "Ct", "Text to be saved to disk");
-        inputs.AddText("Path", "Pt", "Path to file");
+        inputs.AddText("Content", "C", "Text to be saved to disk");
+        inputs.AddText("Path", "P", "Path to file");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "Bt", "Size of saved file in bytes");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "B", "Size of saved file in bytes");
 
     protected override void Process(IDataAccess access)
     {
@@ -176,11 +176,11 @@ public sealed class SaveWebResponseComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HttpResponseDataParameter("Response", "Rs", "Full Http response object (with metadata)"));
-        inputs.AddText("Path", "Pt", "Path to file");
+        inputs.Add(new HttpResponseDataParameter("Response", "R", "Full Http response object (with metadata)"));
+        inputs.AddText("Path", "P", "Path to file");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "Bt", "Size of saved file in bytes");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "B", "Size of saved file in bytes");
 
     protected override void Process(IDataAccess access)
     {
@@ -235,11 +235,11 @@ public sealed class BitmapToByteArrayComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new BitmapParameter("Bitmap", "Bm", "Input Bitmap"));
-        inputs.AddText("Format", "Fm", "Image format (BMP, JPEG, PNG, GIF, TIFF)");
+        inputs.Add(new BitmapParameter("Bitmap", "B", "Input Bitmap"));
+        inputs.AddText("Format", "F", "Image format (BMP, JPEG, PNG, GIF, TIFF)");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Output Byte Array"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "A", "Output Byte Array"));
 
     protected override void Process(IDataAccess access)
     {
@@ -261,9 +261,9 @@ public sealed class ByteArrayToBitmapComponent : SwiftletComponent
     public ByteArrayToBitmapComponent() : base("Byte Array To Bitmap", "Converts a byte array to a bitmap", Sections.Utilities) { }
     public ByteArrayToBitmapComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "By", "Input Byte Array"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "A", "Input Byte Array"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new BitmapParameter("Bitmap", "Bm", "Output bitmap"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new BitmapParameter("Bitmap", "B", "Output bitmap"));
 
     protected override void Process(IDataAccess access)
     {
@@ -283,16 +283,16 @@ public sealed class BitmapToMeshComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new BitmapParameter("Bitmap", "Bm", "Input Bitmap"));
-        inputs.AddRectangle("Rectangle", "Rc", "Optional boundary", Access.Item, Requirement.MayBeMissing);
+        inputs.Add(new BitmapParameter("Bitmap", "B", "Input Bitmap"));
+        inputs.AddRectangle("Rectangle", "R", "Optional boundary", Access.Item, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddMesh("Mesh", "Ms", "Output colored mesh");
-        outputs.AddColour("Colors", "Cl", "Bitmap colors (in the original order)", Access.Twig);
-        outputs.AddInteger("Width", "Wd", "Bitmap width (in pixels)");
-        outputs.AddInteger("Height", "Ht", "Bitmap height (in pixels)");
+        outputs.AddMesh("Mesh", "M", "Output colored mesh");
+        outputs.AddColour("Colors", "C", "Bitmap colors (in the original order)", Access.Twig);
+        outputs.AddInteger("Width", "W", "Bitmap width (in pixels)");
+        outputs.AddInteger("Height", "H", "Bitmap height (in pixels)");
     }
 
     protected override void Process(IDataAccess access)
@@ -332,14 +332,14 @@ public sealed class GenerateQrCodeComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Text", "Tx", "Text to encode as a QR code (e.g. a URL)");
-        inputs.AddInteger("Pixels", "Px", "Pixels per module", Access.Item, Requirement.MayBeMissing).Set(20);
-        inputs.AddColour("Dark", "Dk", "Dark color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.Black));
-        inputs.AddColour("Light", "Lt", "Light color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.White));
-        inputs.AddBoolean("Quiet", "Qt", "Draw quiet zones", Access.Item, Requirement.MayBeMissing).Set(true);
+        inputs.AddText("Text", "T", "Text to encode as a QR code (e.g. a URL)");
+        inputs.AddInteger("Pixels", "P", "Pixels per module", Access.Item, Requirement.MayBeMissing).Set(20);
+        inputs.AddColour("Dark", "D", "Dark color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.Black));
+        inputs.AddColour("Light", "L", "Light color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.White));
+        inputs.AddBoolean("Quiet", "Q", "Draw quiet zones", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new BitmapParameter("Bitmap", "Bm", "Output bitmap"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new BitmapParameter("Bitmap", "B", "Output bitmap"));
 
     protected override void Process(IDataAccess access)
     {
@@ -371,9 +371,9 @@ public sealed class ColorToHexComponent : SwiftletComponent
     public ColorToHexComponent() : base("Color to Hex", "Converts a Color value to a hex code", Sections.Utilities) { }
     public ColorToHexComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddColour("Color", "Cl", "Color to convert");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddColour("Color", "C", "Color to convert");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Hex", "Hx", "Hex code");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Hex", "H", "Hex code");
 
     protected override void Process(IDataAccess access)
     {
@@ -391,9 +391,9 @@ public sealed class HexToColorComponent : SwiftletComponent
     public HexToColorComponent() : base("Hex to Color", "Parses a hex code into a color value", Sections.Utilities) { }
     public HexToColorComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Hex", "Hx", "Hex color code");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Hex", "H", "Hex color code");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddColour("Color", "Cl", "Color represented by the hex code");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddColour("Color", "C", "Color represented by the hex code");
 
     protected override void Process(IDataAccess access)
     {
@@ -422,11 +422,11 @@ public sealed class ReplaceEmptyBranchesComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddGeneric("Tree", "Tr", "Input tree", Access.Tree);
-        inputs.AddGeneric("Replacement", "Rp", "List of values to replace empty branches with", Access.Twig);
+        inputs.AddGeneric("Tree", "T", "Input tree", Access.Tree);
+        inputs.AddGeneric("Replacement", "R", "List of values to replace empty branches with", Access.Twig);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddGeneric("Tree", "Tr", "Output tree with padded empty branches", Access.Tree);
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddGeneric("Tree", "T", "Output tree with padded empty branches", Access.Tree);
 
     protected override void Process(IDataAccess access)
     {

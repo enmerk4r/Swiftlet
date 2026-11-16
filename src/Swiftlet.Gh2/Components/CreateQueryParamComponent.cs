@@ -20,13 +20,13 @@ public sealed class CreateQueryParamComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Key", "Ky", "Query Parameter Key");
-        inputs.AddText("Value", "Vl", "Query Parameter Value");
+        inputs.AddText("Key", "K", "Query Parameter Key");
+        inputs.AddText("Value", "V", "Query Parameter Value");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new QueryParameterParameter("Param", "Pr", "Http Query Parameter"));
+        outputs.Add(new QueryParameterParameter("Param", "P", "Http Query Parameter"));
     }
 
     protected override void Process(IDataAccess access)

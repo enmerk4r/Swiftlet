@@ -13,7 +13,7 @@ internal static class UtilityInputs
     public const string EncodingInfo = "Can be ASCII, Unicode, UTF8, UTF7, UTF32";
 
     /// <summary>Text encoding input with the Grasshopper 1 default of UTF8.</summary>
-    public static void AddEncoding(InputAdder inputs) => inputs.AddText("Encoding", "En", EncodingInfo).Set("UTF8");
+    public static void AddEncoding(InputAdder inputs) => inputs.AddText("Encoding", "E", EncodingInfo).Set("UTF8");
 
     public static string Encoding(IDataAccess access, int index)
         => access.GetItem(index, out string encoding) && encoding is not null ? encoding : "UTF8";
@@ -25,9 +25,9 @@ public sealed class Base64ToByteArrayComponent : SwiftletComponent
     public Base64ToByteArrayComponent() : base("Base64 to Byte Array", "Converts a Base64 encoded string to a byte array", Sections.Utilities) { }
     public Base64ToByteArrayComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Base64", "B6", "Base64 encoded string");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Base64", "B", "Base64 encoded string");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Output Byte Array"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "A", "Output Byte Array"));
 
     protected override void Process(IDataAccess access)
     {
@@ -45,11 +45,11 @@ public sealed class Base64ToTextComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Base64", "B6", "Base64 encoded string");
+        inputs.AddText("Base64", "B", "Base64 encoded string");
         UtilityInputs.AddEncoding(inputs);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "Tx", "Converted Text");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "T", "Converted Text");
 
     protected override void Process(IDataAccess access)
     {
@@ -77,9 +77,9 @@ public sealed class ByteArrayToBase64Component : SwiftletComponent
     public ByteArrayToBase64Component() : base("Byte Array To Base64", "Converts a Byte Array to a Base64 encoded string", Sections.Utilities) { }
     public ByteArrayToBase64Component(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "By", "Input Byte Array"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "A", "Input Byte Array"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Base64", "B6", "Base64 encoded string");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Base64", "B", "Base64 encoded string");
 
     protected override void Process(IDataAccess access)
     {
@@ -94,9 +94,9 @@ public sealed class ByteArrayToListComponent : SwiftletComponent
     public ByteArrayToListComponent() : base("Byte Array To List", "Converts a byte array into a list of integers", Sections.Utilities) { }
     public ByteArrayToListComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "By", "Byte Array to convert"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Byte Array", "A", "Byte Array to convert"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "Bt", "Byte Array as a list of integers", Access.Twig);
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddInteger("Bytes", "B", "Byte Array as a list of integers", Access.Twig);
 
     protected override void Process(IDataAccess access)
     {
@@ -111,9 +111,9 @@ public sealed class ListToByteArrayComponent : SwiftletComponent
     public ListToByteArrayComponent() : base("List To Byte Array", "Converts a list of integers into a byte array", Sections.Utilities) { }
     public ListToByteArrayComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddInteger("Bytes", "Bt", "Input as a list of integers", Access.Twig);
+    protected override void AddInputs(InputAdder inputs) => inputs.AddInteger("Bytes", "B", "Input as a list of integers", Access.Twig);
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Byte Array"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "A", "Byte Array"));
 
     protected override void Process(IDataAccess access)
     {
@@ -131,12 +131,12 @@ public sealed class ByteArrayToTextComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new ByteArrayParameter("Byte Array", "By", "Input Byte Array"));
+        inputs.Add(new ByteArrayParameter("Byte Array", "A", "Input Byte Array"));
         // Optional in Grasshopper 1 (the other encoding components require it); falls back to UTF8.
-        inputs.AddText("Encoding", "En", UtilityInputs.EncodingInfo, Access.Item, Requirement.MayBeMissing).Set("UTF8");
+        inputs.AddText("Encoding", "E", UtilityInputs.EncodingInfo, Access.Item, Requirement.MayBeMissing).Set("UTF8");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "Tx", "Output text");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "T", "Output text");
 
     protected override void Process(IDataAccess access)
     {
@@ -164,11 +164,11 @@ public sealed class TextToBase64Component : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Text", "Tx", "Input Text");
+        inputs.AddText("Text", "T", "Input Text");
         UtilityInputs.AddEncoding(inputs);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Base64", "B6", "Base64 encoded string");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Base64", "B", "Base64 encoded string");
 
     protected override void Process(IDataAccess access)
     {
@@ -193,11 +193,11 @@ public sealed class TextToByteArrayComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Text", "Tx", "Input Text");
+        inputs.AddText("Text", "T", "Input Text");
         UtilityInputs.AddEncoding(inputs);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Byte Array"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "A", "Byte Array"));
 
     protected override void Process(IDataAccess access)
     {
@@ -222,11 +222,11 @@ public sealed class UrlEncodeComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Text", "Tx", "Text to be URL encoded");
+        inputs.AddText("Text", "T", "Text to be URL encoded");
         UtilityInputs.AddEncoding(inputs);
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Encoded", "Ec", "URL-encoded string");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Encoded", "E", "URL-encoded string");
 
     protected override void Process(IDataAccess access)
     {
@@ -249,9 +249,9 @@ public sealed class CompressDataComponent : SwiftletComponent
     public CompressDataComponent() : base("Compress Data", "GZIP byte array data", Sections.Utilities) { }
     public CompressDataComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed bytes"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Uncompressed", "U", "Uncompressed bytes"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed bytes"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Compressed", "C", "Compressed bytes"));
 
     protected override void Process(IDataAccess access)
     {
@@ -266,9 +266,9 @@ public sealed class DecompressDataComponent : SwiftletComponent
     public DecompressDataComponent() : base("Decompress Data", "Un-GZIP byte array data", Sections.Utilities) { }
     public DecompressDataComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed bytes"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Compressed", "C", "Compressed bytes"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed bytes"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Uncompressed", "U", "Uncompressed bytes"));
 
     protected override void Process(IDataAccess access)
     {
@@ -288,11 +288,11 @@ public sealed class CreateCsvLineComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);
-        inputs.AddText("Delimiter", "Dl", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
+        inputs.AddText("Cells", "C", "Cell values of a CSV line", Access.Twig);
+        inputs.AddText("Delimiter", "D", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Line", "Ln", "Formatted CSV line");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Line", "L", "Formatted CSV line");
 
     protected override void Process(IDataAccess access)
     {
@@ -312,11 +312,11 @@ public sealed class ReadCsvLineComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Line", "Ln", "Formatted CSV line");
-        inputs.AddText("Delimiter", "Dl", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
+        inputs.AddText("Line", "L", "Formatted CSV line");
+        inputs.AddText("Delimiter", "D", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Cells", "C", "Cell values of a CSV line", Access.Twig);
 
     protected override void Process(IDataAccess access)
     {
@@ -341,9 +341,9 @@ public sealed class SplitTextIntoLinesComponent : SwiftletComponent
     public SplitTextIntoLinesComponent() : base("Split Text Into Lines", "Takes a block of text and splits it into individual lines by the newline character", Sections.Utilities) { }
     public SplitTextIntoLinesComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Text", "Tx", "Text to split into lines");
+    protected override void AddInputs(InputAdder inputs) => inputs.AddText("Text", "T", "Text to split into lines");
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Lines", "Ln", "Individual lines", Access.Twig);
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Lines", "L", "Individual lines", Access.Twig);
 
     protected override void Process(IDataAccess access)
     {
@@ -373,11 +373,11 @@ public sealed class GenerateGuidComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddBoolean("Generate", "Gn", "Generate a GUID!").Set(true);
-        inputs.AddText("Format", "Fm", FormatInfo).Set("D");
+        inputs.AddBoolean("Generate", "G", "Generate a GUID!").Set(true);
+        inputs.AddText("Format", "F", FormatInfo).Set("D");
     }
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("GUID", "Gd", "Random GUID");
+    protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("GUID", "G", "Random GUID");
 
     protected override void Process(IDataAccess access)
     {

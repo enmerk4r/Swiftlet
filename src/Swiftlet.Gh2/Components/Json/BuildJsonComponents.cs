@@ -25,10 +25,10 @@ public sealed class CreateJsonArrayComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.Add(new JsonNodeParameter("JTokens", "Jt", "JTokens to be combined into an array", Access.Twig));
+        inputs.Add(new JsonNodeParameter("JTokens", "JT", "JTokens to be combined into an array", Access.Twig));
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonArrayParameter("JArray", "Ja", "Resulting JArray"));
+        outputs.Add(new JsonArrayParameter("JArray", "JA", "Resulting JArray"));
 
     protected override void Process(IDataAccess access)
     {
@@ -53,15 +53,15 @@ public sealed class CreateJsonObjectComponent : Component
     protected override void AddInputs(InputAdder inputs)
     {
         // Optional lists need an explicit empty twig or the component never runs (see porting guide).
-        inputs.AddText("Keys", "Ks", "List of JObject keys", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
+        inputs.AddText("Keys", "K", "List of JObject keys", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
         // InputAdder.Add resets Requirement to its own argument (default MustExist): pass it explicitly.
-        var values = new JsonNodeParameter("Values", "Vs", "List of JObject values", Access.Twig);
+        var values = new JsonNodeParameter("Values", "V", "List of JObject values", Access.Twig);
         values.Set(Array.Empty<JsonToken>());
         inputs.Add(values, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonObjectParameter("JObject", "Jo", "Resulting JObject"));
+        outputs.Add(new JsonObjectParameter("JObject", "O", "Resulting JObject"));
 
     protected override void Process(IDataAccess access)
     {
@@ -93,10 +93,10 @@ public sealed class CreateJsonValueComponent : Component
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.AddGeneric("Value", "Vl", "A string, integer, number, DateTime or boolean. Leave empty for null.", Access.Item, Requirement.MayBeMissing);
+        inputs.AddGeneric("Value", "V", "A string, integer, number, DateTime or boolean. Leave empty for null.", Access.Item, Requirement.MayBeMissing);
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonValueParameter("JValue", "Jv", "JSON Value"));
+        outputs.Add(new JsonValueParameter("JValue", "JV", "JSON Value"));
 
     protected override void Process(IDataAccess access)
     {
@@ -131,14 +131,14 @@ public sealed class MergeJsonObjectsComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new JsonObjectParameter("JSON Object A", "Ja", "Base JSON object."));
-        inputs.Add(new JsonObjectParameter("JSON Object B", "Jb", "Incoming JSON object to merge into A."));
-        inputs.AddInteger("Mode", "Md", "Conflict mode. 0 = A wins, 1 = B wins, 2 = A wins unless null, 3 = B wins unless null. Default is 1.",
+        inputs.Add(new JsonObjectParameter("JSON Object A", "A", "Base JSON object."));
+        inputs.Add(new JsonObjectParameter("JSON Object B", "B", "Incoming JSON object to merge into A."));
+        inputs.AddInteger("Mode", "M", "Conflict mode. 0 = A wins, 1 = B wins, 2 = A wins unless null, 3 = B wins unless null. Default is 1.",
             Access.Item, Requirement.MayBeMissing).Set((int)JsonObjectMerger.DefaultConflictMode);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonObjectParameter("JObject", "Jo", "Merged JObject."));
+        outputs.Add(new JsonObjectParameter("JObject", "JO", "Merged JObject."));
 
     protected override void Process(IDataAccess access)
     {
@@ -165,12 +165,12 @@ public sealed class RemoveJsonKeyComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new JsonObjectParameter("JObject", "Jo", "JObject to remove the key from"));
-        inputs.AddText("Key", "Ky", "Key to be removed");
+        inputs.Add(new JsonObjectParameter("JObject", "JO", "JObject to remove the key from"));
+        inputs.AddText("Key", "K", "Key to be removed");
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonObjectParameter("JObject", "Jo", "Updated JObject"));
+        outputs.Add(new JsonObjectParameter("JObject", "JO", "Updated JObject"));
 
     protected override void Process(IDataAccess access)
     {
@@ -194,13 +194,13 @@ public sealed class SetJsonKeyComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new JsonObjectParameter("JObject", "Jo", "JObject to add the JToken to"));
-        inputs.AddText("Key", "Ky", "JToken key");
-        inputs.Add(new JsonNodeParameter("JToken", "Jt", "JToken to be set on the JObject"));
+        inputs.Add(new JsonObjectParameter("JObject", "JO", "JObject to add the JToken to"));
+        inputs.AddText("Key", "K", "JToken key");
+        inputs.Add(new JsonNodeParameter("JToken", "JT", "JToken to be set on the JObject"));
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new JsonObjectParameter("JObject", "Jo", "Updated JObject"));
+        outputs.Add(new JsonObjectParameter("JObject", "JO", "Updated JObject"));
 
     protected override void Process(IDataAccess access)
     {

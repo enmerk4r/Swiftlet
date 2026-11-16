@@ -25,12 +25,12 @@ public sealed class ParseXmlComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("XML", "Xm", "XML markup string");
+        inputs.AddText("XML", "X", "XML markup string");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new XmlNodeParameter("Document", "Dc", "XML Document root node"));
+        outputs.Add(new XmlNodeParameter("Document", "D", "XML Document root node"));
     }
 
     protected override void Process(IDataAccess access)
@@ -65,21 +65,21 @@ public sealed class CreateXmlElementComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Name", "Nm", "Element tag name");
-        inputs.AddText("Text", "Tx", "Inner text content", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("Namespace", "Ns", "XML namespace URI", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("Name", "N", "Element tag name");
+        inputs.AddText("Text", "T", "Inner text content", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("Namespace", "NS", "XML namespace URI", Access.Item, Requirement.MayBeMissing);
 
         // Optional lists need an explicit empty twig or the component does not run when they are unconnected.
-        inputs.AddText("Attr Names", "An", "List of attribute names", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
-        inputs.AddText("Attr Values", "Av", "List of attribute values", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
-        var children = new XmlNodeParameter("Children", "Ch", "Child XML elements", Access.Twig);
+        inputs.AddText("Attr Names", "AN", "List of attribute names", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
+        inputs.AddText("Attr Values", "AV", "List of attribute values", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
+        var children = new XmlNodeParameter("Children", "C", "Child XML elements", Access.Twig);
         children.Set(Array.Empty<XmlNode>());
         inputs.Add(children, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new XmlNodeParameter("Element", "El", "Created XML element"));
+        outputs.Add(new XmlNodeParameter("Element", "E", "Created XML element"));
     }
 
     protected override void Process(IDataAccess access)
@@ -145,13 +145,13 @@ public sealed class GetXmlAttributeValueComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Element", "El", "XML element"));
-        inputs.AddText("Attribute", "At", "Attribute name");
+        inputs.Add(new XmlNodeParameter("Element", "E", "XML element"));
+        inputs.AddText("Attribute", "A", "Attribute name");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Value", "Vl", "Attribute value");
+        outputs.AddText("Value", "V", "Attribute value");
     }
 
     protected override void Process(IDataAccess access)
@@ -197,13 +197,13 @@ public sealed class GetXmlAttributesComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Element", "El", "XML element"));
+        inputs.Add(new XmlNodeParameter("Element", "E", "XML element"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Names", "Nm", "Attribute names", Access.Twig);
-        outputs.AddText("Values", "Vl", "Attribute values", Access.Twig);
+        outputs.AddText("Names", "N", "Attribute names", Access.Twig);
+        outputs.AddText("Values", "V", "Attribute values", Access.Twig);
     }
 
     protected override void Process(IDataAccess access)
@@ -242,12 +242,12 @@ public sealed class GetXmlChildNodesComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Parent", "Pr", "Parent XML element"));
+        inputs.Add(new XmlNodeParameter("Parent", "P", "Parent XML element"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new XmlNodeParameter("Children", "Ch", "Child nodes", Access.Twig));
+        outputs.Add(new XmlNodeParameter("Children", "C", "Child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -275,13 +275,13 @@ public sealed class GetXmlElementsByTagComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Parent", "Pr", "Parent XML node"));
-        inputs.AddText("Tag", "Tg", "Tag name to search for");
+        inputs.Add(new XmlNodeParameter("Parent", "P", "Parent XML node"));
+        inputs.AddText("Tag", "T", "Tag name to search for");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new XmlNodeParameter("Elements", "El", "Matching XML elements", Access.Twig));
+        outputs.Add(new XmlNodeParameter("Elements", "E", "Matching XML elements", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -326,13 +326,13 @@ public sealed class GetXmlElementsByXPathComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Parent", "Pr", "Parent XML node"));
-        inputs.AddText("XPath", "Xp", "XPath expression");
+        inputs.Add(new XmlNodeParameter("Parent", "P", "Parent XML node"));
+        inputs.AddText("XPath", "X", "XPath expression");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new XmlNodeParameter("Elements", "El", "Matching XML elements", Access.Twig));
+        outputs.Add(new XmlNodeParameter("Elements", "E", "Matching XML elements", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -377,13 +377,13 @@ public sealed class GetXmlInnerTextComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Element", "El", "XML element"));
+        inputs.Add(new XmlNodeParameter("Element", "E", "XML element"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("InnerText", "Tx", "Inner text content");
-        outputs.AddText("InnerXml", "Xm", "Inner XML markup");
+        outputs.AddText("InnerText", "T", "Inner text content");
+        outputs.AddText("InnerXml", "X", "Inner XML markup");
     }
 
     protected override void Process(IDataAccess access)
@@ -416,13 +416,13 @@ public sealed class StringifyXmlNodeComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new XmlNodeParameter("Node", "Nd", "XML node to stringify"));
-        inputs.AddBoolean("Indent", "In", "Pretty-print with indentation").Set(true);
+        inputs.Add(new XmlNodeParameter("Node", "N", "XML node to stringify"));
+        inputs.AddBoolean("Indent", "I", "Pretty-print with indentation").Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("XML", "Xm", "XML string");
+        outputs.AddText("XML", "X", "XML string");
     }
 
     protected override void Process(IDataAccess access)

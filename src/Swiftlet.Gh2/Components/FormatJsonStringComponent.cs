@@ -22,12 +22,12 @@ public sealed class FormatJsonStringComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("JSON String", "Js", "Unformatted JSON string");
+        inputs.AddText("JSON String", "J", "Unformatted JSON string");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Pretty JSON", "Pj", "Formatted JSON string (this helps with readability)");
+        outputs.AddText("Pretty JSON", "P", "Formatted JSON string (this helps with readability)");
     }
 
     protected override void Process(IDataAccess access)

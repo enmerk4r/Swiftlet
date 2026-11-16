@@ -20,13 +20,13 @@ public sealed class CreateHttpHeaderComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Key", "Ky", "Header Key");
-        inputs.AddText("Value", "Vl", "Header Value");
+        inputs.AddText("Key", "K", "Header Key");
+        inputs.AddText("Value", "V", "Header Value");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HttpHeaderParameter("Header", "Hd", "Http Header"));
+        outputs.Add(new HttpHeaderParameter("Header", "H", "Http Header"));
     }
 
     protected override void Process(IDataAccess access)

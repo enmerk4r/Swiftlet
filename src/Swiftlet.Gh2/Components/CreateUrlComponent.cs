@@ -19,15 +19,15 @@ public sealed class CreateUrlComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Scheme", "Sc", "URL scheme (http or https)");
-        inputs.AddText("Host", "Hs", "Host component of the URL");
-        inputs.AddInteger("Port", "Pt", "TCP port number").Requirement = Requirement.MayBeMissing;
-        inputs.AddText("Route", "Rt", "A route (path) to an online resource").Requirement = Requirement.MayBeMissing;
+        inputs.AddText("Scheme", "S", "URL scheme (http or https)");
+        inputs.AddText("Host", "H", "Host component of the URL");
+        inputs.AddInteger("Port", "P", "TCP port number").Requirement = Requirement.MayBeMissing;
+        inputs.AddText("Route", "R", "A route (path) to an online resource").Requirement = Requirement.MayBeMissing;
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("URL", "Ur", "Constructed URL string");
+        outputs.AddText("URL", "U", "Constructed URL string");
     }
 
     protected override void Process(IDataAccess access)

@@ -18,14 +18,14 @@ Per GH1 entry the status is one of
 Checked: name, section and palette place (GH1 exposure row -> GH2 Nomen slot, hidden -> Rank.Hidden) for
 components and parameters; for components also input/output count and order, pin names, access (item/list/tree
 vs Item/Twig/Tree), optionality (GH1 Optional vs GH2 Requirement) and input defaults (colours compared by
-value). Descriptions and nicknames are warnings only (GH2 uses two-letter nicknames by convention). A GH1
+value). Descriptions are warnings only; pin short names must match GH1 nicknames. A GH1
 optional input with a default that GH2 makes required with the same default is a warning (it differs only
 when a connected wire carries no data); --strict makes it a mismatch.
 
-Pin short names (GH1 NickName vs GH2 UserName, e.g. "K" vs "Ky") are not a parity criterion; they are
-recorded per component in gh2.nicknames ("gh1" = every pin uses the GH1 nickname, "own" = none does,
-"mixed", or "none" for no pins) with the differing pins listed, so either convention can be applied
-mechanically. --nicknames prints them. Warnings are stored per entry in gh2.warnings.
+Pin short names (GH1 NickName vs GH2 UserName) are checked for parity and recorded per component
+in gh2.nicknames ("gh1" = every pin uses the GH1 nickname, "own" = none does, "mixed", or "none"
+for no pins) with the differing pins listed for review. --nicknames prints them. Warnings are stored
+per entry in gh2.warnings.
 
 Exit status is non-zero when any non-archived entry is not "ported" or a rule is broken.
 """
@@ -97,6 +97,8 @@ def compare_pins(side, gh1_pins, gh2_pins, inputs):
         tag = f"{side}[{i}] {a['name']}"
         if a["name"] != b["name"]:
             diffs.append(f"{tag}: name '{a['name']}' vs '{b['name']}'")
+        if (a.get("nickname") or "") != (b.get("userName") or ""):
+            diffs.append(f"{tag}: short name '{a.get('nickname') or ''}' vs '{b.get('userName') or ''}'")
         if ACCESS.get(a["access"]) != b["access"]:
             diffs.append(f"{tag}: access {a['access']} vs {b['access']}")
         if inputs:
@@ -123,7 +125,7 @@ def main():
     ap.add_argument("--port", type=int, required=True)
     ap.add_argument("--write", action="store_true", help="update the gh2 blocks in docs/parity.json")
     ap.add_argument("--report", help="write the raw GH2 catalog and evaluation here")
-    ap.add_argument("--warnings", action="store_true", help="also print description/nickname warnings")
+    ap.add_argument("--warnings", action="store_true", help="also print review warnings")
     ap.add_argument("--nicknames", action="store_true", help="list pin short names that differ from the GH1 nicknames")
     ap.add_argument("--strict", action="store_true", help="treat GH1 optional-with-default vs GH2 required-with-default as a mismatch")
     a = ap.parse_args()
