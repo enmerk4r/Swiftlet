@@ -1,0 +1,3 @@
+var a=AppDomain.CurrentDomain.GetAssemblies().Single(x=>x.GetName().Name=="Grasshopper2");
+dynamic editor=a.GetType("Grasshopper2.UI.Editor").GetProperty("Instance").GetValue(null);
+foreach(dynamic c in (System.Collections.IEnumerable)editor.Canvas.Document.Objects.Forwards) if(c.InstanceId.ToString()=="__TARGET_ID__") { c.Parameters.Input(0).Set(new string[]{"__HTTP_BASE__/ok"}); c.Parameters.Input(0).Expire(); c.TimeoutSeconds=5; c.Expire(); Console.WriteLine("GET ready "+c.InstanceId); }

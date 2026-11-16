@@ -47,6 +47,8 @@ public sealed class GetRequestComponent : Component
         inputs.AddText("URL", "Ur", "URL for the web resource you're trying to reach");
         var query = new QueryParameterParameter("Params", "Pr", "Query Params", Access.Twig) { Requirement = Requirement.MayBeMissing };
         var headers = new HttpHeaderParameter("Headers", "Hd", "Http Headers", Access.Twig) { Requirement = Requirement.MayBeMissing };
+        query.Set(Array.Empty<QueryParameter>());
+        headers.Set(Array.Empty<HttpHeader>());
         inputs.Add(query);
         inputs.Add(headers);
     }

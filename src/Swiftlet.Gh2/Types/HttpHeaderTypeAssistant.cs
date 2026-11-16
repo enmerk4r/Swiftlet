@@ -12,7 +12,7 @@ public sealed class HttpHeaderTypeAssistant : TypeAssistant<HttpHeader>
     public override HttpHeader Copy(HttpHeader instance) => new(instance.Key, instance.Value);
 
     public override string DescribePrimary(Pear<HttpHeader> pear)
-        => $"{pear.Item.Key}: {pear.Item.Value}";
+        => $"HEADER [ {pear.Item.Key} | {pear.Item.Value} ]";
 
     public override bool Write(IWriter writer, Name location, HttpHeader instance)
     {

@@ -8,7 +8,7 @@ public sealed class QueryParameterTypeAssistant : TypeAssistant<QueryParameter>
 {
     public QueryParameterTypeAssistant() : base("Query Parameter") { }
     public override QueryParameter Copy(QueryParameter instance) => new(instance.Key, instance.Value);
-    public override string DescribePrimary(Pear<QueryParameter> pear) => pear.Item.ToQueryString();
+    public override string DescribePrimary(Pear<QueryParameter> pear) => $"PARAM [ {pear.Item.Key} | {pear.Item.Value} ]";
     public override bool Write(IWriter writer, Name location, QueryParameter instance)
     {
         writer.StringArray(location, new[] { instance.Key, instance.Value });

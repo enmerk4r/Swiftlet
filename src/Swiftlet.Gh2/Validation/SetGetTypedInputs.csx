@@ -1,0 +1,5 @@
+var gh=AppDomain.CurrentDomain.GetAssemblies().Single(x=>x.GetName().Name=="Grasshopper2"); dynamic e=gh.GetType("Grasshopper2.UI.Editor").GetProperty("Instance").GetValue(null); var core=AppDomain.CurrentDomain.GetAssemblies().Single(x=>x.GetName().Name=="Swiftlet.Core");
+foreach(dynamic c in (System.Collections.IEnumerable)e.Canvas.Document.Objects.Forwards) if(c.InstanceId.ToString()=="__TARGET_ID__") {
+ c.Parameters.Input(0).Set(new string[]{"__HTTP_BASE__/ok"});c.Parameters.Input(0).Expire();
+ for(int i=1;i<=2;i++){var t=core.GetType(i==1?"Swiftlet.Core.Http.QueryParameter":"Swiftlet.Core.Http.HttpHeader");var arr=Array.CreateInstance(t,1);arr.SetValue(Activator.CreateInstance(t,new object[]{i==1?"q":"X-Swiftlet",i==1?"a b&\u03bb":"typed-header"}),0);dynamic p=c.Parameters.Input(i);((System.Reflection.MethodInfo[])p.GetType().GetMethods()).Single(m=>m.Name=="Set"&&m.GetParameters()[0].ParameterType==arr.GetType()).Invoke(p,new object[]{arr});p.Expire();}c.Expire();
+}

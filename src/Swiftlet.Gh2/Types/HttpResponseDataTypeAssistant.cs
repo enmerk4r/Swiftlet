@@ -9,7 +9,7 @@ public sealed class HttpResponseDataTypeAssistant : TypeAssistant<HttpResponseDa
 {
     public HttpResponseDataTypeAssistant() : base("HTTP Response") { }
     public override HttpResponseData Copy(HttpResponseData instance) => instance.Duplicate();
-    public override string DescribePrimary(Pear<HttpResponseData> pear) => $"{pear.Item.StatusCode} {pear.Item.ReasonPhrase}";
+    public override string DescribePrimary(Pear<HttpResponseData> pear) => $"Http Response [{pear.Item.StatusCode}]";
     public override bool Write(IWriter writer, Name location, HttpResponseData instance)
     {
         writer.String(location, JsonSerializer.Serialize(instance));
