@@ -5,14 +5,14 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class CreateCsvLineComponent : GH_Component
 {
     public CreateCsvLineComponent()
-        : base("Create CSV Line", "CSVL", "Formats multiple strings as a single line of delimeter-separated values", ShellNaming.Category, ShellNaming.Utilities)
+        : base("Create CSV Line", "CSVL", "Formats multiple strings as a single line of delimiter-separated values", ShellNaming.Category, ShellNaming.Utilities)
     {
     }
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Cells", "C", "Cell values of a CSV line", GH_ParamAccess.list);
-        pManager.AddTextParameter("Delimiter", "D", "CSV delimeter", GH_ParamAccess.item, ",");
+        pManager.AddTextParameter("Delimiter", "D", "CSV delimiter", GH_ParamAccess.item, ",");
         pManager[1].Optional = true;
     }
 

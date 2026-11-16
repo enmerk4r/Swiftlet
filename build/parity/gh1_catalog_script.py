@@ -3,6 +3,8 @@
 Usage: python gh1_catalog_script.py <path to built Swiftlet.Gh.Rhino8.dll (copy it out of bin first)> <out.json>
 Then send <out.json>.args.json to the Rhino MCP run_csharp tool; the dump is written to <out.json>.
 """
+import json, sys
+
 dll, out = sys.argv[1], sys.argv[2]
 script = r'''
 using System; using System.IO; using System.Linq; using System.Reflection; using System.Collections.Generic; using System.Text.Json;

@@ -7,14 +7,14 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class ReadCsvLineComponent : GH_Component
 {
     public ReadCsvLineComponent()
-        : base("Read CSV Line", "RCSVL", "Extracts individual values from a delimeter-separated line", ShellNaming.Category, ShellNaming.Utilities)
+        : base("Read CSV Line", "RCSVL", "Extracts individual values from a delimiter-separated line", ShellNaming.Category, ShellNaming.Utilities)
     {
     }
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Line", "L", "Formatted CSV line", GH_ParamAccess.item);
-        pManager.AddTextParameter("Delimiter", "D", "CSV delimeter", GH_ParamAccess.item, ",");
+        pManager.AddTextParameter("Delimiter", "D", "CSV delimiter", GH_ParamAccess.item, ",");
         pManager[1].Optional = true;
     }
 

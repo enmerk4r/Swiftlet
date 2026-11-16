@@ -20,7 +20,7 @@ public sealed class BearerTokenAuthComponent : GH_Component
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Your Authorization heder", GH_ParamAccess.item);
+        pManager.AddParameter(new HttpHeaderParam(), "Header", "H", "Your Authorization header", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

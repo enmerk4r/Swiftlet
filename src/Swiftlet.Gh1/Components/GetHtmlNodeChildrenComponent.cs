@@ -7,7 +7,7 @@ namespace Swiftlet.Gh.Rhino8.Components;
 public sealed class GetHtmlNodeChildrenComponent : GH_Component
 {
     public GetHtmlNodeChildrenComponent()
-        : base("Get Child Nodes", "GCH", "Get all child nodes of an HTML node ", ShellNaming.Category, ShellNaming.ReadHtml)
+        : base("Get Child Nodes", "GCH", "Get all child nodes of an HTML node", ShellNaming.Category, ShellNaming.ReadHtml)
     {
     }
 

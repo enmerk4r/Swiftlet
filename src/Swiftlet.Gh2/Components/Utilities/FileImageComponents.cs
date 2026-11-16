@@ -236,7 +236,7 @@ public sealed class BitmapToByteArrayComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.Add(new BitmapParameter("Bitmap", "Bm", "Input Bitmap"));
-        inputs.AddText("Format", "Fm", "Image format (BMP, JPEG, PNG, GIF, TIFF, EMF, WMF, EXIF, ICON)");
+        inputs.AddText("Format", "Fm", "Image format (BMP, JPEG, PNG, GIF, TIFF)");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Byte Array", "By", "Output Byte Array"));

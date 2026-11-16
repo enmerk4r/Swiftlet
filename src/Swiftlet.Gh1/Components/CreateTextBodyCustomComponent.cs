@@ -17,7 +17,7 @@ public sealed class CreateTextBodyCustomComponent : GH_Component
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddGenericParameter("Content", "C", "Text contents of your request body", GH_ParamAccess.item);
-        pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item, ContentTypes.ApplicationJson);
+        pManager.AddTextParameter("ContentType", "T", "Content-Type header value", GH_ParamAccess.item, ContentTypes.ApplicationJson);
 
         pManager[0].Optional = true;
         pManager[1].Optional = true;

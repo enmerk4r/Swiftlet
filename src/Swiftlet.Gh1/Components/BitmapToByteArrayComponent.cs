@@ -17,7 +17,7 @@ public sealed class BitmapToByteArrayComponent : GH_Component
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddParameter(new BitmapParam(), "Bitmap", "B", "Input Bitmap", GH_ParamAccess.item);
-        pManager.AddTextParameter("Format", "F", "Image format (BMP, JPEG, PNG, GIF, TIFF, EMF, WMF, EXIF, ICON)", GH_ParamAccess.item);
+        pManager.AddTextParameter("Format", "F", "Image format (BMP, JPEG, PNG, GIF, TIFF)", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)

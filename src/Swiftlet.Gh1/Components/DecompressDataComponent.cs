@@ -15,12 +15,12 @@ public sealed class DecompressDataComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddParameter(new ByteArrayParam(), "Compressed", "C", "Compressed text", GH_ParamAccess.item);
+        pManager.AddParameter(new ByteArrayParam(), "Compressed", "C", "Compressed bytes", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddParameter(new ByteArrayParam(), "Uncompressed", "U", "Uncompressed text", GH_ParamAccess.item);
+        pManager.AddParameter(new ByteArrayParam(), "Uncompressed", "U", "Uncompressed bytes", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)
