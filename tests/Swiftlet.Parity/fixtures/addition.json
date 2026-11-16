@@ -1,0 +1,11 @@
+{
+  "name": "addition-scalar",
+  "component": "Addition",
+  "inputs": [
+    2.25,
+    3.5
+  ],
+  "expected_scalars": [
+    5.75
+  ]
+}
