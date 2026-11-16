@@ -86,6 +86,8 @@ public sealed class HttpListenerComponent : ListenerComponent
 
     protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _requests.Commit(solution);
 
+    protected override bool HasUnconfirmedOutput => _requests.HasUnconfirmed;
+
     protected override void StopResource()
     {
         if (_session is not { } session)
@@ -319,6 +321,8 @@ public sealed class WebSocketClientComponent : ListenerComponent
 
     protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _received.Commit(solution);
 
+    protected override bool HasUnconfirmedOutput => _received.HasUnconfirmed;
+
     protected override void StopResource()
     {
         _run = false;
@@ -429,6 +433,8 @@ public sealed class WebSocketServerComponent : ListenerComponent
     }
 
     protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _received.Commit(solution);
+
+    protected override bool HasUnconfirmedOutput => _received.HasUnconfirmed;
 
     protected override void StopResource()
     {
