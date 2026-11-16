@@ -76,13 +76,15 @@ public sealed class ModernOAuthAuthorizationFlow : IAsyncDisposable
 
     public async Task<OAuthCallbackResult> WaitForCompletionAsync(CancellationToken cancellationToken = default)
     {
-        if (_callbackSession is null || Session is null)
+        var callback = _callbackSession;
+        var session = Session;
+        if (callback is null || session is null)
         {
             throw new InvalidOperationException("Authorization flow has not been started.");
         }
 
         OAuthCallbackResult result = await ModernOAuthWorkflow
-            .WaitForAuthorizationCodeAsync(_callbackSession, Session, cancellationToken)
+            .WaitForAuthorizationCodeAsync(callback, session, cancellationToken)
             .ConfigureAwait(false);
 
         AuthorizationCode = result.AuthorizationCode;
@@ -91,18 +93,19 @@ public sealed class ModernOAuthAuthorizationFlow : IAsyncDisposable
         IsWaiting = false;
         IsCompleted = true;
 
-        await _callbackSession.DisposeAsync().ConfigureAwait(false);
-        _callbackSession = null;
+        await callback.DisposeAsync().ConfigureAwait(false);
+        Interlocked.CompareExchange(ref _callbackSession, null, callback);
 
         return result;
     }
 
     public async Task ResetAsync()
     {
-        if (_callbackSession is not null)
+        var callback = Volatile.Read(ref _callbackSession);
+        if (callback is not null)
         {
-            await _callbackSession.DisposeAsync().ConfigureAwait(false);
-            _callbackSession = null;
+            await callback.DisposeAsync().ConfigureAwait(false);
+            Interlocked.CompareExchange(ref _callbackSession, null, callback);
         }
 
         Session = null;

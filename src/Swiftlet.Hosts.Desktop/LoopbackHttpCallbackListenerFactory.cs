@@ -32,6 +32,11 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
     private sealed class LoopbackHttpCallbackSession : ILocalHttpCallbackSession
     {
         private readonly Uri _callbackUri;
+        private readonly object _sync = new();
+        private readonly CancellationTokenSource _lifetime = new();
+        private Task<LocalHttpCallbackRequest>? _pendingRead;
+        private Task? _disposeTask;
+        private bool _disposed;
         private TcpClient? _client;
         private NetworkStream? _stream;
         private bool _responseSent;
@@ -43,19 +48,34 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
 
         public Uri CallbackUri => _callbackUri;
 
-        public async Task<LocalHttpCallbackRequest> WaitForCallbackAsync(CancellationToken cancellationToken = default)
+        public Task<LocalHttpCallbackRequest> WaitForCallbackAsync(CancellationToken cancellationToken = default)
         {
-            if (_client is not null)
+            lock (_sync)
             {
-                throw new InvalidOperationException("This callback session has already accepted a request.");
+                if (_disposed) throw new ObjectDisposedException(nameof(LoopbackHttpCallbackSession));
+                if (_client is not null || _pendingRead is { IsCompleted: false })
+                    throw new InvalidOperationException("This callback session is already receiving a request.");
+                return _pendingRead = ReadCallbackAsync(cancellationToken);
             }
+        }
 
-            TcpClient client = await AcceptClientAsync(cancellationToken).ConfigureAwait(false);
-            _client = client;
-            _stream = client.GetStream();
-            _responseSent = false;
-
-            using var reader = new StreamReader(_stream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+        private async Task<LocalHttpCallbackRequest> ReadCallbackAsync(CancellationToken cancellationToken)
+        {
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.Token);
+            TcpClient client = await AcceptClientAsync(linked.Token).ConfigureAwait(false);
+            // Closing the accepted socket also interrupts StreamReader operations on net7,
+            // whose ReadLineAsync overload does not take a cancellation token.
+            using var cancellation = linked.Token.Register(client.Dispose);
+            NetworkStream stream;
+            lock (_sync)
+            {
+                if (_disposed || linked.IsCancellationRequested)
+                { client.Dispose(); throw new OperationCanceledException(linked.Token); }
+                _client = client;
+                _stream = stream = client.GetStream();
+                _responseSent = false;
+            }
+            using var reader = new StreamReader(stream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
 
             string requestLine = await ReadRequiredLineAsync(reader).ConfigureAwait(false);
             string[] parts = requestLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -122,23 +142,25 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
 
         public ValueTask DisposeAsync()
         {
-            try
-            {
-                _stream?.Dispose();
-            }
-            catch
-            {
-            }
+            lock (_sync)
+                return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
 
-            try
+        private async Task DisposeCoreAsync()
+        {
+            _disposed = true;
+            _lifetime.Cancel();
+            _stream?.Dispose();
+            _client?.Dispose();
+            // AcceptClientAsync owns both IPv4/IPv6 listeners and stops them in finally.
+            // Join that operation before returning: cancellation alone merely schedules
+            // its continuation and does not prove the callback port has been released.
+            if (_pendingRead is { } pending)
             {
-                _client?.Dispose();
+                try { await pending.ConfigureAwait(false); }
+                catch (Exception) { /* The waiter retains the original failure; disposal observes it. */ }
             }
-            catch
-            {
-            }
-
-            return ValueTask.CompletedTask;
+            _lifetime.Dispose();
         }
 
         private static IReadOnlyList<TcpListener> CreateListeners(int port)
@@ -177,10 +199,12 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                 acceptTasks.Add(listener.AcceptTcpClientAsync(cancellationToken).AsTask());
             }
 
+            TcpClient? accepted = null;
             try
             {
                 Task<TcpClient> completed = await Task.WhenAny(acceptTasks).ConfigureAwait(false);
-                return await completed.ConfigureAwait(false);
+                accepted = await completed.ConfigureAwait(false);
+                return accepted;
             }
             finally
             {
@@ -193,6 +217,15 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
                     catch
                     {
                     }
+                }
+                foreach (Task<TcpClient> task in acceptTasks)
+                {
+                    try
+                    {
+                        TcpClient other = await task.ConfigureAwait(false);
+                        if (!ReferenceEquals(other, accepted)) other.Dispose();
+                    }
+                    catch (Exception) { /* Stopping the listener faults or cancels the losing accept. */ }
                 }
             }
         }

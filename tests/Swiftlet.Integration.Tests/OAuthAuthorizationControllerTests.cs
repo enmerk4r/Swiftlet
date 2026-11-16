@@ -49,6 +49,14 @@ internal static class OAuthAuthorizationControllerTests
         await controller.EvaluateAsync("https://auth.example.test/authorize", "client", [], port, true);
         Assert.True(oldUrl != browser.Url);
         await controller.ResetAsync(); AssertPortReleased(port);
+        // Immediate reuse exercises cancellation while both callback accepts are pending.
+        for (int attempt = 0; attempt < 32; attempt++)
+        {
+            await controller.EvaluateAsync("https://auth.example.test/authorize", "client", [], port, true);
+            Assert.True(controller.Snapshot.IsWaiting);
+            await controller.ResetAsync();
+            AssertPortReleased(port);
+        }
     }
     private static int FreePort()
     { var listener = new TcpListener(IPAddress.Loopback, 0); listener.Start(); int port = ((IPEndPoint)listener.LocalEndpoint).Port; listener.Stop(); return port; }
