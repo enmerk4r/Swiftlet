@@ -11,6 +11,7 @@
     <Version>$(SwiftletVersion)</Version>
     <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
     <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(SwiftletVersion)</InformationalVersion>
     <Title>Swiftlet</Title>
     <Company>Sergey Pigach</Company>
     <Description>Grasshopper 2 plugin for accessing Web APIs</Description>
