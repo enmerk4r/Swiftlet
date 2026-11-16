@@ -42,6 +42,31 @@ object CoreValue(JsonObject spec)
         case "query": return Activator.CreateInstance(core.GetType("Swiftlet.Core.Http.QueryParameter", true), (string)v![0], (string)v[1]);
         case "header": return Activator.CreateInstance(core.GetType("Swiftlet.Core.Http.HttpHeader", true), (string)v![0], (string)v[1]);
         case "bytes": return Convert.FromBase64String((string)v!);
+        case "bodytext": return Activator.CreateInstance(CoreType("Http.RequestBodyText"), (string)v![0], (string)v[1]);
+        case "bodybytes": return Activator.CreateInstance(CoreType("Http.RequestBodyBytes"), (string)v![0], Convert.FromBase64String((string)v[1]!));
+        case "form":
+            return Activator.CreateInstance(CoreType("Http.RequestBodyFormUrlEncoded"),
+                v![0]!.AsArray().Select(x => (string)x!).ToList().AsEnumerable(), v[1]!.AsArray().Select(x => (string)x!).ToList().AsEnumerable());
+        case "field": return Field(v!.AsObject());
+        case "multipart":
+        {
+            var fieldT = CoreType("Http.MultipartField");
+            var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(fieldT))!;
+            foreach (var f in v!.AsArray()) list.Add(Field(f!.AsObject()));
+            var ctor = CoreType("Http.RequestBodyMultipartForm").GetConstructor(new[] { typeof(IEnumerable<>).MakeGenericType(fieldT) })!;
+            return ctor.Invoke(new object[] { list });
+        }
+        case "response":
+        {
+            // {"version","status","reason","headers":[[k,v]...],"success","content","bytes"(base64)}
+            var o = v!.AsObject();
+            var headerT = CoreType("Http.HttpHeader");
+            var headers = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(headerT))!;
+            foreach (var h in o["headers"]?.AsArray() ?? new JsonArray()) headers.Add(Activator.CreateInstance(headerT, (string)h![0], (string)h[1]));
+            return Activator.CreateInstance(CoreType("Http.HttpResponseData"), (string?)o["version"] ?? "1.1", (int?)o["status"] ?? 200,
+                (string?)o["reason"] ?? "OK", headers, (bool?)o["success"] ?? true, (string?)o["content"] ?? "",
+                Convert.FromBase64String((string?)o["bytes"] ?? ""))!;
+        }
         case "json": case "jobject": case "jarray": case "jvalue":
             return JsonForHost(kind, (string)v!, 2);
         case "html": case "htmlel": case "xml":
@@ -56,9 +81,10 @@ object JsonForHost(string kind, string text, int host)
     if (host == 1) return JsonNode.Parse(text);
     string typeName = kind switch { "jobject" => "JsonObjectData", "jarray" => "JsonArrayData", "jvalue" => "JsonValueData", _ => "JsonToken" };
     var t = core.GetType("Swiftlet.Core.Json." + typeName, true);
-    var parse = t.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null)
-        ?? throw new MissingMethodException(t.Name + ".Parse(string)");
-    return parse.Invoke(null, new object[] { text });
+    var node = JsonNode.Parse(text);
+    if (kind == "jvalue" && node is null) return t.GetField("Null")!.GetValue(null);
+    var ctor = t.GetConstructors().Single(c => c.GetParameters().Length == 1 && typeof(JsonNode).IsAssignableFrom(c.GetParameters()[0].ParameterType));
+    return ctor.Invoke(new object[] { node });
 }
 
 // Markup nodes are the same CLR types in both hosts. "html" is the document node, "htmlel" its first
@@ -77,6 +103,19 @@ object MarkupNode(string kind, string markup)
     return kind == "html" ? (object)doc.DocumentNode : (object)doc.DocumentNode.FirstChild;
 }
 
+Type CoreType(string name) => core.GetType("Swiftlet.Core." + name, true)!;
+
+// {"name", "text", "contentType"?} or {"name", "bytes"(base64), "fileName"?, "contentType"?}
+object Field(JsonObject f)
+{
+    var t = CoreType("Http.MultipartField");
+    if (f["text"] is not null)
+        return t.GetConstructor(new[] { typeof(string), typeof(string), typeof(string), typeof(System.Text.Encoding) })!
+            .Invoke(new object[] { (string)f["name"]!, (string)f["text"]!, (string?)f["contentType"], null });
+    return t.GetConstructor(new[] { typeof(string), typeof(byte[]), typeof(string), typeof(string) })!
+        .Invoke(new object[] { (string)f["name"]!, Convert.FromBase64String((string)f["bytes"]!), (string?)f["fileName"], (string?)f["contentType"] });
+}
+
 object Gh1Goo(JsonObject spec)
 {
     var (kind, v) = spec.Single();
@@ -89,9 +128,16 @@ object Gh1Goo(JsonObject spec)
         case "query": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.QueryParameterGoo", true), CoreValue(spec));
         case "header": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HttpHeaderGoo", true), CoreValue(spec));
         case "bytes": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.ByteArrayGoo", true), CoreValue(spec));
+        case "bodytext": case "bodybytes": case "form": case "multipart":
+            return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.RequestBodyGoo", true), CoreValue(spec));
+        case "field": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.MultipartFieldGoo", true), CoreValue(spec));
+        case "response": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HttpResponseDataGoo", true), CoreValue(spec));
         case "json": case "jobject": case "jarray": case "jvalue":
             string goo = kind switch { "jobject" => "JsonObjectGoo", "jarray" => "JsonArrayGoo", "jvalue" => "JsonValueGoo", _ => "JsonNodeGoo" };
-            return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo." + goo, true), JsonForHost(kind, (string)v!, 1));
+            var gooT = sw1.GetType("Swiftlet.Gh.Rhino8.Goo." + goo, true);
+            var parsed = JsonForHost(kind, (string)v!, 1);
+            if (parsed is null) return gooT.GetMethod("CreateJsonNull", BindingFlags.Public | BindingFlags.Static)!.Invoke(null, null);
+            return Activator.CreateInstance(gooT, parsed);
         case "html": case "htmlel":
             return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HtmlNodeGoo", true), MarkupNode(kind, (string)v!));
         case "xml":
@@ -108,10 +154,13 @@ object Canon(object o, int depth = 0)
     // GH1 goo -> underlying value
     if (t.GetInterface("Grasshopper.Kernel.Types.IGH_Goo") != null)
     {
+        // Prefer the wrapped value: Swiftlet's JSON goo return Newtonsoft tokens from ScriptVariable.
+        if (t.GetProperty("RepresentsJsonNull")?.GetValue(o) is true)
+            return new Dictionary<string, object> { ["json"] = "null" };
+        var valueProp = t.GetProperty("Value");
+        if (valueProp != null) return Canon(valueProp.GetValue(o), depth);
         var sv = t.GetMethod("ScriptVariable")?.Invoke(o, null);
-        if (sv != null && !ReferenceEquals(sv, o)) return Canon(sv, depth);
-        var val = t.GetProperty("Value")?.GetValue(o);
-        return Canon(val, depth);
+        return sv != null && !ReferenceEquals(sv, o) ? Canon(sv, depth) : new Dictionary<string, object> { ["opaque"] = t.FullName };
     }
     switch (o)
     {
@@ -122,6 +171,7 @@ object Canon(object o, int depth = 0)
         case double d: return new Dictionary<string, object> { ["num"] = d };
         case byte[] bytes: return new Dictionary<string, object> { ["bytes"] = Convert.ToBase64String(bytes) };
         case JsonNode node: return new Dictionary<string, object> { ["json"] = node.ToJsonString() };
+        case System.Text.Encoding enc: return new Dictionary<string, object> { ["encoding"] = enc.WebName };
         case System.Xml.XmlNode xmlNode: return new Dictionary<string, object> { ["xml"] = xmlNode.OuterXml };
     }
     if (t.FullName == "HtmlAgilityPack.HtmlNode")
@@ -245,7 +295,9 @@ void SetGh2(dynamic param, JsonNode spec)
 Dictionary<string, object> RunGh2(JsonObject c)
 {
     dynamic doc = Gh2Doc();
-    var compType = sw2.GetType("Swiftlet.Gh2.Components." + (string)(c["gh2"] ?? c["gh1"])!, true);
+    string gh2Name = (string)(c["gh2"] ?? c["gh1"])!;
+    var compType = sw2.GetTypes().SingleOrDefault(t => t.Name == gh2Name && t.Namespace!.StartsWith("Swiftlet.Gh2.Components"))
+        ?? throw new TypeLoadException("GH2 component class not found: " + gh2Name);
     dynamic comp = Activator.CreateInstance(compType);
     doc.Objects.Add(comp);
     try
@@ -283,6 +335,9 @@ Dictionary<string, object> RunGh2(JsonObject c)
                 string level = m.Level.ToString();
                 if (level == "Error" || level == "Warning") msgs.Add(level + ": " + (string)m.Text + " | " + (string)m.Info);
             }
+        // A Process that throws faults the object instead of adding a message; report it as an error.
+        Exception fault = comp.State.FaultException;
+        if (fault != null) msgs.Add("Error: unhandled " + fault.GetType().Name + ": " + fault.Message);
         string phase = comp.State.Phase.ToString();
         return new Dictionary<string, object> { ["outputs"] = outputs, ["messages"] = msgs, ["phase"] = phase };
     }
