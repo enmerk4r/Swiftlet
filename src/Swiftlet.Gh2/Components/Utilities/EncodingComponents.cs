@@ -132,7 +132,8 @@ public sealed class ByteArrayToTextComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.Add(new ByteArrayParameter("Byte Array", "By", "Input Byte Array"));
-        UtilityInputs.AddEncoding(inputs);
+        // Optional in Grasshopper 1 (the other encoding components require it); falls back to UTF8.
+        inputs.AddText("Encoding", "En", UtilityInputs.EncodingInfo, Access.Item, Requirement.MayBeMissing).Set("UTF8");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Text", "Tx", "Output text");
@@ -288,7 +289,7 @@ public sealed class CreateCsvLineComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);
-        inputs.AddText("Delimiter", "Dl", "CSV delimeter").Set(",");
+        inputs.AddText("Delimiter", "Dl", "CSV delimeter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Line", "Ln", "Formatted CSV line");
@@ -312,7 +313,7 @@ public sealed class ReadCsvLineComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Line", "Ln", "Formatted CSV line");
-        inputs.AddText("Delimiter", "Dl", "CSV delimeter").Set(",");
+        inputs.AddText("Delimiter", "Dl", "CSV delimeter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);

@@ -327,10 +327,10 @@ public sealed class GenerateQrCodeComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Text", "Tx", "Text to encode as a QR code (e.g. a URL)");
-        inputs.AddInteger("Pixels", "Px", "Pixels per module").Set(20);
-        inputs.AddColour("Dark", "Dk", "Dark color").Set(Colour.FromGdi(Color.Black));
-        inputs.AddColour("Light", "Lt", "Light color").Set(Colour.FromGdi(Color.White));
-        inputs.AddBoolean("Quiet", "Qt", "Draw quiet zones").Set(true);
+        inputs.AddInteger("Pixels", "Px", "Pixels per module", Access.Item, Requirement.MayBeMissing).Set(20);
+        inputs.AddColour("Dark", "Dk", "Dark color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.Black));
+        inputs.AddColour("Light", "Lt", "Light color", Access.Item, Requirement.MayBeMissing).Set(Colour.FromGdi(Color.White));
+        inputs.AddBoolean("Quiet", "Qt", "Draw quiet zones", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new BitmapParameter("Bitmap", "Bm", "Output bitmap"));
