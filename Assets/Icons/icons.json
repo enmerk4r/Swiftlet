@@ -52,8 +52,9 @@
       "classes": [
         "BitmapParam"
       ],
-      "faces": 12,
+      "faces": 6,
       "shadows": 0,
+      "outsideArtboardRemoved": 6,
       "diffVsLegacy": 12.28
     },
     "bitmap-to-byte-array": {
@@ -74,8 +75,9 @@
       "classes": [
         "ByteArrayParam"
       ],
-      "faces": 18,
+      "faces": 9,
       "shadows": 0,
+      "outsideArtboardRemoved": 9,
       "diffVsLegacy": 16.81
     },
     "byte-array-to-base64": {
@@ -813,8 +815,9 @@
       "classes": [
         "HtmlNodeParam"
       ],
-      "faces": 15,
+      "faces": 7,
       "shadows": 0,
+      "outsideArtboardRemoved": 8,
       "diffVsLegacy": 20.14
     },
     "http-header-param": {
@@ -880,8 +883,9 @@
       "classes": [
         "JsonArrayParam"
       ],
-      "faces": 13,
+      "faces": 7,
       "shadows": 0,
+      "outsideArtboardRemoved": 6,
       "diffVsLegacy": 14.11
     },
     "jobject-param": {
@@ -891,8 +895,9 @@
       "classes": [
         "JsonObjectParam"
       ],
-      "faces": 14,
+      "faces": 7,
       "shadows": 0,
+      "outsideArtboardRemoved": 7,
       "diffVsLegacy": 14.2
     },
     "jtoken-param": {
@@ -902,8 +907,9 @@
       "classes": [
         "JsonNodeParam"
       ],
-      "faces": 13,
+      "faces": 7,
       "shadows": 0,
+      "outsideArtboardRemoved": 6,
       "diffVsLegacy": 13.07
     },
     "jvalue-param": {
@@ -913,8 +919,9 @@
       "classes": [
         "JsonValueParam"
       ],
-      "faces": 12,
+      "faces": 6,
       "shadows": 0,
+      "outsideArtboardRemoved": 6,
       "diffVsLegacy": 12.82
     },
     "list-to-byte-array": {

@@ -134,6 +134,10 @@ def main():
         open(os.path.join(out_svg, slug + ".svg"), "w", newline="\n").write(svg)
         render_svg(svg, 24).save(os.path.join(out_png, slug + ".png"))
         m["faces"], m["shadows"] = faces, shadows
+        if convert.vector_elements.removed:
+            m["outsideArtboardRemoved"] = convert.vector_elements.removed  # organising captions, see convert.py
+        else:
+            m.pop("outsideArtboardRemoved", None)
         orig = on_white(Image.open(os.path.join(legacy_dir, m["legacyPng"])).resize((24, 24)))
         new = on_white(Image.open(os.path.join(out_png, slug + ".png")))
         m["diffVsLegacy"] = round(float(np.abs(orig - new).mean()), 2)
