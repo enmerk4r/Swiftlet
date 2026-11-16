@@ -1,0 +1,63 @@
+[
+ {
+  "name": "FormatJsonString: object",
+  "gh1": "FormatJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{\"a\":1,\"b\":[true,null,\"x\"]}"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "{\r\n  \"a\": 1,\r\n  \"b\": [\r\n    true,\r\n    null,\r\n    \"x\"\r\n  ]\r\n}"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "FormatJsonString: scalar",
+  "gh1": "FormatJsonStringComponent",
+  "inputs": [
+   {
+    "text": "  42 "
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "42"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "FormatJsonString: unicode kept",
+  "gh1": "FormatJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{\"k\":\"λ\"}"
+   }
+  ]
+ },
+ {
+  "name": "FormatJsonString: invalid JSON is an error",
+  "gh1": "FormatJsonStringComponent",
+  "inputs": [
+   {
+    "text": "{not json"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "FormatJsonString: JSON null is an error",
+  "gh1": "FormatJsonStringComponent",
+  "inputs": [
+   {
+    "text": "null"
+   }
+  ],
+  "expectError": true
+ }
+]
