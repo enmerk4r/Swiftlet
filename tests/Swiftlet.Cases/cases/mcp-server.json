@@ -4,7 +4,7 @@
     "gh1": "CreateMcpTextContentComponent",
     "inputs": [
       {
-        "text": "hello λ"
+        "text": "hello Î»"
       }
     ],
     "expect": [
@@ -12,7 +12,7 @@
         {
           "mcp": {
             "type": "text",
-            "text": "hello λ"
+            "text": "hello Î»"
           }
         }
       ]
@@ -116,7 +116,7 @@
         "text": "file:///hello.txt"
       },
       {
-        "text": "λ\nline"
+        "text": "Î»\nline"
       }
     ],
     "expect": [
@@ -126,7 +126,7 @@
             "type": "resource",
             "resource": {
               "uri": "file:///hello.txt",
-              "text": "λ\nline",
+              "text": "Î»\nline",
               "mimeType": "text/plain"
             }
           }
@@ -487,7 +487,7 @@
           "method": "POST",
           "route": "/api",
           "path": "/api/case",
-          "body": "hi λ"
+          "body": "hi Î»"
         }
       }
     ]
@@ -540,5 +540,86 @@
         }
       ]
     ]
+  },
+  {
+    "name": "MCP image png",
+    "gh1": "CreateMcpImageContentComponent",
+    "inputs": [
+      {
+        "image": [
+          1,
+          1,
+          "/wAA/w=="
+        ]
+      },
+      {
+        "text": "png"
+      }
+    ]
+  },
+  {
+    "name": "MCP image jpeg",
+    "gh1": "CreateMcpImageContentComponent",
+    "inputs": [
+      {
+        "image": [
+          1,
+          1,
+          "/wAA/w=="
+        ]
+      },
+      {
+        "text": "jpeg"
+      }
+    ]
+  },
+  {
+    "name": "MCP image gif",
+    "gh1": "CreateMcpImageContentComponent",
+    "inputs": [
+      {
+        "image": [
+          1,
+          1,
+          "/wAA/w=="
+        ]
+      },
+      {
+        "text": "gif"
+      }
+    ]
+  },
+  {
+    "name": "MCP image tiff",
+    "gh1": "CreateMcpImageContentComponent",
+    "inputs": [
+      {
+        "image": [
+          1,
+          1,
+          "/wAA/w=="
+        ]
+      },
+      {
+        "text": "tiff"
+      }
+    ]
+  },
+  {
+    "name": "MCP image rejects unknown format",
+    "gh1": "CreateMcpImageContentComponent",
+    "inputs": [
+      {
+        "image": [
+          1,
+          1,
+          "/wAA/w=="
+        ]
+      },
+      {
+        "text": "invalid"
+      }
+    ],
+    "expectError": true
   }
 ]
