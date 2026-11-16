@@ -41,11 +41,10 @@ public sealed class GetElementsByTagNameComponent : GH_Component
             return;
         }
 
-        IEnumerable<HtmlNode> nodes = recursive
-            ? goo.Value.Descendants(tag)
-            : goo.Value.ChildNodes.Where(static node => node.Name is not null).Where(node => node.Name == tag);
-
-        DA.SetDataList(0, nodes.Select(static node => new HtmlNodeGoo(node)));
+        DA.SetDataList(
+            0,
+            HtmlQueries.GetElementsByTagName(goo.Value, tag, recursive)
+                .Select(static node => new HtmlNodeGoo(node)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

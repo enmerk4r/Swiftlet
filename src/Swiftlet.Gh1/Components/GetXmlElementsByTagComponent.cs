@@ -44,20 +44,7 @@ public sealed class GetXmlElementsByTagComponent : GH_Component
             return;
         }
 
-        XmlNodeList? elements = goo.Value is XmlElement element
-            ? element.GetElementsByTagName(tagName)
-            : goo.Value.SelectNodes($".//{tagName}");
-
-        List<XmlNodeGoo> results = [];
-        if (elements is not null)
-        {
-            foreach (XmlNode child in elements)
-            {
-                results.Add(new XmlNodeGoo(child));
-            }
-        }
-
-        DA.SetDataList(0, results);
+        DA.SetDataList(0, XmlQueries.GetElementsByTag(goo.Value, tagName).Select(static child => new XmlNodeGoo(child)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

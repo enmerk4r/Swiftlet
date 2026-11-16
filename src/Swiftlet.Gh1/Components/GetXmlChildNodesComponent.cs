@@ -33,16 +33,7 @@ public sealed class GetXmlChildNodesComponent : GH_Component
             return;
         }
 
-        List<XmlNodeGoo> children = [];
-        foreach (XmlNode child in goo.Value.ChildNodes)
-        {
-            if (child.NodeType == XmlNodeType.Element || (child.NodeType == XmlNodeType.Text && !string.IsNullOrWhiteSpace(child.Value)))
-            {
-                children.Add(new XmlNodeGoo(child));
-            }
-        }
-
-        DA.SetDataList(0, children);
+        DA.SetDataList(0, XmlQueries.GetChildNodes(goo.Value).Select(static child => new XmlNodeGoo(child)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

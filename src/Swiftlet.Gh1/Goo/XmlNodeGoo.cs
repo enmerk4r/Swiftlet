@@ -26,31 +26,7 @@ public sealed class XmlNodeGoo : GH_Goo<XmlNode>
 
     public override string ToString() => Value is null ? "Null XML Node" : $"XML Node [ {Value.Name} ]";
 
-    public string ToXmlString(bool indent = true)
-    {
-        if (Value is null)
-        {
-            return string.Empty;
-        }
-
-        if (!indent)
-        {
-            return Value.OuterXml;
-        }
-
-        var builder = new StringBuilder();
-        var settings = new XmlWriterSettings
-        {
-            Indent = true,
-            IndentChars = "  ",
-            OmitXmlDeclaration = true,
-        };
-
-        using XmlWriter writer = XmlWriter.Create(builder, settings);
-        Value.WriteTo(writer);
-        writer.Flush();
-        return builder.ToString();
-    }
+    public string ToXmlString(bool indent = true) => XmlQueries.ToXmlString(Value, indent);
 
     public override bool CastTo<Q>(ref Q target)
     {

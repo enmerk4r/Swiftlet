@@ -62,37 +62,18 @@ public sealed class CreateXmlElementComponent : GH_Component
             return;
         }
 
-        var document = new XmlDocument();
-        XmlElement element = string.IsNullOrWhiteSpace(xmlNamespace)
-            ? document.CreateElement(name)
-            : document.CreateElement(name, xmlNamespace);
+        XmlElement element = XmlQueries.CreateElement(
+            name,
+            text,
+            xmlNamespace,
+            attributeNames,
+            attributeValues,
+            children.Select(static child => child?.Value),
+            out List<int> skippedAttributeIndices);
 
-        if (!string.IsNullOrEmpty(text))
+        foreach (int index in skippedAttributeIndices)
         {
-            element.InnerText = text;
-        }
-
-        for (int index = 0; index < attributeNames.Count; index++)
-        {
-            string attributeName = attributeNames[index];
-            if (string.IsNullOrWhiteSpace(attributeName))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Skipping attribute at index {index}: name is empty");
-                continue;
-            }
-
-            element.SetAttribute(attributeName, attributeValues[index] ?? string.Empty);
-        }
-
-        foreach (XmlNodeGoo? child in children)
-        {
-            if (child?.Value is null)
-            {
-                continue;
-            }
-
-            XmlNode importedChild = document.ImportNode(child.Value, deep: true);
-            element.AppendChild(importedChild);
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Skipping attribute at index {index}: name is empty");
         }
 
         DA.SetData(0, new XmlNodeGoo(element));
