@@ -43,6 +43,7 @@ public sealed class OAuthAuthorizeComponent : OAuthComponentBase
         access.SetItem(0, value.Code); access.SetItem(1, value.Verifier); access.SetItem(2, value.RedirectUri); access.SetItem(3, value.Status);
         if (value.ReportError && value.Error is not null) access.AddError("OAuth", value.Error);
         if (value.Warning is not null) access.AddWarning("OAuth", value.Warning);
+        ComponentMessage.Show(this, value.IsWaiting ? "Waiting..." : value.Code is not null ? "Authorized" : value.Error is not null ? "Error" : null, label => Label = label);
     }
     private void OnChanged(object? sender, EventArgs args)
     {

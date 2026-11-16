@@ -149,13 +149,17 @@ public sealed class SaveWebResponseComponent : SwiftletComponent
 {
     private const string SaveAsTextKey = "SaveAsText";
 
-    public SaveWebResponseComponent() : base("Save Web Response", "Save Web Response to disk", Sections.Utilities) { }
+    public SaveWebResponseComponent() : base("Save Web Response", "Save Web Response to disk", Sections.Utilities) => ShowMode();
 
     public SaveWebResponseComponent(IReader reader) : base(reader)
     {
         if (reader.HasItem(SaveAsTextKey))
             SaveAsText = reader.Boolean(SaveAsTextKey);
+        ShowMode();
     }
+
+    /// <summary>GH1 shows the save mode under the component at all times, not only after a solve.</summary>
+    private void ShowMode() => ShowMessage(SaveAsText ? "Text" : "Binary");
 
     /// <summary>False saves the response bytes ("Binary" in Grasshopper 1); true saves the text content.</summary>
     public bool SaveAsText
@@ -180,6 +184,7 @@ public sealed class SaveWebResponseComponent : SwiftletComponent
 
     protected override void Process(IDataAccess access)
     {
+        ShowMode();
         access.GetItem(0, out HttpResponseData response);
         access.GetItem(1, out string path);
         if (response is null)
@@ -214,6 +219,7 @@ public sealed class SaveWebResponseComponent : SwiftletComponent
             AddUndoRecord(new Grasshopper2.Undo.VerbNoun("Change", "Save mode"),
                 new Grasshopper2.Undo.Actions.CustomValueAction(this, SaveAsTextKey));
             SaveAsText = picker.SelectedIndex == 1;
+            ShowMode();
             Expire();
             Document?.Solution.Start();
         };

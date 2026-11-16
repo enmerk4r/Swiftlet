@@ -63,6 +63,7 @@ public sealed class ServerInputComponent : Component, IRemovalAware
             _session ??= CreateSession();
             if (_session.Port != port) _requests.Clear();
             _session.ReconfigureAsync(port, routes, linked.Token).GetAwaiter().GetResult();
+            ComponentMessage.Show(this, $"http://localhost:{port}/", label => Label = label);
             var requests = _requests.Capture(routes, route => _session.TryDequeuePendingRequest(route, out var request) ? request : null);
             linked.Token.ThrowIfCancellationRequested();
             for (int index = 0; index < requests.Length; index++)

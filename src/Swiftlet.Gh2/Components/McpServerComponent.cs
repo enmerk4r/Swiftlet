@@ -58,13 +58,14 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
             _session ??= CreateSession();
             if (_session.Port != port) _calls.Clear();
             _session.ReconfigureAsync(port, name, tools, linked.Token).GetAwaiter().GetResult();
+            ShowMessage(_session.StatusMessage);
             var names = Parameters.Outputs.Select(p => p.UserName).ToArray();
             var calls = _calls.Capture(names, key => _session.TryDequeuePendingCall(key, out var call) ? call : null);
             linked.Token.ThrowIfCancellationRequested();
             for (int index = 0; index < calls.Length; index++) access.SetItem(index, calls[index]!);
         }
         catch (OperationCanceledException) when (access.Solution.Token.IsCancellationRequested || _lifetime.IsCancellationRequested) { throw; }
-        catch (Exception error) { access.AddError("MCP server failed", $"Failed to start MCP server: {error.Message}"); }
+        catch (Exception error) { access.AddError("MCP server failed", $"Failed to start MCP server: {error.Message}"); ShowMessage("Error"); }
         finally { _gate.Release(); }
     }
     private ModernMcpServerSession CreateSession()

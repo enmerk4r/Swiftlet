@@ -85,6 +85,20 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
             Stop();
     }
 
+    /// <summary>
+    /// GH1's Message for a transfer that is idle, finished or running ("Starting..." is set by the caller when
+    /// it starts one). Progress solves come from <see cref="FileTransferJob.Changed"/>, so the text follows them.
+    /// </summary>
+    private protected void ShowTransferMessage(bool run, TransferSnapshot state, bool download)
+    {
+        if (!run)
+            ShowMessage("Idle");
+        else if (state.Completed)
+            ShowMessage(!state.Success ? "Failed" : download ? $"Done ({TransferFormatting.FormatBytes(state.Bytes)})" : "Done");
+        else if (state.Running)
+            ShowMessage(download ? TransferMessages.DownloadProgress(state) : TransferMessages.UploadProgress(state));
+    }
+
     /// <summary>Validates URL and path as GH1 does; returns the normalised path or null after an error.</summary>
     private protected static string? ValidateUrlAndPath(IDataAccess access, string? url, string? path)
     {
@@ -164,6 +178,7 @@ public sealed class DownloadFileComponent : TransferComponent
         access.GetItem(5, out bool overwrite);
 
         var state = Job.Snapshot;
+        ShowTransferMessage(run, state, download: true);
         if (!run)
         {
             Stop();
@@ -192,6 +207,7 @@ public sealed class DownloadFileComponent : TransferComponent
             return;
         }
 
+        ShowMessage("Starting...");
         _job.Start(UrlBuilder.AddQueryParameters(url, query), normalizedPath, headers);
         Set(access, false, 0, null, 0, 0, null);
     }
@@ -240,7 +256,9 @@ public sealed class UploadFileComponent : TransferComponent
         var headers = Items<HttpHeader>(access, 5);
         access.GetItem(6, out bool run);
 
-        if (UploadOutputs.Report(access, run, Job.Snapshot, Stop))
+        var state = Job.Snapshot;
+        ShowTransferMessage(run, state, download: false);
+        if (UploadOutputs.Report(access, run, state, Stop))
             return;
 
         string? normalizedPath = ValidateUrlAndPath(access, url, path);
@@ -263,6 +281,7 @@ public sealed class UploadFileComponent : TransferComponent
             contentType = MimeTypeMap.GetMimeType(normalizedPath);
 
         long fileSize = new FileInfo(normalizedPath).Length;
+        ShowMessage($"Starting... ({TransferFormatting.FormatBytes(fileSize)})");
         _job.Start(UrlBuilder.AddQueryParameters(url, query), normalizedPath, method, contentType, headers, fileSize);
         UploadOutputs.Set(access, false, 0, 0, null, null);
     }
@@ -304,7 +323,9 @@ public sealed class UploadFileMultipartComponent : TransferComponent
         var headers = Items<HttpHeader>(access, 6);
         access.GetItem(7, out bool run);
 
-        if (UploadOutputs.Report(access, run, Job.Snapshot, Stop))
+        var state = Job.Snapshot;
+        ShowTransferMessage(run, state, download: false);
+        if (UploadOutputs.Report(access, run, state, Stop))
             return;
 
         string? normalizedPath = ValidateUrlAndPath(access, url, path);
@@ -324,6 +345,7 @@ public sealed class UploadFileMultipartComponent : TransferComponent
             contentType = MimeTypeMap.GetMimeType(normalizedPath);
 
         long fileSize = new FileInfo(normalizedPath).Length;
+        ShowMessage($"Starting... ({TransferFormatting.FormatBytes(fileSize)})");
         _job.Start(url, normalizedPath, fieldName, fileName, contentType, fields, headers, fileSize);
         UploadOutputs.Set(access, false, 0, 0, null, null);
     }

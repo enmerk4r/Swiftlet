@@ -18,6 +18,9 @@ public abstract class SwiftletComponent : Component
     protected SwiftletComponent(IReader reader) : base(reader) { }
 
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
+
+    /// <summary>GH1's <c>Message</c>: text under the component (see <see cref="ComponentMessage"/>); null clears it.</summary>
+    protected void ShowMessage(string? text) => ComponentMessage.Show(this, text, label => Label = label);
 }
 
 /// <summary>Chapter and section names; identical to the Grasshopper 1 tab and panels.</summary>

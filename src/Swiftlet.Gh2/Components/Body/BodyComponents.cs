@@ -65,6 +65,7 @@ public sealed class CreateTextBodyComponent : SwiftletComponent
         // change the stored setting: GH2 solves run in parallel and must not mutate the component.
         string contentType = RequestBodyContent.DetectContentType(content) ?? ContentType;
         access.SetItem(0, new RequestBodyText(contentType, text));
+        ShowMessage(ContentTypes.ToDisplayName(contentType));
     }
 
     public override void AppendToInputPanel(InputPanel panel)
@@ -209,6 +210,7 @@ public sealed class CreateFormUrlEncodedBodyComponent : SwiftletComponent
         if (keys.Count == 0)
             access.AddWarning("No form fields provided", "Both lists are empty.");
         access.SetItem(0, new RequestBodyFormUrlEncoded(keys, values));
+        ShowMessage("x-www-form-urlencoded");
     }
 }
 
