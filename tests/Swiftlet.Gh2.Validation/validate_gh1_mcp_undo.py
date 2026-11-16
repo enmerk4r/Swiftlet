@@ -1,4 +1,4 @@
-"""GH1 baseline: remove a connected tool, native wire Undo, inspect downstream wire."""
+"""GH1: remove a connected tool, native wire Undo/Redo/Undo; the output must come back with its pin id and downstream wire."""
 import argparse,json,socket,sys,time
 from pathlib import Path
 HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1];sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
@@ -17,9 +17,14 @@ def settled(names):
 with socket.socket() as sock:sock.bind(("127.0.0.1",0));port=sock.getsockname()[1]
 try:
  call(action="setup",port=port);settled(["first","second"])
- r=call(action="wire");assert r["wires"]==1,r;rows.append({"action":"before",**r})
- call(action="tools");r=settled(["first"]);assert r["wires"]==0,r;rows.append({"action":"removed",**r})
- call(action="undo");r=settled(["first","second"]);rows.append({"action":"undo",**r})
- print("GH1 Undo restores "+("output and wire" if r["wires"]==1 else "output only; downstream wire remains disconnected"),flush=True)
+ r=call(action="wire");assert r["wires"]==1,r;rows.append({"action":"before","passed":True,**r});pin=r["pins"][1]["id"]
+ call(action="tools");r=settled(["first"]);rows.append({"action":"removed","passed":r["wires"]==0,**r})
+ for action,names in [("undo",["first","second"]),("redo",["first"]),("undo",["first","second"])]:
+  call(action=action);r=settled(names);restored=len(names)==2
+  ok=r["wires"]==1 and r["pins"][1]["id"]==pin if restored else r["wires"]==0
+  rows.append({"action":action,"passed":ok,**r})
+ ok=all(x["passed"] for x in rows)
+ print(("PASS" if ok else "FAIL")+" GH1 MCP tool removal Undo/Redo/Undo restores pin id and downstream wire",flush=True)
 finally:
  call(action="close");a.report.parent.mkdir(parents=True,exist_ok=True);a.report.write_text(json.dumps(rows,indent=2))
+sys.exit(0 if rows and all(x["passed"] for x in rows) else 1)
