@@ -22,6 +22,11 @@ value). Descriptions and nicknames are warnings only (GH2 uses two-letter nickna
 optional input with a default that GH2 makes required with the same default is a warning (it differs only
 when a connected wire carries no data); --strict makes it a mismatch.
 
+Pin short names (GH1 NickName vs GH2 UserName, e.g. "K" vs "Ky") are not a parity criterion; they are
+recorded per component in gh2.nicknames ("gh1" = every pin uses the GH1 nickname, "own" = none does,
+"mixed", or "none" for no pins) with the differing pins listed, so either convention can be applied
+mechanically. --nicknames prints them. Warnings are stored per entry in gh2.warnings.
+
 Exit status is non-zero when any non-archived entry is not "ported" or a rule is broken.
 """
 import argparse, json, pathlib, re, sys
@@ -63,6 +68,27 @@ def norm_value(v):
 STRICT_OPTIONAL = False
 
 
+def compare_nicknames(gh1_pins, gh2_pins, side):
+    """(matching count, differing pins) for GH1 nickname vs GH2 short name (UserName), pin by pin."""
+    same, differ = 0, []
+    for i, (a, b) in enumerate(zip(gh1_pins, gh2_pins)):
+        if (a.get("nickname") or "") == (b.get("userName") or ""):
+            same += 1
+        else:
+            differ.append({"pin": f"{side}[{i}] {a['name']}", "gh1": a.get("nickname"), "gh2": b.get("userName")})
+    return same, differ
+
+
+def nickname_summary(e, target):
+    same, differ = 0, []
+    for side, key in (("in", "inputs"), ("out", "outputs")):
+        n, d = compare_nicknames(e.get(key, []), target.get(key, []), side)
+        same += n
+        differ += d
+    status = "none" if same + len(differ) == 0 else "gh1" if not differ else "own" if same == 0 else "mixed"
+    return {"status": status, "same": same, "differ": differ}
+
+
 def compare_pins(side, gh1_pins, gh2_pins, inputs):
     diffs, warnings = [], []
     if len(gh1_pins) != len(gh2_pins):
@@ -98,6 +124,7 @@ def main():
     ap.add_argument("--write", action="store_true", help="update the gh2 blocks in docs/parity.json")
     ap.add_argument("--report", help="write the raw GH2 catalog and evaluation here")
     ap.add_argument("--warnings", action="store_true", help="also print description/nickname warnings")
+    ap.add_argument("--nicknames", action="store_true", help="list pin short names that differ from the GH1 nicknames")
     ap.add_argument("--strict", action="store_true", help="treat GH1 optional-with-default vs GH2 required-with-default as a mismatch")
     a = ap.parse_args()
     global STRICT_OPTIONAL
@@ -128,6 +155,7 @@ def main():
             guess = e["class"][:-len("Param")] + "Parameter" if e["kind"] == "param" and e["class"].endswith("Param") else e["class"]
             target = by_class.get(guess)
         diffs, warns = [], []
+        nicknames = None
         if len(rules) > 1:
             diffs.append(f"{len(rules)} migration rules for this GH1 GUID ({', '.join(r['source'] for r in rules)})")
         if target is not None and not e["archived"]:
@@ -144,6 +172,7 @@ def main():
         if target is not None and e["kind"] == "component" and target.get("kind") == "component" and not e["archived"]:
             if e["description"] != target.get("info"):
                 warns.append("component description differs")
+            nicknames = nickname_summary(e, target)
             for side, inputs in (("in", True), ("out", False)):
                 d, w = compare_pins(side, e.get("inputs" if inputs else "outputs", []), target.get("inputs" if inputs else "outputs", []), inputs)
                 diffs += d
@@ -169,6 +198,8 @@ def main():
             "status": status,
             "migration": ({"rule": rule["ruleType"], "table": rule["source"], "target": rule.get("gh2Class")} if rule else None),
             "diffs": diffs,
+            "warnings": warns,
+            "nicknames": nicknames,
             "notes": old.get("notes", ""),
         }
         if status not in ("ported", "archived"):
@@ -196,6 +227,19 @@ def main():
         print("BROKEN", b)
     if extra:
         print("\nGH2 objects with no GH1 counterpart:", ", ".join(sorted(extra)))
+    nick = [(e["class"], e["gh2"]["nicknames"]) for e in doc["entries"] if e["gh2"].get("nicknames")]
+    tally = {}
+    for _, n in nick:
+        tally[n["status"]] = tally.get(n["status"], 0) + 1
+    print("\npin short names vs GH1 nicknames (components):",
+          ", ".join(f"{k} {v}" for k, v in sorted(tally.items())), "; --nicknames to list")
+    if a.nicknames:
+        for status in ("mixed", "own", "gh1"):
+            rows = sorted(((c, n) for c, n in nick if n["status"] == status), key=lambda r: r[0])
+            print(f"\n{status} ({len(rows)}):")
+            for c, n in rows:
+                differ = ", ".join(f"{d['pin']} {d['gh1']}->{d['gh2']}" for d in n["differ"])
+                print(f"  {c}: {differ}" if differ else f"  {c}")
     if a.warnings:
         for w in warnings:
             print("WARN", w)
