@@ -101,9 +101,20 @@ The script:
   - keeps `osx-x64` as a self-contained single-file bridge
   - produces a single `rh8-any` Yak package because Yak compatibility is derived from the referenced RhinoCommon SDK
 - `rhino9`
-  - builds from the same `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
-  - stages the same binary for Rhino 9 discovery
+  - builds the Grasshopper 1 shell from the same `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
+  - also builds the Grasshopper 2 shell (`src/Swiftlet.Gh2/Swiftlet.Gh2.csproj`, listed under `additionalPlugins` in `build/targets/rhino9.json`) and stages `Swiftlet.Gh2.rhp` into the same folder
+  - both shells share one copy of every common assembly; packaging fails if a shared assembly's identity differs between them
   - re-tags the generated `any` package to `rh9-*` after `yak build`
+
+For a local test package without the CI-built Linux and macOS bridges:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build\packaging\Publish-Target.ps1 -Target rhino9 -Configuration Release -OnlyBridgeIds win-x64
+```
+
+Such a package is not release-complete. The Windows Native AOT bridge needs the MSVC linker (Visual Studio Build Tools, C++ workload) and `vswhere.exe` on `PATH` (`C:\Program Files (x86)\Microsoft Visual Studio\Installer`). `Yak.exe` from Rhino 9 needs the .NET 10 runtime.
+
+To try a built package without installing it, extract the `.yak` (it is a zip) and start Rhino 9 with `RHINO_PACKAGE_DIRS` set to the extracted folder.
 
 ## Output Layout
 
