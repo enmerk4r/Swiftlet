@@ -38,6 +38,8 @@ internal static class IntegrationTestRunner
             ("JSON goos cast from Newtonsoft tokens for legacy interop", JsonGoosCastFromNewtonsoftTokensAsync),
             ("Headless host services require manual browser and clipboard actions", HeadlessServicesRequireManualActionsAsync),
             ("Desktop host workflow exposes desktop capabilities", DesktopWorkflowExposesCapabilitiesAsync),
+            ("OAuth token session deduplicates, refreshes and cancels without replaying codes", OAuthTokenSessionTests.RunAsync),
+            ("OAuth controller rejects wrong state, releases callbacks and guards reset generations", OAuthAuthorizationControllerTests.RunAsync),
             ("Modern OAuth authorization flow tracks state through callback completion", OAuthAuthorizationFlowTracksStateAsync),
             ("OAuth callback listener completes a loopback authorization round-trip", OAuthLoopbackCallbackRoundTripAsync),
             ("OAuth callback listener accepts form-post authorization responses", OAuthLoopbackCallbackFormPostRoundTripAsync),
