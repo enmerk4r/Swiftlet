@@ -1,4 +1,4 @@
-using System.Net.Sockets;
+
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -7,17 +7,14 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed class UdpListenerComponent : GH_Component
 {
-    private UdpClient? _client;
-    private Task? _listenerTask;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private int _port;
-    private byte[]? _lastData;
-    private string? _lastRemoteEndpoint;
+    private readonly UdpListenerSession _session = new();
     private bool _freeze;
 
     public UdpListenerComponent()
         : base("UDP Listener", "UDP-L", "A UDP listener component that receives UDP datagrams on a specified port.\nThis component is ALPHA. Use at your own risk.", ShellNaming.Category, ShellNaming.Server)
     {
+        _session.DataReceived += OnDataReceived;
+        _session.Faulted += OnFaulted;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -53,22 +50,23 @@ public sealed class UdpListenerComponent : GH_Component
             return;
         }
 
-        bool portChanged = _port != port;
-        _port = port;
         Message = $":{port}";
 
-        if (_client is null || portChanged)
+        try
         {
-            StopListener();
-            StartListener(port);
+            _session.Start(port);
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to start listener: {ex.Message}");
         }
 
-        if (_lastData is not null)
+        if (_session.LatestData is { } data)
         {
-            DA.SetData(0, new ByteArrayGoo(_lastData));
+            DA.SetData(0, new ByteArrayGoo(data));
         }
 
-        DA.SetData(1, _lastRemoteEndpoint);
+        DA.SetData(1, _session.LatestRemoteEndpoint);
     }
 
     protected override void AfterSolveInstance()
@@ -79,7 +77,7 @@ public sealed class UdpListenerComponent : GH_Component
 
     public override void RemovedFromDocument(GH_Document document)
     {
-        StopListener();
+        _session.Stop();
         base.RemovedFromDocument(document);
     }
 
@@ -87,7 +85,7 @@ public sealed class UdpListenerComponent : GH_Component
     {
         if (context == GH_DocumentContext.Close)
         {
-            StopListener();
+            _session.Stop();
         }
 
         base.DocumentContextChanged(document, context);
@@ -97,62 +95,16 @@ public sealed class UdpListenerComponent : GH_Component
 
     public override Guid ComponentGuid => new("B4E8C3D2-9F5A-4E6B-8C7D-2F3E4A5B6C7D");
 
-    private void StartListener(int port)
+    private void OnDataReceived(object? sender, EventArgs e)
     {
-        try
+        if (!_freeze)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _client = new UdpClient(port);
-            _listenerTask = Task.Run(() => ListenForDataAsync(_cancellationTokenSource.Token));
-        }
-        catch (Exception ex)
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to start listener: {ex.Message}");
+            Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
         }
     }
 
-    private void StopListener()
+    private void OnFaulted(object? sender, string message)
     {
-        try
-        {
-            _cancellationTokenSource?.Cancel();
-            _client?.Close();
-            _client?.Dispose();
-            _client = null;
-            _listenerTask = null;
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
-        }
-        catch
-        {
-        }
-    }
-
-    private async Task ListenForDataAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (!cancellationToken.IsCancellationRequested && _client is not null)
-            {
-                UdpReceiveResult result = await _client.ReceiveAsync().ConfigureAwait(false);
-                _lastData = result.Buffer;
-                _lastRemoteEndpoint = $"{result.RemoteEndPoint.Address}:{result.RemoteEndPoint.Port}";
-
-                if (!_freeze)
-                {
-                    Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
-                }
-            }
-        }
-        catch (ObjectDisposedException)
-        {
-        }
-        catch (SocketException)
-        {
-        }
-        catch (Exception ex)
-        {
-            Rhino.RhinoApp.InvokeOnUiThread((Action)(() => AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message)));
-        }
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => AddRuntimeMessage(GH_RuntimeMessageLevel.Error, message)));
     }
 }

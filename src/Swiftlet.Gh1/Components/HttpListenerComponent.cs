@@ -19,7 +19,7 @@ public sealed class HttpListenerComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddIntegerParameter("Port", "P", "Port number to listen at between 0 and 65353", GH_ParamAccess.item);
+        pManager.AddIntegerParameter("Port", "P", "Port number to listen at between 0 and 65535", GH_ParamAccess.item);
         pManager.AddTextParameter("Route", "R", "Optional route prefix", GH_ParamAccess.item);
         pManager.AddParameter(new RequestBodyParam(), "Response Body", "B", "Pre-canned response body that will be returned to the sender", GH_ParamAccess.item);
 
@@ -49,9 +49,9 @@ public sealed class HttpListenerComponent : GH_Component
         DA.GetData(1, ref route);
         DA.GetData(2, ref responseBody);
 
-        if (port < 0 || port > 65353)
+        if (port < 0 || port > 65535)
         {
-            throw new Exception("Port number must be between 0 and 65353");
+            throw new Exception("Port number must be between 0 and 65535");
         }
 
         if (!string.IsNullOrEmpty(route) && !route.EndsWith("/"))

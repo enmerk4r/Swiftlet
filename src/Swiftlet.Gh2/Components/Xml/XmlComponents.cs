@@ -72,9 +72,9 @@ public sealed class CreateXmlElementComponent : SwiftletComponent
         // Optional lists need an explicit empty twig or the component does not run when they are unconnected.
         inputs.AddText("Attr Names", "An", "List of attribute names", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
         inputs.AddText("Attr Values", "Av", "List of attribute values", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
-        var children = new XmlNodeParameter("Children", "Ch", "Child XML elements", Access.Twig) { Requirement = Requirement.MayBeMissing };
+        var children = new XmlNodeParameter("Children", "Ch", "Child XML elements", Access.Twig);
         children.Set(Array.Empty<XmlNode>());
-        inputs.Add(children);
+        inputs.Add(children, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
