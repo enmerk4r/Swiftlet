@@ -15,4 +15,6 @@ internal static partial class ComponentIds
     public const string DeconstructHttpResponse = "4ff3841b-13cf-472a-a9e6-6204e80bff21";
     public const string DeconstructMultipartField = "2e815138-f6d7-44b3-909c-56173f055b1b";
     public const string DeconstructMultipartBody = "b937fa0d-208e-47ac-9444-10d04943662c";
+    public const string Throttle = "5f4eb652-50c7-490b-9e9e-3b3fd1044309";
+    public const string UdpStream = "72dd14d3-8e47-425f-92d1-3c9330ad2ea7";
 }

@@ -30,9 +30,16 @@ public sealed class DeconstructUrlComponent : Component
     {
         access.Solution.Token.ThrowIfCancellationRequested();
         access.GetItem(0, out string url);
-        var parts = HttpDeconstructionWorkflow.DeconstructUrl(url);
-        access.SetItem(0, parts.Base); access.SetItem(1, parts.Scheme);
-        access.SetItem(2, parts.Host); access.SetItem(3, parts.Route);
-        access.SetTwig(4, parts.Parameters);
+        try
+        {
+            var parts = HttpDeconstructionWorkflow.DeconstructUrl(url);
+            access.SetItem(0, parts.Base); access.SetItem(1, parts.Scheme);
+            access.SetItem(2, parts.Host); access.SetItem(3, parts.Route);
+            access.SetTwig(4, parts.Parameters);
+        }
+        catch (Exception ex)
+        {
+            access.AddError("Invalid URL", ex.Message);
+        }
     }
 }

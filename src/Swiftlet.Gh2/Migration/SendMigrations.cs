@@ -42,6 +42,8 @@ public sealed class SendMigrationTable : IMigrationTable
         yield return Gh1MigrationRule.Identity("6b60cc1e-e463-4997-b1b3-7d1835ec0c0b", ComponentIds.DeconstructHttpResponse, 1, 7);
         yield return Gh1MigrationRule.Identity("8f2ea76a-117e-40db-a25f-466870c3c79f", ComponentIds.DeconstructMultipartField, 1, 5);
         yield return Gh1MigrationRule.Identity("f38c3ec8-a611-46c3-8c79-a1b38de62d00", ComponentIds.DeconstructMultipartBody, 1, 1);
+        yield return Gh1MigrationRule.Identity("6f4d4fde-70f7-4393-92dd-5d87fc94e1dc", ComponentIds.Throttle, 2, 1);
+        yield return Gh1MigrationRule.Identity("a3f7b2c1-8d4e-4f5a-9b6c-1e2d3f4a5b6c", ComponentIds.UdpStream, 3, 2);
     }
 
     private sealed class RequestMigration : IMigrateComponent

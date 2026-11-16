@@ -37,7 +37,7 @@ public sealed class ThrottleComponent : GH_Component
         DA.GetData(0, ref input);
         DA.GetData(1, ref delay);
 
-        Thread.Sleep(Math.Abs(delay));
+        SendUtilities.Delay(delay);
         DA.SetData(0, input);
     }
 

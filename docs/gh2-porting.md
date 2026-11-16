@@ -20,6 +20,10 @@ DescribePrimary provides the human-facing description (use the GH1 wording where
 
 **Optional list trap:** Access.Twig + Requirement.MayBeMissing without persistent data produced zero Process iterations, with Completed/zero diagnostics/empty output. Calling Set(Array.Empty<T>()) creates an explicit empty twig and makes an unconnected optional list participate. GET's query and header inputs use this. Test both empty and nonempty lists; also test connected empty trees during each full port. A diagnostic-free solution is not enough: assert output count and contents.
 
+An output with no data appears as one null slot in the canonical tree, rather than an empty list. Item inputs with `.Set(default)` reproduce GH1 optional inputs with a persistent default.
+
+HtmlNode and XmlNode keep their document context: their assistants return the same node from Copy; components must lock the owning document for every read. Never mutate these shared inputs.
+
 After changing persistent data programmatically with Set, expire the input parameter and the owning component before solving. Expiring only the component can reuse cached input data.
 
 ## Network work and cancellation
@@ -43,6 +47,8 @@ A component can compile, register and solve while still failing persistence. Tes
 RequestMigrationTable (formerly HeaderMigrationTable) demonstrates a simple Gh1MigrationRule.Identity pin map. This is sufficient only for stateless one-to-one cases.
 
 GetRequestMigration first delegates pin transfer to the standard identity rule, then reads the protected TimeoutSeconds property from the restored GH1 source instance using the interop UnderlyingObject. This avoids referencing Grasshopper.dll in the native GH2 shell. The live test writes a GH1 GET with timeout 30 through its real GH_IO Write, reads a fresh GH1 instance, and migrates it; the result retains 30 and all three inputs/outputs. Fail explicitly if a required saved property cannot be recovered. Do not silently reset legacy state or drop connected pins.
+
+TransferOutputs preserves wiring, but does not restore GH1 NickName-based settings. Transfer those explicitly before maintaining variable parameters (ServerInput demonstrates saved route names).
 
 A direct migrator test does not yet prove an entire GH1 file's wires/custom data convert correctly. Opening representative saved GH1 definitions, including nondefault settings and custom persistent data, remains a full migration gate.
 

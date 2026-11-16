@@ -1,4 +1,3 @@
-using System.Net.Sockets;
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -38,46 +37,16 @@ public sealed class UdpStreamComponent : GH_Component
         DA.GetData(1, ref port);
         DA.GetData(2, ref dataGoo);
 
-        if (string.IsNullOrWhiteSpace(host))
+        var result = SendUtilities.SendUdpAsync(host, port, dataGoo?.Value ?? Array.Empty<byte>()).GetAwaiter().GetResult();
+        if (result.Error is not null)
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Host cannot be empty");
-            return;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, result.Error);
+            if (result.IsValidationError) return;
         }
+        if (result.Warning is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, result.Warning);
+        DA.SetData(0, result.Success);
+        DA.SetData(1, result.BytesSent);
 
-        if (Uri.TryCreate(host, UriKind.Absolute, out Uri? uri) && !string.IsNullOrWhiteSpace(uri.Scheme))
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"UDP does not use URL schemes. Use '{uri.Host}' instead of '{host}'");
-            return;
-        }
-
-        if (port < 0 || port > 65535)
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port must be between 0 and 65535");
-            return;
-        }
-
-        byte[] data = dataGoo?.Value ?? Array.Empty<byte>();
-        if (data.Length == 0)
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No data to send");
-            DA.SetData(0, false);
-            DA.SetData(1, 0);
-            return;
-        }
-
-        try
-        {
-            using var client = new UdpClient();
-            int bytesSent = client.Send(data, data.Length, host, port);
-            DA.SetData(0, true);
-            DA.SetData(1, bytesSent);
-        }
-        catch (Exception ex)
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-            DA.SetData(0, false);
-            DA.SetData(1, 0);
-        }
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
