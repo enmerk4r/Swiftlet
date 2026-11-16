@@ -1,115 +1,98 @@
-﻿# GH2 porting guide
+# GH2 porting guide
 
-This guide records patterns tested in the Swiftlet spike. It is not a claim that all components, migrations or release gates are complete.
+Implementation and test notes for the 0.4.0 branch; release status and user-visible changes are in [CHANGELOG.md](../CHANGELOG.md). Native event/undo results are in [gh2-ui-gates.md](gh2-ui-gates.md).
 
-## Boundaries and identities
+## Boundaries, SDK and identities
 
-Keep neutral behavior in Core/Runtime, UI/document services in Hosts.Rhino, and Grasshopper trees, parameters, scheduling and presentation in their respective shells. Use src/Swiftlet.Gh1 and src/Swiftlet.Gh2 across Rhino versions. Preserve GH1 assembly name Swiftlet.Gh.Rhino8 and all original component GUIDs. Give GH2 its own assembly GUID and stable IoIds, and record the explicit correspondence in docs/parity.json.
+Keep domain behavior in Core/Runtime, Rhino services in Hosts.Rhino, and Grasshopper data trees, scheduling and UI in `src/Swiftlet.Gh1` / `src/Swiftlet.Gh2`; Rhino-version differences belong in build targets. Preserve the GH1 assembly name `Swiftlet.Gh.Rhino8` and its GUIDs. GH2 has stable, separate IoIds, mapped in [parity.json](parity.json).
 
-GH2 targets net8.0 and Grasshopper2 9.0.26300.9401 with runtime SDK assets excluded. Compile against that package's XML/API; installed 9.1 XML may expose newer symbols. Shared libraries remain net7.0. Rhino 9.1's active CLR is 10.0.2; target framework and runtime version are distinct.
+Compile GH2 against pinned `Grasshopper2 9.0.26300.9401`, targeting net8.0 and excluding runtime SDK assets. Shared libraries target net7.0. Tests here used Windows Rhino 9.1 with CLR 10.0.2: target framework and loaded runtime are different. Look up signatures in the pinned NuGet XML; installed Rhino XML may describe newer APIs.
 
-The user-facing product/tab remains Swiftlet. Keep existing numbered section strings; GH2 renders their dots as middle dots. This host formatting does not require different product categories.
+Keep the product/tab named Swiftlet and preserve numbered section names; GH2 renders their dots as middle dots.
 
-## Components and data
+Every component and parameter needs both its normal constructor and `(IReader reader) : base(reader)`. Use `TypeAssistant<T>` plus plain domain values, not GH1 Goo wrappers. Assistants must preserve exact fields/bytes through archives. Public parameterless assistant constructors permit discovery. `DescribePrimary` supplies display text, not a general text-conversion contract; register conversions separately when needed. Inputs are immutable; duplicate mutable values before changing them. HTML/XML nodes retain their document owner, so their readers lock that owner instead of modifying shared nodes.
 
-Start from CreateHttpHeaderComponent: Component + Nomen, IoId attribute, AddInputs/AddOutputs, Process(IDataAccess), and both empty and IReader constructors. Match input access and retrieval exactly. Never mutate shared input values. Copy mutable domain values in assistants.
+## Pins and parity
 
-Use plain domain types with TypeAssistant<T> and Parameter<T>. Public parameterless assistant constructors permit discovery. Parameter classes also need an IReader constructor. HttpHeader and QueryParameter serialize as a fixed two-string array. HttpResponseData serializes every field, including headers and exact response bytes. BitmapTypeAssistant stores dimensions and RGBA bytes. These assistants have actual persistent-parameter roundtrip checks, not just transient solve checks.
+- Match access (`Item`, `Twig`, `Tree`) to both Get and Set calls; a mismatch can compile and fail only during solving.
+- **Pass optionality to Add:** `inputs.Add(parameter, Requirement.MayBeMissing)`; `Add(parameter)` overwrites a pre-set requirement with its default `MustExist`.
+- Do not invent empty values or null-item defaults to make optional pins execute; truly empty optional custom Item/Twig inputs were verified with live HTTP/UDP fixtures.
+- Preserve failure output shape: a GH1 exception gives empty output trees, whereas an error message followed by return can leave null slots; choose GH2 throw versus `AddError` accordingly.
+- After programmatically changing persistent data, expire the input parameter and component before solving.
 
-DescribePrimary provides the human-facing description (use the GH1 wording where relevant). Rhino AI graph snapshots currently sample raw ToString and may display the CLR type name. Compare typed fields and exact trees for behavior; do not change domain objects merely to make sampled strings look like GH1. Text conversion to another parameter is a separate conversion contract that may require ConversionRepository; DescribePrimary alone is not proof of every cast.
+Compare typed values, tree paths, null slots and diagnostics; sampled Rhino AI `ToString()` output is not a parity oracle. Read a coherent set of output trees from one `component.State.Data` snapshot, keyed by output InstanceId. Independently cached output-parameter states can refer to different solves. Cancellation retains the last successful data: inspect phase/solution IDs before interpreting it as current output.
 
-**Optional custom input rule:** `InputAdder.Add(parameter)` overwrites a pre-set parameter.Requirement with its default MustExist. Pass `inputs.Add(parameter, Requirement.MayBeMissing)` explicitly for optional custom pins (or set the requirement after adding). Inspect the constructed component, not only its initializer. This was the root cause of earlier zero-iteration solves. Do not add empty twigs, empty objects or one-null persistent values unless GH1 has that persistent default. Real network regressions prove optional Item (IRequestBody) and Twig (QueryParameter/HttpHeader) inputs execute with genuinely empty persistent trees once MayBeMissing is retained. `validate_send_http.py --clear-optional-defaults` explicitly verifies that absence. Missing bytes in UDP are mapped to empty bytes inside Process, matching GH1, rather than stored as a new default.
+`build/parity/build_parity_gh2.py` reflects names, sections, pins, access, requirements, defaults, migration targets and palette placement. Duplicate migration rules are errors. GH1 optional pins with persistent defaults represented as required GH2 pins with the same defaults are reported warnings, not silently invented behavior.
 
-When GH1 lets an exception escape, it has empty output trees. When it reports an error and returns, outputs hold null slots. Preserve that distinction (throw versus AddError) in GH2; the strict parity runner detects it.
+## Cancellation and background delivery
 
-An output with no data appears as one null slot in the canonical tree, rather than an empty list. Item inputs with `.Set(default)` reproduce GH1 optional inputs with a persistent default.
+Process is synchronous and normally runs on a worker. Pass `access.Solution.Token` into long work and check it before publishing outputs. Shared HTTP caller cancellation propagates; timeout/transport failures retain their response contract. Synchronous GH1 adapters use `ConfigureAwait(false)` inside awaited workflows to avoid waiting for a continuation on a blocked caller context. DNS validation remains synchronous, so cancellation is not immediate at every network stage.
 
-HtmlNode and XmlNode keep their document context: their assistants return the same node from Copy; components must lock the owning document for every read. Never mutate these shared inputs.
+`ListenerComponent` serializes Process, reconfiguration and shutdown with a gate. Cancel its lifetime before waiting for the gate. Release resources on deletion, disable, document replacement and close; recreate them on re-enable or undo. UI callbacks recheck document state, activity and generation so work from an old session cannot expire a new one.
 
-After changing persistent data programmatically with Set, expire the input parameter and the owning component before solving. Expiring only the component can reuse cached input data.
+WebSocket Server/Client and HTTP Listener use `ListenerComponent.Outbox<T>` to retain received items across abandoned processing. The integrated rule currently waits for the publishing solution to complete and requests recomputation after cancellation/fault. Controlled cancellation found that a publisher can remain Completed while downstream work is canceled, then be consumed by a later solution without rerunning the publisher. Whole-solution completion is therefore too coarse to decide delivery: the correction must distinguish a retained component result from a discarded one. That correction and burst/lifecycle checks for both missing and duplicate messages are still in progress; the current rule is not a validated delivery guarantee.
 
-## Network work and cancellation
+For burst callbacks, `Document.Solution.DelayedExpire(this)` lets GH2 schedule recomputation without immediately canceling a running solution. MCP Server uses it. Migration of the remaining listener/OAuth callbacks to that scheduling pattern is under validation; do not claim it has landed until the integrated source does so.
 
-Process is synchronous but runs on worker threads by default. GET calls the shared async executor with access.Solution.Token, waits there, and checks cancellation again before setting outputs. Do not wrap it in an untracked Task.Run or start a second request after every callback.
+Server Input and MCP calls are one-shot live handles, not copyable snapshots: assistants retain identity and do not restore live connections from archives. Shared Runtime state retains one unanswered request per route/tool across recomputes and advances after response. Removing a route/tool completes inaccessible calls, and each response stays tied to its originating bridge writer.
 
-Shared HttpRequestExecutor previously swallowed caller cancellation as a status -1 response. It now propagates OperationCanceledException only when the caller token was canceled. Timeout/ordinary transport errors retain the existing failure-response contract. Core tests cover both paths. Audit found only one GH1 executor caller, HttpRequestComponentBase.Execute, which supplies no token; it does not depend on caller cancellation becoming a response.
+## OAuth ownership
 
-The live slow-request check cancels a ten-second local endpoint after 300 ms. Observed completion was approximately 303 ms with Phase=Cancelled. GH2 ObjectSolutionState.Data intentionally retains the most recent successful result, even after cancellation. CurrentId identifies that cached result; ProcessId identifies the newer canceled/faulted computation. Require a successful phase/current solution before reading outputs. The shared executor also uses ConfigureAwait(false): a GH1 graph solved programmatically on Rhino's UI thread deadlocked when the synchronous Execute adapter awaited a continuation on that blocked context. The live graph completes after this fix, and a controlled no-pump-context Core test fails on the old code and passes with it. Manual canvas-click reproduction has not been tested.
+Both shells use `OAuthTokenSession` and `OAuthAuthorizationController`. Exchange is serialized; duplicate one-use codes are suppressed; refresh is edge-triggered; cancellation preserves the last successful token and permits retry. Session credentials, authorization codes and verifiers are transient, not archive state.
 
-The cancellation test verifies the previous successful-data ID is unchanged, rather than incorrectly requiring the cache to be empty.
+The Desktop callback session owns its accept loop and concurrent client readers, with a five-second deadline per incomplete connection. Empty/malformed clients are ignored, unrelated paths receive 404, and the first request targeting the callback path wins; callback state validation remains in the OAuth workflow. Disposal cancels and joins all accepts/readers before returning. Queued notifications carry an attempt generation, checked again on the UI thread and in GH1's scheduled callback.
 
-DNS validation currently uses the shared synchronous UrlValidator; token checks surround validation, but DNS resolution itself is not interruptible by this adapter. Do not describe cancellation as instantaneous for every network stage.
+Tests cover wrong state, empty/malformed/favicon traffic, two held idle connections followed by a prompt callback, immediate reset/rebind, partial HTTP reads, token refresh/cancellation, archives and both hosts' lifecycle. Fixtures use a manual browser service and loopback servers; they do not prove real provider login. The earlier unexplained Rhino exit was not reproduced in ten consecutive final-build close checks with same-PID/API liveness; it was not diagnosed as fixed.
 
-## Settings, undo and persistence
+## Settings and undo
 
-GET stores TimeoutSeconds explicitly through Store/IReader and in CustomValues for its UI setting. Store must call base.Store, reader constructors must call base(reader). The Eto input-panel timeout picker adds CustomValueAction before changing the value, then expires and solves. Never use WinForms in the GH2 shell.
+Store settings in CustomValues and through Store/IReader, calling the base methods. Eto picker handlers record `CustomValueAction` before changing a value. Native control events plus Undo/Redo were verified for six HTTP timeouts, text-body content type and Save Web Response mode, including archive clones and actual outputs/files.
 
-A component can compile, register and solve while still failing persistence. Test component serialization, persistent custom parameters, and document archives. GrasshopperIO.IO.ReadStorableFromFile<Document> is required when reading the document archive used by the spike; the untyped overload cannot infer Document from an IoId. These archive tests do not replace actual UI save/open, copy/paste, undo/redo, or a cold restart.
+Server Input's real create/remove-parameter actions preserve pin identity and downstream wires through undo, including live route output. MCP Port/Name persistent-data undo restores the live session configuration. Automatic MCP tool removal instead recreates a new output on undo and loses its downstream wire in **both** GH1 and GH2; this is a documented existing limitation. Config-copy buttons are export actions, not saved options. Programmatic event tests do not prove mouse hit targets or popup focus.
 
-## OAuth sessions and lifecycle
+## Migration and archived components
 
-Both shells use Runtime.OAuthTokenSession and OAuthAuthorizationController. Token requests serialize through a gate, suppress repeated one-use authorization codes, and refresh on the rising Refresh edge. Lowering Refresh must not replay the original authorization code. A canceled refresh retains the last successful token and can be retried. OAuthTokenClient awaits without capturing the caller context; GH1 schedules completion asynchronously, while GH2 waits on its worker with the solution/lifetime cancellation token.
+Use identity rules only for stateless one-to-one mappings. Stateful rules first recover saved GH1 settings from the interop source, establish the complete variable pin set, then transfer pins/wires. `TransferOutputs` alone does not restore GH1 NickName-based route/tool settings. Missing required state must fail explicitly.
 
-Authorization attempts own their callback listener, cancellation source and generation. The Desktop callback session owns a lifetime token and joins its in-flight accept/read during DisposeAsync; canceling a token alone does not prove listening sockets have stopped. Concurrent disposals share that completion, and partial HTTP reads are interrupted by closing their accepted socket. This shared-host fix applies to GH1 and GH2. Empty/malformed connections no longer consume the attempt; non-callback paths receive 404 and the listener keeps accepting. Accepted connections are read concurrently with individual five-second deadlines, so an idle preconnect cannot delay the first valid callback. Disposal joins all readers and accepts. Real callback state validation is unchanged. This also fixes the pre-existing GH1 0.3.3 preconnect behaviour. Reset, deletion, disable and document close cancel and release that listener. Every queued completion carries its attempt generation; both adapters recheck it on the UI thread, and GH1 checks again in its scheduled solution callback. An old completion must not expire a new or removed component. There is only one completion notification per attempt, so no cross-attempt notification coalescing is needed.
+| Archived GH1 object | GH2 disposition |
+|---|---|
+| Create Text Body | Current native component, with saved content type |
+| Three-input MCP Tool Response | Native compatibility adapter marked `[Obsolete]`, hidden in the palette; original JSON-as-text/plain-error behavior and ordered wires retained |
+| Socket Listener | GH1 interop host |
+| Multipart Form Body Named / Unnamed | GH1 interop hosts |
 
-Live credentials, codes and verifiers are transient. GH1 Write/Read and GH2 archive duplication must produce fresh sessions, rather than restore cached credentials. The controller preserves GH1's distinction between setup validation errors (runtime errors) and provider callback failures (Status output).
+`tests/Swiftlet.Cases/checks/migrate_files.py` reads GH1 archives without solving, converts through `DocumentIO.Convert1(..., MigrationLevel.Total)`, classifies native/interop objects and compares wires into Swiftlet objects. It processes one file per call. Missing third-party objects are dropped **in the test's extraction copy** and reported because GH1 extraction can otherwise wait indefinitely on a hidden missing-plugin prompt; original files are untouched.
 
-`Validation/validate_oauth.py --port <slot>` checks both hosts against local token/callback fixtures: deduplication, refresh edges, real callbacks, cancellation, deletion, disable/re-enable, credential-free archives, and active document close with post-close same-PID/API liveness. It uses an injected manual browser service and never authenticates to an external provider. The four strict static parity cases are in `tests/Swiftlet.Cases/cases/oauth.json`.
+The 21-example audit found 19 fully native Swiftlet conversions and two retaining only the unsupported archived Swiftlet objects above, with their wires intact. Google Maps also has unavailable third-party objects and one missing non-Swiftlet wire; do not generalize that result to lossless conversion. Standard conversion drops GH1 scribbles. `make_gh2_examples.py` recreates notes with their text/position and GH2 default styling, saves through DocumentIO.Save and reopens to compare counts. Fifteen `.ghz` examples were generated; the key-dependent OpenAI example was reopened only, and two others reported unavailable external services when solved.
 
-`Validation/validate_oauth_close.py --slot-script tests/Swiftlet.Cases/slot.py --count 10 --report <json>` repeats the waiting-authorizer active-canvas close in fresh owned processes, checks listener port release and same-PID API liveness, and retains each router log. Start routers with machine-wide .NET; do not inherit DOTNET_ROOT pointing to a user-local .NET 8-only installation. Real interactive browser-provider login, copy/paste and undo remain separate release checks.
+## Icons, palette and viewport services
 
-## Migration
+`Assets/Icons/icons.json` drives shared `IconSlugs.g.cs`; SVG masters feed GH2 vector icons and generated 24px GH1 PNGs. The pipeline outlines text/strokes, flattens transforms and shadows, and splits compound glyph holes for GH2's SVG parser. Native renders were compared against reference renders. Keep the original origami colors and flat shaded faces.
 
-RequestMigrationTable (formerly HeaderMigrationTable) demonstrates a simple Gh1MigrationRule.Identity pin map. This is sufficient only for stateless one-to-one cases.
+Run `python build/parity/build_palette.py` after catalog changes. `Palette.Entry` uses generated class mappings to translate GH1 exposure rows into Nomen slots 0-7 and hidden rank; it does not change IoIds. Stored objects keep their serialized Nomen, so regenerate example files when testing new palette naming. Current constructors match GH1 names/sections; pin short-name style is a separate user-facing choice.
 
-GetRequestMigration first delegates pin transfer to the standard identity rule, then reads the protected TimeoutSeconds property from the restored GH1 source instance using the interop UnderlyingObject. This avoids referencing Grasshopper.dll in the native GH2 shell. The live test writes a GH1 GET with timeout 30 through its real GH_IO Write, reads a fresh GH1 instance, and migrates it; the result retains 30 and all three inputs/outputs. Fail explicitly if a required saved property cannot be recovered. Do not silently reset legacy state or drop connected pins.
+Viewport captures go through `Hosts.Rhino.RhinoViewportCapture`, which runs inline on the UI thread or dispatches from workers with cancellation. Do not access or modify the Rhino document directly from Process.
 
-TransferOutputs preserves wiring, but does not restore GH1 NickName-based settings. Transfer those explicitly before maintaining variable parameters (ServerInput demonstrates saved route names).
+## Reproducible local checks
 
-A direct migrator test does not yet prove an entire GH1 file's wires/custom data convert correctly. Opening representative saved GH1 definitions, including nondefault settings and custom persistent data, remains a full migration gate.
+Use an isolated worktree and an explicitly owned Rhino slot. `tests/Swiftlet.Cases/slot.py --stop-file PATH` starts Rhino 9 and retains `<PATH>.router.log`; creating the stop file closes its slot. Clear an inherited `DOTNET_ROOT` that points to a .NET 8-only installation: Rhino 9's helpers need the machine-wide .NET 10 runtime. Never mix old Rhino 8 routers into the shared slot store, and verify PID ownership rather than assuming a reused port is yours.
 
-## Icons and viewport work
+```
+dotnet build Swiftlet.sln
+dotnet run --project tests/Swiftlet.Core.Tests
+dotnet run --project tests/Swiftlet.Integration.Tests
+python tests/Swiftlet.Cases/cases.py --port PORT --load
+$caseFiles = (Get-ChildItem tests/Swiftlet.Cases/cases/*.json).FullName
+python tests/Swiftlet.Cases/cases.py --port PORT @caseFiles
+python tests/Swiftlet.Cases/cases.py --port PORT --migrations
+python build/parity/build_parity_gh2.py --port PORT
+python tests/Swiftlet.Cases/checks/migrate_files.py --port PORT --report migration.json
+```
 
-Every component/parameter uses an IconInternal override returning SwiftletIcons.For(GetType()) with the base icon as fallback. The shared generated IconSlugs mapping comes from Assets/Icons/icons.json; Parameter-to-Param suffix mapping is supported. New names outside that convention need explicit map entries. SVGs are embedded by the GH2 project.
+The loader stages GH1/GH2 together in one temporary folder; never load build output directly, and restart Rhino after changing binaries. If the machine lacks a net7 runtime, use `DOTNET_ROLL_FORWARD=Major` for the net7 test executables, not a .NET 8-only DOTNET_ROOT override.
 
-Use approved normalized vector masters; keep the origami colors and flat shaded faces. GH2 SVG parsing cannot faithfully handle arbitrary Illustrator transforms, clips, gradients or compound glyph holes. Opus's converter normalizes these, splits glyph holes, and validates actual native GH2 rendering. The logo has its own vector source.
+The 239-case suite compares exact GH1/GH2 results; network, transfers, OAuth, archives and settings have separate live harnesses under `tests/Swiftlet.Cases/checks`, `tests/Swiftlet.Parity` and `src/Swiftlet.Gh2/Validation`. Close tests must check listener/bridge cleanup **and** a post-close call to the same Rhino PID. Use OS LISTEN-state inspection for OAuth port checks: a bare TCP probe is itself a client connection.
 
-Use Hosts.Rhino.RhinoViewportCapture with access.Solution.Token. It runs inline on the UI thread or dispatches to the UI and waits cancellably from a worker. Do not access or modify Rhino document state directly from Process. Both capture components and bitmap serialization were verified live by Fable; see their source for the shared service pattern.
+The Rhino 9 Yak payload must contain both shells and one consistent set of versioned shared DLLs. Packaging checks assembly identities; cold-start checks point `RHINO_PACKAGE_DIRS` at the package contents and exercise its bundled bridge. Windows cold start and packaged network checks passed; actual user install/update/uninstall, other platforms, pointer/focus checks and the final combined stress result remain separate release evidence. Do not infer them from a successful compile or component archive clone.
 
-## Listener and variable-parameter gate
-
-ServerInput uses SingleThreaded only for its own iteration ordering, plus an explicit session gate for external callbacks, port changes and shutdown. Live HTTP checks passed background routing, identical unanswered request reuse across recompute, eight simultaneous same-route requests, variable-route archive clone, deletion while a request is pending, port change and document-close port release. The reusable script is tests/Swiftlet.Parity/validate_server_input.py; it closes its scratch document, so use a dedicated slot.
-
-ServerInputRequestState in Runtime retains one active request per route until its response completes. Both shells use it; cancellation/recompute cannot silently discard a claimed request. A response completion schedules the next queued request. Runtime cancellation marks the handle completed and route removal finishes unreachable queued requests. Each bridge generation retains its own cancellation token and response writer, preventing late old-generation responses from crossing into a restarted bridge. Lifecycle callbacks cancel before waiting on the gate; background expiry callbacks recheck document/activity/closing state on the UI thread.
-
-ListenerRequest is deliberately a shared one-shot response handle, as GH1 Duplicate was, not a mutable data snapshot to duplicate. Its TypeAssistant.Copy preserves identity; live connections are transient and are not restored from an archive. Variable output names/ports are stored by the normal component/parameter serialization. ServerInput migration creates the full variable output set before transferring pin identities, wiring, values and route names.
-
-Remaining listener release checks include actual UI undo/redo, saved GH1 file migration with wires, activity/disabled behavior and long-running stress. Archive clone and deterministic request-state tests do not by themselves prove those UI transitions.
-
-## Build, load and test
-
-Build in an isolated worktree. Use tests/Swiftlet.Parity/load_plugin.py to copy the artifact/dependencies to a fresh temporary folder, start GH2, and ScopePlugin then LoadPlugin. Do not load directly from your build folder; Rhino locks loaded files. Restart the dedicated Rhino process before testing a rebuilt assembly. Coordinate slot ownership with the router owner; never use another agent's default canvas.
-
-Use the current Rhino 9 router. Current-session legacy native MCP tool inventories may be stale; the direct loopback helper/harness reaches g2 tools. Always target the dedicated port.
-
-Header checks: src/Swiftlet.Gh2/Validation/README.md.
-HTTP bulk checks: `Validation/validate_send_http.py --port <slot> --clear-optional-defaults` checks exact loopback HTTP method/query/header/body values, all six saved HTTP timeout migrations, actual UDP datagrams from both shells, and Throttle cancellation. Auth and Send pure/data cases are in tests/Swiftlet.Cases/cases/{auth,send}.json.
-
-GET checks: run Validation/validate_get.py --port <dedicated-port> --gh1 <built-gh1.gha> with the latest GH2 build already loaded. It creates/removes its own GET component and serves only a temporary loopback HTTP fixture. Assertions cover default optional lists, exact typed query/header handling, Unicode query escaping, response byte persistence, timeout persistence, cancellation, and original GH1 saved-state migration. The optional --output saves evidence.
-
-The parity harness reads full tree paths and typed values and fails on unsupported types. Extend canonicalization deliberately per domain type; never fall back to ToString equality or sample-only comparison. Maintain exact pins/defaults/null semantics and behavior in docs/parity.json. Archived components need an explicit disposition, not silent omissions.
-
-## Release evidence and remaining limits
-
-The unified Rhino 9 payload must contain GH1 and GH2 plus exactly one consistent set of shared DLLs. Live coexistence tests showed first-loaded shared assemblies win; independently updated packages can silently bind to the other shell's copies. Fable has tested isolated cold startup with RHINO_PACKAGE_DIRS pointing directly at the package contents. Real install/update/uninstall, full bridge payloads, every component's parity, complete file migration, UI undo/copy/paste, and platform-specific tests remain release gates.
-
-Primary references: [GH2 getting started](https://developer.rhino3d.com/guides/grasshopper2/getting-started/), [GH2 migration guide](https://developer.rhino3d.com/guides/grasshopper2/migrating-components-to-gh2/). For exact signatures prefer the pinned NuGet XML and compilable, tested code in this repository.
-
-
-## Native MCP Server
-
-`McpServerComponent` uses typed tool definitions and dynamically synchronizes named request outputs on the UI thread. Existing outputs retain their identities as other tools are added or removed. `McpCallRequestState` retains unanswered calls across canceled/repeated solutions in both shells and advances a tool queue only after its response succeeds. Removal finishes inaccessible calls with an error; late callbacks are generation guarded. Bridge sessions bind response delegates to their original writer and atomically serialize tool removal against request enqueue.
-
-`tests/Swiftlet.Parity/validate_mcp_server.py` checks real initialize/list/call HTTP, eight concurrent calls on one tool, retained identity on recompute, dynamic output identity, archive clone, five client configurations (four JSON, Codex TOML), Eto panel construction, tool removal, port changes, disable/re-enable, component deletion and document close. It closes its dedicated scratch document. The direct migration check preserves all saved dynamic output names, port and component nickname; whole-file migration and interactive undo remain separate release gates.
-
-The archived three-pin MCP Tool Response has an exact compatibility adapter with `[Obsolete]`; GH2 reports `Obsolete=true` and `Nomen.Rank=Hidden`. It calls the same legacy Runtime overload as GH1, preserving JSON-as-text success results and plain-string error messages. Twelve live before/after cases capture and compare exact sent results, including Unicode, objects, arrays, strings, numbers, booleans and null. `ValidateLegacyMcpResponseMigration.csx` archives and converts a whole GH1 document with three distinct sources and a success sink, proving all ordered source wires, the success wire and hidden/obsolete state survive. `ValidateMcpServerMigration.csx` also checks dynamic output names and saved port through whole-document conversion. GH1 request retention/burst checks are in `validate_mcp_server_gh1.py`.
+Primary API references: [GH2 getting started](https://developer.rhino3d.com/guides/grasshopper2/getting-started/) and [GH2 migration](https://developer.rhino3d.com/guides/grasshopper2/migrating-components-to-gh2/); use the pinned NuGet XML and tested repository code for exact signatures.
