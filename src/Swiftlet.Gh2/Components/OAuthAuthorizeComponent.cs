@@ -53,7 +53,7 @@ public sealed class OAuthAuthorizeComponent : OAuthComponentBase
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
             if (change.Generation != _controller.Generation || lifetime.IsCancellationRequested || Document is not { State: DocumentState.Active } document || Activity == ObjectActivity.Disabled) return;
-            Expire(); document.Solution.Start();
+            document.Solution.DelayedExpire(this);
         }));
     }
     protected override void OnStopped()

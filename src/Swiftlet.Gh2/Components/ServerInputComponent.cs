@@ -127,8 +127,7 @@ public sealed class ServerInputComponent : Component, IRemovalAware
             var document = Document;
             if (Volatile.Read(ref _stopping) != 0 || document is null ||
                 document.State != DocumentState.Active || Activity == ObjectActivity.Disabled) return;
-            Expire();
-            document.Solution.Start();
+            document.Solution.DelayedExpire(this);
         }));
     }
     private void StopListener()

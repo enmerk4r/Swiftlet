@@ -97,8 +97,7 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
                 document.State != DocumentState.Active || Activity == ObjectActivity.Disabled)
                 return;
 
-            Expire();
-            document.Solution.Start();
+            document.Solution.DelayedExpire(this);
         }));
     }
 
