@@ -47,6 +47,7 @@ internal static class IntegrationTestRunner
             ("OAuth callback listener normalizes malformed file-style callback targets", OAuthLoopbackCallbackMalformedFileTargetRoundTripAsync),
             ("Modern MCP server handles initialize, tools/list, and tools/call over HTTP", ModernMcpServerHandlesJsonRpcOverHttpAsync),
             ("Modern MCP server session manages lifecycle and config export", ModernMcpServerSessionManagesLifecycleAsync),
+            ("MCP calls survive retries and advance only after a successful response", McpCallsSurviveRetriesAsync),
             ("Modern MCP response workflow preserves deconstruct and one-shot semantics", ModernMcpResponseWorkflowPreservesSemanticsAsync),
             ("Modern HTTP server routes requests and completes one-shot responses", ModernServerRoutesRequestsAndCompletesResponsesAsync),
             ("Server input retains requests across retries and advances after responses", ServerInputRetainsRequestsAcrossRetriesAsync),
@@ -717,6 +718,20 @@ internal static class IntegrationTestRunner
 
         Assert.Equal(HttpStatusCode.OK, callResponse.StatusCode);
         Assert.Contains("\"text\":\"echo: hello\"", callBody);
+
+        using var oldRequest = new HttpRequestMessage(HttpMethod.Post, "mcp/")
+        {
+            Content = JsonContent("""{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"echo","arguments":{}}}"""),
+        };
+        oldRequest.Headers.Add("Mcp-Session-Id", sessionId);
+        Task<HttpResponseMessage> oldResponse = client.SendAsync(oldRequest);
+        var oldCall = await WaitForPendingCallAsync(session, "echo").ConfigureAwait(false);
+        await session.StopAsync().ConfigureAwait(false);
+        try { using var closed = await oldResponse.WaitAsync(TimeSpan.FromSeconds(3)); }
+        catch (HttpRequestException) { }
+        await session.ReconfigureAsync(GetAvailablePort(), "Restarted", [new McpToolDefinition("echo", "Echo")]);
+        Assert.False(oldCall.TryRespondWithText("must not cross bridge generations"));
+        Assert.False(oldCall.ResponseTask.IsCompleted);
     }
 
     private static async Task ModernMcpServerSessionManagesLifecycleAsync()
@@ -762,6 +777,36 @@ internal static class IntegrationTestRunner
         Assert.False(session.IsRunning);
         Assert.Equal(0, session.Port);
         Assert.Equal("Stopped", session.StatusMessage);
+    }
+
+    private static async Task McpCallsSurviveRetriesAsync()
+    {
+        var first = new ModernMcpToolCallContext("1", "echo", [], _ => true);
+        var second = new ModernMcpToolCallContext("2", "echo", [], _ => true);
+        var queue = new Queue<ModernMcpToolCallContext>([first, second]);
+        var state = new McpCallRequestState();
+        var notified = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        state.RequestReady += (_, _) => notified.TrySetResult(true);
+        ModernMcpToolCallContext? Dequeue(string _) => queue.TryDequeue(out var call) ? call : null;
+        Assert.True(ReferenceEquals(first, state.Capture(["echo"], Dequeue)[0]));
+        Assert.True(ReferenceEquals(first, state.Capture(["echo"], Dequeue)[0]));
+        Assert.Equal(1, queue.Count);
+        Assert.True(first.TryRespondWithText("first"));
+        await first.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2));
+        await notified.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.False(first.TryRespondWithText("duplicate"));
+        Assert.True(ReferenceEquals(second, state.Capture(["echo"], Dequeue)[0]));
+        state.Capture([], Dequeue);
+        Assert.True(second.HasResponded);
+        Assert.True(state.Capture(["echo"], Dequeue)[0] is null);
+        var failed = new ModernMcpToolCallContext("failed", "echo", [], _ => false);
+        queue.Enqueue(failed);
+        state.Capture(["echo"], Dequeue);
+        Assert.False(failed.TryRespondWithText("not sent"));
+        Assert.False(failed.ResponseTask.IsCompleted);
+        Assert.True(ReferenceEquals(failed, state.Capture(["echo"], Dequeue)[0]));
+        state.Clear();
+        Assert.True(state.Capture(["echo"], Dequeue)[0] is null);
     }
 
     private static async Task ModernMcpResponseWorkflowPreservesSemanticsAsync()

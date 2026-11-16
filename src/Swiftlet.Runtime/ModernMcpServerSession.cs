@@ -9,6 +9,7 @@ namespace Swiftlet.Runtime;
 
 public sealed class ModernMcpServerSession : IAsyncDisposable
 {
+    private readonly object _configurationSync = new();
     private readonly object _bridgeIoSync = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<ModernMcpToolCallContext>> _pendingCalls =
         new(StringComparer.Ordinal);
@@ -42,16 +43,14 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
 
     public void Configure(string serverName, IEnumerable<McpToolDefinition>? tools)
     {
-        ServerName = string.IsNullOrWhiteSpace(serverName) ? "Swiftlet" : serverName;
-        Tools = tools?.Select(static tool => tool.Duplicate()).ToArray() ?? [];
-
-        HashSet<string> currentToolNames = Tools.Select(static tool => tool.Name).ToHashSet(StringComparer.Ordinal);
-        foreach (string key in _pendingCalls.Keys)
+        lock (_configurationSync)
         {
-            if (!currentToolNames.Contains(key))
-            {
-                _pendingCalls.TryRemove(key, out _);
-            }
+            ServerName = string.IsNullOrWhiteSpace(serverName) ? "Swiftlet" : serverName;
+            Tools = tools?.Select(static tool => tool.Duplicate()).ToArray() ?? [];
+            HashSet<string> currentToolNames = Tools.Select(static tool => tool.Name).ToHashSet(StringComparer.Ordinal);
+            foreach (string key in _pendingCalls.Keys)
+                if (!currentToolNames.Contains(key) && _pendingCalls.TryRemove(key, out var removed))
+                    while (removed.TryDequeue(out var pending)) pending.TryRespondWithError(-32000, "Tool was removed.");
         }
     }
 
@@ -117,8 +116,15 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
 
     public async Task StopAsync()
     {
+        StreamWriter? stoppedWriter;
+        lock (_configurationSync)
+        {
+            foreach (var pending in _pendingCalls.Values)
+                while (pending.TryDequeue(out var call)) call.TryRespondWithError(-32000, "Server stopped.");
+            lock (_bridgeIoSync) { stoppedWriter = _bridgeInput; _bridgeInput = null; }
+        }
         Process? bridgeProcess = _bridgeProcess;
-        StreamWriter? bridgeInput = _bridgeInput;
+        StreamWriter? bridgeInput = stoppedWriter;
         Task? bridgeOutputTask = _bridgeOutputTask;
         Task? bridgeErrorTask = _bridgeErrorTask;
 
@@ -237,7 +243,8 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
 
         _bridgeProcess = process;
         _bridgeInput = process.StandardInput;
-        _bridgeOutputTask = Task.Run(() => ReadBridgeOutputAsync(process, readySource, diagnostics), CancellationToken.None);
+        var responseWriter = _bridgeInput;
+        _bridgeOutputTask = Task.Run(() => ReadBridgeOutputAsync(process, readySource, diagnostics, responseWriter), CancellationToken.None);
         _bridgeErrorTask = Task.Run(() => DrainBridgeErrorAsync(process, diagnostics), CancellationToken.None);
 
         try
@@ -270,7 +277,7 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    private async Task ReadBridgeOutputAsync(Process process, TaskCompletionSource<bool> readySource, BridgeProcessDiagnostics diagnostics)
+    private async Task ReadBridgeOutputAsync(Process process, TaskCompletionSource<bool> readySource, BridgeProcessDiagnostics diagnostics, StreamWriter responseWriter)
     {
         try
         {
@@ -304,7 +311,7 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
                         break;
 
                     case "call_tool":
-                        HandleIncomingToolCall(message);
+                        HandleIncomingToolCall(message, responseWriter);
                         break;
                 }
             }
@@ -334,7 +341,7 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
         }
     }
 
-    private void HandleIncomingToolCall(JsonObject message)
+    private void HandleIncomingToolCall(JsonObject message, StreamWriter responseWriter)
     {
         string? callId = message["callId"]?.GetValue<string>();
         string? toolName = message["toolName"]?.GetValue<string>();
@@ -345,20 +352,23 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
             return;
         }
 
-        var context = new ModernMcpToolCallContext(
-            callId,
-            toolName,
-            arguments,
-            result => TrySendToolResult(callId, result));
-
-        ConcurrentQueue<ModernMcpToolCallContext> queue = _pendingCalls.GetOrAdd(
-            toolName,
-            static _ => new ConcurrentQueue<ModernMcpToolCallContext>());
-        queue.Enqueue(context);
-        RequestQueued?.Invoke(this, EventArgs.Empty);
+        lock (_configurationSync)
+        {
+            if (!ReferenceEquals(responseWriter, _bridgeInput)) return;
+            var context = new ModernMcpToolCallContext(callId, toolName, arguments,
+                result => TrySendToolResult(callId, result, responseWriter));
+            if (!Tools.Any(tool => string.Equals(tool.Name, toolName, StringComparison.Ordinal)))
+            {
+                context.TryRespondWithError(-32000, "Tool was removed.");
+                return;
+            }
+            _pendingCalls.GetOrAdd(toolName, static _ => new ConcurrentQueue<ModernMcpToolCallContext>()).Enqueue(context);
+        }
+        // Preserve bridge arrival order while allowing the output reader to stop without waiting for UI dispatch.
+        _ = Task.Run(() => RequestQueued?.Invoke(this, EventArgs.Empty));
     }
 
-    private bool TrySendToolResult(string callId, McpToolResult result)
+    private bool TrySendToolResult(string callId, McpToolResult result, StreamWriter responseWriter)
     {
         var message = new JsonObject
         {
@@ -367,7 +377,8 @@ public sealed class ModernMcpServerSession : IAsyncDisposable
             ["result"] = result.ToJson(),
         };
 
-        return TryWriteMessage(message);
+        lock (_bridgeIoSync)
+            return ReferenceEquals(responseWriter, _bridgeInput) && TryWriteMessage(message, responseWriter);
     }
 
     private bool TryWriteMessage(JsonObject message)
