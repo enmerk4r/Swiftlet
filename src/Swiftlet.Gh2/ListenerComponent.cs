@@ -110,7 +110,20 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     /// </summary>
     protected virtual void OnSolutionCommitted(SolutionId solution) { }
 
+    /// <summary>
+    /// True while something this component published has not been confirmed by a completed solution.
+    /// When a solution is cancelled or faults in that state, the component asks to be solved again,
+    /// because GH2 does not necessarily run it again by itself.
+    /// </summary>
+    protected virtual bool HasUnconfirmedOutput => false;
+
     private void OnSolutionCompleted(object? sender, SolutionEventArgs args) => OnSolutionCommitted(args.SolutionId);
+
+    private void OnSolutionAbandoned(object? sender, EventArgs args)
+    {
+        if (HasUnconfirmedOutput)
+            RequestRecompute();
+    }
 
     /// <summary>
     /// Items received from the network that must reach the outputs exactly once.
@@ -158,6 +171,18 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
             }
         }
 
+        /// <summary>True while published or newly stored items are waiting for a completed solution.</summary>
+        public bool HasUnconfirmed
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    return _items.Count > 0;
+                }
+            }
+        }
+
         public void Clear()
         {
             lock (_sync)
@@ -177,6 +202,8 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
         {
             old.StateChanged -= OnDocumentStateChanged;
             old.Solution.SolutionCompleted -= OnSolutionCompleted;
+            old.Solution.SolutionCancelled -= OnSolutionAbandoned;
+            old.Solution.SolutionFaulted -= OnSolutionAbandoned;
             StopListener();
         }
 
@@ -184,6 +211,8 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
         {
             current.StateChanged += OnDocumentStateChanged;
             current.Solution.SolutionCompleted += OnSolutionCompleted;
+            current.Solution.SolutionCancelled += OnSolutionAbandoned;
+            current.Solution.SolutionFaulted += OnSolutionAbandoned;
             Volatile.Write(ref _stopping, 0);
         }
     }
