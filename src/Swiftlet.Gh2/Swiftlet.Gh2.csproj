@@ -24,4 +24,7 @@
     <ProjectReference Include="..\Swiftlet.Runtime\Swiftlet.Runtime.csproj" />
     <ProjectReference Include="..\Swiftlet.Hosts.Rhino\Swiftlet.Hosts.Rhino.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Assets\Icons\svg\*.svg" LogicalName="SwiftletIcon.%(Filename)%(Extension)" Visible="false" />
+  </ItemGroup>
 </Project>
