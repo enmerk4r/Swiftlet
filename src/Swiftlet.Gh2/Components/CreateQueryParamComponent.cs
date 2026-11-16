@@ -12,7 +12,7 @@ namespace Swiftlet.Gh2.Components;
 public sealed class CreateQueryParamComponent : Component
 {
     public CreateQueryParamComponent()
-        : base(new Nomen("Create Query Param", "Create an Http Query Param", "Swiftlet", "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateQueryParamComponent), "Create Query Param", "Create an Http Query Param", "Swiftlet", "2. Request")) { }
 
     public CreateQueryParamComponent(IReader reader) : base(reader) { }
 

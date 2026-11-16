@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class XmlNodeParameter : Parameter<XmlNode>
 {
     public XmlNodeParameter()
-        : base(new Nomen("XML Node", "Container for XML nodes", "Swiftlet", "6. Read XML"), Access.Item) { }
+        : base(Palette.Entry(nameof(XmlNodeParameter), "XML Node", "Container for XML nodes", "Swiftlet", "6. Read XML"), Access.Item) { }
 
     public XmlNodeParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

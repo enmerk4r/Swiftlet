@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class RequestBodyParameter : Parameter<IRequestBody>
 {
     public RequestBodyParameter()
-        : base(new Nomen("Request Body", "Container for request bodies", "Swiftlet", "2. Request"), Access.Item) { }
+        : base(Palette.Entry(nameof(RequestBodyParameter), "Request Body", "Container for request bodies", "Swiftlet", "2. Request"), Access.Item) { }
 
     public RequestBodyParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

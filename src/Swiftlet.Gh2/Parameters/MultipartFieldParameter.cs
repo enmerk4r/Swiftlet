@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class MultipartFieldParameter : Parameter<MultipartField>
 {
     public MultipartFieldParameter()
-        : base(new Nomen("Multipart Field", "Container for multipart/form-data fields", "Swiftlet", "2. Request"), Access.Item) { }
+        : base(Palette.Entry(nameof(MultipartFieldParameter), "Multipart Field", "Container for multipart/form-data fields", "Swiftlet", "2. Request"), Access.Item) { }
 
     public MultipartFieldParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

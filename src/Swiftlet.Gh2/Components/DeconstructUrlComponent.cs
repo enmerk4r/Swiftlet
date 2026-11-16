@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructUrl)]
 public sealed class DeconstructUrlComponent : Component
 {
-    public DeconstructUrlComponent() : base(new Nomen("Deconstruct URL", "Deconstruct a URL into its constituent parts", "Swiftlet", "3. Send")) { }
+    public DeconstructUrlComponent() : base(Palette.Entry(nameof(DeconstructUrlComponent), "Deconstruct URL", "Deconstruct a URL into its constituent parts", "Swiftlet", "3. Send")) { }
     public DeconstructUrlComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

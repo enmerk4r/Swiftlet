@@ -12,7 +12,7 @@ namespace Swiftlet.Gh2.Components;
 public sealed class CreateHttpHeaderComponent : Component
 {
     public CreateHttpHeaderComponent()
-        : base(new Nomen("Create Http Header", "Create a new Http Header", "Swiftlet", "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateHttpHeaderComponent), "Create Http Header", "Create a new Http Header", "Swiftlet", "2. Request")) { }
 
     public CreateHttpHeaderComponent(IReader reader) : base(reader) { }
 

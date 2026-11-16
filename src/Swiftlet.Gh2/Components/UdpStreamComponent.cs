@@ -10,7 +10,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.UdpStream)]
 public sealed class UdpStreamComponent : Component
 {
-    public UdpStreamComponent() : base(new Nomen("UDP Stream", "Send data as a UDP datagram to a specified host and port", "Swiftlet", "3. Send")) { }
+    public UdpStreamComponent() : base(Palette.Entry(nameof(UdpStreamComponent), "UDP Stream", "Send data as a UDP datagram to a specified host and port", "Swiftlet", "3. Send")) { }
     public UdpStreamComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

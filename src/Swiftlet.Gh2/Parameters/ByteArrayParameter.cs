@@ -10,7 +10,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class ByteArrayParameter : Parameter<byte[]>
 {
     public ByteArrayParameter()
-        : base(new Nomen("Byte Array", "Container for byte arrays", "Swiftlet", "7. Utilities"), Access.Item) { }
+        : base(Palette.Entry(nameof(ByteArrayParameter), "Byte Array", "Container for byte arrays", "Swiftlet", "7. Utilities"), Access.Item) { }
 
     public ByteArrayParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

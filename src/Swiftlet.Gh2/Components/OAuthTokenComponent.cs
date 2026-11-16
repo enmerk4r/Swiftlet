@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 public sealed class OAuthTokenComponent : OAuthComponentBase
 {
     private readonly OAuthTokenSession _session = new();
-    public OAuthTokenComponent() : base(new Nomen("OAuth Token","Exchanges an OAuth 2.0 authorization code for access and refresh tokens.\nSet Refresh to true to use a refresh token to obtain new tokens.", "Swiftlet", "1. Auth")) { }
+    public OAuthTokenComponent() : base(Palette.Entry(nameof(OAuthTokenComponent), "OAuth Token","Exchanges an OAuth 2.0 authorization code for access and refresh tokens.\nSet Refresh to true to use a refresh token to obtain new tokens.", "Swiftlet", "1. Auth")) { }
     public OAuthTokenComponent(IReader reader) : base(reader) { }
     protected override void AddInputs(InputAdder inputs)
     {

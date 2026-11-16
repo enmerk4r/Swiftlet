@@ -12,7 +12,7 @@ namespace Swiftlet.Gh2.Components;
 public sealed class ScreenCaptureActiveViewportComponent : Component
 {
     public ScreenCaptureActiveViewportComponent()
-        : base(new Nomen("Screen Capture Active Viewport", "Captures a bitmap of the active Rhino viewport.", "Swiftlet", "7. Utilities")) { }
+        : base(Palette.Entry(nameof(ScreenCaptureActiveViewportComponent), "Screen Capture Active Viewport", "Captures a bitmap of the active Rhino viewport.", "Swiftlet", "7. Utilities")) { }
 
     public ScreenCaptureActiveViewportComponent(IReader reader) : base(reader) { }
 

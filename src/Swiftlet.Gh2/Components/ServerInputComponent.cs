@@ -23,7 +23,7 @@ public sealed class ServerInputComponent : Component, IRemovalAware
     private long _generation;
 
     public ServerInputComponent()
-        : base(new Nomen("Server Input", "Listen for HTTP requests and route them to variable outputs.", "Swiftlet", "8. Server")) => Initialize();
+        : base(Palette.Entry(nameof(ServerInputComponent), "Server Input", "Listen for HTTP requests and route them to variable outputs.", "Swiftlet", "8. Server")) => Initialize();
     public ServerInputComponent(IReader reader) : base(reader) => Initialize();
 
     private void Initialize()

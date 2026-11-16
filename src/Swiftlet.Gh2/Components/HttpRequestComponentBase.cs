@@ -20,7 +20,7 @@ public abstract class HttpRequestComponentBase : Component
     private static readonly HttpRequestExecutor Executor = new();
     private readonly IpBlacklist _ipBlacklist = IpBlacklist.FromEnvironment();
 
-    protected HttpRequestComponentBase(string name, string description) : base(new Nomen(name, description, "Swiftlet", "3. Send")) { }
+    protected HttpRequestComponentBase(string name, string description) : base(Palette.Entry(nameof(HttpRequestComponentBase), name, description, "Swiftlet", "3. Send")) { }
     protected virtual string? FixedMethod => null;
     protected virtual bool SupportsBody => false;
     protected virtual string BodyDescription => string.Empty;

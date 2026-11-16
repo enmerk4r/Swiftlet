@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructHttpResponse)]
 public sealed class DeconstructHttpResponseComponent : Component
 {
-    public DeconstructHttpResponseComponent() : base(new Nomen("Deconstruct Response", "Deconstruct Http Response", "Swiftlet", "3. Send")) { }
+    public DeconstructHttpResponseComponent() : base(Palette.Entry(nameof(DeconstructHttpResponseComponent), "Deconstruct Response", "Deconstruct Http Response", "Swiftlet", "3. Send")) { }
     public DeconstructHttpResponseComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

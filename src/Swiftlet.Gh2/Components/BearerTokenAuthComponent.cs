@@ -9,7 +9,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.BearerTokenAuth)]
 public sealed class BearerTokenAuthComponent : Component
 {
-    public BearerTokenAuthComponent() : base(new Nomen("Bearer Token Auth", "Creates an Authorization header for your Bearer token", "Swiftlet", "1. Auth")) { }
+    public BearerTokenAuthComponent() : base(Palette.Entry(nameof(BearerTokenAuthComponent), "Bearer Token Auth", "Creates an Authorization header for your Bearer token", "Swiftlet", "1. Auth")) { }
     public BearerTokenAuthComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class JsonValueParameter : Parameter<JsonValueData>
 {
     public JsonValueParameter()
-        : base(new Nomen("JSON Value", "Container for JSON values", "Swiftlet", "4. Read JSON"), Access.Item) { }
+        : base(Palette.Entry(nameof(JsonValueParameter), "JSON Value", "Container for JSON values", "Swiftlet", "4. Read JSON"), Access.Item) { }
 
     public JsonValueParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

@@ -13,7 +13,7 @@ namespace Swiftlet.Gh2;
 public abstract class SwiftletComponent : Component
 {
     protected SwiftletComponent(string name, string info, string section)
-        : base(new Nomen(name, info, Sections.Chapter, section)) { }
+        : base(Palette.Entry(null, name, info, Sections.Chapter, section)) { }
 
     protected SwiftletComponent(IReader reader) : base(reader) { }
 

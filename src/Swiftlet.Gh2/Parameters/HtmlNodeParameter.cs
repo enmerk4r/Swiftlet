@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class HtmlNodeParameter : Parameter<HtmlNode>
 {
     public HtmlNodeParameter()
-        : base(new Nomen("HTML Node", "Container for HTML nodes", "Swiftlet", "5. Read HTML"), Access.Item) { }
+        : base(Palette.Entry(nameof(HtmlNodeParameter), "HTML Node", "Container for HTML nodes", "Swiftlet", "5. Read HTML"), Access.Item) { }
 
     public HtmlNodeParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

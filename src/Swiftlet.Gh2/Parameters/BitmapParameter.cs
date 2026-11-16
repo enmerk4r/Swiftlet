@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class BitmapParameter : Parameter<SwiftletImage>
 {
     public BitmapParameter()
-        : base(new Nomen("Bitmap", "Container for bitmaps", "Swiftlet", "7. Utilities"), Access.Item) { }
+        : base(Palette.Entry(nameof(BitmapParameter), "Bitmap", "Container for bitmaps", "Swiftlet", "7. Utilities"), Access.Item) { }
 
     public BitmapParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

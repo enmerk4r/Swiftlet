@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 public sealed class CreateUrlComponent : Component
 {
     public CreateUrlComponent()
-        : base(new Nomen("Create URL", "Construct a URL from its constituent parts", "Swiftlet", "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateUrlComponent), "Create URL", "Construct a URL from its constituent parts", "Swiftlet", "2. Request")) { }
 
     public CreateUrlComponent(IReader reader) : base(reader) { }
 

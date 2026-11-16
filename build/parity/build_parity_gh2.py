@@ -15,7 +15,8 @@ Per GH1 entry the status is one of
   no-rule      a GH2 class of the same name exists but no migration rule targets it
   missing      no GH2 counterpart at all
   archived     archived GH1 component; "migration" says where it goes, or null if nowhere
-Checked: component name and section, input/output count and order, pin names, access (item/list/tree
+Checked: name, section and palette place (GH1 exposure row -> GH2 Nomen slot, hidden -> Rank.Hidden) for
+components and parameters; for components also input/output count and order, pin names, access (item/list/tree
 vs Item/Twig/Tree), optionality (GH1 Optional vs GH2 Requirement) and input defaults (colours compared by
 value). Descriptions and nicknames are warnings only (GH2 uses two-letter nicknames by convention). A GH1
 optional input with a default that GH2 makes required with the same default is a warning (it differs only
@@ -30,6 +31,7 @@ sys.path.insert(0, str(REPO / "tests" / "Swiftlet.Cases"))
 from cases import run_csharp  # noqa: E402
 
 ACCESS = {"item": "Item", "list": "Twig", "tree": "Tree"}
+PALETTE_ORDER = ["primary", "secondary", "tertiary", "quarternary", "quinary", "senary", "septenary", "last"]
 OPTIONAL = {"MayBeMissing", "MayBeNull"}
 
 
@@ -128,12 +130,18 @@ def main():
         diffs, warns = [], []
         if len(rules) > 1:
             diffs.append(f"{len(rules)} migration rules for this GH1 GUID ({', '.join(r['source'] for r in rules)})")
-        if target is not None and e["kind"] == "component" and target.get("kind") == "component" and not e["archived"]:
+        if target is not None and not e["archived"]:
+            # Name, section and palette place apply to components and parameters alike.
             if e["name"] != target.get("name"):
                 diffs.append(f"name '{e['name']}' vs '{target.get('name')}'")
             # GH2 displays the dot in numbered sections as a middle dot; the stored section is the same.
             if e["panel"] != (target.get("section") or "").replace("·", "."):
                 diffs.append(f"section '{e['panel']}' vs '{target.get('section')}'")
+            hidden = e["exposure"] == "hidden"
+            want_rank, want_slot = ("Hidden", None) if hidden else ("Normal", PALETTE_ORDER.index(e["exposure"]))
+            if target.get("rank") != want_rank or (want_slot is not None and target.get("slot") != want_slot):
+                diffs.append(f"palette: GH1 exposure {e['exposure']} vs GH2 slot {target.get('slot')} rank {target.get('rank')}")
+        if target is not None and e["kind"] == "component" and target.get("kind") == "component" and not e["archived"]:
             if e["description"] != target.get("info"):
                 warns.append("component description differs")
             for side, inputs in (("in", True), ("out", False)):

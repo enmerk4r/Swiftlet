@@ -9,7 +9,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.BasicAuth)]
 public sealed class BasicAuthComponent : Component
 {
-    public BasicAuthComponent() : base(new Nomen("Basic Auth", "Creates an Authorization header for your Basic auth", "Swiftlet", "1. Auth")) { }
+    public BasicAuthComponent() : base(Palette.Entry(nameof(BasicAuthComponent), "Basic Auth", "Creates an Authorization header for your Basic auth", "Swiftlet", "1. Auth")) { }
     public BasicAuthComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

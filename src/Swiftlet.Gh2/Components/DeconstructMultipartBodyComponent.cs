@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructMultipartBody)]
 public sealed class DeconstructMultipartBodyComponent : Component
 {
-    public DeconstructMultipartBodyComponent() : base(new Nomen("Deconstruct Multipart Body", "Deconstruct a multipart/form-data body into individual fields", "Swiftlet", "3. Send")) { }
+    public DeconstructMultipartBodyComponent() : base(Palette.Entry(nameof(DeconstructMultipartBodyComponent), "Deconstruct Multipart Body", "Deconstruct a multipart/form-data body into individual fields", "Swiftlet", "3. Send")) { }
     public DeconstructMultipartBodyComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

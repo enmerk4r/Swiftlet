@@ -9,7 +9,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.ApiKeyAuth)]
 public sealed class ApiKeyAuthComponent : Component
 {
-    public ApiKeyAuthComponent() : base(new Nomen("API Key", "Create a header and a query param (you'll likely need one or the other, not both) for API key auth", "Swiftlet", "1. Auth")) { }
+    public ApiKeyAuthComponent() : base(Palette.Entry(nameof(ApiKeyAuthComponent), "API Key", "Create a header and a query param (you'll likely need one or the other, not both) for API key auth", "Swiftlet", "1. Auth")) { }
     public ApiKeyAuthComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)
