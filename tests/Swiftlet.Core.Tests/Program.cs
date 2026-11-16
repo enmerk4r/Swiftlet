@@ -34,6 +34,8 @@ internal static class TestRunner
             ("OAuth token client parses successful token responses", OAuthTokenClientParsesSuccessfulResponses),
             ("HttpRequestDefinition builds full URL and preserves headers", HttpRequestDefinitionBuildsRequestData),
             ("HttpRequestExecutor returns response data from handler", HttpRequestExecutorReturnsResponseData),
+            ("HTTP caller cancellation propagates instead of becoming response data", HttpCallerCancellationPropagates),
+            ("HTTP timeout remains a failure response", HttpTimeoutRemainsFailureResponse),
             ("JSON object merger recursively merges nested objects", JsonObjectMergerRecursivelyMergesNestedObjects),
             ("JSON object merger supports null-aware conflict modes", JsonObjectMergerSupportsNullAwareConflictModes),
             ("JSON object merger treats arrays and type mismatches as conflicts", JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts),
@@ -367,6 +369,34 @@ internal static class TestRunner
         Assert.Equal(202, response.StatusCode);
         Assert.Equal("{\"status\":\"ok\"}", response.Content);
         Assert.Equal("abc", response.Headers.Single(header => header.Key == "X-Test").Value);
+    }
+
+    private static void HttpCallerCancellationPropagates()
+    {
+        using var cancellation = new CancellationTokenSource();
+        using var handler = new CancellationHttpMessageHandler();
+        using var client = new HttpClient(handler);
+        var task = new HttpRequestExecutor(client).ExecuteAsync(
+            new HttpRequestDefinition("https://example.test", "GET"), cancellation.Token);
+        handler.Started.Task.Wait(TimeSpan.FromSeconds(5));
+        Assert.True(handler.Started.Task.IsCompleted, "Request did not start.");
+        cancellation.Cancel();
+        try
+        {
+            task.GetAwaiter().GetResult();
+            throw new InvalidOperationException("Caller cancellation was converted into response data.");
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
+    }
+
+    private static void HttpTimeoutRemainsFailureResponse()
+    {
+        using var handler = new FakeHttpMessageHandler(_ => throw new TaskCanceledException("timeout"));
+        using var client = new HttpClient(handler);
+        var result = new HttpRequestExecutor(client).Execute(
+            new HttpRequestDefinition("https://example.test", "GET"));
+        Assert.Equal(-1, result.StatusCode);
+        Assert.Contains("timeout", result.ReasonPhrase);
     }
 
     private static void JsonObjectMergerRecursivelyMergesNestedObjects()
@@ -854,6 +884,18 @@ internal sealed class FakeHttpMessageHandler : HttpMessageHandler
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         return Task.FromResult(_responseFactory(request));
+    }
+}
+
+internal sealed class CancellationHttpMessageHandler : HttpMessageHandler
+{
+    public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        Started.TrySetResult(true);
+        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        throw new InvalidOperationException("Infinite delay unexpectedly completed.");
     }
 }
 
