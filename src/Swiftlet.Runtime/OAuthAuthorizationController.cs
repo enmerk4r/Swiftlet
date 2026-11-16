@@ -2,9 +2,14 @@ using Swiftlet.HostAbstractions;
 
 namespace Swiftlet.Runtime;
 
+public sealed class OAuthAuthorizationChangedEventArgs(long generation) : EventArgs
+{
+    public long Generation { get; } = generation;
+}
+
 public sealed record OAuthAuthorizationSnapshot(string? Code = null, string? Verifier = null,
     string? RedirectUri = null, string Status = "Ready (set Authorize to true to start)",
-    string? Error = null, string? Warning = null, bool IsWaiting = false);
+    string? Error = null, string? Warning = null, bool IsWaiting = false, bool ReportError = true);
 
 /// <summary>One owned authorization attempt at a time; callbacks from superseded attempts cannot publish.</summary>
 public sealed class OAuthAuthorizationController : IAsyncDisposable
@@ -17,6 +22,7 @@ public sealed class OAuthAuthorizationController : IAsyncDisposable
     private long _generation;
     private bool _previousAuthorize;
     public event EventHandler? Changed;
+    public long Generation => Volatile.Read(ref _generation);
     public OAuthAuthorizationSnapshot Snapshot => Volatile.Read(ref _snapshot);
     public OAuthAuthorizationController(IHostServices host) => _host = host;
 
@@ -78,11 +84,11 @@ public sealed class OAuthAuthorizationController : IAsyncDisposable
         {
             if (generation != _generation || !ReferenceEquals(flow, _flow) || token.IsCancellationRequested) return;
             _snapshot = _snapshot with { Code = code, Error = error, Warning = null, IsWaiting = false,
-                Status = !string.IsNullOrWhiteSpace(code) ? "Authorization successful" : $"Error: {error}" };
+                Status = !string.IsNullOrWhiteSpace(code) ? "Authorization successful" : $"Error: {error}", ReportError = false };
             publish = true;
         }
         finally { _gate.Release(); }
-        if (publish) Changed?.Invoke(this, EventArgs.Empty);
+        if (publish) Changed?.Invoke(this, new OAuthAuthorizationChangedEventArgs(generation));
     }
     public async Task ResetAsync()
     {

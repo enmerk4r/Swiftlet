@@ -5,7 +5,7 @@ Assembly A(string name)=>AppDomain.CurrentDomain.GetAssemblies().Single(a=>a.Get
 var gh=A(host==1?"Grasshopper":"Grasshopper2");var sw=A(host==1?"Swiftlet.Gh.Rhino8":"Swiftlet.Gh2");
 dynamic doc;
 if(host==1){dynamic canvas=gh.GetType("Grasshopper.Instances").GetProperty("ActiveCanvas").GetValue(null);doc=canvas.Document;}
-else {dynamic editor=gh.GetType("Grasshopper2.UI.Editor").GetProperty("Instance").GetValue(null);doc=editor.Canvas.Document;}
+else {dynamic editor=gh.GetType("Grasshopper2.UI.Editor").GetProperty("Instance").GetValue(null);doc=editor.Canvas.Document;if(doc==null||doc.State.ToString()=="Closed"){doc=gh.GetType("Grasshopper2.Doc.Document").GetMethod("NewActiveDocument").Invoke(null,null);editor.Canvas.Document=doc;}}
 dynamic component=null;
 if(action=="create") {
  string name=command.GetProperty("class").GetString();var type=sw.GetType((host==1?"Swiftlet.Gh.Rhino8.Components.":"Swiftlet.Gh2.Components.")+name);
@@ -21,6 +21,16 @@ if(action=="create") {
  IEnumerable objects=host==1?(IEnumerable)doc.Objects:(IEnumerable)doc.Objects.Forwards;
  foreach(dynamic candidate in objects)if((host==1?candidate.InstanceGuid.ToString():candidate.InstanceId.ToString())==id){component=candidate;break;}
  if(component==null)throw new Exception("OAuth target missing");
+}
+if(action=="close") { if(host!=2)throw new Exception("Document close check is GH2 only");doc.Close();Console.WriteLine("OAUTH_JSON:{}");return; }
+if(action=="archive") {
+ object restored;
+ if(host==2){var io=A("GrasshopperIO").GetType("GrasshopperIO.IO");restored=io.GetMethods().Single(m=>m.Name=="Duplicate"&&!m.IsGenericMethod).Invoke(null,new object[]{component});}
+ else {dynamic chunk=Activator.CreateInstance(A("GH_IO").GetType("GH_IO.Serialization.GH_LooseChunk"),new object[]{"OAuthArchive"});component.Write(chunk);dynamic copy=Activator.CreateInstance(component.GetType());copy.CreateAttributes();copy.Read(chunk);restored=copy;}
+ var flags=BindingFlags.NonPublic|BindingFlags.Instance;
+ if(restored.GetType().Name=="OAuthTokenComponent") {dynamic state=restored.GetType().GetField("_session",flags).GetValue(restored);if(!string.IsNullOrEmpty((string)state.Cached.AccessToken))throw new Exception("Token cache serialized");}
+ else {dynamic state=restored.GetType().GetField("_controller",flags).GetValue(restored);if(state.Snapshot.Code!=null||state.Snapshot.Verifier!=null)throw new Exception("Authorization state serialized");}
+ Console.WriteLine("OAUTH_JSON:{\"archived\":true}");return;
 }
 if(action=="remove") {
  if(host==1){var sources=new List<object>();foreach(dynamic pin in component.Params.Input)foreach(object source in pin.Sources)sources.Add(source);doc.RemoveObject(component,false);foreach(dynamic source in sources)doc.RemoveObject(source,false);}

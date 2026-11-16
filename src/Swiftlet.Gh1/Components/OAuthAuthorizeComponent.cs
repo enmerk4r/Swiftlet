@@ -7,7 +7,6 @@ public sealed class OAuthAuthorizeComponent : GH_Component
 {
     private readonly OAuthAuthorizationController _controller;
     private long _generation;
-    private int _updateScheduled;
 
     public OAuthAuthorizeComponent() : this(new RhinoHostServices()) { }
 
@@ -61,24 +60,26 @@ public sealed class OAuthAuthorizeComponent : GH_Component
         DA.GetData(4, ref authorize);
         var value = _controller.EvaluateAsync(authorizationUrl, clientId, scopes, port, authorize).GetAwaiter().GetResult();
         DA.SetData(0, value.Code); DA.SetData(1, value.Verifier); DA.SetData(2, value.RedirectUri); DA.SetData(3, value.Status);
-        if (value.Error is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Error, value.Error);
+        if (value.ReportError && value.Error is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Error, value.Error);
         if (value.Warning is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, value.Warning);
         Message = value.IsWaiting ? "Waiting..." : value.Code is not null ? "Authorized" : value.Error is not null ? "Error" : string.Empty;
     }
     private void OnChanged(object? sender, EventArgs args)
     {
+        if (args is not OAuthAuthorizationChangedEventArgs change || change.Generation != _controller.Generation) return;
         long generation = Volatile.Read(ref _generation);
-        if (Interlocked.Exchange(ref _updateScheduled, 1) != 0) return;
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
-            if (generation != Volatile.Read(ref _generation)) return;
-            Interlocked.Exchange(ref _updateScheduled, 0);
-            OnPingDocument()?.ScheduleSolution(5, _ => ExpireSolution(false));
+            if (generation != Volatile.Read(ref _generation) || change.Generation != _controller.Generation) return;
+            OnPingDocument()?.ScheduleSolution(5, _ =>
+            {
+                if (generation == Volatile.Read(ref _generation) && change.Generation == _controller.Generation) ExpireSolution(false);
+            });
         }));
     }
     private void Stop()
     {
-        Interlocked.Increment(ref _generation); Interlocked.Exchange(ref _updateScheduled, 0);
+        Interlocked.Increment(ref _generation);
         _controller.ResetAsync().GetAwaiter().GetResult();
     }
     public override void RemovedFromDocument(GH_Document document)

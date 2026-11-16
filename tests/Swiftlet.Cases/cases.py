@@ -16,6 +16,7 @@ Case file: a JSON array of cases:
     "inputs": [{"text": "q"}, {"text": "a b"}],  # per input: value spec, list of specs, or null (missing)
     "expect": [[{"type": "QueryParameter", ...}]], # optional: per output, flat list of canonical values
     "expectError": true,                       # optional: both hosts must report an error and no data
+    "allowErrorData": true,                    # opt in only when errors intentionally have outputs; use expect
     "gh1Skip": "reason"                        # optional: GH2-only case
   }
 MCP specs: mcptext, mcplink, mcpembeddedtext, mcpbinary, mcpimage, mcpparam, mcptool, mcpcall; listenerrequest supplies a deterministic live request handle. MCP payloads compare parsed full ToJson data (including binary bytes), not display summaries.
@@ -137,7 +138,7 @@ def evaluate(case, r):
         if case.get("expectError"):
             if not has_error(h):
                 problems.append(f"{n}: expected an error, got {h['messages']}")
-            if any(v is not None for o in h["outputs"] for v in flatten(o)):
+            if not case.get("allowErrorData") and any(v is not None for o in h["outputs"] for v in flatten(o)):
                 problems.append(f"{n}: expected no output data, got {h['outputs']}")
         elif has_error(h):
             problems.append(f"{n}: unexpected error {h['messages']}")

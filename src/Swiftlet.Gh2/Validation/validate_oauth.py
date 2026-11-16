@@ -17,10 +17,12 @@ class Handler(BaseHTTPRequestHandler):
   if not refresh:payload["refresh_token"]="refresh-1"
   body=json.dumps(payload).encode();self.send_response(200);self.send_header("Content-Length",str(len(body)));self.end_headers()
   try:self.wfile.write(body)
-  except (BrokenPipeError,ConnectionResetError):pass
+  except (BrokenPipeError,ConnectionResetError,ConnectionAbortedError):pass
  def log_message(self,*args):pass
 p=argparse.ArgumentParser(description=__doc__);p.add_argument("--port",required=True,type=int);p.add_argument("--report",type=Path)
 a=p.parse_args();client=RhinoMcp(a.port);targets=[];evidence=[]
+initial=client.call("run_csharp",{"script":"Console.WriteLine(\"ALIVE \"+Environment.ProcessId);"}).get("stdout", "").strip()
+assert initial.startswith("ALIVE "),initial
 server=ThreadingHTTPServer(("127.0.0.1",0),Handler);threading.Thread(target=server.serve_forever,daemon=True).start()
 source=(HERE/"OAuthHarness.csx").read_text()
 def call(host,action,**values):
@@ -57,6 +59,13 @@ try:
   values=call(host,"update",id=target,inputs={"6":False})["values"]
   assert values[0]=="refreshed" and requests[name]==2,(values,requests)
   passed(f"GH{host} token exchange, duplicates, refresh edge and no authorization-code replay")
+  assert call(host,"archive",id=target)["archived"]
+  passed(f"GH{host} token archive excludes cached credentials")
+  if host==1:
+   call(host,"update",id=target,inputs={"0":endpoint.replace("/token","/slow"),"2":"new-code"})
+   deadline=time.monotonic()+3
+   while requests[name]<3 and time.monotonic()<deadline:time.sleep(.01)
+   assert requests[name]>=3
   if host==2:
    cancelled=call(host,"cancel",id=target,inputs={"0":endpoint.replace("/token","/slow"),"2":"new-code"})
    assert cancelled["cancelled"];passed(f"GH2 token cancellation {cancelled['elapsed']}ms")
@@ -73,6 +82,8 @@ try:
   values=until(host,target,lambda v:v[0]=="live-code")
   assert values[3]=="Authorization successful",values
   released(port)
+  assert call(host,"archive",id=target)["archived"]
+  passed(f"GH{host} authorization archive excludes completed code and verifier")
   call(host,"update",id=target,inputs={"4":False});values=call(host,"update",id=target,inputs={"4":True})["values"]
   assert values[0] is None,values
   if host==2:
@@ -81,6 +92,13 @@ try:
    passed("GH2 authorization disable/re-enable releases and recreates callback")
   call(host,"remove",id=target);targets.remove((host,target));released(port)
   passed(f"GH{host} real callback completion, fresh attempt, delete releases port")
+ port=freeport()
+ result=call(2,"create",**{"class":"OAuthAuthorizeComponent"},inputs={"0":"https://auth.example.test/authorize","1":"client","3":port,"4":True})
+ target=result["id"];targets.append((2,target))
+ call(2,"close",id=target);targets.remove((2,target));released(port)
+ alive=client.call("run_csharp",{"script":"Console.WriteLine(\"ALIVE \"+Environment.ProcessId);"})
+ assert alive.get("stdout", "").strip()==initial,alive
+ passed("GH2 document close releases pending authorization callback; same PID/API stays alive")
  print("PASS OAuth live suite",flush=True)
 finally:
  for host,target in targets:

@@ -13,7 +13,6 @@ namespace Swiftlet.Gh2.Components;
 public sealed class OAuthAuthorizeComponent : OAuthComponentBase
 {
     private readonly OAuthAuthorizationController _controller;
-    private int _updateScheduled;
     public OAuthAuthorizeComponent() : this(new RhinoHostServices()) { }
     public OAuthAuthorizeComponent(IHostServices host) : base(new Nomen("OAuth Authorize","Initiates OAuth 2.0 Authorization Code flow with PKCE.\nOpens browser for user authentication and receives the authorization code via localhost callback.", "Swiftlet", "1. Auth"))
     { _controller = new(host); _controller.Changed += OnChanged; }
@@ -42,20 +41,20 @@ public sealed class OAuthAuthorizeComponent : OAuthComponentBase
         var value = _controller.EvaluateAsync(url, client, scopes?.NonNullItems.ToArray() ?? Array.Empty<string>(), port, authorize, linked.Token).GetAwaiter().GetResult();
         linked.Token.ThrowIfCancellationRequested();
         access.SetItem(0, value.Code); access.SetItem(1, value.Verifier); access.SetItem(2, value.RedirectUri); access.SetItem(3, value.Status);
-        if (value.Error is not null) access.AddError("OAuth", value.Error);
+        if (value.ReportError && value.Error is not null) access.AddError("OAuth", value.Error);
         if (value.Warning is not null) access.AddWarning("OAuth", value.Warning);
     }
     private void OnChanged(object? sender, EventArgs args)
     {
+        if (args is not OAuthAuthorizationChangedEventArgs change || change.Generation != _controller.Generation) return;
         var lifetime = LifetimeToken;
-        if (lifetime.IsCancellationRequested || Interlocked.Exchange(ref _updateScheduled, 1) != 0) return;
+        if (lifetime.IsCancellationRequested) return;
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
-            Interlocked.Exchange(ref _updateScheduled, 0);
-            if (lifetime.IsCancellationRequested || Document is not { State: DocumentState.Active } document || Activity == ObjectActivity.Disabled) return;
+            if (change.Generation != _controller.Generation || lifetime.IsCancellationRequested || Document is not { State: DocumentState.Active } document || Activity == ObjectActivity.Disabled) return;
             Expire(); document.Solution.Start();
         }));
     }
     protected override void OnStopped()
-    { Interlocked.Exchange(ref _updateScheduled, 0); _controller.ResetAsync().GetAwaiter().GetResult(); }
+    { _controller.ResetAsync().GetAwaiter().GetResult(); }
 }

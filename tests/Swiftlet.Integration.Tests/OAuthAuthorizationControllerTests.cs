@@ -12,6 +12,8 @@ internal static class OAuthAuthorizationControllerTests
     {
         var browser = new Browser();
         await using var controller = new OAuthAuthorizationController(new DesktopHostServices(browserLauncher: browser));
+        OAuthAuthorizationChangedEventArgs? lastChange = null;
+        controller.Changed += (_, args) => lastChange = (OAuthAuthorizationChangedEventArgs)args;
         int port = FreePort();
         var ready = await controller.EvaluateAsync("https://auth.example.test/authorize", "client", ["openid"], port, false);
         Assert.False(ready.IsWaiting); Assert.Equal(0, browser.Count);
@@ -23,7 +25,11 @@ internal static class OAuthAuthorizationControllerTests
         await client.GetStringAsync($"http://localhost:{port}/callback/?code=bad-code&state=wrong");
         await UntilAsync(() => !controller.Snapshot.IsWaiting);
         Assert.Null(controller.Snapshot.Code); Assert.Contains("State mismatch", controller.Snapshot.Error!);
+        Assert.False(controller.Snapshot.ReportError, "Provider callback failures preserve the GH1 status-output contract.");
+        await UntilAsync(() => lastChange is not null);
+        var finishedGeneration = lastChange!.Generation;
         await controller.ResetAsync();
+        Assert.True(finishedGeneration != controller.Generation, "Reset must invalidate queued notifications from the old attempt.");
         Assert.Null(controller.Snapshot.Code);
         AssertPortReleased(port);
         await controller.EvaluateAsync("https://auth.example.test/authorize", "client", ["openid"], port, true);
