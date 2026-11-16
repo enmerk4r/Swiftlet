@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\Version.props" />
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <TargetExt>.rhp</TargetExt>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Swiftlet.Gh2</RootNamespace>
+    <AssemblyName>Swiftlet.Gh2</AssemblyName>
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
+    <Title>Swiftlet GH2</Title>
+    <Company>Sergey Pigach</Company>
+    <Description>Grasshopper 2 plugin for accessing Web APIs</Description>
+    <Copyright>Copyright (c) 2021 Sergey</Copyright>
+    <Grasshopper2SdkVersion Condition="'$(Grasshopper2SdkVersion)' == ''">9.0.26300.9401</Grasshopper2SdkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Grasshopper2" Version="$(Grasshopper2SdkVersion)" ExcludeAssets="runtime" />
+    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+  </ItemGroup>
+</Project>

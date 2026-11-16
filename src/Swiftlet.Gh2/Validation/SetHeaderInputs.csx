@@ -1,0 +1,3 @@
+var gh=AppDomain.CurrentDomain.GetAssemblies().First(x=>x.GetName().Name=="Grasshopper2");
+var docs=(System.Collections.IEnumerable)gh.GetType("Grasshopper2.Doc.Document").GetProperty("AllDocuments").GetValue(null);
+foreach(dynamic d in docs) foreach(dynamic c in (System.Collections.IEnumerable)d.Objects.Forwards) if(c.GetType().FullName=="Swiftlet.Gh2.Components.CreateHttpHeaderComponent") { c.Parameters.Input(0).Set(new string[]{"X-Swiftlet"}); c.Parameters.Input(1).Set(new string[]{"hello: unicode \u03bb"}); c.Expire(); Console.WriteLine("SET="+c.InstanceId); foreach(var p in c.Parameters.Output(0).GetType().GetProperties()) if(p.Name.Contains("Data")||p.Name.Contains("Assistant")) Console.WriteLine(p); }
