@@ -11,7 +11,7 @@
     <Version>$(SwiftletVersion)</Version>
     <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
     <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
-    <Title>Swiftlet GH2</Title>
+    <Title>Swiftlet</Title>
     <Company>Sergey Pigach</Company>
     <Description>Grasshopper 2 plugin for accessing Web APIs</Description>
     <Copyright>Copyright (c) 2021 Sergey</Copyright>
@@ -20,5 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Grasshopper2" Version="$(Grasshopper2SdkVersion)" ExcludeAssets="runtime" />
     <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Runtime\Swiftlet.Runtime.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Rhino\Swiftlet.Hosts.Rhino.csproj" />
   </ItemGroup>
 </Project>
