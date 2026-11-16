@@ -10,8 +10,8 @@ dynamic integer=Activator.CreateInstance(g1.GetType("Grasshopper.Kernel.Types.GH
 dynamic path=Activator.CreateInstance(g1.GetType("Grasshopper.Kernel.Data.GH_Path"),new object[]{0});
 source.Params.Input[0].PersistentData.Clear();source.Params.Input[0].PersistentData.Append(integer,path);
 var wrapper=Activator.CreateInstance(gh2.GetType("Grasshopper2.Interop.IGH_Component"),new object[]{source});
-dynamic table=Activator.CreateInstance(plugin.GetType("Swiftlet.Gh2.Migration.ServerMigrationTable"));
-foreach(object migrator in table.CreateMigrators())
+var migratorType=plugin.GetType("Swiftlet.Gh2.Migration.ServerInputMigration");
+foreach(object migrator in new[]{Activator.CreateInstance(migratorType)})
 {
     var type=migrator.GetType();if(type.Name!="ServerInputMigration")continue;
     dynamic target=type.GetMethod("Migrate").Invoke(migrator,new object[]{wrapper});

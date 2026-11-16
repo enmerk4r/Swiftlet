@@ -11,15 +11,13 @@ public sealed class ServerMigrationTable : IMigrationTable
 {
     public IEnumerable<IMigrateBase> CreateMigrators()
     {
-        yield return new ServerInputMigration();
-        yield return new ListenerRequestMigration();
-        yield return Gh1MigrationRule.Identity("b2c3d4e5-f6a7-8901-bcde-f12345678901",ComponentIds.DeconstructRequest,1,6);
-        yield return Gh1MigrationRule.Identity("c3d4e5f6-a7b8-9012-cdef-123456789012",ComponentIds.ServerResponse,4,1);
+        yield return Gh1MigrationRule.Identity("b2c3d4e5-f6a7-8901-bcde-f12345678901", ComponentIds.DeconstructRequest, 1, 6);
+        yield return Gh1MigrationRule.Identity("c3d4e5f6-a7b8-9012-cdef-123456789012", ComponentIds.ServerResponse, 4, 1);
 
     }
 }
 
-internal sealed class ServerInputMigration : IMigrateComponent
+public sealed class ServerInputMigration : IMigrateComponent
 {
     public Guid Grasshopper1Id => new("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     public IDocumentObject Migrate(IGH_Component source)
@@ -44,7 +42,7 @@ internal sealed class ServerInputMigration : IMigrateComponent
     }
 }
 
-internal sealed class ListenerRequestMigration : IMigrateParameter
+public sealed class ListenerRequestMigration : IMigrateParameter
 {
     public Guid Grasshopper1Id => new("c8ede657-11f0-460e-9485-68b507d7668d");
     public IDocumentObject Migrate(IGH_Param source)
