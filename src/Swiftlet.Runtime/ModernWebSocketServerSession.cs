@@ -35,7 +35,11 @@ public sealed class ModernWebSocketServerSession : IAsyncDisposable
     {
         if (Port != port || !IsRunning)
         {
-            await StopAsync().ConfigureAwait(false);
+            // The caller is the owner's own solve and reads the new state right after, so tearing down the
+            // previous bridge here does not notify. A notification would make the owner recompute, which
+            // (before background solves were queued) cancelled this very solve while the bridge was starting,
+            // aborting the start and repeating the cycle: thousands of cancelled solutions.
+            await StopCoreAsync(notify: false).ConfigureAwait(false);
             await StartBridgeAsync(port, cancellationToken).ConfigureAwait(false);
         }
 
@@ -62,8 +66,16 @@ public sealed class ModernWebSocketServerSession : IAsyncDisposable
         return false;
     }
 
-    public async Task StopAsync()
+    /// <summary>
+    /// Stops the bridge and forgets connections and queued messages. Raises <see cref="StateChanged"/> only
+    /// when there was something to stop or clear; stopping an idle session is silent.
+    /// </summary>
+    public Task StopAsync() => StopCoreAsync(notify: true);
+
+    private async Task StopCoreAsync(bool notify)
     {
+        bool hadState = _bridgeProcess is not null || _bridgeInput is not null || !_connections.IsEmpty
+            || !_messageQueue.IsEmpty || !_pendingSends.IsEmpty || _activeClientCount != 0 || Port != 0;
         Process? bridgeProcess = _bridgeProcess;
         StreamWriter? bridgeInput = _bridgeInput;
         Task? bridgeOutputTask = _bridgeOutputTask;
@@ -135,7 +147,10 @@ public sealed class ModernWebSocketServerSession : IAsyncDisposable
         _pendingSends.Clear();
         _activeClientCount = 0;
         Port = 0;
-        OnStateChanged();
+        if (notify && hadState)
+        {
+            OnStateChanged();
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -198,7 +213,8 @@ public sealed class ModernWebSocketServerSession : IAsyncDisposable
         }
         catch
         {
-            await StopAsync().ConfigureAwait(false);
+            // A start that failed or was cancelled leaves the session idle, as it was before: no notification.
+            await StopCoreAsync(notify: false).ConfigureAwait(false);
             throw;
         }
     }
