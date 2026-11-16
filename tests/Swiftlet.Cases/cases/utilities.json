@@ -308,7 +308,7 @@
   "expect": [
    [
     {
-     "text": "a+b%26c%3Dd%2F%C3%A9~_-."
+     "text": "a+b%26c%3Dd%2F%C3%A9%7E_-."
     }
    ]
   ]
@@ -747,7 +747,7 @@
   ]
  },
  {
-  "name": "BitmapToByteArray: BMP",
+  "name": "BitmapToByteArray: JPEG",
   "gh1": "BitmapToByteArrayComponent",
   "inputs": [
    {
@@ -758,7 +758,7 @@
     ]
    },
    {
-    "text": "BMP"
+    "text": "jpeg"
    }
   ]
  },
@@ -801,6 +801,105 @@
     ]
    },
    null
+  ]
+ },
+ {
+  "name": "Decompress: gzip from another tool",
+  "gh1": "DecompressDataComponent",
+  "inputs": [
+   {
+    "bytes": "H4sIAFNV+2oC/8tIzcnJVzi3W6E8vygnJWOUB+UBAI7XzZIYAQAA"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "aGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZA=="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToBitmap: PNG",
+  "gh1": "ByteArrayToBitmapComponent",
+  "inputs": [
+   {
+    "bytes": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAE0lEQVR4nGP4z8DwHwyBNAg0AABJSQl4KKDbdwAAAABJRU5ErkJggg=="
+   }
+  ]
+ },
+ {
+  "name": "SaveWebResponse: binary by default",
+  "gh1": "SaveWebResponseComponent",
+  "inputs": [
+   {
+    "response": {
+     "version": "1.1",
+     "status": 200,
+     "reason": "OK",
+     "headers": [
+      [
+       "Content-Type",
+       "text/plain"
+      ]
+     ],
+     "success": true,
+     "content": "response body λ",
+     "bytes": "cmVzcG9uc2UgYm9keSDOuw=="
+    }
+   },
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\response.bin"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "int": 16
+    }
+   ]
+  ]
+ },
+ {
+  "name": "SaveWebResponse: invalid path is an error",
+  "gh1": "SaveWebResponseComponent",
+  "inputs": [
+   {
+    "response": {
+     "version": "1.1",
+     "status": 200,
+     "reason": "OK",
+     "headers": [
+      [
+       "Content-Type",
+       "text/plain"
+      ]
+     ],
+     "success": true,
+     "content": "response body λ",
+     "bytes": "cmVzcG9uc2UgYm9keSDOuw=="
+    }
+   },
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\no<>such|dir\\r.bin"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "FileToByteArray: saved response bytes",
+  "gh1": "FileToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\response.bin"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "cmVzcG9uc2UgYm9keSDOuw=="
+    }
+   ]
   ]
  }
 ]

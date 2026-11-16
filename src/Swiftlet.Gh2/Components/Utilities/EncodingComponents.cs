@@ -32,14 +32,8 @@ public sealed class Base64ToByteArrayComponent : SwiftletComponent
     protected override void Process(IDataAccess access)
     {
         access.GetItem(0, out string text);
-        try
-        {
-            access.SetItem(0, Convert.FromBase64String(text ?? string.Empty));
-        }
-        catch (FormatException ex)
-        {
-            access.AddError("Invalid Base64", ex.Message);
-        }
+        // Like Grasshopper 1, a failure here faults the component (no output at all) rather than yielding a null.
+        access.SetItem(0, Convert.FromBase64String(text ?? string.Empty));
     }
 }
 
@@ -280,14 +274,8 @@ public sealed class DecompressDataComponent : SwiftletComponent
         if (!access.GetItem(0, out byte[] input) || input is null)
             return;
 
-        try
-        {
-            access.SetItem(0, UtilityCompression.Decompress(input));
-        }
-        catch (InvalidDataException ex)
-        {
-            access.AddError("Invalid compressed data", ex.Message);
-        }
+        // Like Grasshopper 1, a failure here faults the component (no output at all) rather than yielding a null.
+        access.SetItem(0, UtilityCompression.Decompress(input));
     }
 }
 

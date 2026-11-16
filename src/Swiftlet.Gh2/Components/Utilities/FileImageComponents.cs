@@ -241,20 +241,11 @@ public sealed class BitmapToByteArrayComponent : SwiftletComponent
             return;
 
         access.GetItem(1, out string format);
+        // Like Grasshopper 1, a failure here faults the component (no output at all) rather than yielding a null.
         if (!ImageFormatParser.TryParse(format, out SwiftletImageFormat imageFormat))
-        {
-            access.AddError("Unsupported format", $"Format {format} is not supported");
-            return;
-        }
+            throw new Exception($"Format {format} is not supported");
 
-        try
-        {
-            access.SetItem(0, ImageCodec.Save(image, imageFormat));
-        }
-        catch (Exception ex)
-        {
-            access.AddError("Failed to encode image", ex.Message);
-        }
+        access.SetItem(0, ImageCodec.Save(image, imageFormat));
     }
 }
 
@@ -273,14 +264,8 @@ public sealed class ByteArrayToBitmapComponent : SwiftletComponent
         if (!access.GetItem(0, out byte[] bytes) || bytes is null)
             return;
 
-        try
-        {
-            access.SetItem(0, ImageCodec.Load(bytes));
-        }
-        catch (Exception ex)
-        {
-            access.AddError("Failed to decode image", ex.Message);
-        }
+        // Like Grasshopper 1, a failure here faults the component (no output at all) rather than yielding a null.
+        access.SetItem(0, ImageCodec.Load(bytes));
     }
 }
 
