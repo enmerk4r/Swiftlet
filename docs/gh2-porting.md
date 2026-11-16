@@ -56,7 +56,13 @@ Use Hosts.Rhino.RhinoViewportCapture with access.Solution.Token. It runs inline 
 
 ## Listener and variable-parameter gate
 
-Sol owns ServerInput and its reusable lifecycle pattern. Require documented evidence for burst requests, cancellation/retry, event coalescing, source generation checks, delete/close cleanup, undo/re-add, and owned bridge processes. SingleThreaded serializes this component's iterations only; it does not serialize other components or external callbacks. Do not copy a GH1 boolean request-trigger flag without auditing races. Keep this section provisional until the listener acceptance checks land.
+ServerInput uses SingleThreaded only for its own iteration ordering, plus an explicit session gate for external callbacks, port changes and shutdown. Live HTTP checks passed background routing, identical unanswered request reuse across recompute, eight simultaneous same-route requests, variable-route archive clone, deletion while a request is pending, port change and document-close port release. The reusable script is tests/Swiftlet.Parity/validate_server_input.py; it closes its scratch document, so use a dedicated slot.
+
+ServerInputRequestState in Runtime retains one active request per route until its response completes. Both shells use it; cancellation/recompute cannot silently discard a claimed request. A response completion schedules the next queued request. Runtime cancellation marks the handle completed and route removal finishes unreachable queued requests. Each bridge generation retains its own cancellation token and response writer, preventing late old-generation responses from crossing into a restarted bridge. Lifecycle callbacks cancel before waiting on the gate; background expiry callbacks recheck document/activity/closing state on the UI thread.
+
+ListenerRequest is deliberately a shared one-shot response handle, as GH1 Duplicate was, not a mutable data snapshot to duplicate. Its TypeAssistant.Copy preserves identity; live connections are transient and are not restored from an archive. Variable output names/ports are stored by the normal component/parameter serialization. ServerInput migration creates the full variable output set before transferring pin identities, wiring, values and route names.
+
+Remaining listener release checks include actual UI undo/redo, saved GH1 file migration with wires, activity/disabled behavior and long-running stress. Archive clone and deterministic request-state tests do not by themselves prove those UI transitions.
 
 ## Build, load and test
 
