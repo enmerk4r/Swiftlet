@@ -1,0 +1,210 @@
+[
+ {
+  "name": "CreateQueryParam: basic",
+  "gh1": "CreateQueryParamComponent",
+  "inputs": [
+   {
+    "text": "q"
+   },
+   {
+    "text": "a b&λ"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "QueryParameter",
+     "props": {
+      "Key": {
+       "text": "q"
+      },
+      "Value": {
+       "text": "a b&λ"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateQueryParam: empty value",
+  "gh1": "CreateQueryParamComponent",
+  "inputs": [
+   {
+    "text": "flag"
+   },
+   {
+    "text": ""
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "QueryParameter",
+     "props": {
+      "Key": {
+       "text": "flag"
+      },
+      "Value": {
+       "text": ""
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateQueryParam: list of keys",
+  "gh1": "CreateQueryParamComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   {
+    "text": "v"
+   }
+  ]
+ },
+ {
+  "name": "CreateQueryParam: missing key does not run",
+  "gh1": "CreateQueryParamComponent",
+  "inputs": [
+   null,
+   {
+    "text": "v"
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "CreateUrl: scheme+host",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "https"
+   },
+   {
+    "text": "example.com"
+   },
+   null,
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "https://example.com/"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateUrl: port+route",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "http"
+   },
+   {
+    "text": "localhost"
+   },
+   {
+    "int": 8080
+   },
+   {
+    "text": "api/v1/items"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "http://localhost:8080/api/v1/items"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateUrl: default port omitted",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "https"
+   },
+   {
+    "text": "example.com"
+   },
+   {
+    "int": 443
+   },
+   {
+    "text": "/x"
+   }
+  ]
+ },
+ {
+  "name": "CreateUrl: non-positive port ignored",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "https"
+   },
+   {
+    "text": "example.com"
+   },
+   {
+    "int": 0
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "https://example.com/"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateUrl: unicode route",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "https"
+   },
+   {
+    "text": "example.com"
+   },
+   null,
+   {
+    "text": "a b/ü"
+   }
+  ]
+ },
+ {
+  "name": "CreateUrl: host is not validated (GH1 behaviour)",
+  "gh1": "CreateUrlComponent",
+  "inputs": [
+   {
+    "text": "https"
+   },
+   {
+    "text": "bad host name"
+   },
+   null,
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "https://bad host name/"
+    }
+   ]
+  ]
+ }
+]
