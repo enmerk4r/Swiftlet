@@ -10,11 +10,13 @@ Server (GH1 WebSocket Server on a free port; a raw-socket client in this process
   send text   -> Message output carries it
   close       -> Clients 0
   Run = false -> Status/Message "Stopped" and the port is released
-Client (GH1 WebSocket Client; a raw-socket server in this process):
+Client (GH1 WebSocket Client; a raw-socket server in this process that answers only its first handshake):
   Run = true  -> Status Connected
   server sends a text frame -> Message output carries it
-  server closes             -> Status leaves Connected
+  server closes             -> GH1 reconnects (Run is still true) to an endpoint that never answers:
+                               "Error: Connection timed out" within the 10 s connect limit, Rhino responsive
   Run = false -> Message "Disconnected"
+  Run = true against the silent endpoint -> the connecting solve returns within the limit with that error
 
     python tests/Swiftlet.Cases/checks/validate_gh1_websocket.py --port <slot port>   (after cases.py --load)
 Loopback only. Removes what it adds.
@@ -165,32 +167,52 @@ check(s["outs"][2] == "Stopped" and s["message"] == "Stopped" and can_bind(P), f
 cs(GH1 + 'doc.RemoveObject(Comp("WebSocketServerComponent"), false);')
 
 # ---------------------------------------------------------------- client
+# The test server completes the handshake for the first connection only; later connections are accepted and
+# then left unanswered, like an endpoint that accepts TCP but never speaks WebSocket. The GH1 client connects
+# synchronously on the UI thread (also when it reconnects by itself after the server closed), so this checks
+# that the shared client's connect limit (ModernWebSocketClient.ConnectTimeout, 10 s) keeps Rhino responsive.
+CONNECT_LIMIT = 10
 Q = free_port()
 listener = socket.socket()
 listener.bind(("127.0.0.1", Q))
-listener.listen(1)
-accepted = {}
+listener.listen(8)
+accepted = {"silent": []}
 
 
 def serve():
-    conn, _ = listener.accept()
-    headers = read_headers(conn)
-    k = next(l.split(":", 1)[1].strip() for l in headers.splitlines() if l.lower().startswith("sec-websocket-key"))
-    acc = base64.b64encode(hashlib.sha1((k + GUID).encode()).digest()).decode()
-    conn.sendall(("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
-                  f"Sec-WebSocket-Accept: {acc}\r\n\r\n").encode())
-    accepted["conn"] = conn
+    first = True
+    while True:
+        try:
+            conn, _ = listener.accept()
+        except OSError:
+            return
+        if not first:
+            accepted["silent"].append(conn)  # hold it open, never answer
+            continue
+        first = False
+        headers = read_headers(conn)
+        k = next(l.split(":", 1)[1].strip() for l in headers.splitlines() if l.lower().startswith("sec-websocket-key"))
+        acc = base64.b64encode(hashlib.sha1((k + GUID).encode()).digest()).decode()
+        conn.sendall(("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+                      f"Sec-WebSocket-Accept: {acc}\r\n\r\n").encode())
+        accepted["conn"] = conn
 
 
-t = threading.Thread(target=serve, daemon=True)
-t.start()
+def timed_cs(script):
+    t0 = time.time()
+    out = cs(script)
+    return out, time.time() - t0
+
+
+CLIENT_STATE = GH1 + 'var c = Comp("WebSocketClientComponent"); Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { message = c.Message, outs = new[] { Out(c, 1), Out(c, 3) } }));'
+
+threading.Thread(target=serve, daemon=True).start()
 cs(GH1 + r'''
 var comp = (IGH_Component)Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Components.WebSocketClientComponent", true));
 comp.CreateAttributes(); doc.AddObject(comp, false);
 var url = (Param_String)comp.Params.Input[0]; url.PersistentData.Clear(); url.PersistentData.Append(new GH_String("ws://127.0.0.1:%d/"));
 SetRun(comp, 2, true);
 ''' % Q)
-t.join(10)
 C_OUTS = [1, 3]  # Message, Status
 s = wait_for("WebSocketClientComponent", C_OUTS, lambda s: s["outs"][1] == "Connected")
 check("conn" in accepted and s["outs"][1] == "Connected" and s["message"] == "Connected", f"GH1 WS Client Run=true connects: {s}")
@@ -200,21 +222,44 @@ if "conn" in accepted:
 s = wait_for("WebSocketClientComponent", C_OUTS, lambda s: s["outs"][0] == "from-server")
 check(s["outs"][0] == "from-server", f"GH1 WS Client updates on a received message: {s}")
 
-# Stop listening first, as a server that goes away does: with Run still true the GH1 client reconnects at once,
-# synchronously on the UI thread and without a timeout, so a listener that accepts TCP but never completes the
-# handshake would freeze Rhino (pre-existing GH1 behaviour, reported separately).
-listener.close()
+# The server closes; Run is still true, so GH1 reconnects at once, now to an endpoint that never answers.
+t_close = time.time()
 if "conn" in accepted:
     accepted["conn"].sendall(close_frame(mask=False))
     time.sleep(0.2)
     accepted["conn"].close()
-s = wait_for("WebSocketClientComponent", C_OUTS, lambda s: s["outs"][1] != "Connected")
-check(s["outs"][1] != "Connected" and s["message"] != "Connected", f"GH1 WS Client updates when the server closes: {s}")
+slowest, s = 0.0, None
+deadline = time.time() + CONNECT_LIMIT + 20
+while time.time() < deadline:
+    out, took = timed_cs(CLIENT_STATE)
+    slowest = max(slowest, took)
+    s = json.loads(out.splitlines()[-1])
+    if s["outs"][1].startswith("Error: Connection timed out"):
+        break
+    time.sleep(0.25)
+check(s is not None and s["outs"][1].startswith("Error: Connection timed out") and s["message"] == "Error",
+      f"GH1 WS Client: reconnect after the server closed gives up with an error: {s}")
+check(slowest < CONNECT_LIMIT + 5, f"Rhino stays responsive during that reconnect (slowest call {slowest:.1f} s, limit {CONNECT_LIMIT} s)")
+check(len(accepted["silent"]) >= 1, f"the reconnect really reached the silent endpoint ({len(accepted['silent'])} connection(s))")
+print(f"     (error after {time.time() - t_close:.1f} s from the server close)")
 
 cs(GH1 + 'SetRun(Comp("WebSocketClientComponent"), 2, false);')
 s = wait_for("WebSocketClientComponent", C_OUTS, lambda s: s["message"] == "Disconnected")
-check(s["message"] == "Disconnected", f"GH1 WS Client Run=false: {s}")
+check(s["message"] == "Disconnected" and s["outs"][1] == "Disconnected", f"GH1 WS Client Run=false clears the error: {s}")
+
+# A user-started connect to the silent endpoint: the solve that connects must return within the limit.
+_, took = timed_cs(GH1 + 'SetRun(Comp("WebSocketClientComponent"), 2, true);')
+s = state("WebSocketClientComponent", C_OUTS)
+check(took < CONNECT_LIMIT + 5 and s["outs"][1].startswith("Error: Connection timed out"),
+      f"GH1 WS Client Run=true on an endpoint without handshake fails in {took:.1f} s: {s}")
+_, took = timed_cs('Console.WriteLine(Environment.ProcessId);')
+check(took < 5, f"Rhino responsive afterwards ({took:.1f} s)")
+
+cs(GH1 + 'SetRun(Comp("WebSocketClientComponent"), 2, false);')
 cs(GH1 + 'doc.RemoveObject(Comp("WebSocketClientComponent"), false);')
+listener.close()
+for c in accepted["silent"]:
+    c.close()
 
 print()
 print("ALL CHECKS PASSED" if not failures else "%d FAILED: %s" % (len(failures), failures))

@@ -21,6 +21,16 @@ public sealed class ModernWebSocketClient : IAsyncDisposable
 
     public bool IsConnected => _connection?.IsOpen == true;
 
+    /// <summary>
+    /// Upper bound for opening a connection (TCP connect plus the WebSocket handshake). Without it, an
+    /// endpoint that accepts TCP but never answers the upgrade keeps <see cref="ConnectAsync"/> waiting
+    /// forever; GH1 connects synchronously on the UI thread (also when it reconnects after the server
+    /// closed), so that froze Rhino. A healthy local or internet handshake takes well under a second;
+    /// 10 s leaves room for slow networks and TLS while keeping a stall short. It matches the bridge
+    /// start-up limit used by the WebSocket and HTTP servers.
+    /// </summary>
+    public static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(10);
+
     public async Task ConnectAsync(string url, CancellationToken cancellationToken = default)
     {
         // The caller replaces the connection and reads the result itself; closing the old one is not a
@@ -28,7 +38,33 @@ public sealed class ModernWebSocketClient : IAsyncDisposable
         await DisconnectCoreAsync(notify: false).ConfigureAwait(false);
 
         var client = new ClientWebSocket();
-        await client.ConnectAsync(new Uri(url), cancellationToken).ConfigureAwait(false);
+        using (var connectLimit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+        {
+            connectLimit.CancelAfter(ConnectTimeout);
+            try
+            {
+                await client.ConnectAsync(new Uri(url), connectLimit.Token).ConfigureAwait(false);
+            }
+            catch (Exception error) when (connectLimit.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                // Our own limit, not the caller's cancellation: report it like any other connect failure.
+                client.Dispose();
+                _lastError = $"Connection timed out after {ConnectTimeout.TotalSeconds:0} s (no WebSocket handshake from {url})";
+                throw new TimeoutException(_lastError, error);
+            }
+            catch (Exception error) when (error is not OperationCanceledException)
+            {
+                // Failed connects show as "Error: ..." in the Status output, as errors on a live connection do.
+                client.Dispose();
+                _lastError = error.Message;
+                throw;
+            }
+            catch
+            {
+                client.Dispose();
+                throw;
+            }
+        }
 
         var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var connection = new ModernWebSocketConnection(client, false, url, "client");
