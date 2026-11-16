@@ -1,7 +1,7 @@
 using System.Reflection;
 using Swiftlet.HostAbstractions;
 
-namespace Swiftlet.Gh.Rhino8;
+namespace Swiftlet.Hosts.Rhino;
 
 public sealed class RhinoClipboardService : IClipboardService
 {

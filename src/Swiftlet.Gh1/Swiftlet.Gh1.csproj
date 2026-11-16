@@ -70,10 +70,12 @@
     <ProjectReference Include="..\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
     <ProjectReference Include="..\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
     <ProjectReference Include="..\Swiftlet.Runtime\Swiftlet.Runtime.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Rhino\Swiftlet.Hosts.Rhino.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Swiftlet.Runtime" />
+    <Using Include="Swiftlet.Hosts.Rhino" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(OS)' != 'Windows_NT'">

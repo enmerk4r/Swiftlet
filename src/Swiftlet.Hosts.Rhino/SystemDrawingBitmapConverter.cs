@@ -2,7 +2,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Swiftlet.Imaging;
 
-namespace Swiftlet.Gh.Rhino8;
+namespace Swiftlet.Hosts.Rhino;
 
 internal static class SystemDrawingBitmapConverter
 {

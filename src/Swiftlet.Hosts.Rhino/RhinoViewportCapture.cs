@@ -1,8 +1,8 @@
 using System.Drawing;
-using Rhino.Display;
+using global::Rhino.Display;
 using Swiftlet.Imaging;
 
-namespace Swiftlet.Gh.Rhino8;
+namespace Swiftlet.Hosts.Rhino;
 
 internal static class RhinoViewportCapture
 {
@@ -30,7 +30,7 @@ internal static class RhinoViewportCapture
     }
 
     private static bool TryCapture(
-        Func<Rhino.RhinoDoc, RhinoView?> resolveView,
+        Func<global::Rhino.RhinoDoc, RhinoView?> resolveView,
         out SwiftletImage? image,
         out string? errorMessage)
     {
@@ -40,11 +40,11 @@ internal static class RhinoViewportCapture
         string? capturedError = null;
         using var done = new ManualResetEventSlim(false);
 
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        global::Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
             try
             {
-                Rhino.RhinoDoc? doc = Rhino.RhinoDoc.ActiveDoc;
+                global::Rhino.RhinoDoc? doc = global::Rhino.RhinoDoc.ActiveDoc;
                 if (doc is null)
                 {
                     capturedError = "No active Rhino document.";

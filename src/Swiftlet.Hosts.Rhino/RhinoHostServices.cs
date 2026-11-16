@@ -2,7 +2,7 @@ using Swiftlet.HostAbstractions;
 using Swiftlet.Hosts.Desktop;
 using Swiftlet.Hosts.Headless;
 
-namespace Swiftlet.Gh.Rhino8;
+namespace Swiftlet.Hosts.Rhino;
 
 public sealed class RhinoHostServices : IHostServices
 {

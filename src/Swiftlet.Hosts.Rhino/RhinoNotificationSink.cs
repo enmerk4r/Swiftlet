@@ -1,6 +1,6 @@
 using Swiftlet.HostAbstractions;
 
-namespace Swiftlet.Gh.Rhino8;
+namespace Swiftlet.Hosts.Rhino;
 
 public sealed class RhinoNotificationSink : INotificationSink
 {
@@ -15,6 +15,6 @@ public sealed class RhinoNotificationSink : INotificationSink
             _ => "[Swiftlet]",
         };
 
-        Rhino.RhinoApp.WriteLine($"{prefix} {notification.Message}");
+        global::Rhino.RhinoApp.WriteLine($"{prefix} {notification.Message}");
     }
 }

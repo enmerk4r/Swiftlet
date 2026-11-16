@@ -6,6 +6,7 @@
 |---|---|
 | `src/Swiftlet.Core`, `Swiftlet.Imaging`, `Swiftlet.HostAbstractions`, `Swiftlet.Hosts.*` | Domain and host services. No Grasshopper or Rhino references. |
 | `src/Swiftlet.Runtime` | Host-neutral workflows (requests, servers, WebSockets, MCP, OAuth, utilities) shared by both shells. No Grasshopper or Rhino references. |
+| `src/Swiftlet.Hosts.Rhino` | Rhino host services (notifications, clipboard, browser, viewport capture) for both shells. RhinoCommon only, no Grasshopper. Inside this namespace write `global::Rhino.` for RhinoCommon types. |
 | `src/Swiftlet.Gh1` | Grasshopper 1 shell (`.gha`). Assembly name and namespace remain `Swiftlet.Gh.Rhino8`; component GUIDs must never change. |
 | `src/Swiftlet.Gh2` | Grasshopper 2 shell (`.rhp`, Rhino 9+). |
 | `src/SwiftletBridge` | Native bridge executable used by server, WebSocket and MCP components. |
@@ -15,6 +16,8 @@ The split is GH1 vs GH2, never per Rhino version. Logic belongs in Core/Runtime;
 Every GH1 component must have a GH2 counterpart with the same behaviour (and vice versa). A missing counterpart is a blocker, not a note.
 
 ## Building
+
+A running Rhino locks the DLLs it loaded. Load test builds into Rhino from a copy of the output folder, or build with `-p:OutDir=<other folder>`.
 
 ```
 dotnet build Swiftlet.sln

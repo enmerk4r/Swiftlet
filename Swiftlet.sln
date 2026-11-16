@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8E4C679E-094
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swiftlet.Runtime", "src\Swiftlet.Runtime\Swiftlet.Runtime.csproj", "{B9C20AD4-0009-411C-AA35-D348057ADB2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swiftlet.Hosts.Rhino", "src\Swiftlet.Hosts.Rhino\Swiftlet.Hosts.Rhino.csproj", "{DE838EFB-BFAE-404F-BFC0-8467D3AD1034}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{B9C20AD4-0009-411C-AA35-D348057ADB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9C20AD4-0009-411C-AA35-D348057ADB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9C20AD4-0009-411C-AA35-D348057ADB2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE838EFB-BFAE-404F-BFC0-8467D3AD1034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE838EFB-BFAE-404F-BFC0-8467D3AD1034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE838EFB-BFAE-404F-BFC0-8467D3AD1034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE838EFB-BFAE-404F-BFC0-8467D3AD1034}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{53D6362F-E322-4C02-9854-D82B25455132} = {0C696C32-2D37-4B25-9B93-616F9B74FBB6}
 		{B4CD1323-21C5-4744-86C5-4E99921C10E8} = {0C696C32-2D37-4B25-9B93-616F9B74FBB6}
 		{B9C20AD4-0009-411C-AA35-D348057ADB2F} = {8E4C679E-094E-4657-ADB1-E9961BC42218}
+		{DE838EFB-BFAE-404F-BFC0-8467D3AD1034} = {8E4C679E-094E-4657-ADB1-E9961BC42218}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {31F7A430-CDB3-44AF-AF7D-5AE22988ABFC}
