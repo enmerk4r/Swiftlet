@@ -37,9 +37,7 @@ public sealed class GetElementByIdComponent : GH_Component
             return;
         }
 
-        var tempDocument = new HtmlDocument();
-        tempDocument.LoadHtml(goo.Value.OuterHtml);
-        HtmlNode? element = tempDocument.GetElementbyId(elementId);
+        HtmlNode? element = HtmlQueries.GetElementById(goo.Value, elementId);
         if (element is not null)
         {
             DA.SetData(0, new HtmlNodeGoo(element));

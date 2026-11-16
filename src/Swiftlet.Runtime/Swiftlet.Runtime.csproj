@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
     <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
     <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />

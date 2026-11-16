@@ -44,6 +44,8 @@ object CoreValue(JsonObject spec)
         case "bytes": return Convert.FromBase64String((string)v!);
         case "json": case "jobject": case "jarray": case "jvalue":
             return JsonForHost(kind, (string)v!, 2);
+        case "html": case "htmlel": case "xml":
+            return MarkupNode(kind, (string)v!);
         default: throw new NotSupportedException("value kind " + kind);
     }
 }
@@ -59,6 +61,22 @@ object JsonForHost(string kind, string text, int host)
     return parse.Invoke(null, new object[] { text });
 }
 
+// Markup nodes are the same CLR types in both hosts. "html" is the document node, "htmlel" its first
+// child element, "xml" the document element. Each call parses a fresh document.
+object MarkupNode(string kind, string markup)
+{
+    if (kind == "xml")
+    {
+        var xml = new System.Xml.XmlDocument();
+        xml.LoadXml(markup);
+        return xml.DocumentElement;
+    }
+    var hap = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "HtmlAgilityPack");
+    dynamic doc = Activator.CreateInstance(hap.GetType("HtmlAgilityPack.HtmlDocument", true));
+    doc.LoadHtml(markup);
+    return kind == "html" ? (object)doc.DocumentNode : (object)doc.DocumentNode.FirstChild;
+}
+
 object Gh1Goo(JsonObject spec)
 {
     var (kind, v) = spec.Single();
@@ -67,13 +85,17 @@ object Gh1Goo(JsonObject spec)
         case "text": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_String", true), (string)v!);
         case "int": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Integer", true), (int)v!);
         case "num": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Number", true), (double)v!);
-        case "bool": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Boolean", true), (bool)v!);
+        case "bool": return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Boolean", true), new object[] { (bool)v! }); // object[]: a bare bool selects the (Type, bool nonPublic) overload
         case "query": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.QueryParameterGoo", true), CoreValue(spec));
         case "header": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HttpHeaderGoo", true), CoreValue(spec));
         case "bytes": return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.ByteArrayGoo", true), CoreValue(spec));
         case "json": case "jobject": case "jarray": case "jvalue":
             string goo = kind switch { "jobject" => "JsonObjectGoo", "jarray" => "JsonArrayGoo", "jvalue" => "JsonValueGoo", _ => "JsonNodeGoo" };
             return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo." + goo, true), JsonForHost(kind, (string)v!, 1));
+        case "html": case "htmlel":
+            return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HtmlNodeGoo", true), MarkupNode(kind, (string)v!));
+        case "xml":
+            return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.XmlNodeGoo", true), MarkupNode(kind, (string)v!));
         default: throw new NotSupportedException("value kind " + kind);
     }
 }
@@ -100,7 +122,10 @@ object Canon(object o, int depth = 0)
         case double d: return new Dictionary<string, object> { ["num"] = d };
         case byte[] bytes: return new Dictionary<string, object> { ["bytes"] = Convert.ToBase64String(bytes) };
         case JsonNode node: return new Dictionary<string, object> { ["json"] = node.ToJsonString() };
+        case System.Xml.XmlNode xmlNode: return new Dictionary<string, object> { ["xml"] = xmlNode.OuterXml };
     }
+    if (t.FullName == "HtmlAgilityPack.HtmlNode")
+        return new Dictionary<string, object> { ["html"] = (string)t.GetProperty("OuterHtml").GetValue(o) };
     if (t.Namespace == "Swiftlet.Core.Json")
     {
         // Immutable wrappers: compare by their compact JSON text (JSON null -> "null").

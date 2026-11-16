@@ -1,0 +1,400 @@
+[
+ {
+  "name": "ParseXml: document element",
+  "gh1": "ParseXmlComponent",
+  "inputs": [
+   {
+    "text": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item><other />text</root>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ParseXml: malformed is an error",
+  "gh1": "ParseXmlComponent",
+  "inputs": [
+   {
+    "text": "<root><a></root>"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "ParseXml: blank input warns, no data",
+  "gh1": "ParseXmlComponent",
+  "inputs": [
+   {
+    "text": "   "
+   }
+  ]
+ },
+ {
+  "name": "XmlAttributeValue: present",
+  "gh1": "GetXmlAttributeValueComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "b"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "two"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "XmlAttributeValue: absent warns, no data",
+  "gh1": "GetXmlAttributeValueComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "zz"
+   }
+  ]
+ },
+ {
+  "name": "XmlAttributes",
+  "gh1": "GetXmlAttributesComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "text": "1"
+    },
+    {
+     "text": "two"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "XmlChildNodes: elements and non-blank text",
+  "gh1": "GetXmlChildNodesComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   }
+  ]
+ },
+ {
+  "name": "XmlByTag: descendants",
+  "gh1": "GetXmlElementsByTagComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "item"
+   }
+  ]
+ },
+ {
+  "name": "XmlByTag: nested",
+  "gh1": "GetXmlElementsByTagComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "sub"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<sub>deep</sub>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "XmlByTag: none",
+  "gh1": "GetXmlElementsByTagComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "nope"
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "XmlByXPath: predicate",
+  "gh1": "GetXmlElementsByXPathComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "item[@id='2']"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<item id=\"2\"><sub>deep</sub></item>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "XmlByXPath: invalid expression is an error",
+  "gh1": "GetXmlElementsByXPathComponent",
+  "inputs": [
+   {
+    "xml": "<root a=\"1\" b=\"two\"><item id=\"1\">first</item><item id=\"2\"><sub>deep</sub></item>  <other/>text</root>"
+   },
+   {
+    "text": "item["
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "XmlInnerText",
+  "gh1": "GetXmlInnerTextComponent",
+  "inputs": [
+   {
+    "xml": "<item id=\"2\"><sub>deep</sub></item>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "deep"
+    }
+   ],
+   [
+    {
+     "text": "<sub>deep</sub>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "StringifyXml: indented",
+  "gh1": "StringifyXmlNodeComponent",
+  "inputs": [
+   {
+    "xml": "<a><b>1</b></a>"
+   },
+   {
+    "bool": true
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "<a>\r\n  <b>1</b>\r\n</a>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "StringifyXml: compact",
+  "gh1": "StringifyXmlNodeComponent",
+  "inputs": [
+   {
+    "xml": "<a><b>1</b></a>"
+   },
+   {
+    "bool": false
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "<a><b>1</b></a>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "StringifyXml: indent defaults to true",
+  "gh1": "StringifyXmlNodeComponent",
+  "inputs": [
+   {
+    "xml": "<a><b>1</b></a>"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "<a>\r\n  <b>1</b>\r\n</a>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateXml: name only",
+  "gh1": "CreateXmlElementComponent",
+  "inputs": [
+   {
+    "text": "root"
+   },
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<root />"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateXml: text, attributes, children",
+  "gh1": "CreateXmlElementComponent",
+  "inputs": [
+   {
+    "text": "root"
+   },
+   {
+    "text": "hi & <bye>"
+   },
+   null,
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "text": "1"
+    },
+    {
+     "text": "x y"
+    }
+   ],
+   [
+    {
+     "xml": "<c>1</c>"
+    },
+    {
+     "xml": "<d/>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateXml: namespace",
+  "gh1": "CreateXmlElementComponent",
+  "inputs": [
+   {
+    "text": "root"
+   },
+   null,
+   {
+    "text": "urn:test"
+   },
+   null,
+   null,
+   null
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<root xmlns=\"urn:test\" />"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateXml: attribute count mismatch is an error",
+  "gh1": "CreateXmlElementComponent",
+  "inputs": [
+   {
+    "text": "root"
+   },
+   null,
+   null,
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "text": "1"
+    }
+   ],
+   null
+  ],
+  "expectError": true
+ },
+ {
+  "name": "CreateXml: blank attribute name is skipped",
+  "gh1": "CreateXmlElementComponent",
+  "inputs": [
+   {
+    "text": "root"
+   },
+   null,
+   null,
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": " "
+    }
+   ],
+   [
+    {
+     "text": "1"
+    },
+    {
+     "text": "2"
+    }
+   ],
+   null
+  ],
+  "expect": [
+   [
+    {
+     "xml": "<root a=\"1\" />"
+    }
+   ]
+  ]
+ }
+]

@@ -16,6 +16,7 @@ internal static class TestRunner
         List<(string Name, Action Test)> tests =
         [
             ("ContentTypes.ToDisplayName maps known and custom types", ContentTypesMapDisplayNames),
+            ("JsonData wrappers are immutable, kind-checked and distinguish JSON null", JsonDataWrappersBehave),
             ("MimeTypeMap resolves known and unknown extensions", MimeTypeMapResolvesExtensions),
             ("UrlBuilder appends encoded query parameters", UrlBuilderAppendsQueryParameters),
             ("RequestBodyFormUrlEncoded serializes form values", RequestBodyFormUrlEncodedSerializesValues),
@@ -810,6 +811,48 @@ internal static class TestRunner
     private static JsonObject ParseJsonObject(string json)
     {
         return JsonNode.Parse(json)?.AsObject() ?? throw new InvalidOperationException("Failed to parse JSON object.");
+    }
+
+    private static void JsonDataWrappersBehave()
+    {
+        JsonToken token = JsonToken.Parse("{ \"a\": 1, \"b\": [true, null, \"x\"] }");
+        Assert.Equal("{\"a\":1,\"b\":[true,null,\"x\"]}", token.Json);
+        Assert.Equal("JSON Object [2 keys]", token.ToString());
+        Assert.False(token.IsNull);
+
+        // Every caller gets its own node; mutating one does not affect the token or other callers.
+        JsonObject first = (JsonObject)token.ToNode()!;
+        first["a"] = 99;
+        Assert.Equal(1, ((JsonObject)token.ToNode()!)["a"]!.GetValue<int>());
+
+        Assert.True(JsonObjectData.TryFrom(token, out JsonObjectData? asObject));
+        Assert.Equal(2, asObject!.ToObject().Count);
+        Assert.False(JsonArrayData.TryFrom(token, out _));
+        Assert.False(JsonValueData.TryFrom(token, out _));
+
+        JsonToken array = JsonToken.Parse("[1,2,3]");
+        Assert.True(JsonArrayData.TryFrom(array, out JsonArrayData? asArray));
+        Assert.Equal("JSON Array [3 items]", asArray!.ToString());
+        Assert.False(JsonObjectData.TryFrom(array, out _));
+
+        // JSON null is a real value, distinct from "no value".
+        Assert.True(JsonToken.Null.IsNull);
+        Assert.Null(JsonToken.Null.ToNode());
+        Assert.Equal("JSON Value [null]", JsonToken.Null.ToString());
+        Assert.True(JsonValueData.TryFrom(JsonToken.Null, out JsonValueData? nullValue));
+        Assert.True(nullValue!.IsNull);
+        Assert.True(new JsonToken((JsonNode?)null).Equals(JsonToken.Null));
+        Assert.True(new JsonValueData(null).Equals(JsonValueData.Null));
+
+        JsonValueData text = new(JsonValue.Create("hello"));
+        Assert.Equal("\"hello\"", text.Json);
+        Assert.Equal("hello", text.ToValue()!.GetValue<string>());
+        Assert.Equal("JSON Value [\"hello\"]", text.ToString());
+        Assert.True(JsonToken.From(text).Equals(JsonToken.Parse("\"hello\"")));
+        Assert.False(text.Equals(JsonToken.Parse("\"hello\"")));
+
+        Assert.Equal("{}", new JsonObjectData(null).Json);
+        Assert.Equal("[]", new JsonArrayData(null).Json);
     }
 
     private static void AssertJsonEqual(JsonObject expected, JsonObject actual)

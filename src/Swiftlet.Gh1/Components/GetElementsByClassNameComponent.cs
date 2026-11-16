@@ -41,23 +41,10 @@ public sealed class GetElementsByClassNameComponent : GH_Component
             return;
         }
 
-        IEnumerable<HtmlNode> children = recursive ? goo.Value.Descendants() : goo.Value.ChildNodes;
-        List<HtmlNodeGoo> matching = [];
-        foreach (HtmlNode child in children)
-        {
-            if (!child.Attributes.Contains("class"))
-            {
-                continue;
-            }
-
-            string[] parts = child.Attributes["class"].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (parts.Contains(className))
-            {
-                matching.Add(new HtmlNodeGoo(child));
-            }
-        }
-
-        DA.SetDataList(0, matching);
+        DA.SetDataList(
+            0,
+            HtmlQueries.GetElementsByClassName(goo.Value, className, recursive)
+                .Select(static node => new HtmlNodeGoo(node)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

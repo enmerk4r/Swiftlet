@@ -44,27 +44,10 @@ public sealed class GetElementsByAttributeValueComponent : GH_Component
             return;
         }
 
-        List<HtmlNodeGoo> matching = [];
-        if (recursive)
-        {
-            HtmlNodeCollection? nodes = goo.Value.SelectNodes($".//*[@{attribute}='{value}']");
-            if (nodes is not null)
-            {
-                matching.AddRange(nodes.Select(static node => new HtmlNodeGoo(node)));
-            }
-        }
-        else
-        {
-            foreach (HtmlNode child in goo.Value.ChildNodes)
-            {
-                if (child.Attributes.Contains(attribute) && child.Attributes[attribute].Value == value)
-                {
-                    matching.Add(new HtmlNodeGoo(child));
-                }
-            }
-        }
-
-        DA.SetDataList(0, matching);
+        DA.SetDataList(
+            0,
+            HtmlQueries.GetElementsByAttributeValue(goo.Value, attribute, value, recursive)
+                .Select(static node => new HtmlNodeGoo(node)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
