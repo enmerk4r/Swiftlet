@@ -7,7 +7,9 @@ param(
     [switch]$NoRestore,
     [string]$PluginOutputDir,
     [string]$PrebuiltBridgeRoot,
-    [switch]$SkipBridgePublish
+    [switch]$SkipBridgePublish,
+    # Local test packages only: publish just these bridge ids (for example win-x64). Release packages need all of them.
+    [string[]]$OnlyBridgeIds
 )
 
 $ErrorActionPreference = "Stop"
@@ -668,6 +670,11 @@ $bridgePublishes = @()
 if (-not $SkipBridgePublish) {
     foreach ($publishTarget in $targetMetadata.bridgePublishes) {
         $publishId = [string]$publishTarget.id
+        if ($null -ne $OnlyBridgeIds -and $OnlyBridgeIds.Count -gt 0 -and $OnlyBridgeIds -notcontains $publishId) {
+            Write-Warning "Skipping bridge '$publishId' (-OnlyBridgeIds). This package is not release-complete."
+            continue
+        }
+
         $publishMode = Resolve-BridgePublishMode -PublishTarget $publishTarget
         $publishDirectory = Join-Path $bridgeStageRoot $publishId
         New-CleanDirectory -Path $publishDirectory
