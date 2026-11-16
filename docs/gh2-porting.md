@@ -17,12 +17,13 @@ Every component and parameter needs both its normal constructor and `(IReader re
 - Match access (`Item`, `Twig`, `Tree`) to both Get and Set calls; a mismatch can compile and fail only during solving.
 - **Pass optionality to Add:** `inputs.Add(parameter, Requirement.MayBeMissing)`; `Add(parameter)` overwrites a pre-set requirement with its default `MustExist`.
 - Do not invent empty values or null-item defaults to make optional pins execute; truly empty optional custom Item/Twig inputs were verified with live HTTP/UDP fixtures.
+- Preserve optionality even when a pin has a persistent default. Ten pins across HTML search, CSV, Byte Array To Text and QR retain `MayBeMissing` plus their defaults; `Validation/ValidateOptionalDefaults.csx` clears the defaults and verifies all seven components still produce the expected fallback output. The previous build was not tested with this check, so this is verified alignment, not a demonstrated before/after failure.
 - Preserve failure output shape: a GH1 exception gives empty output trees, whereas an error message followed by return can leave null slots; choose GH2 throw versus `AddError` accordingly.
 - After programmatically changing persistent data, expire the input parameter and component before solving.
 
 Compare typed values, tree paths, null slots and diagnostics; sampled Rhino AI `ToString()` output is not a parity oracle. Read a coherent set of output trees from one `component.State.Data` snapshot, keyed by output InstanceId. Independently cached output-parameter states can refer to different solves. Cancellation retains the last successful data: inspect phase/solution IDs before interpreting it as current output.
 
-`build/parity/build_parity_gh2.py` reflects names, sections, pins, access, requirements, defaults, migration targets and palette placement. Duplicate migration rules are errors. GH1 optional pins with persistent defaults represented as required GH2 pins with the same defaults are reported warnings, not silently invented behavior.
+`build/parity/build_parity_gh2.py` reflects names, sections, pins, access, requirements, defaults, migration targets and palette placement. Duplicate migration rules are errors. The generator reports optional-with-default versus required-with-default differences as warnings (errors with `--strict`); the ten known differences are now aligned. A warning classification is not evidence that missing-input behavior matches.
 
 ## Cancellation and background delivery
 
