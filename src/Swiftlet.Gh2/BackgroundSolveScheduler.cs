@@ -10,6 +10,15 @@ internal static class BackgroundSolveScheduler
 {
     private static readonly ConditionalWeakTable<Document, Coordinator> Documents = new();
 
+    /// <summary>Acquire an opaque coalescing lease; an old request can only release its own ticket.</summary>
+    public static int Acquire(ref int pending, ref int sequence)
+    {
+        if (Volatile.Read(ref pending) != 0) return 0;
+        int ticket = Interlocked.Increment(ref sequence);
+        if (ticket == 0) ticket = Interlocked.Increment(ref sequence);
+        return Interlocked.CompareExchange(ref pending, ticket, 0) == 0 ? ticket : 0;
+    }
+
     public static void Request(Component component, Func<bool> current, Action? prepare = null, Action? release = null)
     {
         var request = new Pending(component, current, prepare, release);

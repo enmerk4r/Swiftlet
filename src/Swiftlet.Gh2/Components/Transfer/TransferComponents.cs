@@ -22,6 +22,7 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
     private protected abstract FileTransferJob Job { get; }
     private long _generation;
     private int _expiryPosted;
+    private int _expirySequence;
 
     protected TransferComponent(string name, string info) : base(name, info, Sections.Send) => Initialize();
 
@@ -52,11 +53,11 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
     private void PostExpiry()
     {
         long generation = Volatile.Read(ref _generation);
-        if (Interlocked.Exchange(ref _expiryPosted, 1) != 0)
-            return;
+        int ticket = BackgroundSolveScheduler.Acquire(ref _expiryPosted, ref _expirySequence);
+        if (ticket == 0) return;
         BackgroundSolveScheduler.Request(this,
             () => generation == Volatile.Read(ref _generation),
-            release: () => { if (generation == Volatile.Read(ref _generation)) Interlocked.Exchange(ref _expiryPosted, 0); });
+            release: () => Interlocked.CompareExchange(ref _expiryPosted, 0, ticket));
     }
 
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)

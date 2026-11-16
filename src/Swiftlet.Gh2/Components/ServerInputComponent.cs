@@ -20,6 +20,7 @@ public sealed class ServerInputComponent : Component, IRemovalAware
     private CancellationTokenSource _lifetime = new();
     private int _stopping;
     private int _expiryPosted;
+    private int _expirySequence;
     private long _generation;
 
     public ServerInputComponent()
@@ -119,10 +120,12 @@ public sealed class ServerInputComponent : Component, IRemovalAware
     {
         if (sender is ModernServerSession source && !ReferenceEquals(source, _session)) return;
         long generation = Volatile.Read(ref _generation);
-        if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _expiryPosted, 1) != 0) return;
+        if (Volatile.Read(ref _stopping) != 0) return;
+        int ticket = BackgroundSolveScheduler.Acquire(ref _expiryPosted, ref _expirySequence);
+        if (ticket == 0) return;
         BackgroundSolveScheduler.Request(this,
             () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
-            release: () => { if (generation == Volatile.Read(ref _generation)) Interlocked.Exchange(ref _expiryPosted, 0); });
+            release: () => Interlocked.CompareExchange(ref _expiryPosted, 0, ticket));
     }
     private void StopListener()
     {
