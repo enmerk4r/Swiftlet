@@ -9,7 +9,7 @@ public sealed class QueryParameterParameter : Parameter<QueryParameter>
 {
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
-    public QueryParameterParameter() : base(new Nomen("Query Parameter", "HTTP query parameter", "Swiftlet", "2. Request"), Access.Item) { }
+    public QueryParameterParameter() : base(Palette.Entry(nameof(QueryParameterParameter), "Query Param", "Container for HTTP query parameters", "Swiftlet", "2. Request"), Access.Item) { }
     public QueryParameterParameter(string name, string userName, string info, Access access = Access.Item) : base(name, userName, info, access) { }
     public QueryParameterParameter(IReader reader) : base(reader) { }
 }

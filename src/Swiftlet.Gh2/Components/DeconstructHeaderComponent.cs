@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructHeader)]
 public sealed class DeconstructHeaderComponent : Component
 {
-    public DeconstructHeaderComponent() : base(new Nomen("Deconstruct Http Header", "Deconstruct a Header into its constituent parts", "Swiftlet", "3. Send")) { }
+    public DeconstructHeaderComponent() : base(Palette.Entry(nameof(DeconstructHeaderComponent), "Deconstruct Http Header", "Deconstruct a Header into its constituent parts", "Swiftlet", "3. Send")) { }
     public DeconstructHeaderComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

@@ -10,7 +10,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.Throttle)]
 public sealed class ThrottleComponent : Component
 {
-    public ThrottleComponent() : base(new Nomen("Throttle", "This is a simple passthrough component that lets you add a delay. Useful when sending multiple calls to APIs with limitations on maximum number of requests per minute", "Swiftlet", "3. Send")) { }
+    public ThrottleComponent() : base(Palette.Entry(nameof(ThrottleComponent), "Throttle", "This is a simple passthrough component that lets you add a delay. Useful when sending multiple calls to APIs with limitations on maximum number of requests per minute", "Swiftlet", "3. Send")) { }
     public ThrottleComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

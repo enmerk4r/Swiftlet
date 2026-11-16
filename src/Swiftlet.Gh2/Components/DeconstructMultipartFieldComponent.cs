@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructMultipartField)]
 public sealed class DeconstructMultipartFieldComponent : Component
 {
-    public DeconstructMultipartFieldComponent() : base(new Nomen("Deconstruct Multipart Field", "Deconstruct a multipart field into its constituent parts", "Swiftlet", "3. Send")) { }
+    public DeconstructMultipartFieldComponent() : base(Palette.Entry(nameof(DeconstructMultipartFieldComponent), "Deconstruct Multipart Field", "Deconstruct a multipart field into its constituent parts", "Swiftlet", "3. Send")) { }
     public DeconstructMultipartFieldComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

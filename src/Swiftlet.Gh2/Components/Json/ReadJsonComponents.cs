@@ -35,7 +35,7 @@ internal static class JsonComponentSupport
 public sealed class ParseJsonStringComponent : Component
 {
     public ParseJsonStringComponent()
-        : base(new Nomen("Parse JSON String", "Parse a string into a searchable JSON Object", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(ParseJsonStringComponent), "Parse JSON String", "Parse a string into a searchable JSON Object", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public ParseJsonStringComponent(IReader reader) : base(reader) { }
 
@@ -64,7 +64,7 @@ public sealed class ParseJsonStringComponent : Component
 public sealed class GetJsonObjectKeyComponent : Component
 {
     public GetJsonObjectKeyComponent()
-        : base(new Nomen("Get JSON Object Key", "Get a specific key from JObject", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(GetJsonObjectKeyComponent), "Get JSON Object Key", "Get a specific key from JObject", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public GetJsonObjectKeyComponent(IReader reader) : base(reader) { }
 
@@ -92,7 +92,7 @@ public sealed class GetJsonObjectKeyComponent : Component
 public sealed class ReadJsonArrayComponent : Component
 {
     public ReadJsonArrayComponent()
-        : base(new Nomen("Read JSON Array", "Read a JSON Array into a series of searchable JSON objects", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(ReadJsonArrayComponent), "Read JSON Array", "Read a JSON Array into a series of searchable JSON objects", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public ReadJsonArrayComponent(IReader reader) : base(reader) { }
 
@@ -121,7 +121,7 @@ public sealed class ReadJsonArrayComponent : Component
 public sealed class ReadJsonObjectComponent : Component
 {
     public ReadJsonObjectComponent()
-        : base(new Nomen("Read JSON Object", "Get all keys and values from JObject", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(ReadJsonObjectComponent), "Read JSON Object", "Get all keys and values from JObject", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public ReadJsonObjectComponent(IReader reader) : base(reader) { }
 
@@ -160,7 +160,7 @@ public sealed class ReadJsonObjectComponent : Component
 public sealed class ReadJsonValueComponent : Component
 {
     public ReadJsonValueComponent()
-        : base(new Nomen("Read JSON Value", "Read JSON Value", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(ReadJsonValueComponent), "Read JSON Value", "Read JSON Value", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public ReadJsonValueComponent(IReader reader) : base(reader) { }
 
@@ -199,7 +199,7 @@ public sealed class ReadJsonValueComponent : Component
 public sealed class SeparateJsonTokensComponent : Component
 {
     public SeparateJsonTokensComponent()
-        : base(new Nomen("Separate JSON Tokens", "Separate tokens into JObjects, JArrays and JValues", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(SeparateJsonTokensComponent), "Separate JSON Tokens", "Separate tokens into JObjects, JArrays and JValues", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public SeparateJsonTokensComponent(IReader reader) : base(reader) { }
 
@@ -247,7 +247,7 @@ public sealed class SeparateJsonTokensComponent : Component
 public sealed class StringifyJsonTokenComponent : Component
 {
     public StringifyJsonTokenComponent()
-        : base(new Nomen("Stringify JSON Token", "Convert any abstract JToken to an indented JSON string", JsonComponentSupport.Tab, "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(StringifyJsonTokenComponent), "Stringify JSON Token", "Convert any abstract JToken to an indented JSON string", JsonComponentSupport.Tab, "4. Read JSON")) { }
 
     public StringifyJsonTokenComponent(IReader reader) : base(reader) { }
 

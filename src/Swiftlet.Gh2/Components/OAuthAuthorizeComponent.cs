@@ -14,7 +14,7 @@ public sealed class OAuthAuthorizeComponent : OAuthComponentBase
 {
     private readonly OAuthAuthorizationController _controller;
     public OAuthAuthorizeComponent() : this(new RhinoHostServices()) { }
-    public OAuthAuthorizeComponent(IHostServices host) : base(new Nomen("OAuth Authorize","Initiates OAuth 2.0 Authorization Code flow with PKCE.\nOpens browser for user authentication and receives the authorization code via localhost callback.", "Swiftlet", "1. Auth"))
+    public OAuthAuthorizeComponent(IHostServices host) : base(Palette.Entry(nameof(OAuthAuthorizeComponent), "OAuth Authorize","Initiates OAuth 2.0 Authorization Code flow with PKCE.\nOpens browser for user authentication and receives the authorization code via localhost callback.", "Swiftlet", "1. Auth"))
     { _controller = new(host); _controller.Changed += OnChanged; }
     public OAuthAuthorizeComponent(IReader reader) : base(reader)
     { _controller = new(new RhinoHostServices()); _controller.Changed += OnChanged; }

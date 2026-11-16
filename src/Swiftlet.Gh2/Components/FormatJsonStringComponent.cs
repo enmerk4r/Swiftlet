@@ -14,7 +14,7 @@ public sealed class FormatJsonStringComponent : Component
     private static readonly JsonSerializerOptions Indented = new() { WriteIndented = true };
 
     public FormatJsonStringComponent()
-        : base(new Nomen("Format Json String", "Prettify a JSON string by formatting it with proper indentations", "Swiftlet", "4. Read JSON")) { }
+        : base(Palette.Entry(nameof(FormatJsonStringComponent), "Format Json String", "Prettify a JSON string by formatting it with proper indentations", "Swiftlet", "4. Read JSON")) { }
 
     public FormatJsonStringComponent(IReader reader) : base(reader) { }
 

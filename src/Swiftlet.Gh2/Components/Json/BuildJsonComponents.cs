@@ -18,7 +18,7 @@ namespace Swiftlet.Gh2.Components.Json;
 public sealed class CreateJsonArrayComponent : Component
 {
     public CreateJsonArrayComponent()
-        : base(new Nomen("Create JSON Array", "Combine a list of JTokens into a JArray", JsonComponentSupport.Tab, "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateJsonArrayComponent), "Create JSON Array", "Combine a list of JTokens into a JArray", JsonComponentSupport.Tab, "2. Request")) { }
 
     public CreateJsonArrayComponent(IReader reader) : base(reader) { }
 
@@ -44,7 +44,7 @@ public sealed class CreateJsonArrayComponent : Component
 public sealed class CreateJsonObjectComponent : Component
 {
     public CreateJsonObjectComponent()
-        : base(new Nomen("Create JSON Object", "Create a JObject from keys and values", JsonComponentSupport.Tab, "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateJsonObjectComponent), "Create JSON Object", "Create a JObject from keys and values", JsonComponentSupport.Tab, "2. Request")) { }
 
     public CreateJsonObjectComponent(IReader reader) : base(reader) { }
 
@@ -86,7 +86,7 @@ public sealed class CreateJsonObjectComponent : Component
 public sealed class CreateJsonValueComponent : Component
 {
     public CreateJsonValueComponent()
-        : base(new Nomen("Create JSON Value", "Turn a Grasshopper value into a JSON value", JsonComponentSupport.Tab, "2. Request")) { }
+        : base(Palette.Entry(nameof(CreateJsonValueComponent), "Create JSON Value", "Turn a Grasshopper value into a JSON value", JsonComponentSupport.Tab, "2. Request")) { }
 
     public CreateJsonValueComponent(IReader reader) : base(reader) { }
 
@@ -121,7 +121,7 @@ public sealed class CreateJsonValueComponent : Component
 public sealed class MergeJsonObjectsComponent : Component
 {
     public MergeJsonObjectsComponent()
-        : base(new Nomen("Merge JSON Objects",
+        : base(Palette.Entry(nameof(MergeJsonObjectsComponent), "Merge JSON Objects",
             "Merge two JSON objects. Nested objects are merged recursively; conflicts use Mode: 0 = A wins, 1 = B wins, 2 = A wins unless null, 3 = B wins unless null.",
             JsonComponentSupport.Tab, "2. Request")) { }
 
@@ -157,7 +157,7 @@ public sealed class MergeJsonObjectsComponent : Component
 public sealed class RemoveJsonKeyComponent : Component
 {
     public RemoveJsonKeyComponent()
-        : base(new Nomen("Remove JSON Key", "Remove a key from JObject", JsonComponentSupport.Tab, "2. Request")) { }
+        : base(Palette.Entry(nameof(RemoveJsonKeyComponent), "Remove JSON Key", "Remove a key from JObject", JsonComponentSupport.Tab, "2. Request")) { }
 
     public RemoveJsonKeyComponent(IReader reader) : base(reader) { }
 
@@ -186,7 +186,7 @@ public sealed class RemoveJsonKeyComponent : Component
 public sealed class SetJsonKeyComponent : Component
 {
     public SetJsonKeyComponent()
-        : base(new Nomen("Set JSON Key", "Add or modify a JObject key", JsonComponentSupport.Tab, "2. Request")) { }
+        : base(Palette.Entry(nameof(SetJsonKeyComponent), "Set JSON Key", "Add or modify a JObject key", JsonComponentSupport.Tab, "2. Request")) { }
 
     public SetJsonKeyComponent(IReader reader) : base(reader) { }
 

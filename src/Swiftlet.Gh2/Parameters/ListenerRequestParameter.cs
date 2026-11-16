@@ -12,7 +12,7 @@ public sealed class ListenerRequestParameter : Parameter<ModernServerRequestCont
 {
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
     public ListenerRequestParameter()
-        : base(new Nomen("Listener Request", "A live HTTP request and one-shot response handle.", "Swiftlet", "8. Server"), Access.Item) { }
+        : base(Palette.Entry(nameof(ListenerRequestParameter), "Listener Request", "A live HTTP request and one-shot response handle.", "Swiftlet", "8. Server"), Access.Item) { }
     public ListenerRequestParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }
     public ListenerRequestParameter(IReader reader) : base(reader) { }

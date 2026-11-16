@@ -64,6 +64,7 @@ foreach (var t in sw2.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.GetC
         e["kind"] = compT.IsAssignableFrom(t) ? "component" : paramT.IsAssignableFrom(t) ? "param" : "other";
         object nomen = P(o, "Nomen");
         e["name"] = S(P(nomen, "Name")); e["info"] = S(P(nomen, "Info")); e["chapter"] = S(P(nomen, "Chapter")); e["section"] = S(P(nomen, "Section"));
+        e["slot"] = P(nomen, "Slot"); e["rank"] = S(P(nomen, "Rank"));
         if (e["kind"].Equals("component"))
         {
             dynamic prm = ((dynamic)o).Parameters;

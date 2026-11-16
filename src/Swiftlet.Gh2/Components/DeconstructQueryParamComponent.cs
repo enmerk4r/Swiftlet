@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Components;
 [IoId(ComponentIds.DeconstructQueryParam)]
 public sealed class DeconstructQueryParamComponent : Component
 {
-    public DeconstructQueryParamComponent() : base(new Nomen("Deconstruct Query Param", "Deconstruct a Query Param into its constituent parts", "Swiftlet", "3. Send")) { }
+    public DeconstructQueryParamComponent() : base(Palette.Entry(nameof(DeconstructQueryParamComponent), "Deconstruct Query Param", "Deconstruct a Query Param into its constituent parts", "Swiftlet", "3. Send")) { }
     public DeconstructQueryParamComponent(IReader reader) : base(reader) { }
     protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
     protected override void AddInputs(InputAdder inputs)

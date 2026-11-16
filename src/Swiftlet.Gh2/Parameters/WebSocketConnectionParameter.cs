@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class WebSocketConnectionParameter : Parameter<ModernWebSocketConnection>
 {
     public WebSocketConnectionParameter()
-        : base(new Nomen("WebSocket Connection", "An open WebSocket connection", "Swiftlet", "8. Server"), Access.Item) { }
+        : base(Palette.Entry(nameof(WebSocketConnectionParameter), "WebSocket Connection", "An open WebSocket connection", "Swiftlet", "8. Server"), Access.Item) { }
 
     public WebSocketConnectionParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }

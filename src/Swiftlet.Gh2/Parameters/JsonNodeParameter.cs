@@ -11,7 +11,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class JsonNodeParameter : Parameter<JsonToken>
 {
     public JsonNodeParameter()
-        : base(new Nomen("JSON Token", "Container for JSON tokens", "Swiftlet", "4. Read JSON"), Access.Item) { }
+        : base(Palette.Entry(nameof(JsonNodeParameter), "JSON Token", "Container for JSON tokens", "Swiftlet", "4. Read JSON"), Access.Item) { }
 
     public JsonNodeParameter(string name, string userName, string info, Access access = Access.Item)
         : base(name, userName, info, access) { }
