@@ -18,7 +18,7 @@ public sealed class GetElementsByClassNameComponent : GH_Component
     {
         pManager.AddParameter(new HtmlNodeParam(), "Parent", "P", "Parent node", GH_ParamAccess.item);
         pManager.AddTextParameter("Class", "C", "Name of the HTML class", GH_ParamAccess.item);
-        pManager.AddBooleanParameter("Recursive", "R", "Determines whether to search for specified attribute in all of the descendants, or only one level down", GH_ParamAccess.item, true);
+        pManager.AddBooleanParameter("Recursive", "R", "Determines whether to search for the specified class in all of the descendants, or only one level down", GH_ParamAccess.item, true);
         pManager[2].Optional = true;
     }
 

@@ -121,7 +121,7 @@ public sealed class GetElementsByClassNameComponent : SwiftletComponent
     {
         inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
         inputs.AddText("Class", "Cl", "Name of the HTML class");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
+        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for the specified class in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
@@ -303,7 +303,7 @@ public sealed class GetHtmlAttributesComponent : SwiftletComponent
 public sealed class GetHtmlNodeChildrenComponent : SwiftletComponent
 {
     public GetHtmlNodeChildrenComponent()
-        : base("Get Child Nodes", "Get all child nodes of an HTML node ", Sections.ReadHtml) { }
+        : base("Get Child Nodes", "Get all child nodes of an HTML node", Sections.ReadHtml) { }
     public GetHtmlNodeChildrenComponent(IReader reader) : base(reader) { }
 
     protected override void AddInputs(InputAdder inputs)

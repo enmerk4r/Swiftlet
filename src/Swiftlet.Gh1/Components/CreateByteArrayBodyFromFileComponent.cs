@@ -17,7 +17,7 @@ public sealed class CreateByteArrayBodyFromFileComponent : GH_Component
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Path", "P", "Path to file", GH_ParamAccess.item);
-        pManager.AddTextParameter("ContentType", "T", "Text contents of your request body", GH_ParamAccess.item);
+        pManager.AddTextParameter("ContentType", "T", "Content-Type header value", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)

@@ -20,8 +20,8 @@ public sealed class DeconstructHeaderComponent : GH_Component
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddTextParameter("Key", "K", "Query Parameter Key", GH_ParamAccess.item);
-        pManager.AddTextParameter("Value", "V", "Query Parameter Value", GH_ParamAccess.item);
+        pManager.AddTextParameter("Key", "K", "Header Key", GH_ParamAccess.item);
+        pManager.AddTextParameter("Value", "V", "Header Value", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

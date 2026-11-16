@@ -249,9 +249,9 @@ public sealed class CompressDataComponent : SwiftletComponent
     public CompressDataComponent() : base("Compress Data", "GZIP byte array data", Sections.Utilities) { }
     public CompressDataComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed text"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed bytes"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed text"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed bytes"));
 
     protected override void Process(IDataAccess access)
     {
@@ -266,9 +266,9 @@ public sealed class DecompressDataComponent : SwiftletComponent
     public DecompressDataComponent() : base("Decompress Data", "Un-GZIP byte array data", Sections.Utilities) { }
     public DecompressDataComponent(IReader reader) : base(reader) { }
 
-    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed text"));
+    protected override void AddInputs(InputAdder inputs) => inputs.Add(new ByteArrayParameter("Compressed", "Cm", "Compressed bytes"));
 
-    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed text"));
+    protected override void AddOutputs(OutputAdder outputs) => outputs.Add(new ByteArrayParameter("Uncompressed", "Un", "Uncompressed bytes"));
 
     protected override void Process(IDataAccess access)
     {
@@ -283,13 +283,13 @@ public sealed class DecompressDataComponent : SwiftletComponent
 [IoId(ComponentIds.CreateCsvLine)]
 public sealed class CreateCsvLineComponent : SwiftletComponent
 {
-    public CreateCsvLineComponent() : base("Create CSV Line", "Formats multiple strings as a single line of delimeter-separated values", Sections.Utilities) { }
+    public CreateCsvLineComponent() : base("Create CSV Line", "Formats multiple strings as a single line of delimiter-separated values", Sections.Utilities) { }
     public CreateCsvLineComponent(IReader reader) : base(reader) { }
 
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);
-        inputs.AddText("Delimiter", "Dl", "CSV delimeter", Access.Item, Requirement.MayBeMissing).Set(",");
+        inputs.AddText("Delimiter", "Dl", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Line", "Ln", "Formatted CSV line");
@@ -307,13 +307,13 @@ public sealed class CreateCsvLineComponent : SwiftletComponent
 [IoId(ComponentIds.ReadCsvLine)]
 public sealed class ReadCsvLineComponent : SwiftletComponent
 {
-    public ReadCsvLineComponent() : base("Read CSV Line", "Extracts individual values from a delimeter-separated line", Sections.Utilities) { }
+    public ReadCsvLineComponent() : base("Read CSV Line", "Extracts individual values from a delimiter-separated line", Sections.Utilities) { }
     public ReadCsvLineComponent(IReader reader) : base(reader) { }
 
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Line", "Ln", "Formatted CSV line");
-        inputs.AddText("Delimiter", "Dl", "CSV delimeter", Access.Item, Requirement.MayBeMissing).Set(",");
+        inputs.AddText("Delimiter", "Dl", "CSV delimiter", Access.Item, Requirement.MayBeMissing).Set(",");
     }
 
     protected override void AddOutputs(OutputAdder outputs) => outputs.AddText("Cells", "Cl", "Cell values of a CSV line", Access.Twig);

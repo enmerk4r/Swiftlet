@@ -18,7 +18,7 @@ public sealed class BearerTokenAuthComponent : Component
     }
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HttpHeaderParameter("Header", "H", "Your Authorization heder"));
+        outputs.Add(new HttpHeaderParameter("Header", "H", "Your Authorization header"));
     }
     protected override void Process(IDataAccess access)
     {

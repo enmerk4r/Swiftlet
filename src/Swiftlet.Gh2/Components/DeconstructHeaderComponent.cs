@@ -20,8 +20,8 @@ public sealed class DeconstructHeaderComponent : Component
     }
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Key", "K", "Query Parameter Key", Access.Item);
-        outputs.AddText("Value", "V", "Query Parameter Value", Access.Item);
+        outputs.AddText("Key", "K", "Header Key", Access.Item);
+        outputs.AddText("Value", "V", "Header Value", Access.Item);
     }
     protected override void Process(IDataAccess access)
     {

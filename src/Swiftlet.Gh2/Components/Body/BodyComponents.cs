@@ -101,7 +101,7 @@ public sealed class CreateTextBodyCustomComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddGeneric("Content", "Ct", "Text contents of your request body", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("ContentType", "Ty", "Text contents of your request body", Access.Item, Requirement.MayBeMissing).Set(ContentTypes.ApplicationJson);
+        inputs.AddText("ContentType", "Ty", "Content-Type header value", Access.Item, Requirement.MayBeMissing).Set(ContentTypes.ApplicationJson);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
@@ -154,7 +154,7 @@ public sealed class CreateByteArrayBodyFromFileComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Path", "Pt", "Path to file");
-        inputs.AddText("ContentType", "Ty", "Text contents of your request body");
+        inputs.AddText("ContentType", "Ty", "Content-Type header value");
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
