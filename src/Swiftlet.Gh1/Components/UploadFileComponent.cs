@@ -9,26 +9,13 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed class UploadFileComponent : GH_Component
 {
-    private const int BufferSize = 81920;
-    private static readonly HttpClient HttpClient = new();
-
-    private Task? _uploadTask;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private volatile bool _isUploading;
-    private volatile int _progress;
-    private long _bytesUploaded;
-    private long _totalBytes;
-    private volatile bool _completed;
-    private volatile bool _success;
-    private string? _error;
-    private volatile int _statusCode;
-    private string? _responseContent;
-    private DateTime _lastUiUpdate = DateTime.MinValue;
-    private readonly TimeSpan _uiUpdateInterval = TimeSpan.FromMilliseconds(100);
+    // Transfer state and worker live in Swiftlet.Runtime (shared with the GH2 shell).
+    private readonly Swiftlet.Runtime.Transfers.FileUploadJob _job = new();
 
     public UploadFileComponent()
         : base("Upload File", "UL", "Upload a file to a URL using streaming (memory-efficient for large files)", ShellNaming.Category, ShellNaming.Send)
     {
+        _job.Changed += OnJobChanged;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.quinary;
@@ -74,14 +61,10 @@ public sealed class UploadFileComponent : GH_Component
         DA.GetDataList(5, headers);
         DA.GetData(6, ref run);
 
+        var state = _job.Snapshot;
         if (!run)
         {
-            if (_isUploading)
-            {
-                CancelUpload();
-            }
-
-            ResetState();
+            _job.Reset();
             Message = "Idle";
             DA.SetData(0, false);
             DA.SetData(1, 0);
@@ -91,21 +74,21 @@ public sealed class UploadFileComponent : GH_Component
             return;
         }
 
-        if (_completed)
+        if (state.Completed)
         {
-            DA.SetData(0, _success);
-            DA.SetData(1, _progress);
-            DA.SetData(2, _statusCode);
-            DA.SetData(3, _responseContent);
-            DA.SetData(4, _error);
-            Message = _success ? "Done" : "Failed";
+            DA.SetData(0, state.Success);
+            DA.SetData(1, state.Progress);
+            DA.SetData(2, state.StatusCode);
+            DA.SetData(3, state.Content);
+            DA.SetData(4, state.Error);
+            Message = state.Success ? "Done" : "Failed";
             return;
         }
 
-        if (_isUploading)
+        if (state.Running)
         {
             DA.SetData(0, false);
-            DA.SetData(1, _progress);
+            DA.SetData(1, state.Progress);
             DA.SetData(2, 0);
             DA.SetData(3, null);
             DA.SetData(4, null);
@@ -159,20 +142,8 @@ public sealed class UploadFileComponent : GH_Component
         HttpHeader[] headerValues = headers.Where(static h => h?.Value is not null).Select(static h => h!.Value!).ToArray();
         long fileSize = new FileInfo(normalizedPath).Length;
 
-        _isUploading = true;
-        _completed = false;
-        _success = false;
-        _progress = 0;
-        _bytesUploaded = 0;
-        _totalBytes = fileSize;
-        _error = null;
-        _statusCode = 0;
-        _responseContent = null;
-        _cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken token = _cancellationTokenSource.Token;
-
         Message = $"Starting... ({TransferFormatting.FormatBytes(fileSize)})";
-        _uploadTask = Task.Run(() => UploadAsync(fullUrl, normalizedPath, method, contentType, headerValues, fileSize, token), token);
+        _job.Start(fullUrl, normalizedPath, method, contentType, headerValues, fileSize);
 
         DA.SetData(0, false);
         DA.SetData(1, 0);
@@ -187,8 +158,7 @@ public sealed class UploadFileComponent : GH_Component
 
     public override void RemovedFromDocument(GH_Document document)
     {
-        CancelUpload();
-        ResetState();
+        _job.Reset();
         base.RemovedFromDocument(document);
     }
 
@@ -196,139 +166,24 @@ public sealed class UploadFileComponent : GH_Component
     {
         if (context == GH_DocumentContext.Close)
         {
-            CancelUpload();
-            ResetState();
+            _job.Reset();
         }
 
         base.DocumentContextChanged(document, context);
     }
 
-    private async Task UploadAsync(
-        string url,
-        string path,
-        string method,
-        string contentType,
-        IReadOnlyList<HttpHeader> headers,
-        long fileSize,
-        CancellationToken token)
+    private void OnJobChanged(bool completed)
     {
-        try
-        {
-            using var request = new HttpRequestMessage(method == "PUT" ? HttpMethod.Put : HttpMethod.Post, url);
-            foreach (HttpHeader header in headers)
-            {
-                request.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-
-            await using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, useAsync: true);
-            using var progressStream = new ProgressReadStream(fileStream, bytesRead =>
-            {
-                _bytesUploaded = bytesRead;
-                if (fileSize > 0)
-                {
-                    _progress = Math.Min((int)((bytesRead * 100L) / fileSize), 99);
-                }
-
-                UpdateProgressMessage();
-            });
-
-            using var streamContent = new StreamContent(progressStream, BufferSize);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            streamContent.Headers.ContentLength = fileSize;
-            request.Content = streamContent;
-
-            using HttpResponseMessage response = await HttpClient.SendAsync(request, token).ConfigureAwait(false);
-            _statusCode = (int)response.StatusCode;
-            _responseContent = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
-            _success = response.IsSuccessStatusCode;
-            _progress = 100;
-            if (!_success)
-            {
-                _error = $"HTTP {_statusCode}: {response.ReasonPhrase}";
-            }
-
-            _completed = true;
-            _isUploading = false;
-            ScheduleUiUpdate();
-        }
-        catch (OperationCanceledException)
-        {
-            _error = "Upload cancelled";
-            _completed = true;
-            _isUploading = false;
-            ScheduleUiUpdate();
-        }
-        catch (HttpRequestException ex)
-        {
-            _error = $"HTTP error: {ex.Message}";
-            _completed = true;
-            _isUploading = false;
-            ScheduleUiUpdate();
-        }
-        catch (IOException ex)
-        {
-            _error = $"File error: {ex.Message}";
-            _completed = true;
-            _isUploading = false;
-            ScheduleUiUpdate();
-        }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-            _completed = true;
-            _isUploading = false;
-            ScheduleUiUpdate();
-        }
-    }
-
-    private void UpdateProgressMessage()
-    {
-        DateTime now = DateTime.Now;
-        if (now - _lastUiUpdate < _uiUpdateInterval)
-        {
-            return;
-        }
-
-        _lastUiUpdate = now;
-        string message = $"Uploading... {_progress}% ({TransferFormatting.FormatBytes(_bytesUploaded)} / {TransferFormatting.FormatBytes(_totalBytes)})";
+        // Worker thread: progress updates the badge and re-solves (throttled by the job); completion re-solves.
+        string? message = completed ? null : Swiftlet.Runtime.Transfers.TransferMessages.UploadProgress(_job.Snapshot);
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
-            Message = message;
+            if (message is not null)
+            {
+                Message = message;
+            }
+
             ExpireSolution(true);
         }));
     }
-
-    private void ScheduleUiUpdate()
-    {
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
-    }
-
-    private void CancelUpload()
-    {
-        try
-        {
-            _cancellationTokenSource?.Cancel();
-        }
-        catch
-        {
-        }
-    }
-
-    private void ResetState()
-    {
-        _isUploading = false;
-        _completed = false;
-        _success = false;
-        _progress = 0;
-        _bytesUploaded = 0;
-        _totalBytes = 0;
-        _error = null;
-        _statusCode = 0;
-        _responseContent = null;
-        _uploadTask = null;
-
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-    }
 }
-

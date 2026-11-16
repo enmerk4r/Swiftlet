@@ -8,26 +8,13 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed class DownloadFileComponent : GH_Component
 {
-    private const int BufferSize = 81920;
-    private static readonly HttpClient HttpClient = new();
-
-    private Task? _downloadTask;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private volatile bool _isDownloading;
-    private volatile int _progress;
-    private long _bytesDownloaded;
-    private long _totalBytes;
-    private volatile bool _completed;
-    private volatile bool _success;
-    private string? _error;
-    private volatile int _statusCode;
-    private string? _downloadPath;
-    private DateTime _lastUiUpdate = DateTime.MinValue;
-    private readonly TimeSpan _uiUpdateInterval = TimeSpan.FromMilliseconds(100);
+    // Transfer state and worker live in Swiftlet.Runtime (shared with the GH2 shell).
+    private readonly Swiftlet.Runtime.Transfers.FileDownloadJob _job = new();
 
     public DownloadFileComponent()
         : base("Download File", "DL", "Download a file from a URL directly to disk (streaming, memory-efficient for large files)", ShellNaming.Category, ShellNaming.Send)
     {
+        _job.Changed += OnJobChanged;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.quinary;
@@ -71,14 +58,10 @@ public sealed class DownloadFileComponent : GH_Component
         DA.GetData(4, ref run);
         DA.GetData(5, ref overwrite);
 
+        var state = _job.Snapshot;
         if (!run)
         {
-            if (_isDownloading)
-            {
-                CancelDownload();
-            }
-
-            ResetState();
+            _job.Reset();
             Message = "Idle";
             DA.SetData(0, false);
             DA.SetData(1, 0);
@@ -89,25 +72,25 @@ public sealed class DownloadFileComponent : GH_Component
             return;
         }
 
-        if (_completed)
+        if (state.Completed)
         {
-            DA.SetData(0, _success);
-            DA.SetData(1, _progress);
-            DA.SetData(2, _success ? _downloadPath : null);
-            DA.SetData(3, _statusCode);
-            DA.SetData(4, (int)_bytesDownloaded);
-            DA.SetData(5, _error);
-            Message = _success ? $"Done ({TransferFormatting.FormatBytes(_bytesDownloaded)})" : "Failed";
+            DA.SetData(0, state.Success);
+            DA.SetData(1, state.Progress);
+            DA.SetData(2, state.Success ? state.Path : null);
+            DA.SetData(3, state.StatusCode);
+            DA.SetData(4, (int)state.Bytes);
+            DA.SetData(5, state.Error);
+            Message = state.Success ? $"Done ({TransferFormatting.FormatBytes(state.Bytes)})" : "Failed";
             return;
         }
 
-        if (_isDownloading)
+        if (state.Running)
         {
             DA.SetData(0, false);
-            DA.SetData(1, _totalBytes > 0 ? _progress : -1);
+            DA.SetData(1, state.TotalBytes > 0 ? state.Progress : -1);
             DA.SetData(2, null);
             DA.SetData(3, 0);
-            DA.SetData(4, (int)_bytesDownloaded);
+            DA.SetData(4, (int)state.Bytes);
             DA.SetData(5, null);
             return;
         }
@@ -145,21 +128,9 @@ public sealed class DownloadFileComponent : GH_Component
             url,
             queryParams.Where(static p => p?.Value is not null).Select(static p => p!.Value!));
 
-        _downloadPath = normalizedPath;
-        _isDownloading = true;
-        _completed = false;
-        _success = false;
-        _progress = 0;
-        _bytesDownloaded = 0;
-        _totalBytes = 0;
-        _error = null;
-        _statusCode = 0;
-        _cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken token = _cancellationTokenSource.Token;
-
         HttpHeader[] headerValues = headers.Where(static h => h?.Value is not null).Select(static h => h!.Value!).ToArray();
         Message = "Starting...";
-        _downloadTask = Task.Run(() => DownloadAsync(fullUrl, normalizedPath, headerValues, token), token);
+        _job.Start(fullUrl, normalizedPath, headerValues);
 
         DA.SetData(0, false);
         DA.SetData(1, 0);
@@ -175,8 +146,7 @@ public sealed class DownloadFileComponent : GH_Component
 
     public override void RemovedFromDocument(GH_Document document)
     {
-        CancelDownload();
-        ResetState();
+        _job.Reset();
         base.RemovedFromDocument(document);
     }
 
@@ -184,164 +154,24 @@ public sealed class DownloadFileComponent : GH_Component
     {
         if (context == GH_DocumentContext.Close)
         {
-            CancelDownload();
-            ResetState();
+            _job.Reset();
         }
 
         base.DocumentContextChanged(document, context);
     }
 
-    private async Task DownloadAsync(string url, string path, IReadOnlyList<HttpHeader> headers, CancellationToken token)
+    private void OnJobChanged(bool completed)
     {
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            foreach (HttpHeader header in headers)
-            {
-                request.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-
-            using HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-            _statusCode = (int)response.StatusCode;
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _error = $"HTTP {_statusCode}: {response.ReasonPhrase}";
-                _completed = true;
-                _isDownloading = false;
-                ScheduleUiUpdate();
-                return;
-            }
-
-            _totalBytes = response.Content.Headers.ContentLength ?? 0;
-            string? directory = Path.GetDirectoryName(path);
-            if (!string.IsNullOrWhiteSpace(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-            await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, useAsync: true);
-            byte[] buffer = new byte[BufferSize];
-            int bytesRead;
-
-            while ((bytesRead = await responseStream.ReadAsync(buffer.AsMemory(0, buffer.Length), token).ConfigureAwait(false)) > 0)
-            {
-                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), token).ConfigureAwait(false);
-                _bytesDownloaded += bytesRead;
-                if (_totalBytes > 0)
-                {
-                    _progress = Math.Min((int)((_bytesDownloaded * 100L) / _totalBytes), 99);
-                }
-
-                UpdateProgressMessage();
-            }
-
-            _progress = 100;
-            _success = true;
-            _completed = true;
-            _isDownloading = false;
-            ScheduleUiUpdate();
-        }
-        catch (OperationCanceledException)
-        {
-            _error = "Download cancelled";
-            _completed = true;
-            _isDownloading = false;
-            TryDeleteFile(path);
-            ScheduleUiUpdate();
-        }
-        catch (HttpRequestException ex)
-        {
-            _error = $"HTTP error: {ex.Message}";
-            _completed = true;
-            _isDownloading = false;
-            TryDeleteFile(path);
-            ScheduleUiUpdate();
-        }
-        catch (IOException ex)
-        {
-            _error = $"File error: {ex.Message}";
-            _completed = true;
-            _isDownloading = false;
-            TryDeleteFile(path);
-            ScheduleUiUpdate();
-        }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-            _completed = true;
-            _isDownloading = false;
-            TryDeleteFile(path);
-            ScheduleUiUpdate();
-        }
-    }
-
-    private void UpdateProgressMessage()
-    {
-        DateTime now = DateTime.Now;
-        if (now - _lastUiUpdate < _uiUpdateInterval)
-        {
-            return;
-        }
-
-        _lastUiUpdate = now;
-        string message = _totalBytes > 0
-            ? $"Downloading... {_progress}% ({TransferFormatting.FormatBytes(_bytesDownloaded)} / {TransferFormatting.FormatBytes(_totalBytes)})"
-            : $"Downloading... {TransferFormatting.FormatBytes(_bytesDownloaded)}";
-
+        // Worker thread: progress updates the badge and re-solves (throttled by the job); completion re-solves.
+        string? message = completed ? null : Swiftlet.Runtime.Transfers.TransferMessages.DownloadProgress(_job.Snapshot);
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
-            Message = message;
+            if (message is not null)
+            {
+                Message = message;
+            }
+
             ExpireSolution(true);
         }));
     }
-
-    private void ScheduleUiUpdate()
-    {
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() => ExpireSolution(true)));
-    }
-
-    private void CancelDownload()
-    {
-        try
-        {
-            _cancellationTokenSource?.Cancel();
-        }
-        catch
-        {
-        }
-    }
-
-    private void ResetState()
-    {
-        _isDownloading = false;
-        _completed = false;
-        _success = false;
-        _progress = 0;
-        _bytesDownloaded = 0;
-        _totalBytes = 0;
-        _error = null;
-        _statusCode = 0;
-        _downloadPath = null;
-        _downloadTask = null;
-
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-    }
-
-    private static void TryDeleteFile(string path)
-    {
-        try
-        {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-        }
-        catch
-        {
-        }
-    }
 }
-
