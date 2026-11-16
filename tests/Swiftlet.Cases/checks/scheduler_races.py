@@ -101,6 +101,41 @@ Print(new { cleaned=true });
 '''
 
 
+TICKETS = r'''
+var c = Activator.CreateInstance(sw.GetTypes().First(t => t.Name == "DownloadFileComponent"));
+doc.Objects.Add((dynamic)c);
+var bt = c.GetType().BaseType;
+var post = bt.GetMethod("PostExpiry",flags); var stop = bt.GetMethod("Stop",flags);
+var field = bt.GetField("_expiryPosted",flags);
+var scheduler = sw.GetType("Swiftlet.Gh2.BackgroundSolveScheduler",true);
+var table = scheduler.GetField("Documents",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
+object[] found = {(object)doc,null};
+try
+{
+    post.Invoke(c,null);
+    table.GetType().GetMethod("TryGetValue").Invoke(table,found);
+    var co=found[1]; var pending=(IDictionary)co.GetType().GetField("_pending",flags).GetValue(co);
+    Guid id=(Guid)((dynamic)c).InstanceId;
+    var old=pending[id]; int first=(int)field.GetValue(c);
+    // Hold the old request outside the pending map, exactly as an in-flight batch would.
+    pending.Remove(id);
+    stop.Invoke(c,null);
+    post.Invoke(c,null);
+    var current=pending[id]; int second=(int)field.GetValue(c);
+    old.GetType().GetMethod("Release").Invoke(old,null);
+    int afterOld=(int)field.GetValue(c);
+    // Release is idempotent even after another lease has been acquired.
+    old.GetType().GetMethod("Release").Invoke(old,null);
+    int afterRepeat=(int)field.GetValue(c);
+    current.GetType().GetMethod("Release").Invoke(current,null);
+    int afterCurrent=(int)field.GetValue(c);
+    Print(new { first,second,afterOld,afterRepeat,afterCurrent,
+        passed=first!=0 && second!=0 && first!=second && afterOld==second && afterRepeat==second && afterCurrent==0 });
+}
+finally { doc.Objects.Remove((dynamic)c); }
+'''
+
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--port',type=int,required=True); ap.add_argument('--report',required=True)
     args=ap.parse_args(); report={'port':args.port,'checks':{}}
@@ -144,6 +179,7 @@ def main():
         report['checks']['late_transfer_after_stop']={'passed':released['queued']==0 and progress and row['done'] and file_ok,'setup':setup,'release':released,'releaseHistory':release_history,'progressObserved':progress,'fileMatches':file_ok,'result':row,'history':history}
     finally:
         run(TRANSFER_CLEAN); server.shutdown(); server.server_close()
+    report['checks']['old_ticket_new_ticket']=run(TICKETS)
     report['alive']=run('Print(new { pid=System.Environment.ProcessId });')
     report['passed']=all(r['passed'] for r in report['checks'].values()) and report['alive']['pid']==report['assembly']['pid']
     path=pathlib.Path(args.report); path.parent.mkdir(parents=True,exist_ok=True); path.write_text(json.dumps(report,indent=2))
