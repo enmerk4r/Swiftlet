@@ -120,8 +120,8 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
 
     private protected static void AddQueryAndHeaders(InputAdder inputs)
     {
-        inputs.Add(new QueryParameterParameter("Params", "Pr", "Query parameters", Access.Twig), Requirement.MayBeMissing);
-        inputs.Add(new HttpHeaderParameter("Headers", "Hd", "HTTP headers", Access.Twig), Requirement.MayBeMissing);
+        inputs.Add(new QueryParameterParameter("Params", "Q", "Query parameters", Access.Twig), Requirement.MayBeMissing);
+        inputs.Add(new HttpHeaderParameter("Headers", "H", "HTTP headers", Access.Twig), Requirement.MayBeMissing);
     }
 }
 
@@ -138,21 +138,21 @@ public sealed class DownloadFileComponent : TransferComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("URL", "Ur", "URL to download from");
-        inputs.AddText("Path", "Pt", "Destination file path");
+        inputs.AddText("URL", "U", "URL to download from");
+        inputs.AddText("Path", "P", "Destination file path");
         AddQueryAndHeaders(inputs);
-        inputs.AddBoolean("Run", "Rn", "Set to true to start download").Set(false);
-        inputs.AddBoolean("Overwrite", "Ow", "Overwrite existing file").Set(true);
+        inputs.AddBoolean("Run", "R", "Set to true to start download").Set(false);
+        inputs.AddBoolean("Overwrite", "O", "Overwrite existing file").Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddBoolean("Done", "Dn", "True when download is complete");
-        outputs.AddInteger("Progress", "Pg", "Download progress (0-100%), or -1 if server doesn't report file size");
-        outputs.AddText("Path", "Pt", "Path to downloaded file");
-        outputs.AddInteger("Status", "St", "HTTP status code");
+        outputs.AddBoolean("Done", "D", "True when download is complete");
+        outputs.AddInteger("Progress", "P", "Download progress (0-100%), or -1 if server doesn't report file size");
+        outputs.AddText("Path", "F", "Path to downloaded file");
+        outputs.AddInteger("Status", "S", "HTTP status code");
         outputs.AddInteger("Size", "Sz", "File size in bytes");
-        outputs.AddText("Error", "Er", "Error message if download failed");
+        outputs.AddText("Error", "E", "Error message if download failed");
     }
 
     protected override void Process(IDataAccess access)
@@ -223,12 +223,12 @@ public sealed class UploadFileComponent : TransferComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("URL", "Ur", "Upload endpoint URL");
-        inputs.AddText("Path", "Pt", "Source file path");
-        inputs.AddText("Method", "Md", "HTTP method (POST or PUT)").Set("POST");
-        inputs.AddText("Content Type", "Ty", "MIME type (auto-detected if empty)").Set(string.Empty);
+        inputs.AddText("URL", "U", "Upload endpoint URL");
+        inputs.AddText("Path", "P", "Source file path");
+        inputs.AddText("Method", "M", "HTTP method (POST or PUT)").Set("POST");
+        inputs.AddText("Content Type", "T", "MIME type (auto-detected if empty)").Set(string.Empty);
         AddQueryAndHeaders(inputs);
-        inputs.AddBoolean("Run", "Rn", "Set to true to start upload").Set(false);
+        inputs.AddBoolean("Run", "R", "Set to true to start upload").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs) => UploadOutputs.Add(outputs);
@@ -287,14 +287,14 @@ public sealed class UploadFileMultipartComponent : TransferComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("URL", "Ur", "Upload endpoint URL");
-        inputs.AddText("Path", "Pt", "Source file path");
-        inputs.AddText("Field Name", "Fn", "Form field name for the file").Set("file");
-        inputs.AddText("File Name", "Nm", "Filename to send (defaults to actual filename)", Access.Item, Requirement.MayBeMissing).Set(string.Empty);
-        inputs.AddText("Content Type", "Ty", "MIME type (auto-detected if empty)", Access.Item, Requirement.MayBeMissing).Set(string.Empty);
+        inputs.AddText("URL", "U", "Upload endpoint URL");
+        inputs.AddText("Path", "P", "Source file path");
+        inputs.AddText("Field Name", "N", "Form field name for the file").Set("file");
+        inputs.AddText("File Name", "F", "Filename to send (defaults to actual filename)", Access.Item, Requirement.MayBeMissing).Set(string.Empty);
+        inputs.AddText("Content Type", "T", "MIME type (auto-detected if empty)", Access.Item, Requirement.MayBeMissing).Set(string.Empty);
         inputs.Add(new MultipartFieldParameter("Fields", "Fd", "Additional form fields", Access.Twig), Requirement.MayBeMissing);
-        inputs.Add(new HttpHeaderParameter("Headers", "Hd", "HTTP headers", Access.Twig), Requirement.MayBeMissing);
-        inputs.AddBoolean("Run", "Rn", "Set to true to start upload").Set(false);
+        inputs.Add(new HttpHeaderParameter("Headers", "H", "HTTP headers", Access.Twig), Requirement.MayBeMissing);
+        inputs.AddBoolean("Run", "R", "Set to true to start upload").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs) => UploadOutputs.Add(outputs);
@@ -343,11 +343,11 @@ internal static class UploadOutputs
 {
     public static void Add(OutputAdder outputs)
     {
-        outputs.AddBoolean("Done", "Dn", "True when upload is complete");
-        outputs.AddInteger("Progress", "Pg", "Upload progress (0-100%)");
-        outputs.AddInteger("Status", "St", "HTTP status code");
-        outputs.AddText("Content", "Ct", "Response body");
-        outputs.AddText("Error", "Er", "Error message if upload failed");
+        outputs.AddBoolean("Done", "D", "True when upload is complete");
+        outputs.AddInteger("Progress", "P", "Upload progress (0-100%)");
+        outputs.AddInteger("Status", "S", "HTTP status code");
+        outputs.AddText("Content", "C", "Response body");
+        outputs.AddText("Error", "E", "Error message if upload failed");
     }
 
     /// <summary>Handles Run = false, a completed and a running upload; false means "start one".</summary>

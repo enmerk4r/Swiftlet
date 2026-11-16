@@ -23,12 +23,12 @@ public sealed class ReadHtmlComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("HTML", "Ht", "HTML Markup");
+        inputs.AddText("HTML", "H", "HTML Markup");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Node", "Nd", "Html Node"));
+        outputs.Add(new HtmlNodeParameter("Node", "N", "Html Node"));
     }
 
     protected override void Process(IDataAccess access)
@@ -46,13 +46,13 @@ public sealed class GetElementByIdComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
-        inputs.AddText("ID", "Id", "HTML Element ID");
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
+        inputs.AddText("ID", "I", "HTML Element ID");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Element", "El", "Found element"));
+        outputs.Add(new HtmlNodeParameter("Element", "E", "Found element"));
     }
 
     protected override void Process(IDataAccess access)
@@ -80,15 +80,15 @@ public sealed class GetElementsByAttributeValueComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
-        inputs.AddText("Attribute", "At", "Name of the HTML attribute");
-        inputs.AddText("Value", "Vl", "Attribute value to search for");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
+        inputs.AddText("Attribute", "A", "Name of the HTML attribute");
+        inputs.AddText("Value", "V", "Attribute value to search for");
+        inputs.AddBoolean("Recursive", "R", "Determines whether to search for specified attribute in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Children", "Ch", "A list of child nodes", Access.Twig));
+        outputs.Add(new HtmlNodeParameter("Children", "C", "A list of child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -119,14 +119,14 @@ public sealed class GetElementsByClassNameComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
-        inputs.AddText("Class", "Cl", "Name of the HTML class");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for the specified class in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
+        inputs.AddText("Class", "C", "Name of the HTML class");
+        inputs.AddBoolean("Recursive", "R", "Determines whether to search for the specified class in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Children", "Ch", "A list of child nodes", Access.Twig));
+        outputs.Add(new HtmlNodeParameter("Children", "C", "A list of child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -156,14 +156,14 @@ public sealed class GetElementsByTagNameComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
-        inputs.AddText("Tag", "Tg", "Name of the HTML tag");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified tags in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
+        inputs.AddText("Tag", "T", "Name of the HTML tag");
+        inputs.AddBoolean("Recursive", "R", "Determines whether to search for specified tags in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Children", "Ch", "A list of child nodes", Access.Twig));
+        outputs.Add(new HtmlNodeParameter("Children", "C", "A list of child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -193,13 +193,13 @@ public sealed class GetElementsByXPathComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
-        inputs.AddText("XPATH", "Xp", "XPATH Expression");
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
+        inputs.AddText("XPATH", "X", "XPATH Expression");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Children", "Ch", "A list of child nodes", Access.Twig));
+        outputs.Add(new HtmlNodeParameter("Children", "C", "A list of child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -235,13 +235,13 @@ public sealed class GetHtmlAttributeValueComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Node", "Nd", "HTML node"));
-        inputs.AddText("Attribute", "At", "Name of the HTML attribute");
+        inputs.Add(new HtmlNodeParameter("Node", "N", "HTML node"));
+        inputs.AddText("Attribute", "A", "Name of the HTML attribute");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Value", "Vl", "HTML Attribute value");
+        outputs.AddText("Value", "V", "HTML Attribute value");
     }
 
     protected override void Process(IDataAccess access)
@@ -272,13 +272,13 @@ public sealed class GetHtmlAttributesComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Node", "Nd", "HTML node"));
+        inputs.Add(new HtmlNodeParameter("Node", "N", "HTML node"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Names", "Nm", "List of HTML Attribute names", Access.Twig);
-        outputs.AddText("Values", "Vl", "List of HTML Attribute values", Access.Twig);
+        outputs.AddText("Names", "N", "List of HTML Attribute names", Access.Twig);
+        outputs.AddText("Values", "V", "List of HTML Attribute values", Access.Twig);
     }
 
     protected override void Process(IDataAccess access)
@@ -308,12 +308,12 @@ public sealed class GetHtmlNodeChildrenComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
+        inputs.Add(new HtmlNodeParameter("Parent", "P", "Parent node"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new HtmlNodeParameter("Children", "Ch", "A list of child nodes", Access.Twig));
+        outputs.Add(new HtmlNodeParameter("Children", "C", "A list of child nodes", Access.Twig));
     }
 
     protected override void Process(IDataAccess access)
@@ -337,12 +337,12 @@ public sealed class GetInnerHtmlComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("Node", "Nd", "HTML node"));
+        inputs.Add(new HtmlNodeParameter("Node", "N", "HTML node"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("HTML", "Ht", "Inner HTML");
+        outputs.AddText("HTML", "H", "Inner HTML");
     }
 
     protected override void Process(IDataAccess access)
@@ -366,12 +366,12 @@ public sealed class StringifyHtmlNodeComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new HtmlNodeParameter("HTML Node", "Nd", "HTML Node object"));
+        inputs.Add(new HtmlNodeParameter("HTML Node", "N", "HTML Node object"));
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("HTML", "Ht", "HTML Markup as text");
+        outputs.AddText("HTML", "H", "HTML Markup as text");
     }
 
     protected override void Process(IDataAccess access)

@@ -50,10 +50,10 @@ public sealed class CreateTextBodyComponent : SwiftletComponent
     }
 
     protected override void AddInputs(InputAdder inputs) =>
-        inputs.AddGeneric("Content", "Ct", "Text contents of your request body", Access.Item, Requirement.MayBeMissing);
+        inputs.AddGeneric("Content", "C", "Text contents of your request body", Access.Item, Requirement.MayBeMissing);
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Request Body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Request Body"));
 
     protected override void Process(IDataAccess access)
     {
@@ -100,12 +100,12 @@ public sealed class CreateTextBodyCustomComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddGeneric("Content", "Ct", "Text contents of your request body", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("ContentType", "Ty", "Content-Type header value", Access.Item, Requirement.MayBeMissing).Set(ContentTypes.ApplicationJson);
+        inputs.AddGeneric("Content", "C", "Text contents of your request body", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("ContentType", "T", "Content-Type header value", Access.Item, Requirement.MayBeMissing).Set(ContentTypes.ApplicationJson);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Request Body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Request Body"));
 
     protected override void Process(IDataAccess access)
     {
@@ -127,12 +127,12 @@ public sealed class CreateByteArrayBodyComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddGeneric("Content", "Ct", "Input content (byte array, string, JSON, XML, or HTML)");
-        inputs.AddText("ContentType", "Ty", "Content-Type header value");
+        inputs.AddGeneric("Content", "C", "Input content (byte array, string, JSON, XML, or HTML)");
+        inputs.AddText("ContentType", "T", "Content-Type header value");
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Request Body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Request Body"));
 
     protected override void Process(IDataAccess access)
     {
@@ -153,12 +153,12 @@ public sealed class CreateByteArrayBodyFromFileComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Path", "Pt", "Path to file");
-        inputs.AddText("ContentType", "Ty", "Content-Type header value");
+        inputs.AddText("Path", "P", "Path to file");
+        inputs.AddText("ContentType", "T", "Content-Type header value");
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Request Body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Request Body"));
 
     protected override void Process(IDataAccess access)
     {
@@ -188,12 +188,12 @@ public sealed class CreateFormUrlEncodedBodyComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Keys", "Ks", "Form field names", Access.Twig);
-        inputs.AddText("Values", "Vs", "Form field values", Access.Twig);
+        inputs.AddText("Keys", "K", "Form field names", Access.Twig);
+        inputs.AddText("Values", "V", "Form field values", Access.Twig);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Form URL encoded request body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Form URL encoded request body"));
 
     protected override void Process(IDataAccess access)
     {
@@ -224,13 +224,13 @@ public sealed class CreateMultipartFieldTextComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Name", "Nm", "Field name (optional)", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("Text", "Tx", "Field text value", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("ContentType", "Ty", "Field content type", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("Name", "N", "Field name (optional)", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("Text", "T", "Field text value", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("ContentType", "C", "Field content type", Access.Item, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new MultipartFieldParameter("Field", "Fd", "Multipart field"));
+        outputs.Add(new MultipartFieldParameter("Field", "F", "Multipart field"));
 
     protected override void Process(IDataAccess access)
     {
@@ -252,15 +252,15 @@ public sealed class CreateMultipartFieldBytesComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("Name", "Nm", "Field name (optional)", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("Name", "N", "Field name (optional)", Access.Item, Requirement.MayBeMissing);
         // InputAdder.Add resets Requirement to its own argument (default MustExist): pass it explicitly.
-        inputs.Add(new ByteArrayParameter("Bytes", "By", "Field bytes"), Requirement.MayBeMissing);
-        inputs.AddText("FileName", "Fn", "Optional filename", Access.Item, Requirement.MayBeMissing);
-        inputs.AddText("ContentType", "Ty", "Field content type", Access.Item, Requirement.MayBeMissing);
+        inputs.Add(new ByteArrayParameter("Bytes", "B", "Field bytes"), Requirement.MayBeMissing);
+        inputs.AddText("FileName", "F", "Optional filename", Access.Item, Requirement.MayBeMissing);
+        inputs.AddText("ContentType", "C", "Field content type", Access.Item, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new MultipartFieldParameter("Field", "Fd", "Multipart field"));
+        outputs.Add(new MultipartFieldParameter("Field", "F", "Multipart field"));
 
     protected override void Process(IDataAccess access)
     {
@@ -283,13 +283,13 @@ public sealed class CreateMultipartFormBodyComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        var fields = new MultipartFieldParameter("Fields", "Fs", "Multipart form fields", Access.Twig);
+        var fields = new MultipartFieldParameter("Fields", "F", "Multipart form fields", Access.Twig);
         fields.Set(Array.Empty<MultipartField>());
         inputs.Add(fields, Requirement.MayBeMissing); // Add resets Requirement unless passed explicitly
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
-        outputs.Add(new RequestBodyParameter("Body", "Bd", "Request Body"));
+        outputs.Add(new RequestBodyParameter("Body", "B", "Request Body"));
 
     protected override void Process(IDataAccess access)
     {

@@ -20,13 +20,13 @@ public sealed class ScreenCaptureViewportComponent : Component
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddBoolean("Capture", "Cp", "Set to true to capture the viewport.").Set(false);
-        inputs.AddText("Viewport Name", "Vp", "Name of the Rhino viewport to capture.");
+        inputs.AddBoolean("Capture", "C", "Set to true to capture the viewport.").Set(false);
+        inputs.AddText("Viewport Name", "V", "Name of the Rhino viewport to capture.");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new BitmapParameter("Bitmap", "Bm", "Captured viewport bitmap."));
+        outputs.Add(new BitmapParameter("Bitmap", "B", "Captured viewport bitmap."));
     }
 
     protected override void Process(IDataAccess access)

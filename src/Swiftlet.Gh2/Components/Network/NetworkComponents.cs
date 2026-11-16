@@ -24,17 +24,17 @@ public sealed class HttpListenerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen at between 1 and 65535");
-        inputs.AddText("Route", "Rt", "Optional route prefix", Access.Item, Requirement.MayBeMissing);
-        inputs.Add(new RequestBodyParameter("Response Body", "Bd", "Pre-canned response body that will be returned to the sender"), Requirement.MayBeMissing);
+        inputs.AddInteger("Port", "P", "Port number to listen at between 1 and 65535");
+        inputs.AddText("Route", "R", "Optional route prefix", Access.Item, Requirement.MayBeMissing);
+        inputs.Add(new RequestBodyParameter("Response Body", "B", "Pre-canned response body that will be returned to the sender"), Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddText("Method", "Mt", "Request Method");
-        outputs.Add(new HttpHeaderParameter("Headers", "Hd", "Http Request Headers", Access.Twig));
-        outputs.Add(new QueryParameterParameter("Query Params", "Qr", "Components of the request query string", Access.Twig));
-        outputs.AddText("Content", "Ct", "Request Content");
+        outputs.AddText("Method", "M", "Request Method");
+        outputs.Add(new HttpHeaderParameter("Headers", "H", "Http Request Headers", Access.Twig));
+        outputs.Add(new QueryParameterParameter("Query Params", "Q", "Components of the request query string", Access.Twig));
+        outputs.AddText("Content", "C", "Request Content");
     }
 
     protected override void ProcessListener(IDataAccess access, CancellationToken cancellation)
@@ -130,13 +130,13 @@ public sealed class UdpListenerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen on (1-65535)");
+        inputs.AddInteger("Port", "P", "Port number to listen on (1-65535)");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new ByteArrayParameter("Data", "Dt", "Received data as byte array"));
-        outputs.AddText("Remote", "Rm", "Remote endpoint (IP:Port) that sent the data");
+        outputs.Add(new ByteArrayParameter("Data", "D", "Received data as byte array"));
+        outputs.AddText("Remote", "R", "Remote endpoint (IP:Port) that sent the data");
     }
 
     protected override void ProcessListener(IDataAccess access, CancellationToken cancellation)
@@ -220,19 +220,19 @@ public sealed class WebSocketClientComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddText("URL", "Ur", "URL of WebSocket server (ws:// or wss://)");
-        var query = new QueryParameterParameter("Params", "Pr", "Query parameters to append to the URL", Access.Twig);
+        inputs.AddText("URL", "U", "URL of WebSocket server (ws:// or wss://)");
+        var query = new QueryParameterParameter("Params", "P", "Query parameters to append to the URL", Access.Twig);
         query.Set(Array.Empty<QueryParameter>());
         inputs.Add(query, Requirement.MayBeMissing);
-        inputs.AddBoolean("Run", "Rn", "Set to true to connect, false to disconnect").Set(false);
+        inputs.AddBoolean("Run", "R", "Set to true to connect, false to disconnect").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new WebSocketConnectionParameter("Connection", "Cn", "WebSocket connection for sending messages via WebSocket Send component"));
-        outputs.AddText("Message", "Ms", "Most recent message received from the server");
-        outputs.AddText("Messages", "Mm", "All messages received since last solve", Access.Twig);
-        outputs.AddText("Status", "St", "Connection status");
+        outputs.Add(new WebSocketConnectionParameter("Connection", "C", "WebSocket connection for sending messages via WebSocket Send component"));
+        outputs.AddText("Message", "M", "Most recent message received from the server");
+        outputs.AddText("Messages", "Ms", "All messages received since last solve", Access.Twig);
+        outputs.AddText("Status", "S", "Connection status");
     }
 
     protected override void ProcessListener(IDataAccess access, CancellationToken cancellation)
@@ -363,17 +363,17 @@ public sealed class WebSocketServerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen on (1-65535)").Set(8181);
-        inputs.AddBoolean("Run", "Rn", "Set to true to start the server, false to stop").Set(false);
+        inputs.AddInteger("Port", "P", "Port number to listen on (1-65535)").Set(8181);
+        inputs.AddBoolean("Run", "R", "Set to true to start the server, false to stop").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.Add(new WebSocketConnectionParameter("Connection", "Cn", "Connection context for the client that sent the message (use with WebSocket Send)"));
-        outputs.AddText("Message", "Ms", "Most recent message received");
-        outputs.AddText("Messages", "Mm", "All messages received since last solve", Access.Twig);
-        outputs.AddInteger("Clients", "Nc", "Number of connected clients");
-        outputs.AddText("Status", "St", "Server status");
+        outputs.Add(new WebSocketConnectionParameter("Connection", "C", "Connection context for the client that sent the message (use with WebSocket Send)"));
+        outputs.AddText("Message", "M", "Most recent message received");
+        outputs.AddText("Messages", "Ms", "All messages received since last solve", Access.Twig);
+        outputs.AddInteger("Clients", "N", "Number of connected clients");
+        outputs.AddText("Status", "S", "Server status");
     }
 
     protected override void ProcessListener(IDataAccess access, CancellationToken cancellation)
@@ -476,14 +476,14 @@ public sealed class WebSocketSendComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.Add(new WebSocketConnectionParameter("Connection", "Cn", "WebSocket connection from WebSocket Client or WebSocket Server"));
-        inputs.AddText("Message", "Ms", "Message to send");
-        inputs.AddBoolean("Send", "Sn", "Set to true to send the message").Set(false);
+        inputs.Add(new WebSocketConnectionParameter("Connection", "C", "WebSocket connection from WebSocket Client or WebSocket Server"));
+        inputs.AddText("Message", "M", "Message to send");
+        inputs.AddBoolean("Send", "S", "Set to true to send the message").Set(false);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
     {
-        outputs.AddBoolean("Success", "Sc", "True if the message was sent successfully");
+        outputs.AddBoolean("Success", "S", "True if the message was sent successfully");
         outputs.AddText("Status", "St", "Connection status or error message");
     }
 
