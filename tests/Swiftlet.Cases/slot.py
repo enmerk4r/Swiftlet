@@ -87,3 +87,19 @@ try:
 except Exception:
     pass
 proc.terminate()
+
+# The router normally closes the Rhino it spawned (after a grace period it kills it). Make sure the
+# exact process this script started is really gone; never touch any other Rhino.
+pid = payload.get('pid')
+if isinstance(pid, int):
+    deadline = time.monotonic() + 30
+    def alive():
+        out = subprocess.run(['tasklist', '/FI', 'PID eq %d' % pid, '/FO', 'CSV', '/NH'], capture_output=True, text=True).stdout
+        return ('"%d"' % pid) in out and 'rhino' in out.lower()
+    while alive() and time.monotonic() < deadline:
+        time.sleep(2)
+    if alive():
+        subprocess.run(['taskkill', '/PID', str(pid), '/F'], capture_output=True, text=True)
+        print('KILLED leftover Rhino pid %d' % pid, flush=True)
+    else:
+        print('EXITED Rhino pid %d' % pid, flush=True)
