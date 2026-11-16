@@ -46,22 +46,7 @@ public sealed class StringifyJsonTokenComponent : GH_Component
             return;
         }
 
-        DA.SetData(0, Stringify(goo.Value));
-    }
-
-    private static string? Stringify(JsonNode node)
-    {
-        return node switch
-        {
-            JsonValue value when value.TryGetValue<string>(out string? stringValue) => stringValue,
-            JsonValue value when value.TryGetValue<bool>(out bool boolValue) => boolValue.ToString(),
-            JsonValue value when value.TryGetValue<double>(out double numberValue) => numberValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            JsonValue value when value.TryGetValue<long>(out long longValue) => longValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            JsonValue value when value.TryGetValue<int>(out int intValue) => intValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            JsonValue value when value.TryGetValue<decimal>(out decimal decimalValue) => decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            JsonValue value => value.ToString(),
-            _ => node.ToJsonString(new JsonSerializerOptions { WriteIndented = true }),
-        };
+        DA.SetData(0, Swiftlet.Runtime.JsonScalarText.Stringify(goo.Value));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

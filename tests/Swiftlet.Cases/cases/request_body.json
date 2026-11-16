@@ -1,0 +1,446 @@
+[
+ {
+  "name": "TextBody: plain text uses the JSON default",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "text": "hello"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyText",
+     "props": {
+      "ContentType": {
+       "text": "application/json"
+      },
+      "Text": {
+       "text": "hello"
+      },
+      "Value": {
+       "text": "hello"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextBody: JSON object",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"a\":[1,2]}"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyText",
+     "props": {
+      "ContentType": {
+       "text": "application/json"
+      },
+      "Text": {
+       "text": "{\"a\":[1,2]}"
+      },
+      "Value": {
+       "text": "{\"a\":[1,2]}"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextBody: JSON array",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "jarray": "[1,\"x\"]"
+   }
+  ]
+ },
+ {
+  "name": "TextBody: JSON null token",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "json": "null"
+   }
+  ]
+ },
+ {
+  "name": "TextBody: XML",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "xml": "<a x=\"1\"><b/></a>"
+   }
+  ]
+ },
+ {
+  "name": "TextBody: HTML",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "htmlel": "<p class=\"c\">hi</p>"
+   }
+  ]
+ },
+ {
+  "name": "TextBody: no content",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   null
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyText",
+     "props": {
+      "ContentType": {
+       "text": "application/json"
+      },
+      "Text": {
+       "text": ""
+      },
+      "Value": {
+       "text": ""
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextBody: unsupported content is an error",
+  "gh1": "CreateTextBodyComponent",
+  "inputs": [
+   {
+    "int": 5
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "TextBodyCustom: text + content type",
+  "gh1": "CreateTextBodyCustomComponent",
+  "inputs": [
+   {
+    "text": "a,b"
+   },
+   {
+    "text": "text/csv"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyText",
+     "props": {
+      "ContentType": {
+       "text": "text/csv"
+      },
+      "Text": {
+       "text": "a,b"
+      },
+      "Value": {
+       "text": "a,b"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextBodyCustom: default content type",
+  "gh1": "CreateTextBodyCustomComponent",
+  "inputs": [
+   {
+    "jobject": "{}"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyText",
+     "props": {
+      "ContentType": {
+       "text": "application/json"
+      },
+      "Text": {
+       "text": "{}"
+      },
+      "Value": {
+       "text": "{}"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextBodyCustom: no content",
+  "gh1": "CreateTextBodyCustomComponent",
+  "inputs": [
+   null,
+   {
+    "text": "text/plain"
+   }
+  ]
+ },
+ {
+  "name": "ByteArrayBody: bytes",
+  "gh1": "CreateByteArrayBodyComponent",
+  "inputs": [
+   {
+    "bytes": "AAH/"
+   },
+   {
+    "text": "application/octet-stream"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyBytes",
+     "props": {
+      "Content": {
+       "bytes": "AAH/"
+      },
+      "ContentType": {
+       "text": "application/octet-stream"
+      },
+      "Value": {
+       "bytes": "AAH/"
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayBody: text is UTF-8",
+  "gh1": "CreateByteArrayBodyComponent",
+  "inputs": [
+   {
+    "text": "λ"
+   },
+   {
+    "text": "text/plain"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyBytes",
+     "props": {
+      "Content": {
+       "bytes": "zrs="
+      },
+      "ContentType": {
+       "text": "text/plain"
+      },
+      "Value": {
+       "bytes": "zrs="
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayBody: JSON",
+  "gh1": "CreateByteArrayBodyComponent",
+  "inputs": [
+   {
+    "jobject": "{\"k\":true}"
+   },
+   {
+    "text": "application/json"
+   }
+  ]
+ },
+ {
+  "name": "ByteArrayBody: unsupported content is an error",
+  "gh1": "CreateByteArrayBodyComponent",
+  "inputs": [
+   {
+    "num": 1.5
+   },
+   {
+    "text": "x/y"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "ByteArrayBodyFromFile: reads file",
+  "gh1": "CreateByteArrayBodyFromFileComponent",
+  "inputs": [
+   {
+    "text": "__REPO__/Assets/Icons/svg/api-auth.svg"
+   },
+   {
+    "text": "image/svg+xml"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "type": "RequestBodyBytes",
+     "props": {
+      "Content": {
+       "bytes": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KPHBhdGggZD0iTTE2LjE5MSAwTDAgMTYuMDM3TDI0IDE0LjA4NVoiIGZpbGw9IiNhNDEzM2MiLz4KPHBhdGggZD0iTTE3LjEyNSAxNC42MjVMMTguODc1IDE0LjVMMTcgMS44NzVMMTYuMzEyIDAuNjg4WiIgZmlsbD0iIzZmMGQyOCIvPgo8cGF0aCBkPSJNMTYuMTkxIDBMMCAxNi4wMzdMMTcuNjE2IDI0WiIgZmlsbD0iI2M5MTg0YSIvPgo8cGF0aCBkPSJNNS44MzEgMTMuOTI2TDUuNzA5IDEzLjk2NEw1LjU5OCAxNC4wMjRMNS41MDIgMTQuMTAzTDUuNDIyIDE0LjJMNS4zNjMgMTQuMzFMNS4zMjUgMTQuNDMyTDUuMzExIDE0LjU2NEw1LjMyNSAxNC42OTVMNS4zNjMgMTQuODE3TDUuNDIyIDE0LjkyOEw1LjUwMiAxNS4wMjRMNS41OTggMTUuMTA0TDUuNzA5IDE1LjE2NEw1LjgzMSAxNS4yMDFMNS45ODIgMTUuMjE1TDUuOTgyIDE2LjY1N0w1LjY0MiAxNi40NjhMNS40MDkgMTYuMjg4TDUuMjAxIDE2LjA4TDUuMDIyIDE1Ljg0N0w0LjgxIDE1LjQ1N0w0LjcxMSAxNS4xNzRMNC42NSAxNC44NzVMNC42MjkgMTQuNTY0TDQuNjUgMTQuMjUyTDQuNzExIDEzLjk1M0w0LjgxIDEzLjY3TDUuMDIyIDEzLjI4TDUuMjAxIDEzLjA0N0w1LjQwOSAxMi44NEw1LjY0MiAxMi42Nkw1Ljk4MiAxMi40NzFMNS45ODIgMTMuOTEzWk05LjE1MyAxNC4wMDRMMTUuMDg0IDE0LjAwNEwxNS4xNjIgMTQuMDE0TDE1LjIzMyAxNC4wNDRMMTUuMzI5IDE0LjEzNEwxNS4zNzMgMTQuMjRMMTUuMzc3IDE0Ljg2OEwxNS4zMjkgMTQuOTkzTDE1LjIxNiAxNS4wOTJMMTUuMTA0IDE1LjEyM0wxNC44NTMgMTUuMTI0TDE0Ljg1MyAxNi44NDZMMTQuODEzIDE3LjAwNUwxNC43NDcgMTcuMDgyTDE0LjY0OSAxNy4xMkwxNC4yMjUgMTcuMTE3TDE0LjEwMSAxNy4wNzVMMTQuMDI5IDE2Ljk5M0wxMy45OTkgMTYuODgyTDEzLjk5NiAxNS45ODVMMTMuMzA3IDE1Ljk4NUwxMy4zMDcgMTYuODZMMTMuMjkzIDE2Ljk3TDEzLjI1NyAxNy4wNDZMMTMuMTY4IDE3LjEwNUwxMy4wMzUgMTcuMTIxTDEyLjY3MyAxNy4xMjJMMTIuNjAxIDE3LjEwNkwxMi41NDMgMTcuMDcxTDEyLjQ3NiAxNi45NzNMMTIuNDUxIDE2Ljg0NkwxMi40NSAxNS4xMjRMOS4xNTMgMTUuMTI0TDkuMDgyIDE1LjM1NEw4Ljk4MSAxNS41ODdMOC44NTcgMTUuODA2TDguNzA5IDE2LjAwOUw4LjU0MSAxNi4xOTVMOC4zNTQgMTYuMzYxTDguMTUgMTYuNTA2TDcuOTMgMTYuNjI5TDcuNjk1IDE2LjcyN0w3LjQ0OSAxNi44TDcuMTkyIDE2Ljg0NEw2LjkyNSAxNi44Nkw2Ljc2OCAxNi44NTRMNi40NjMgMTYuODEzTDYuMTcxIDE2LjczM0w1Ljk0MiAxNi42MzhMNS45NDIgMTUuMjE1TDYuMDk0IDE1LjIwMUw2LjIxNiAxNS4xNjRMNi4zMjcgMTUuMTA0TDYuNDIzIDE1LjAyNEw2LjUwMiAxNC45MjhMNi41NjIgMTQuODE3TDYuNiAxNC42OTVMNi42MTMgMTQuNTY0TDYuNiAxNC40MzJMNi41NjIgMTQuMzFMNi41MDIgMTQuMkw2LjQyMyAxNC4xMDNMNi4zMjcgMTQuMDI0TDYuMjE2IDEzLjk2NEw2LjA5NCAxMy45MjZMNS45NDIgMTMuOTEyTDUuOTQyIDEyLjQ4OUw2LjE3MSAxMi4zOTRMNi40NjMgMTIuMzE0TDYuNzY4IDEyLjI3M0w2LjkyNSAxMi4yNjhMNy4zMjEgMTIuMzAyTDcuNTc0IDEyLjM2TDcuODE0IDEyLjQ0Nkw4LjA0MiAxMi41NTdMOC4yNTQgMTIuNjkxTDguNDUgMTIuODQ3TDguNjI4IDEzLjAyM0w4Ljc4NiAxMy4yMThMOC45MjIgMTMuNDI5TDkuMDM1IDEzLjY1NVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg=="
+      },
+      "ContentType": {
+       "text": "image/svg+xml"
+      },
+      "Value": {
+       "bytes": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KPHBhdGggZD0iTTE2LjE5MSAwTDAgMTYuMDM3TDI0IDE0LjA4NVoiIGZpbGw9IiNhNDEzM2MiLz4KPHBhdGggZD0iTTE3LjEyNSAxNC42MjVMMTguODc1IDE0LjVMMTcgMS44NzVMMTYuMzEyIDAuNjg4WiIgZmlsbD0iIzZmMGQyOCIvPgo8cGF0aCBkPSJNMTYuMTkxIDBMMCAxNi4wMzdMMTcuNjE2IDI0WiIgZmlsbD0iI2M5MTg0YSIvPgo8cGF0aCBkPSJNNS44MzEgMTMuOTI2TDUuNzA5IDEzLjk2NEw1LjU5OCAxNC4wMjRMNS41MDIgMTQuMTAzTDUuNDIyIDE0LjJMNS4zNjMgMTQuMzFMNS4zMjUgMTQuNDMyTDUuMzExIDE0LjU2NEw1LjMyNSAxNC42OTVMNS4zNjMgMTQuODE3TDUuNDIyIDE0LjkyOEw1LjUwMiAxNS4wMjRMNS41OTggMTUuMTA0TDUuNzA5IDE1LjE2NEw1LjgzMSAxNS4yMDFMNS45ODIgMTUuMjE1TDUuOTgyIDE2LjY1N0w1LjY0MiAxNi40NjhMNS40MDkgMTYuMjg4TDUuMjAxIDE2LjA4TDUuMDIyIDE1Ljg0N0w0LjgxIDE1LjQ1N0w0LjcxMSAxNS4xNzRMNC42NSAxNC44NzVMNC42MjkgMTQuNTY0TDQuNjUgMTQuMjUyTDQuNzExIDEzLjk1M0w0LjgxIDEzLjY3TDUuMDIyIDEzLjI4TDUuMjAxIDEzLjA0N0w1LjQwOSAxMi44NEw1LjY0MiAxMi42Nkw1Ljk4MiAxMi40NzFMNS45ODIgMTMuOTEzWk05LjE1MyAxNC4wMDRMMTUuMDg0IDE0LjAwNEwxNS4xNjIgMTQuMDE0TDE1LjIzMyAxNC4wNDRMMTUuMzI5IDE0LjEzNEwxNS4zNzMgMTQuMjRMMTUuMzc3IDE0Ljg2OEwxNS4zMjkgMTQuOTkzTDE1LjIxNiAxNS4wOTJMMTUuMTA0IDE1LjEyM0wxNC44NTMgMTUuMTI0TDE0Ljg1MyAxNi44NDZMMTQuODEzIDE3LjAwNUwxNC43NDcgMTcuMDgyTDE0LjY0OSAxNy4xMkwxNC4yMjUgMTcuMTE3TDE0LjEwMSAxNy4wNzVMMTQuMDI5IDE2Ljk5M0wxMy45OTkgMTYuODgyTDEzLjk5NiAxNS45ODVMMTMuMzA3IDE1Ljk4NUwxMy4zMDcgMTYuODZMMTMuMjkzIDE2Ljk3TDEzLjI1NyAxNy4wNDZMMTMuMTY4IDE3LjEwNUwxMy4wMzUgMTcuMTIxTDEyLjY3MyAxNy4xMjJMMTIuNjAxIDE3LjEwNkwxMi41NDMgMTcuMDcxTDEyLjQ3NiAxNi45NzNMMTIuNDUxIDE2Ljg0NkwxMi40NSAxNS4xMjRMOS4xNTMgMTUuMTI0TDkuMDgyIDE1LjM1NEw4Ljk4MSAxNS41ODdMOC44NTcgMTUuODA2TDguNzA5IDE2LjAwOUw4LjU0MSAxNi4xOTVMOC4zNTQgMTYuMzYxTDguMTUgMTYuNTA2TDcuOTMgMTYuNjI5TDcuNjk1IDE2LjcyN0w3LjQ0OSAxNi44TDcuMTkyIDE2Ljg0NEw2LjkyNSAxNi44Nkw2Ljc2OCAxNi44NTRMNi40NjMgMTYuODEzTDYuMTcxIDE2LjczM0w1Ljk0MiAxNi42MzhMNS45NDIgMTUuMjE1TDYuMDk0IDE1LjIwMUw2LjIxNiAxNS4xNjRMNi4zMjcgMTUuMTA0TDYuNDIzIDE1LjAyNEw2LjUwMiAxNC45MjhMNi41NjIgMTQuODE3TDYuNiAxNC42OTVMNi42MTMgMTQuNTY0TDYuNiAxNC40MzJMNi41NjIgMTQuMzFMNi41MDIgMTQuMkw2LjQyMyAxNC4xMDNMNi4zMjcgMTQuMDI0TDYuMjE2IDEzLjk2NEw2LjA5NCAxMy45MjZMNS45NDIgMTMuOTEyTDUuOTQyIDEyLjQ4OUw2LjE3MSAxMi4zOTRMNi40NjMgMTIuMzE0TDYuNzY4IDEyLjI3M0w2LjkyNSAxMi4yNjhMNy4zMjEgMTIuMzAyTDcuNTc0IDEyLjM2TDcuODE0IDEyLjQ0Nkw4LjA0MiAxMi41NTdMOC4yNTQgMTIuNjkxTDguNDUgMTIuODQ3TDguNjI4IDEzLjAyM0w4Ljc4NiAxMy4yMThMOC45MjIgMTMuNDI5TDkuMDM1IDEzLjY1NVoiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg=="
+      }
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayBodyFromFile: missing file is an error",
+  "gh1": "CreateByteArrayBodyFromFileComponent",
+  "inputs": [
+   {
+    "text": "__REPO__/no/such/file.bin"
+   },
+   {
+    "text": "x/y"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "FormUrlEncoded: pairs",
+  "gh1": "CreateFormUrlEncodedBodyComponent",
+  "inputs": [
+   [
+    {
+     "text": "grant_type"
+    },
+    {
+     "text": "scope"
+    }
+   ],
+   [
+    {
+     "text": "client_credentials"
+    },
+    {
+     "text": "a b&c=λ"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "FormUrlEncoded: count mismatch is an error",
+  "gh1": "CreateFormUrlEncodedBodyComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   [
+    {
+     "text": "1"
+    }
+   ]
+  ],
+  "expectError": true
+ },
+ {
+  "name": "MultipartFieldText: all inputs",
+  "gh1": "CreateMultipartFieldTextComponent",
+  "inputs": [
+   {
+    "text": "note"
+   },
+   {
+    "text": "hello λ"
+   },
+   {
+    "text": "text/markdown"
+   }
+  ]
+ },
+ {
+  "name": "MultipartFieldText: defaults",
+  "gh1": "CreateMultipartFieldTextComponent",
+  "inputs": [
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "name": "MultipartFieldBytes: all inputs",
+  "gh1": "CreateMultipartFieldBytesComponent",
+  "inputs": [
+   {
+    "text": "file"
+   },
+   {
+    "bytes": "YWJj"
+   },
+   {
+    "text": "a.txt"
+   },
+   {
+    "text": "text/plain"
+   }
+  ]
+ },
+ {
+  "name": "MultipartFieldBytes: defaults",
+  "gh1": "CreateMultipartFieldBytesComponent",
+  "inputs": [
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "name": "MultipartFormBody: fields",
+  "gh1": "CreateMultipartFormBodyComponent",
+  "inputs": [
+   [
+    {
+     "field": {
+      "name": "a",
+      "text": "1"
+     }
+    },
+    {
+     "field": {
+      "name": "f",
+      "bytes": "eHl6",
+      "fileName": "f.bin",
+      "contentType": "application/octet-stream"
+     }
+    }
+   ]
+  ]
+ },
+ {
+  "name": "MultipartFormBody: no fields",
+  "gh1": "CreateMultipartFormBodyComponent",
+  "inputs": [
+   null
+  ]
+ }
+]

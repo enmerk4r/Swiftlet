@@ -44,7 +44,7 @@ public sealed class ReadJsonObjectComponent : GH_Component
             foreach (KeyValuePair<string, JsonNode?> pair in obj)
             {
                 keys.Add(pair.Key);
-                tokens.Add(new JsonNodeGoo(pair.Value));
+                tokens.Add(pair.Value is null ? JsonNodeGoo.CreateJsonNull() : new JsonNodeGoo(pair.Value));
             }
 
             DA.SetDataList(0, keys);

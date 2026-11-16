@@ -46,7 +46,7 @@ public sealed class ReadJsonValueComponent : GH_Component
             }
             else
             {
-                DA.SetData(0, GetJsonText(inputToken));
+                DA.SetData(0, Swiftlet.Runtime.JsonScalarText.AsText(inputToken));
             }
         }
         catch
@@ -55,7 +55,7 @@ public sealed class ReadJsonValueComponent : GH_Component
 
         try
         {
-            if (inputToken is JsonValue numberValue && TryGetDouble(numberValue, out double number))
+            if (inputToken is JsonValue numberValue && Swiftlet.Runtime.JsonScalarText.TryGetDouble(numberValue, out double number))
             {
                 DA.SetData(1, number);
             }
@@ -74,47 +74,6 @@ public sealed class ReadJsonValueComponent : GH_Component
         catch
         {
         }
-    }
-
-    private static bool TryGetDouble(JsonValue value, out double number)
-    {
-        if (value.TryGetValue<double>(out number))
-        {
-            return true;
-        }
-
-        if (value.TryGetValue<long>(out long longValue))
-        {
-            number = longValue;
-            return true;
-        }
-
-        if (value.TryGetValue<int>(out int intValue))
-        {
-            number = intValue;
-            return true;
-        }
-
-        if (value.TryGetValue<decimal>(out decimal decimalValue))
-        {
-            number = (double)decimalValue;
-            return true;
-        }
-
-        number = default;
-        return false;
-    }
-
-    private static string? GetJsonText(JsonNode node)
-    {
-        return node switch
-        {
-            JsonValue value when value.TryGetValue<string>(out string? stringValue) => stringValue,
-            JsonValue value when value.TryGetValue<bool>(out bool boolValue) => boolValue.ToString(),
-            JsonValue value when TryGetDouble(value, out double numberValue) => numberValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            JsonValue value => value.ToString(),
-            _ => node.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
-        };
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

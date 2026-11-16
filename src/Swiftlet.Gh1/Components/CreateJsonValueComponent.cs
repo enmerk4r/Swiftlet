@@ -57,24 +57,16 @@ public sealed class CreateJsonValueComponent : GH_Component
 
     private static JsonValue? CreateValue(object? input)
     {
-        return input switch
+        // Grasshopper goo unwrap to their CLR values; the conversion itself is shared with GH2.
+        object? value = input switch
         {
-            null => null,
-            GH_String value => JsonValue.Create(value.Value),
-            GH_Integer value => JsonValue.Create(value.Value),
-            GH_Number value => JsonValue.Create(value.Value),
-            GH_Boolean value => JsonValue.Create(value.Value),
-            GH_Time value => JsonValue.Create(value.Value),
-            string value => JsonValue.Create(value),
-            int value => JsonValue.Create(value),
-            long value => JsonValue.Create(value),
-            double value => JsonValue.Create(value),
-            float value => JsonValue.Create(value),
-            decimal value => JsonValue.Create(value),
-            bool value => JsonValue.Create(value),
-            DateTime value => JsonValue.Create(value),
-            DateTimeOffset value => JsonValue.Create(value),
-            _ => null,
+            GH_String goo => goo.Value,
+            GH_Integer goo => goo.Value,
+            GH_Number goo => goo.Value,
+            GH_Boolean goo => goo.Value,
+            GH_Time goo => goo.Value,
+            _ => input,
         };
+        return Swiftlet.Runtime.JsonScalarText.CreateValue(value);
     }
 }
