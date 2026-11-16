@@ -1,4 +1,4 @@
-﻿"""Live GET spike checks in a dedicated GH2 slot with the latest Swiftlet build loaded."""
+"""Live GET spike checks in a dedicated GH2 slot with the latest Swiftlet build loaded."""
 import argparse, json, sys, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -46,6 +46,9 @@ try:
         result = client.call("run_csharp", {"script": source})
         if result.get("stderr"):
             raise RuntimeError(result["stderr"])
+        expected = {"ValidateGet.csx": 3, "CancelGet.csx": 1, "MigrateGet.csx": 2}.get(name, 0)
+        if result.get("stdout", "").count("PASS ") < expected:
+            raise RuntimeError(f"Missing validation evidence for {name}: {result}")
         results.append({"check": name, "stdout": result.get("stdout", "")})
         print(result.get("stdout", ""), end="")
     def solve():
