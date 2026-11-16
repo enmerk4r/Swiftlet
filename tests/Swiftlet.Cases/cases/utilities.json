@@ -1,0 +1,806 @@
+[
+ {
+  "name": "Base64ToByteArray",
+  "gh1": "Base64ToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "aGVsbG8gzrsgd29ybGQ="
+   }
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "aGVsbG8gzrsgd29ybGQ="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Base64ToByteArray: invalid is an error",
+  "gh1": "Base64ToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "not base64!!"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "Base64ToText: default UTF8",
+  "gh1": "Base64ToTextComponent",
+  "inputs": [
+   {
+    "text": "aGVsbG8gzrsgd29ybGQ="
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "hello λ world"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Base64ToText: Unicode",
+  "gh1": "Base64ToTextComponent",
+  "inputs": [
+   {
+    "text": "aABpACAAuwM="
+   },
+   {
+    "text": "Unicode"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "hi λ"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Base64ToText: unknown encoding is an error",
+  "gh1": "Base64ToTextComponent",
+  "inputs": [
+   {
+    "text": "aGk="
+   },
+   {
+    "text": "LATIN9"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "ByteArrayToBase64",
+  "gh1": "ByteArrayToBase64Component",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "aGVsbG8gzrsgd29ybGQ="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToBase64: empty array",
+  "gh1": "ByteArrayToBase64Component",
+  "inputs": [
+   {
+    "bytes": ""
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": ""
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToList",
+  "gh1": "ByteArrayToListComponent",
+  "inputs": [
+   {
+    "bytes": "AAF/gP8="
+   }
+  ],
+  "expect": [
+   [
+    {
+     "int": 0
+    },
+    {
+     "int": 1
+    },
+    {
+     "int": 127
+    },
+    {
+     "int": 128
+    },
+    {
+     "int": 255
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ListToByteArray",
+  "gh1": "ListToByteArrayComponent",
+  "inputs": [
+   [
+    {
+     "int": 0
+    },
+    {
+     "int": 1
+    },
+    {
+     "int": 127
+    },
+    {
+     "int": 128
+    },
+    {
+     "int": 255
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "AAF/gP8="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ListToByteArray: out-of-range values wrap",
+  "gh1": "ListToByteArrayComponent",
+  "inputs": [
+   [
+    {
+     "int": 256
+    },
+    {
+     "int": -1
+    },
+    {
+     "int": 513
+    }
+   ]
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "AP8B"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToText: default UTF8",
+  "gh1": "ByteArrayToTextComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "hello λ world"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToText: ASCII drops non-ASCII",
+  "gh1": "ByteArrayToTextComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   },
+   {
+    "text": "ascii"
+   }
+  ]
+ },
+ {
+  "name": "ByteArrayToText: unknown encoding is an error",
+  "gh1": "ByteArrayToTextComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   },
+   {
+    "text": "nope"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "TextToBase64: default",
+  "gh1": "TextToBase64Component",
+  "inputs": [
+   {
+    "text": "hello λ world"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "aGVsbG8gzrsgd29ybGQ="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextToBase64: UTF32",
+  "gh1": "TextToBase64Component",
+  "inputs": [
+   {
+    "text": "hi"
+   },
+   {
+    "text": "UTF32"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "aAAAAGkAAAA="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextToByteArray: default",
+  "gh1": "TextToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "hello λ world"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "aGVsbG8gzrsgd29ybGQ="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "TextToByteArray: unknown encoding is an error",
+  "gh1": "TextToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "x"
+   },
+   {
+    "text": "EBCDIC"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "UrlEncode: reserved and unicode",
+  "gh1": "UrlEncodeComponent",
+  "inputs": [
+   {
+    "text": "a b&c=d/é~_-."
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "a+b%26c%3Dd%2F%C3%A9~_-."
+    }
+   ]
+  ]
+ },
+ {
+  "name": "UrlEncode: ASCII encoding",
+  "gh1": "UrlEncodeComponent",
+  "inputs": [
+   {
+    "text": "é"
+   },
+   {
+    "text": "ASCII"
+   }
+  ]
+ },
+ {
+  "name": "Compress then compare",
+  "gh1": "CompressDataComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZGhlbGxvIM67IHdvcmxkaGVsbG8gzrsgd29ybGRoZWxsbyDOuyB3b3JsZA=="
+   }
+  ]
+ },
+ {
+  "name": "Decompress: not gzip is an error",
+  "gh1": "DecompressDataComponent",
+  "inputs": [
+   {
+    "bytes": "cGxhaW4gYnl0ZXM="
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "CreateCsvLine: default delimiter, quoting",
+  "gh1": "CreateCsvLineComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b,c"
+    },
+    {
+     "text": ""
+    },
+    {
+     "text": "d"
+    }
+   ],
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "a,\"b,c\",,d"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateCsvLine: semicolon",
+  "gh1": "CreateCsvLineComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b;c"
+    }
+   ],
+   {
+    "text": ";"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "a;\"b;c\""
+    }
+   ]
+  ]
+ },
+ {
+  "name": "CreateCsvLine: multi-character delimiter",
+  "gh1": "CreateCsvLineComponent",
+  "inputs": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b"
+    }
+   ],
+   {
+    "text": "||"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "a||b"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ReadCsvLine: quoted cell",
+  "gh1": "ReadCsvLineComponent",
+  "inputs": [
+   {
+    "text": "a,\"b,c\",,d"
+   },
+   null
+  ],
+  "expect": [
+   [
+    {
+     "text": "a"
+    },
+    {
+     "text": "b,c"
+    },
+    {
+     "text": ""
+    },
+    {
+     "text": "d"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ReadCsvLine: semicolon",
+  "gh1": "ReadCsvLineComponent",
+  "inputs": [
+   {
+    "text": "1;2;3"
+   },
+   {
+    "text": ";"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "1"
+    },
+    {
+     "text": "2"
+    },
+    {
+     "text": "3"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "SplitTextIntoLines: keeps carriage returns",
+  "gh1": "SplitTextIntoLinesComponent",
+  "inputs": [
+   {
+    "text": "a\r\nb\n\nc"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "a\r"
+    },
+    {
+     "text": "b"
+    },
+    {
+     "text": ""
+    },
+    {
+     "text": "c"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "GenerateGuid: off gives no data",
+  "gh1": "GenerateGuidComponent",
+  "inputs": [
+   {
+    "bool": false
+   },
+   null
+  ]
+ },
+ {
+  "name": "ByteArrayToFile",
+  "gh1": "ByteArrayToFileComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   },
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\bytes.bin"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "int": 14
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByteArrayToFile: invalid path is an error",
+  "gh1": "ByteArrayToFileComponent",
+  "inputs": [
+   {
+    "bytes": "aGVsbG8gzrsgd29ybGQ="
+   },
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\no<>such|dir\\x.bin"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "FileToByteArray: reads what was written",
+  "gh1": "FileToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\bytes.bin"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "bytes": "aGVsbG8gzrsgd29ybGQ="
+    }
+   ]
+  ]
+ },
+ {
+  "name": "FileToByteArray: missing file is an error",
+  "gh1": "FileToByteArrayComponent",
+  "inputs": [
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\missing.bin"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "SaveText",
+  "gh1": "SaveTextComponent",
+  "inputs": [
+   {
+    "text": "hello λ world"
+   },
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\text.txt"
+   }
+  ]
+ },
+ {
+  "name": "SaveCsv",
+  "gh1": "SaveCsvComponent",
+  "inputs": [
+   [
+    {
+     "text": "a,b"
+    },
+    {
+     "text": "1,2"
+    }
+   ],
+   {
+    "text": "C:\\Users\\pigac\\AppData\\Local\\Temp\\swiftlet-cases-files\\data.csv"
+   }
+  ]
+ },
+ {
+  "name": "ColorToHex",
+  "gh1": "ColorToHexComponent",
+  "inputs": [
+   {
+    "colour": [
+     255,
+     18,
+     171,
+     239
+    ]
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "#12ABEF"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ColorToHex: alpha ignored",
+  "gh1": "ColorToHexComponent",
+  "inputs": [
+   {
+    "colour": [
+     10,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "#000000"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "HexToColor: with hash",
+  "gh1": "HexToColorComponent",
+  "inputs": [
+   {
+    "text": "#12ABEF"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "colour": [
+      255,
+      18,
+      171,
+      239
+     ]
+    }
+   ]
+  ]
+ },
+ {
+  "name": "HexToColor: without hash",
+  "gh1": "HexToColorComponent",
+  "inputs": [
+   {
+    "text": "ff8000"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "colour": [
+      255,
+      255,
+      128,
+      0
+     ]
+    }
+   ]
+  ]
+ },
+ {
+  "name": "HexToColor: invalid warns, no colour",
+  "gh1": "HexToColorComponent",
+  "inputs": [
+   {
+    "text": "zzzzzz"
+   }
+  ]
+ },
+ {
+  "name": "GenerateQrCode: defaults",
+  "gh1": "GenerateQrCodeComponent",
+  "inputs": [
+   {
+    "text": "https://example.com"
+   },
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "name": "GenerateQrCode: custom colours, no quiet zone",
+  "gh1": "GenerateQrCodeComponent",
+  "inputs": [
+   {
+    "text": "swiftlet"
+   },
+   {
+    "int": 3
+   },
+   {
+    "colour": [
+     255,
+     10,
+     20,
+     30
+    ]
+   },
+   {
+    "colour": [
+     255,
+     250,
+     240,
+     230
+    ]
+   },
+   {
+    "bool": false
+   }
+  ]
+ },
+ {
+  "name": "BitmapToByteArray: PNG",
+  "gh1": "BitmapToByteArrayComponent",
+  "inputs": [
+   {
+    "image": [
+     2,
+     2,
+     "/wAA/wD/AP8AAP//////gA=="
+    ]
+   },
+   {
+    "text": "png"
+   }
+  ]
+ },
+ {
+  "name": "BitmapToByteArray: BMP",
+  "gh1": "BitmapToByteArrayComponent",
+  "inputs": [
+   {
+    "image": [
+     2,
+     2,
+     "/wAA/wD/AP8AAP//////gA=="
+    ]
+   },
+   {
+    "text": "BMP"
+   }
+  ]
+ },
+ {
+  "name": "BitmapToByteArray: unsupported format is an error",
+  "gh1": "BitmapToByteArrayComponent",
+  "inputs": [
+   {
+    "image": [
+     2,
+     2,
+     "/wAA/wD/AP8AAP//////gA=="
+    ]
+   },
+   {
+    "text": "webm"
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "ByteArrayToBitmap: not an image is an error",
+  "gh1": "ByteArrayToBitmapComponent",
+  "inputs": [
+   {
+    "bytes": "ZGVmaW5pdGVseSBub3QgYW4gaW1hZ2U="
+   }
+  ],
+  "expectError": true
+ },
+ {
+  "name": "BitmapToMesh: default plane",
+  "gh1": "BitmapToMeshComponent",
+  "inputs": [
+   {
+    "image": [
+     2,
+     2,
+     "/wAA/wD/AP8AAP//////gA=="
+    ]
+   },
+   null
+  ]
+ }
+]

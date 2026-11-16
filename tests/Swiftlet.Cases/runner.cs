@@ -46,6 +46,14 @@ object CoreValue(JsonObject spec)
             return JsonForHost(kind, (string)v!, 2);
         case "html": case "htmlel": case "xml":
             return MarkupNode(kind, (string)v!);
+        case "colour": // [a, r, g, b] as 0-255
+        {
+            var gdi = System.Drawing.Color.FromArgb((int)v![0], (int)v[1], (int)v[2], (int)v[3]);
+            var colourT = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Grasshopper2").GetType("Grasshopper2.Types.Colour.Colour", true);
+            return colourT.GetMethod("FromGdi").Invoke(null, new object[] { gdi });
+        }
+        case "image": // [width, height, base64 RGBA]
+            return SwiftletImage(v!);
         default: throw new NotSupportedException("value kind " + kind);
     }
 }
@@ -77,6 +85,12 @@ object MarkupNode(string kind, string markup)
     return kind == "html" ? (object)doc.DocumentNode : (object)doc.DocumentNode.FirstChild;
 }
 
+object SwiftletImage(JsonNode v)
+{
+    var imaging = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Swiftlet.Imaging");
+    return Activator.CreateInstance(imaging.GetType("Swiftlet.Imaging.SwiftletImage", true), new object[] { (int)v[0], (int)v[1], Convert.FromBase64String((string)v[2]) });
+}
+
 object Gh1Goo(JsonObject spec)
 {
     var (kind, v) = spec.Single();
@@ -96,6 +110,10 @@ object Gh1Goo(JsonObject spec)
             return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.HtmlNodeGoo", true), MarkupNode(kind, (string)v!));
         case "xml":
             return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.XmlNodeGoo", true), MarkupNode(kind, (string)v!));
+        case "colour":
+            return Activator.CreateInstance(gh1.GetType("Grasshopper.Kernel.Types.GH_Colour", true), new object[] { System.Drawing.Color.FromArgb((int)v![0], (int)v[1], (int)v[2], (int)v[3]) });
+        case "image":
+            return Activator.CreateInstance(sw1.GetType("Swiftlet.Gh.Rhino8.Goo.BitmapGoo", true), new object[] { SwiftletImage(v!) });
         default: throw new NotSupportedException("value kind " + kind);
     }
 }
@@ -123,6 +141,28 @@ object Canon(object o, int depth = 0)
         case byte[] bytes: return new Dictionary<string, object> { ["bytes"] = Convert.ToBase64String(bytes) };
         case JsonNode node: return new Dictionary<string, object> { ["json"] = node.ToJsonString() };
         case System.Xml.XmlNode xmlNode: return new Dictionary<string, object> { ["xml"] = xmlNode.OuterXml };
+        case System.Drawing.Color gdi: return new Dictionary<string, object> { ["colour"] = new[] { (int)gdi.A, gdi.R, gdi.G, gdi.B } };
+        case Rhino.Geometry.Mesh mesh:
+        {
+            // Vertex/face counts, bounding box and a hash of the vertex colours are enough to compare hosts.
+            var sha = System.Security.Cryptography.SHA256.Create();
+            var colourBytes = mesh.VertexColors.SelectMany(c => new[] { c.A, c.R, c.G, c.B }).ToArray();
+            var box = mesh.GetBoundingBox(true);
+            return new Dictionary<string, object> { ["mesh"] = new object[] { mesh.Vertices.Count, mesh.Faces.Count, mesh.VertexColors.Count,
+                Convert.ToHexString(sha.ComputeHash(colourBytes)).Substring(0, 16), box.Min.ToString(), box.Max.ToString() } };
+        }
+    }
+    if (t.FullName == "Grasshopper2.Types.Colour.Colour")
+    {
+        dynamic eto = t.GetMethod("ToEto").Invoke(o, null);
+        return new Dictionary<string, object> { ["colour"] = new[] { (int)eto.Ab, (int)eto.Rb, (int)eto.Gb, (int)eto.Bb } };
+    }
+    if (t.FullName == "Swiftlet.Imaging.SwiftletImage")
+    {
+        dynamic img = o;
+        byte[] px = img.GetPixelBytes();
+        var sha = System.Security.Cryptography.SHA256.Create();
+        return new Dictionary<string, object> { ["image"] = new object[] { (int)img.Width, (int)img.Height, Convert.ToHexString(sha.ComputeHash(px)).Substring(0, 16) } };
     }
     if (t.FullName == "HtmlAgilityPack.HtmlNode")
         return new Dictionary<string, object> { ["html"] = (string)t.GetProperty("OuterHtml").GetValue(o) };

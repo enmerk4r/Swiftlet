@@ -30,20 +30,7 @@ public sealed class ReadCsvLineComponent : GH_Component
         DA.GetData(0, ref line);
         DA.GetData(1, ref delimiter);
 
-        TextFieldParser parser = new(new StringReader(line));
-        if (line.Contains("\""))
-        {
-            parser.HasFieldsEnclosedInQuotes = true;
-        }
-
-        parser.SetDelimiters(delimiter);
-
-        List<string> cells = new();
-        while (!parser.EndOfData)
-        {
-            cells.AddRange(parser.ReadFields());
-        }
-
+        List<string> cells = CsvLines.Read(line, delimiter);
         DA.SetDataList(0, cells);
     }
 
