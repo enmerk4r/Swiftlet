@@ -17,7 +17,9 @@ public sealed class UdpStreamComponent : Component
     {
         inputs.AddText("Host", "H", "Target host (IP address or hostname)");
         inputs.AddInteger("Port", "P", "Target port number (0-65535)");
-        inputs.Add(new ByteArrayParameter("Data", "D", "Data to send as a byte array") { Requirement = Requirement.MayBeMissing });
+        var data = new ByteArrayParameter("Data", "D", "Data to send as a byte array") { Requirement = Requirement.MayBeMissing };
+        data.Set(new[] { Array.Empty<byte>() });
+        inputs.Add(data);
     }
     protected override void AddOutputs(OutputAdder outputs)
     {

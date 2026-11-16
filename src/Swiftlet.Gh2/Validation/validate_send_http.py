@@ -1,10 +1,12 @@
 """Prove both shells send exact HTTP requests and UDP bytes using local fixtures."""
-import argparse, base64, json, socket, sys, threading
+import argparse, base64, json, re, socket, sys, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"))
 from cases import run_csharp,evaluate,flatten
+sys.path.insert(0,str(ROOT/"tests/Swiftlet.Parity"))
+from parity import RhinoMcp
 class Handler(BaseHTTPRequestHandler):
     def handle_request(self):
         body=self.rfile.read(int(self.headers.get("Content-Length","0"))).decode()
@@ -59,6 +61,15 @@ try:
         a.report.parent.mkdir(parents=True,exist_ok=True)
         a.report.write_text(json.dumps({"cases":cases,"results":results,"problems":problems},indent=2))
     if problems:raise RuntimeError(f"{len(problems)} network parity problems")
+    client=RhinoMcp(a.port)
+    ids=(ROOT/"src/Swiftlet.Gh2/Ids/ComponentIds.Send.cs").read_text()
+    throttle=re.search(r'Throttle = "([^"]+)"',ids)[1]
+    target=client.call("g2_place_component",{"selector":throttle,"solve":False})["id"]
+    try:
+        evidence=run_csharp(a.port,(Path(__file__).parent/"CancelThrottle.csx").read_text().replace("__TARGET_ID__",target))
+        if "PASS Throttle cancellation" not in evidence:raise RuntimeError(evidence)
+        print(evidence,end="")
+    finally:client.call("g2_delete_component",{"selector":target,"solve":False})
     print("PASS exact HTTP and UDP fixture suite")
 finally:
     server.shutdown();server.server_close();udp.close()
