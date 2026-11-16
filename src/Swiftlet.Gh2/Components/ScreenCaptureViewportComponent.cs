@@ -3,6 +3,8 @@ using Grasshopper2.UI;
 using GrasshopperIO;
 using Swiftlet.Gh2.Parameters;
 using Swiftlet.Hosts.Rhino;
+using Grasshopper2.UI.Icon;
+using Swiftlet.Gh2.Icons;
 
 namespace Swiftlet.Gh2.Components;
 
@@ -13,6 +15,8 @@ public sealed class ScreenCaptureViewportComponent : Component
         : base(new Nomen("Screen Capture Viewport", "Captures a bitmap of the named Rhino viewport.", "Swiftlet", "7. Utilities")) { }
 
     public ScreenCaptureViewportComponent(IReader reader) : base(reader) { }
+
+    protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 
     protected override void AddInputs(InputAdder inputs)
     {

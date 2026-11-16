@@ -84,7 +84,7 @@
 
   <ItemGroup>
     <Content Include="..\..\Assets\Logo\Logo_*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\..\Assets\ComponentIcons\*.png" Link="Resources\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\Assets\Icons\png24\*.png" Link="Resources\Icons\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyGha" AfterTargets="Build">

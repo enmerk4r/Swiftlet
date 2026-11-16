@@ -2,6 +2,8 @@ using Grasshopper2.Parameters;
 using Grasshopper2.UI;
 using GrasshopperIO;
 using Swiftlet.Imaging;
+using Grasshopper2.UI.Icon;
+using Swiftlet.Gh2.Icons;
 
 namespace Swiftlet.Gh2.Parameters;
 
@@ -15,4 +17,6 @@ public sealed class BitmapParameter : Parameter<SwiftletImage>
         : base(name, userName, info, access) { }
 
     public BitmapParameter(IReader reader) : base(reader) { }
+
+    protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 }

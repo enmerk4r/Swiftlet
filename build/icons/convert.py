@@ -113,6 +113,8 @@ def vector_elements(page):
     raw = page.get_svg_image(text_as_path=True)
     # drop the shadow layers entirely (any group with a mask) before parsing
     raw = re.sub(r'<g mask="url\(#mask_\d+\)">.*?</g>\s*</g>', "", raw, flags=re.S)
+    # artboards larger than 24pt (e.g. the logo) are scaled into the 24-unit icon space via the viewport
+    raw = re.sub(r'(<svg[^>]*?)\swidth="[^"]*"\s+height="[^"]*"', lambda m: m.group(1) + ' width="%d" height="%d"' % (N, N), raw, count=1)
     svg = SVG.parse(io.StringIO(raw), reify=True)
     els = []
     for e in svg.elements():
@@ -123,6 +125,10 @@ def vector_elements(page):
             if len(p) == 0:
                 continue
             gop = float(e.values.get("opacity", 1.0)) if "opacity" in e.values else 1.0
+            bb = p.bbox()
+            is_backdrop = bb is not None and bb[2] - bb[0] >= N * 0.98 and bb[3] - bb[1] >= N * 0.98
+            if is_backdrop and p.fill is not None and p.fill.value is not None and (p.fill.red, p.fill.green, p.fill.blue) == (255, 255, 255):
+                continue  # full-artboard white backdrop (present in Logo.ai)
             if p.fill is not None and p.fill.value is not None:
                 op = (p.fill.opacity if p.fill.opacity is not None else 1.0) * gop
                 evenodd = str(e.values.get("fill-rule", "")).lower() == "evenodd"
@@ -158,7 +164,8 @@ def shapely_to_d(g):
     return "".join(out)
 
 def render_pdf(page, scale):
-    pix = page.get_pixmap(clip=pymupdf.Rect(0, 0, N, N), matrix=pymupdf.Matrix(scale, scale), alpha=True)
+    k = scale * N / page.rect.width
+    pix = page.get_pixmap(clip=page.rect, matrix=pymupdf.Matrix(k, k), alpha=True)
     return np.asarray(Image.frombytes("RGBA", (pix.width, pix.height), pix.samples)).astype(float)
 
 def render_svg(svg_text, px):
@@ -257,6 +264,13 @@ def convert(page, shadow_thresh=0.06, min_area_px=40):
                 pts = list(g.simplify(0.5).exterior.coords)[:-1]
                 d = "M" + "L".join(f"{fmt(x / SS)} {fmt(y / SS)}" for x, y in pts) + "Z"
                 shadows.setdefault(i, []).append((d, colour, 1.0))
+    # Translucent faces (e.g. the logo's pale wings) blend with whatever is under them in ways the
+    # flat master cannot reproduce exactly; bake each one to the colour observed in the original.
+    for i, (d, col, op) in enumerate(items):
+        if op < 0.999:
+            sel = (label == i) & (dark <= shadow_thresh)
+            if sel.sum() >= min_area_px:
+                items[i] = (d, np.median(F[sel], axis=0), 1.0)
     out = []
     for i, it in enumerate(items):
         out.append(it)
