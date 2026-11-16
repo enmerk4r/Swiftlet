@@ -123,8 +123,9 @@ def one_round(a, n, upload_file, download_file):
     base = a.base_port
     run_csharp(a.port, CLEAR)
     time.sleep(2)  # listeners of the previous round release their ports
+    chosen = {k: v for k, v in COMPONENTS.items() if not a.only or k in a.only}
     comps = [{"Key": k, "Selector": v, "X": 100 + (i % 4) * 260, "Y": 100 + (i // 4) * 200}
-             for i, (k, v) in enumerate(COMPONENTS.items())]
+             for i, (k, v) in enumerate(chosen.items())]
     _, text = call(a.port, "g2_apply_graph", {"sliders": [], "components": comps, "wires": [], "solve": False})
     ids = {p["key"]: p["id"] for p in json.loads(text)["placed"]}
     inputs = {
@@ -139,7 +140,7 @@ def one_round(a, n, upload_file, download_file):
         "Download": [("URL", f'"http://localhost:{base}/"'), ("Path", json.dumps(download_file)), ("Run", "true")],
         "Upload": [("URL", f'"http://localhost:{base}/"'), ("Path", json.dumps(upload_file)), ("Run", "true")],
     }
-    puts = "\n".join(f'Put("{ids[k]}", "{name}", {value});' for k, pairs in inputs.items() for name, value in pairs)
+    puts = "\n".join(f'Put("{ids[k]}", "{name}", {value});' for k, pairs in inputs.items() if k in ids for name, value in pairs)
     run_csharp(a.port, SET_INPUTS.replace("__PUTS__", puts))
 
     before = counts(a.port)
@@ -163,7 +164,7 @@ def one_round(a, n, upload_file, download_file):
     delta = {k: after[k] - before[k] for k in after}
     names = ",".join(f'{{"{v}","{k}"}}' for k, v in ids.items())
     state = tagged(run_csharp(a.port, READ_STATE.replace("__NAMES__", names)), "STATE:")
-    ws_listening = listening(base + 2)
+    ws_listening = listening(base + 2) if "WsServer" in ids else None
     stale = [s["key"] for s in state if s["phase"] in ("Cancelled", "Faulted")]
 
     failures = []
@@ -171,7 +172,7 @@ def one_round(a, n, upload_file, download_file):
         failures.append(f"{delta['Started']} solutions started (max {a.max_starts})")
     if not settled:
         failures.append(f"still solving after {a.timeout}s")
-    if not ws_listening:
+    if ws_listening is False:
         failures.append(f"WebSocket Server (Run = true) not listening on {base + 2}")
     if stale:
         failures.append("left Cancelled/Faulted: " + ", ".join(stale))
@@ -191,8 +192,12 @@ def main():
     ap.add_argument("--timeout", type=float, default=300, help="seconds a round may take to settle")
     ap.add_argument("--quiet", type=float, default=5, help="seconds without a new solution that count as settled")
     ap.add_argument("--base-port", type=int, default=18091, help="first of five loopback ports used")
+    ap.add_argument("--only", type=lambda v: [k for k in v.split(",") if k], default=None,
+                    help="comma-separated subset of: " + ",".join(COMPONENTS))
     ap.add_argument("--report", help="write the per-round results here as JSON")
     a = ap.parse_args()
+    if a.only and [k for k in a.only if k not in COMPONENTS]:
+        ap.error("unknown component key(s): " + ", ".join(k for k in a.only if k not in COMPONENTS))
 
     work = tempfile.mkdtemp(prefix="swiftlet-storm-")
     upload_file = os.path.join(work, "upload.txt")
