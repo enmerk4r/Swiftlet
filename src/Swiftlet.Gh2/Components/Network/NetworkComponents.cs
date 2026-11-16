@@ -56,6 +56,7 @@ public sealed class HttpListenerComponent : ListenerComponent
         {
             _session ??= CreateSession();
             _session.ReconfigureAsync(port, route, responseBody, cancellation).GetAwaiter().GetResult();
+            ShowMessage($"http://localhost:{port}/{route}");
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
@@ -149,6 +150,7 @@ public sealed class UdpListenerComponent : ListenerComponent
             return;
         }
 
+        ShowMessage($":{port}");
         try
         {
             _session ??= CreateSession();
@@ -312,6 +314,7 @@ public sealed class WebSocketClientComponent : ListenerComponent
         string status = session.LastError is not null
             ? $"Error: {session.LastError}"
             : session.Connection?.GetStatusString() ?? "Disconnected";
+        ShowMessage(session.Connection?.GetStatusString() ?? (session.LastError is null ? "Disconnected" : "Error"));
 
         if (_lastMessage is not null)
             access.SetItem(1, _lastMessage);
@@ -430,6 +433,7 @@ public sealed class WebSocketServerComponent : ListenerComponent
         access.SetTwig(2, messages);
         access.SetItem(3, session.ActiveClientCount);
         access.SetItem(4, run ? $"Listening on ws://localhost:{port}/" : "Stopped");
+        ShowMessage(run ? $"ws://localhost:{port}/ ({session.ActiveClientCount} clients)" : "Stopped");
     }
 
     protected override void OnSolutionCommitted(Grasshopper2.Doc.SolutionId solution) => _received.Commit(solution);

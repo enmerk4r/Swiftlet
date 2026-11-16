@@ -44,6 +44,7 @@ public sealed class OAuthTokenComponent : OAuthComponentBase
         access.SetItem(0, result.AccessToken); access.SetItem(1, result.RefreshToken);
         if (result.ExpiresIn is int expires) access.SetItem(2, expires);
         access.SetItem(3, result.TokenType); access.SetItem(4, result.Header); access.SetItem(5, result.Error);
+        ComponentMessage.Show(this, result.Status, label => Label = label);
         if (result.Diagnostic is not null)
         {
             if (result.IsWarning) access.AddWarning("OAuth", result.Diagnostic);
