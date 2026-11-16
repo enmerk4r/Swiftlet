@@ -1,0 +1,7 @@
+numpy==2.5.5
+opencv-python-headless==5.0.0.93
+pillow==13.0.0
+pymupdf==2.1
+shapely==2.2.0
+svgelements==1.9.6
+resvg_py==0.5.0

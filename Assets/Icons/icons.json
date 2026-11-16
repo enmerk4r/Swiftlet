@@ -1,0 +1,1485 @@
+{
+  "source": "Assets/ComponentIcons/Icons.ai",
+  "icons": {
+    "api-auth": {
+      "artboard": 26,
+      "legacyPng": "Icons_api_auth_24x24.png",
+      "matchError": 5.59,
+      "classes": [
+        "ApiKeyAuthComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 5.2
+    },
+    "base64-to-byte-array": {
+      "artboard": 72,
+      "legacyPng": "Icons_base64_to_byte_array_24x24.png",
+      "matchError": 4.98,
+      "classes": [
+        "Base64ToByteArrayComponent"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 6.07
+    },
+    "base64-to-text": {
+      "artboard": 62,
+      "legacyPng": "Icons_base64_to_text_24x24.png",
+      "matchError": 4.5,
+      "classes": [
+        "Base64ToTextComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.41
+    },
+    "basic-auth": {
+      "artboard": 25,
+      "legacyPng": "Icons_basic_auth_24x24.png",
+      "matchError": 4.69,
+      "classes": [
+        "BasicAuthComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 5.75
+    },
+    "bitmap": {
+      "artboard": 81,
+      "legacyPng": "Icons_bitmap_24x24.png",
+      "matchError": 14.22,
+      "classes": [
+        "BitmapParam"
+      ],
+      "faces": 12,
+      "shadows": 0,
+      "diffVsLegacy": 12.28
+    },
+    "bitmap-to-byte-array": {
+      "artboard": 77,
+      "legacyPng": "Icons_bitmap_to_byte_array_24x24.png",
+      "matchError": 3.41,
+      "classes": [
+        "BitmapToByteArrayComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.71
+    },
+    "byte-array": {
+      "artboard": 63,
+      "legacyPng": "Icons_byte_array_24x24.png",
+      "matchError": 17.93,
+      "classes": [
+        "ByteArrayParam"
+      ],
+      "faces": 18,
+      "shadows": 0,
+      "diffVsLegacy": 16.81
+    },
+    "byte-array-to-base64": {
+      "artboard": 71,
+      "legacyPng": "Icons_byte_array_to_base64_24x24.png",
+      "matchError": 5.05,
+      "classes": [
+        "ByteArrayToBase64Component"
+      ],
+      "faces": 7,
+      "shadows": 1,
+      "diffVsLegacy": 6.19
+    },
+    "byte-array-to-bitmap": {
+      "artboard": 78,
+      "legacyPng": "Icons_byte_array_to_bitmap_24x24.png",
+      "matchError": 3.5,
+      "classes": [
+        "ByteArrayToBitmapComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 4.83
+    },
+    "byte-array-to-file": {
+      "artboard": 56,
+      "legacyPng": "Icons_byte_array_to_file_24x24.png",
+      "matchError": 3.72,
+      "classes": [
+        "ByteArrayToFileComponent"
+      ],
+      "faces": 4,
+      "shadows": 2,
+      "diffVsLegacy": 2.2
+    },
+    "byte-array-to-list": {
+      "artboard": 69,
+      "legacyPng": "Icons_byte_array_to_list_24x24.png",
+      "matchError": 3.74,
+      "classes": [
+        "ByteArrayToListComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.76
+    },
+    "byte-array-to-mesh": {
+      "artboard": 79,
+      "legacyPng": "Icons_byte_array_to_mesh_24x24.png",
+      "matchError": 4.07,
+      "classes": [
+        "BitmapToMeshComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.36
+    },
+    "byte-array-to-text": {
+      "artboard": 58,
+      "legacyPng": "Icons_byte_array_to_text_24x24.png",
+      "matchError": 3.74,
+      "classes": [
+        "ByteArrayToTextComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.75
+    },
+    "color-to-hex": {
+      "artboard": 74,
+      "legacyPng": "Icons_color_to_hex_24x24.png",
+      "matchError": 3.51,
+      "classes": [
+        "ColorToHexComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.41
+    },
+    "compress-data": {
+      "artboard": 54,
+      "legacyPng": "Icons_compress_data_24x24.png",
+      "matchError": 4.39,
+      "classes": [
+        "CompressDataComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.25
+    },
+    "construct-url": {
+      "artboard": 66,
+      "legacyPng": "Icons_construct_url_24x24.png",
+      "matchError": 5.06,
+      "classes": [
+        "CreateUrlComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 6.29
+    },
+    "create-byte-array-body": {
+      "artboard": 34,
+      "legacyPng": "Icons_create_byte_array_body_24x24.png",
+      "matchError": 6.67,
+      "classes": [
+        "CreateByteArrayBodyComponent",
+        "CreateByteArrayBodyFromFileComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 6.74
+    },
+    "create-csv-line": {
+      "artboard": 48,
+      "legacyPng": "Icons_create_csv_line_24x24.png",
+      "matchError": 3.66,
+      "classes": [
+        "CreateCsvLineComponent"
+      ],
+      "faces": 4,
+      "shadows": 2,
+      "diffVsLegacy": 1.76
+    },
+    "create-form-url-encoded-body": {
+      "artboard": 89,
+      "legacyPng": "Icons_create_form_url_encoded_body.png",
+      "matchError": 6.66,
+      "classes": [
+        "CreateFormUrlEncodedBodyComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 7.07
+    },
+    "create-http-header": {
+      "artboard": 9,
+      "legacyPng": "Icons_create_http_header_24x24.png",
+      "matchError": 5.8,
+      "classes": [
+        "CreateHttpHeaderComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 6.35
+    },
+    "create-json-array": {
+      "artboard": 31,
+      "legacyPng": "Icons_create_json_array_24x24.png",
+      "matchError": 6.18,
+      "classes": [
+        "CreateJsonArrayComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.05
+    },
+    "create-json-object": {
+      "artboard": 30,
+      "legacyPng": "Icons_create_json_object_24x24.png",
+      "matchError": 5.94,
+      "classes": [
+        "CreateJsonObjectComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.37
+    },
+    "create-json-value": {
+      "artboard": 29,
+      "legacyPng": "Icons_create_json_value_24x24.png",
+      "matchError": 4.6,
+      "classes": [
+        "CreateJsonValueComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 4.2
+    },
+    "create-mcp-embedded-binary-resource": {
+      "artboard": 130,
+      "legacyPng": "Icons_create_mcp_embedded_binary_resource_24x24.png",
+      "matchError": 7.32,
+      "classes": [
+        "CreateMcpEmbeddedBinaryResourceComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 8.72
+    },
+    "create-mcp-embedded-text-resource": {
+      "artboard": 131,
+      "legacyPng": "Icons_create_mcp_embedded_text_resource_24x24.png",
+      "matchError": 11.95,
+      "classes": [
+        "CreateMcpEmbeddedTextResourceComponent"
+      ],
+      "faces": 4,
+      "shadows": 4,
+      "diffVsLegacy": 13.94
+    },
+    "create-mcp-image-content": {
+      "artboard": 132,
+      "legacyPng": "Icons_create_mcp_image_content_24x24.png",
+      "matchError": 6.49,
+      "classes": [
+        "CreateMcpImageContentComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 6.47
+    },
+    "create-mcp-resource-link": {
+      "artboard": 133,
+      "legacyPng": "Icons_create_mcp_resource_link_24x24.png",
+      "matchError": 6.58,
+      "classes": [
+        "CreateMcpResourceLinkComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 7.37
+    },
+    "create-mcp-text-content": {
+      "artboard": 134,
+      "legacyPng": "Icons_create_mcp_text_content_24x24.png",
+      "matchError": 6.52,
+      "classes": [
+        "CreateMcpTextContentComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 7.51
+    },
+    "create-multipart-field-bytes": {
+      "artboard": 90,
+      "legacyPng": "Icons_create_multipart_field_bytes.png",
+      "matchError": 7.36,
+      "classes": [
+        "CreateMultipartFieldBytesComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 7.92
+    },
+    "create-multipart-field-text": {
+      "artboard": 91,
+      "legacyPng": "Icons_create_multipart_feild_text.png",
+      "matchError": 7.53,
+      "classes": [
+        "CreateMultipartFieldTextComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 8.2
+    },
+    "create-multipart-form-body": {
+      "artboard": 92,
+      "legacyPng": "Icons_create_multipart_form_body.png",
+      "matchError": 7.9,
+      "classes": [
+        "CreateMultipartFormBodyComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 7.84
+    },
+    "create-multipart-form-data-named": {
+      "artboard": 82,
+      "legacyPng": "Icons_create_multipart_form_data_named_24x24.png",
+      "matchError": null,
+      "classes": [
+        "CreateMultipartFormBodyNamedComponent_ARCHIVED"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 8.26
+    },
+    "create-multipart-form-data-unnamed": {
+      "artboard": 83,
+      "legacyPng": "Icons_create_multipart_form_data_unnamed_24x24.png",
+      "matchError": null,
+      "classes": [
+        "CreateMultipartFormBodyUnnamedComponent_ARCHIVED"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 8.11
+    },
+    "create-query-param": {
+      "artboard": 10,
+      "legacyPng": "Icons_create_query_param_24x24.png",
+      "matchError": 5.53,
+      "classes": [
+        "CreateQueryParamComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 6.98
+    },
+    "create-text-body": {
+      "artboard": 11,
+      "legacyPng": "Icons_create_text_body_24x24.png",
+      "matchError": 6.32,
+      "classes": [
+        "CreateTextBodyComponent",
+        "CreateTextBodyComponent_ARCHIVED"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 6.63
+    },
+    "create-text-body-custom": {
+      "artboard": 35,
+      "legacyPng": "Icons_create_text_body_custom_24x24.png",
+      "matchError": 6.57,
+      "classes": [
+        "CreateTextBodyCustomComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 6.69
+    },
+    "create-xml-element": {
+      "artboard": 117,
+      "legacyPng": "Icons_create_xml_element.png",
+      "matchError": 5.41,
+      "classes": [
+        "CreateXmlElementComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.42
+    },
+    "decompress-data": {
+      "artboard": 55,
+      "legacyPng": "Icons_decompress_data_24x24.png",
+      "matchError": 4.37,
+      "classes": [
+        "DecompressDataComponent"
+      ],
+      "faces": 7,
+      "shadows": 1,
+      "diffVsLegacy": 5.27
+    },
+    "deconstruct-body": {
+      "artboard": 94,
+      "legacyPng": "Icons_deconstruct_body.png",
+      "matchError": 4.54,
+      "classes": [
+        "DeconstructBodyComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 5.09
+    },
+    "deconstruct-http-header": {
+      "artboard": 84,
+      "legacyPng": "Icons_deconstruct_http_header_24x24.png",
+      "matchError": 4.31,
+      "classes": [
+        "DeconstructHeaderComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 6.4
+    },
+    "deconstruct-multipart-body": {
+      "artboard": 127,
+      "legacyPng": "Icons_deconstruct_multipart_body_24x24.png",
+      "matchError": 4.54,
+      "classes": [
+        "DeconstructMultipartBodyComponent"
+      ],
+      "faces": 3,
+      "shadows": 4,
+      "diffVsLegacy": 5.61
+    },
+    "deconstruct-multipart-field": {
+      "artboard": 126,
+      "legacyPng": "Icons_deconstruct_multipart_field_24x24.png",
+      "matchError": 4.13,
+      "classes": [
+        "DeconstructMultipartFieldComponent"
+      ],
+      "faces": 3,
+      "shadows": 3,
+      "diffVsLegacy": 5.12
+    },
+    "deconstruct-query-param": {
+      "artboard": 85,
+      "legacyPng": "Icons_deconstruct_query_param_24x24.png",
+      "matchError": 4.34,
+      "classes": [
+        "DeconstructQueryParamComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 5.21
+    },
+    "deconstruct-request": {
+      "artboard": 109,
+      "legacyPng": "Icons_deconstruct_request.png",
+      "matchError": 5.01,
+      "classes": [
+        "DeconstructRequestComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 5.49
+    },
+    "deconstruct-response": {
+      "artboard": 28,
+      "legacyPng": "Icons_deconstruct_response_24x24.png",
+      "matchError": 4.56,
+      "classes": [
+        "DeconstructHttpResponseComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 5.7
+    },
+    "deconstruct-tool-call": {
+      "artboard": 113,
+      "legacyPng": "Icons_deconstruct_tool_call.png",
+      "matchError": 6.82,
+      "classes": [
+        "DeconstructToolCallComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 7.69
+    },
+    "deconstruct-url": {
+      "artboard": 67,
+      "legacyPng": "Icons_deconstruct_url_24x24.png",
+      "matchError": 4.24,
+      "classes": [
+        "DeconstructUrlComponent"
+      ],
+      "faces": 3,
+      "shadows": 2,
+      "diffVsLegacy": 5.74
+    },
+    "define-tool": {
+      "artboard": 111,
+      "legacyPng": "Icons_define_tool.png",
+      "matchError": 8.88,
+      "classes": [
+        "DefineToolComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 9.81
+    },
+    "define-tool-parameter": {
+      "artboard": 112,
+      "legacyPng": "Icons_define_tool_parameter.png",
+      "matchError": 7.85,
+      "classes": [
+        "DefineToolParameterComponent"
+      ],
+      "faces": 4,
+      "shadows": 3,
+      "diffVsLegacy": 8.86
+    },
+    "delete-request": {
+      "artboard": 20,
+      "legacyPng": "Icons_delete_request_24x24.png",
+      "matchError": 5.85,
+      "classes": [
+        "DeleteRequestComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 8.72
+    },
+    "download-file": {
+      "artboard": 118,
+      "legacyPng": "Icons_download_file.png",
+      "matchError": 5.17,
+      "classes": [
+        "DownloadFileComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 4.77
+    },
+    "file-to-byte-array": {
+      "artboard": 57,
+      "legacyPng": "Icons_file_to_byte_array_24x24.png",
+      "matchError": 3.39,
+      "classes": [
+        "FileToByteArrayComponent"
+      ],
+      "faces": 4,
+      "shadows": 2,
+      "diffVsLegacy": 2.03
+    },
+    "format-json-string": {
+      "artboard": 17,
+      "legacyPng": "Icons_format_json_string_24x24.png",
+      "matchError": 5.51,
+      "classes": [
+        "FormatJsonStringComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 6.43
+    },
+    "generate-guid": {
+      "artboard": 76,
+      "legacyPng": "Icons_generate_guid_24x24.png",
+      "matchError": 4.32,
+      "classes": [
+        "GenerateGuidComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.28
+    },
+    "generate-qr-code": {
+      "artboard": 80,
+      "legacyPng": "Icons_generate_qr_code_24x24.png",
+      "matchError": 4.98,
+      "classes": [
+        "GenerateQrCodeComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.65
+    },
+    "get-attribute-value": {
+      "artboard": 44,
+      "legacyPng": "Icons_get_attribute_value_24x24.png",
+      "matchError": 5.83,
+      "classes": [
+        "GetHtmlAttributeValueComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.58
+    },
+    "get-child-nodes": {
+      "artboard": 37,
+      "legacyPng": "Icons_get_child_nodes_24x24.png",
+      "matchError": 6.04,
+      "classes": [
+        "GetHtmlNodeChildrenComponent"
+      ],
+      "faces": 10,
+      "shadows": 1,
+      "diffVsLegacy": 4.16
+    },
+    "get-element-by-id": {
+      "artboard": 38,
+      "legacyPng": "Icons_get_element_by_id_24x24.png",
+      "matchError": 6.48,
+      "classes": [
+        "GetElementByIdComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 4.78
+    },
+    "get-elements-by-attribute-value": {
+      "artboard": 39,
+      "legacyPng": "Icons_get_elements_by_attribute_value_24x24.png",
+      "matchError": 6.59,
+      "classes": [
+        "GetElementsByAttributeValueComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.43
+    },
+    "get-elements-by-class-name": {
+      "artboard": 40,
+      "legacyPng": "Icons_get_elements_by_class_name_24x24.png",
+      "matchError": 6.04,
+      "classes": [
+        "GetElementsByClassNameComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.1
+    },
+    "get-elements-by-tag-name": {
+      "artboard": 41,
+      "legacyPng": "Icons_get_elements_by_tag_name_24x24.png",
+      "matchError": 7.33,
+      "classes": [
+        "GetElementsByTagNameComponent"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 4.97
+    },
+    "get-elements-by-xpath": {
+      "artboard": 42,
+      "legacyPng": "Icons_get_elements_by_xpath_24x24.png",
+      "matchError": 6.2,
+      "classes": [
+        "GetElementsByXPathComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.58
+    },
+    "get-html-attributes": {
+      "artboard": 45,
+      "legacyPng": "Icons_get_html_attributes_24x24.png",
+      "matchError": 6.09,
+      "classes": [
+        "GetHtmlAttributesComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.81
+    },
+    "get-inner-html": {
+      "artboard": 46,
+      "legacyPng": "Icons_get_inner_html_24x24.png",
+      "matchError": 5.97,
+      "classes": [
+        "GetInnerHtmlComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.25
+    },
+    "get-json-object-key": {
+      "artboard": 18,
+      "legacyPng": "Icons_get_json_object_key.png",
+      "matchError": 5.52,
+      "classes": [
+        "GetJsonObjectKeyComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 6.36
+    },
+    "get-request": {
+      "artboard": 21,
+      "legacyPng": "Icons_get_request_24x24.png",
+      "matchError": 6.48,
+      "classes": [
+        "GetRequestComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 11.13
+    },
+    "get-xml-attribute-value": {
+      "artboard": 98,
+      "legacyPng": "Icons_get_xml_attribute_value.png",
+      "matchError": 5.65,
+      "classes": [
+        "GetXmlAttributeValueComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.84
+    },
+    "get-xml-attributes": {
+      "artboard": 99,
+      "legacyPng": "Icons_get_xml_attributes.png",
+      "matchError": 6.02,
+      "classes": [
+        "GetXmlAttributesComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 6.15
+    },
+    "get-xml-child-nodes": {
+      "artboard": 100,
+      "legacyPng": "Icons_get_xml_child_nodes.png",
+      "matchError": 5.47,
+      "classes": [
+        "GetXmlChildNodesComponent"
+      ],
+      "faces": 10,
+      "shadows": 1,
+      "diffVsLegacy": 5.2
+    },
+    "get-xml-elements-by-tag": {
+      "artboard": 96,
+      "legacyPng": "Icons_get_xml_elements_by_tag.png",
+      "matchError": 6.22,
+      "classes": [
+        "GetXmlElementsByTagComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.57
+    },
+    "get-xml-elements-by-xpath": {
+      "artboard": 97,
+      "legacyPng": "Icons_get_xml_elements_by_xpath.png",
+      "matchError": 5.72,
+      "classes": [
+        "GetXmlElementsByXPathComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.78
+    },
+    "get-xml-inner-text": {
+      "artboard": 101,
+      "legacyPng": "Icons_get_xml_inner_text.png",
+      "matchError": 5.84,
+      "classes": [
+        "GetXmlInnerTextComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 6.77
+    },
+    "hex-to-color": {
+      "artboard": 73,
+      "legacyPng": "Icons_hex_to_color_24x24.png",
+      "matchError": 3.42,
+      "classes": [
+        "HexToColorComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.28
+    },
+    "html-node-param": {
+      "artboard": 43,
+      "legacyPng": "Icons_html_node_param_24x24.png",
+      "matchError": 17.29,
+      "classes": [
+        "HtmlNodeParam"
+      ],
+      "faces": 15,
+      "shadows": 0,
+      "diffVsLegacy": 20.14
+    },
+    "http-header-param": {
+      "artboard": 5,
+      "legacyPng": "Icons_http_header_param_24x24.png",
+      "matchError": 15.55,
+      "classes": [
+        "HttpHeaderParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 15.66
+    },
+    "http-listener": {
+      "artboard": 53,
+      "legacyPng": "Icons_http_listener_24x24.png",
+      "matchError": 5.48,
+      "classes": [
+        "HttpListenerComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 6.26
+    },
+    "http-request": {
+      "artboard": 52,
+      "legacyPng": "Icons_http_request_24x24.png",
+      "matchError": 6.41,
+      "classes": [
+        "HttpRequestComponent",
+        "HttpRequestComponentBase"
+      ],
+      "faces": 5,
+      "shadows": 4,
+      "diffVsLegacy": 10.32
+    },
+    "http-request-param": {
+      "artboard": 122,
+      "legacyPng": "Icons_http_request_param.png",
+      "matchError": 17.04,
+      "classes": [
+        "ListenerRequestParam"
+      ],
+      "faces": 9,
+      "shadows": 0,
+      "diffVsLegacy": 14.88
+    },
+    "http-response-param": {
+      "artboard": 6,
+      "legacyPng": "Icons_http_response_param_24x24.png",
+      "matchError": 16.02,
+      "classes": [
+        "HttpResponseDataParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 15.04
+    },
+    "jarray-param": {
+      "artboard": 1,
+      "legacyPng": "Icons_jarray_param_24x24.png",
+      "matchError": 15.32,
+      "classes": [
+        "JsonArrayParam"
+      ],
+      "faces": 13,
+      "shadows": 0,
+      "diffVsLegacy": 14.11
+    },
+    "jobject-param": {
+      "artboard": 2,
+      "legacyPng": "Icons_jobject_param_24x24.png",
+      "matchError": 16.31,
+      "classes": [
+        "JsonObjectParam"
+      ],
+      "faces": 14,
+      "shadows": 0,
+      "diffVsLegacy": 14.2
+    },
+    "jtoken-param": {
+      "artboard": 3,
+      "legacyPng": "Icons_jtoken_param_24x24 .png",
+      "matchError": 16.38,
+      "classes": [
+        "JsonNodeParam"
+      ],
+      "faces": 13,
+      "shadows": 0,
+      "diffVsLegacy": 13.07
+    },
+    "jvalue-param": {
+      "artboard": 4,
+      "legacyPng": "Icons_jvalue_param_24x24.png",
+      "matchError": 14.28,
+      "classes": [
+        "JsonValueParam"
+      ],
+      "faces": 12,
+      "shadows": 0,
+      "diffVsLegacy": 12.82
+    },
+    "list-to-byte-array": {
+      "artboard": 68,
+      "legacyPng": "Icons_list_to_byte_array_24x24.png",
+      "matchError": 3.83,
+      "classes": [
+        "ListToByteArrayComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 4.89
+    },
+    "mcp-request-param": {
+      "artboard": 121,
+      "legacyPng": "Icons_mcp_request_param.png",
+      "matchError": 15.31,
+      "classes": [
+        "McpToolCallRequestParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 16.84
+    },
+    "mcp-server": {
+      "artboard": 110,
+      "legacyPng": "Icons_mcp_server.png",
+      "matchError": 7.8,
+      "classes": [
+        "McpServerComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 9.29
+    },
+    "mcp-tool-definition": {
+      "artboard": 114,
+      "legacyPng": "Icons_mcp_tool_definition.png",
+      "matchError": 16.67,
+      "classes": [
+        "McpToolDefinitionParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 13.98
+    },
+    "mcp-tool-parameter": {
+      "artboard": 115,
+      "legacyPng": "Icons_mcp_tool_parameter.png",
+      "matchError": 16.15,
+      "classes": [
+        "McpToolParameterParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 13.82
+    },
+    "mcp-tool-response": {
+      "artboard": 116,
+      "legacyPng": "Icons_mcp_tool_response.png",
+      "matchError": 8.71,
+      "classes": [
+        "McpContentBlockParam",
+        "McpToolResponseComponent",
+        "McpToolResponseComponent_ARCHIVED"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 9.9
+    },
+    "merge-json-objects": {
+      "artboard": 125,
+      "legacyPng": "Icons_merge_json_objects_24x24.png",
+      "matchError": 6.52,
+      "classes": [
+        "MergeJsonObjectsComponent"
+      ],
+      "faces": 7,
+      "shadows": 1,
+      "diffVsLegacy": 7.53
+    },
+    "multipart-form-param": {
+      "artboard": 124,
+      "legacyPng": "Icons_multipart_form_param.png",
+      "matchError": 15.43,
+      "classes": [
+        "MultipartFieldParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 15.94
+    },
+    "oauth-authorize": {
+      "artboard": 87,
+      "legacyPng": "Icons_oauth_authorize.png",
+      "matchError": 5.42,
+      "classes": [
+        "OAuthAuthorizeComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 4.78
+    },
+    "oauth-token": {
+      "artboard": 88,
+      "legacyPng": "Icons_oauth_token.png",
+      "matchError": 5.35,
+      "classes": [
+        "OAuthTokenComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 4.88
+    },
+    "parse-json-string": {
+      "artboard": 16,
+      "legacyPng": "Icons_parse_json_string_24x24.png",
+      "matchError": 5.39,
+      "classes": [
+        "ParseJsonStringComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 3.96
+    },
+    "parse-xml": {
+      "artboard": 95,
+      "legacyPng": "Icons_parse_xml.png",
+      "matchError": 4.77,
+      "classes": [
+        "ParseXmlComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 4.31
+    },
+    "patch-request": {
+      "artboard": 22,
+      "legacyPng": "Icons_patch_request_24x24.png",
+      "matchError": 5.45,
+      "classes": [
+        "PatchRequestComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 9.1
+    },
+    "post-request": {
+      "artboard": 23,
+      "legacyPng": "Icons_post_request_24x24.png",
+      "matchError": 5.57,
+      "classes": [
+        "PostRequestComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 9.71
+    },
+    "put-request": {
+      "artboard": 24,
+      "legacyPng": "Icons_put_request_24x24.png",
+      "matchError": 5.63,
+      "classes": [
+        "PutRequestComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 9.06
+    },
+    "query-param": {
+      "artboard": 7,
+      "legacyPng": "Icons_query_param_24x24.png",
+      "matchError": 15.38,
+      "classes": [
+        "QueryParameterParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 16.91
+    },
+    "read-csv-line": {
+      "artboard": 64,
+      "legacyPng": "Icons_read_csv_line_24x24.png",
+      "matchError": 3.99,
+      "classes": [
+        "ReadCsvLineComponent"
+      ],
+      "faces": 4,
+      "shadows": 2,
+      "diffVsLegacy": 1.64
+    },
+    "read-html": {
+      "artboard": 36,
+      "legacyPng": "Icons_read_html_24x24.png",
+      "matchError": 5.1,
+      "classes": [
+        "ReadHtmlComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 4.05
+    },
+    "read-json-array": {
+      "artboard": 12,
+      "legacyPng": "Icons_read_json_array_24x24.png",
+      "matchError": 5.26,
+      "classes": [
+        "ReadJsonArrayComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.63
+    },
+    "read-json-object": {
+      "artboard": 13,
+      "legacyPng": "Icons_read_json_object_24x24.png",
+      "matchError": 5.24,
+      "classes": [
+        "ReadJsonObjectComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.28
+    },
+    "read-json-value": {
+      "artboard": 14,
+      "legacyPng": "Icons_read_json_value_24x24.png",
+      "matchError": 4.58,
+      "classes": [
+        "ReadJsonValueComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.55
+    },
+    "remove-json-key": {
+      "artboard": 33,
+      "legacyPng": "Icons_remove_json_key_24x24.png",
+      "matchError": 4.28,
+      "classes": [
+        "RemoveJsonKeyComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.93
+    },
+    "replace-empty-branches": {
+      "artboard": 70,
+      "legacyPng": "Icons_replace_empty_branches_24x24.png",
+      "matchError": 4.18,
+      "classes": [
+        "ReplaceEmptyBranchesComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 5.09
+    },
+    "request-body-param": {
+      "artboard": 8,
+      "legacyPng": "Icons_request_body_param_24x24.png",
+      "matchError": 15.63,
+      "classes": [
+        "RequestBodyParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 17.18
+    },
+    "save-csv": {
+      "artboard": 49,
+      "legacyPng": "Icons_save_csv_24x24.png",
+      "matchError": 3.9,
+      "classes": [
+        "SaveCsvComponent"
+      ],
+      "faces": 7,
+      "shadows": 2,
+      "diffVsLegacy": 1.9
+    },
+    "save-text": {
+      "artboard": 50,
+      "legacyPng": "Icons_save_text_24x24.png",
+      "matchError": 5.61,
+      "classes": [
+        "SaveTextComponent"
+      ],
+      "faces": 6,
+      "shadows": 2,
+      "diffVsLegacy": 3.8
+    },
+    "save-web-response": {
+      "artboard": 51,
+      "legacyPng": "Icons_save_web_response_24x24.png",
+      "matchError": 4.0,
+      "classes": [
+        "SaveWebResponseComponent"
+      ],
+      "faces": 4,
+      "shadows": 2,
+      "diffVsLegacy": 2.54
+    },
+    "screen-capture-active-viewport": {
+      "artboard": 128,
+      "legacyPng": "Icons_screen_capture_active_viewport_24x24.png",
+      "matchError": 4.24,
+      "classes": [
+        "ScreenCaptureActiveViewportComponent"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 5.34
+    },
+    "screen-capture-viewport": {
+      "artboard": 129,
+      "legacyPng": "Icons_screen_capture_viewport_24x24.png",
+      "matchError": 3.61,
+      "classes": [
+        "ScreenCaptureViewportComponent"
+      ],
+      "faces": 5,
+      "shadows": 1,
+      "diffVsLegacy": 4.64
+    },
+    "separate-json-tokens": {
+      "artboard": 15,
+      "legacyPng": "Icons_separate_json_tokens_24x24.png",
+      "matchError": 5.44,
+      "classes": [
+        "SeparateJsonTokensComponent"
+      ],
+      "faces": 9,
+      "shadows": 1,
+      "diffVsLegacy": 5.26
+    },
+    "server-input": {
+      "artboard": 107,
+      "legacyPng": "Icons_server_input.png",
+      "matchError": 5.88,
+      "classes": [
+        "ServerInputComponent"
+      ],
+      "faces": 6,
+      "shadows": 2,
+      "diffVsLegacy": 6.55
+    },
+    "server-response": {
+      "artboard": 108,
+      "legacyPng": "Icons_server_response.png",
+      "matchError": 6.23,
+      "classes": [
+        "ServerResponseComponent"
+      ],
+      "faces": 6,
+      "shadows": 2,
+      "diffVsLegacy": 6.9
+    },
+    "set-json-key": {
+      "artboard": 32,
+      "legacyPng": "Icons_set_json_key_24x24.png",
+      "matchError": 4.6,
+      "classes": [
+        "SetJsonKeyComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 6.43
+    },
+    "socket-listener": {
+      "artboard": 60,
+      "legacyPng": "Icons_socket_listener_24x24.png",
+      "matchError": 6.17,
+      "classes": [
+        "SocketListenerComponent_ARCHIVED",
+        "WebSocketClientComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 6.83
+    },
+    "socket-server": {
+      "artboard": 105,
+      "legacyPng": "Icons_socket_server.png",
+      "matchError": 5.67,
+      "classes": [
+        "WebSocketServerComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 6.34
+    },
+    "split-text-into-lines": {
+      "artboard": 65,
+      "legacyPng": "Icons_split_text_into_lines_24x24.png",
+      "matchError": 4.13,
+      "classes": [
+        "SplitTextIntoLinesComponent"
+      ],
+      "faces": 7,
+      "shadows": 2,
+      "diffVsLegacy": 1.48
+    },
+    "stringify-html-node": {
+      "artboard": 47,
+      "legacyPng": "Icons_stringify_html_node_24x24.png",
+      "matchError": 6.96,
+      "classes": [
+        "StringifyHtmlNodeComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 5.62
+    },
+    "stringify-json-token": {
+      "artboard": 19,
+      "legacyPng": "Icons_stringify_json_token_24x24.png",
+      "matchError": 5.92,
+      "classes": [
+        "StringifyJsonTokenComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 6.59
+    },
+    "stringify-xml-node": {
+      "artboard": 103,
+      "legacyPng": "Icons_stringify_xml_node.png",
+      "matchError": 7.21,
+      "classes": [
+        "StringifyXmlNodeComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 7.28
+    },
+    "text-to-base64": {
+      "artboard": 61,
+      "legacyPng": "Icons_text_to_base64_24x24.png",
+      "matchError": 4.59,
+      "classes": [
+        "TextToBase64Component"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 5.53
+    },
+    "text-to-byte-array": {
+      "artboard": 59,
+      "legacyPng": "Icons_text_to_byte_array_24x24.png",
+      "matchError": 3.64,
+      "classes": [
+        "TextToByteArrayComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.78
+    },
+    "throttle": {
+      "artboard": 86,
+      "legacyPng": "Icons_throttle_24x24.png",
+      "matchError": 5.45,
+      "classes": [
+        "ThrottleComponent"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 5.76
+    },
+    "token-auth": {
+      "artboard": 27,
+      "legacyPng": "Icons_token_auth_24x24.png",
+      "matchError": 5.42,
+      "classes": [
+        "BearerTokenAuthComponent"
+      ],
+      "faces": 4,
+      "shadows": 1,
+      "diffVsLegacy": 4.79
+    },
+    "udp-listener": {
+      "artboard": 104,
+      "legacyPng": "Icons_udp_listener.png",
+      "matchError": 5.7,
+      "classes": [
+        "UdpListenerComponent"
+      ],
+      "faces": 5,
+      "shadows": 2,
+      "diffVsLegacy": 6.65
+    },
+    "udp-stream": {
+      "artboard": 93,
+      "legacyPng": "Icons_udp_stream.png",
+      "matchError": 5.35,
+      "classes": [
+        "UdpStreamComponent"
+      ],
+      "faces": 5,
+      "shadows": 5,
+      "diffVsLegacy": 9.2
+    },
+    "upload-file": {
+      "artboard": 119,
+      "legacyPng": "Icons_upload_file.png",
+      "matchError": 5.35,
+      "classes": [
+        "UploadFileComponent"
+      ],
+      "faces": 3,
+      "shadows": 1,
+      "diffVsLegacy": 5.07
+    },
+    "upload-file-multipart": {
+      "artboard": 120,
+      "legacyPng": "Icons_upload_file_multipart.png",
+      "matchError": 6.56,
+      "classes": [
+        "UploadFileMultipartComponent"
+      ],
+      "faces": 4,
+      "shadows": 4,
+      "diffVsLegacy": 7.14
+    },
+    "url-encode": {
+      "artboard": 75,
+      "legacyPng": "Icons_url_encode_24x24.png",
+      "matchError": 4.37,
+      "classes": [
+        "UrlEncodeComponent"
+      ],
+      "faces": 6,
+      "shadows": 1,
+      "diffVsLegacy": 5.15
+    },
+    "websocket-connection-param": {
+      "artboard": 123,
+      "legacyPng": "Icons_websocket_connection_param.png",
+      "matchError": 14.79,
+      "classes": [
+        "WebSocketConnectionParam"
+      ],
+      "faces": 6,
+      "shadows": 0,
+      "diffVsLegacy": 16.34
+    },
+    "websocket-send": {
+      "artboard": 106,
+      "legacyPng": "Icons_websocket_send.png",
+      "matchError": 5.33,
+      "classes": [
+        "WebSocketSendComponent"
+      ],
+      "faces": 5,
+      "shadows": 3,
+      "diffVsLegacy": 9.05
+    },
+    "xml-node": {
+      "artboard": 102,
+      "legacyPng": "Icons_xml_node.png",
+      "matchError": 19.61,
+      "classes": [
+        "XmlNodeParam"
+      ],
+      "faces": 8,
+      "shadows": 0,
+      "diffVsLegacy": 16.5
+    }
+  }
+}
