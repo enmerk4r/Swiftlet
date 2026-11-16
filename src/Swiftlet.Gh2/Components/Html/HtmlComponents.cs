@@ -83,7 +83,7 @@ public sealed class GetElementsByAttributeValueComponent : SwiftletComponent
         inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
         inputs.AddText("Attribute", "At", "Name of the HTML attribute");
         inputs.AddText("Value", "Vl", "Attribute value to search for");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down").Set(true);
+        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
@@ -121,7 +121,7 @@ public sealed class GetElementsByClassNameComponent : SwiftletComponent
     {
         inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
         inputs.AddText("Class", "Cl", "Name of the HTML class");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down").Set(true);
+        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified attribute in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
@@ -158,7 +158,7 @@ public sealed class GetElementsByTagNameComponent : SwiftletComponent
     {
         inputs.Add(new HtmlNodeParameter("Parent", "Pr", "Parent node"));
         inputs.AddText("Tag", "Tg", "Name of the HTML tag");
-        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified tags in all of the descendants, or only one level down").Set(true);
+        inputs.AddBoolean("Recursive", "Rc", "Determines whether to search for specified tags in all of the descendants, or only one level down", Access.Item, Requirement.MayBeMissing).Set(true);
     }
 
     protected override void AddOutputs(OutputAdder outputs)
