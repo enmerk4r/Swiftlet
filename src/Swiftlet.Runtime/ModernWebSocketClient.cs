@@ -23,7 +23,9 @@ public sealed class ModernWebSocketClient : IAsyncDisposable
 
     public async Task ConnectAsync(string url, CancellationToken cancellationToken = default)
     {
-        await DisconnectAsync().ConfigureAwait(false);
+        // The caller replaces the connection and reads the result itself; closing the old one is not a
+        // separate notification (only the outcome of the connect is).
+        await DisconnectCoreAsync(notify: false).ConfigureAwait(false);
 
         var client = new ClientWebSocket();
         await client.ConnectAsync(new Uri(url), cancellationToken).ConfigureAwait(false);
@@ -48,13 +50,21 @@ public sealed class ModernWebSocketClient : IAsyncDisposable
         return _messageQueue.TryDequeue(out message);
     }
 
-    public async Task DisconnectAsync()
+    /// <summary>
+    /// Closes the connection. Raises <see cref="StateChanged"/> only when there was a connection or an error
+    /// to clear; disconnecting an idle client is silent.
+    /// </summary>
+    public Task DisconnectAsync() => DisconnectCoreAsync(notify: true);
+
+    private async Task DisconnectCoreAsync(bool notify)
     {
         ClientWebSocket? client;
         CancellationTokenSource? cancellation;
+        bool hadState;
 
         lock (_sync)
         {
+            hadState = _client is not null || _connection is not null || _lastError is not null;
             client = _client;
             cancellation = _receiveLoopCancellation;
             _client = null;
@@ -82,7 +92,10 @@ public sealed class ModernWebSocketClient : IAsyncDisposable
         }
 
         cancellation?.Dispose();
-        OnStateChanged();
+        if (notify && hadState)
+        {
+            OnStateChanged();
+        }
     }
 
     public async ValueTask DisposeAsync()
