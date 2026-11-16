@@ -10,33 +10,13 @@ internal static class BackgroundSolveScheduler
 {
     private static readonly ConditionalWeakTable<Document, Coordinator> Documents = new();
 
-    /// <summary>Acquire an opaque coalescing lease; an old request can only release its own ticket.</summary>
-    public static int Acquire(ref int pending, ref int sequence)
+    public static void Request(Component component, Func<bool> current, Action? prepare = null)
     {
-        if (Volatile.Read(ref pending) != 0) return 0;
-        int ticket = Interlocked.Increment(ref sequence);
-        if (ticket == 0) ticket = Interlocked.Increment(ref sequence);
-        return Interlocked.CompareExchange(ref pending, ticket, 0) == 0 ? ticket : 0;
+        if (component.Document is not { } document) return;
+        Documents.GetValue(document, static value => new Coordinator(value)).Enqueue(new Pending(component, current, prepare));
     }
 
-    public static void Request(Component component, Func<bool> current, Action? prepare = null, Action? release = null)
-    {
-        var request = new Pending(component, current, prepare, release);
-        if (component.Document is not { } document) { request.Release(); return; }
-        Documents.GetValue(document, static value => new Coordinator(value)).Enqueue(request);
-    }
-
-    private sealed class Pending
-    {
-        private Action? _release;
-        public Component Component { get; }
-        public Func<bool> Current { get; }
-        public Action? Prepare { get; }
-        public Pending(Component component, Func<bool> current, Action? prepare) : this(component, current, prepare, null) { }
-        public Pending(Component component, Func<bool> current, Action? prepare, Action? release)
-        { Component = component; Current = current; Prepare = prepare; _release = release; }
-        public void Release() => Interlocked.Exchange(ref _release, null)?.Invoke();
-    }
+    private sealed record Pending(Component Component, Func<bool> Current, Action? Prepare);
 
     private sealed class Coordinator
     {
@@ -54,19 +34,15 @@ internal static class BackgroundSolveScheduler
 
         public void Enqueue(Pending request)
         {
-            Pending? replaced = null;
-            bool disposed, waiting;
+            bool waiting;
             lock (_sync)
             {
-                disposed = _disposed; waiting = _waitingForStop;
-                if (!disposed)
-                {
-                    _pending.TryGetValue(request.Component.InstanceId, out replaced);
-                    _pending[request.Component.InstanceId] = request;
-                }
+                // Check and replacement are one decision. A late obsolete callback cannot replace
+                // the entry for a current generation, nor can it reserve a source-side flag.
+                if (_disposed || !request.Current()) return;
+                _pending[request.Component.InstanceId] = request;
+                waiting = _waitingForStop;
             }
-            replaced?.Release();
-            if (disposed) { request.Release(); return; }
             if (!waiting) Arm(15);
         }
 
@@ -120,9 +96,8 @@ internal static class BackgroundSolveScheduler
             foreach (var request in batch)
             {
                 var component = request.Component;
-                if (!ReferenceEquals(component.Document, _document) || component.Activity == ObjectActivity.Disabled || !request.Current()) { request.Release(); continue; }
+                if (!ReferenceEquals(component.Document, _document) || component.Activity == ObjectActivity.Disabled || !request.Current()) continue;
                 if (_document.Solution.State.CurrentlyRunning is not null) { Requeue(batch); return; }
-                request.Release();
                 request.Prepare?.Invoke();
                 if (_document.Solution.State.CurrentlyRunning is not null) { Requeue(batch); return; }
                 component.Expire();
@@ -139,7 +114,11 @@ internal static class BackgroundSolveScheduler
             lock (_sync)
             {
                 foreach (var request in batch)
-                    _pending.TryAdd(request.Component.InstanceId, request);
+                {
+                    if (!request.Current()) continue;
+                    if (!_pending.TryGetValue(request.Component.InstanceId, out var newer) || !newer.Current())
+                        _pending[request.Component.InstanceId] = request;
+                }
                 _waitingForStop = true;
             }
             // Stop may already have happened while the batch was outside _pending. One deferred
@@ -161,13 +140,11 @@ internal static class BackgroundSolveScheduler
         }
         private void Dispose()
         {
-            Pending[] abandoned;
             lock (_sync)
             {
                 if (_disposed) return;
-                _disposed = true; abandoned = _pending.Values.ToArray(); _pending.Clear(); _timer?.Dispose(); _timer = null;
+                _disposed = true; _pending.Clear(); _timer?.Dispose(); _timer = null;
             }
-            foreach (var request in abandoned) request.Release();
             if (_initialized)
             {
                 _document.StateChanged -= OnDocumentStateChanged;

@@ -21,8 +21,6 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource _lifetime = new();
     private int _stopping;
-    private int _expiryPosted;
-    private int _expirySequence;
     private long _generation;
     private int _abandonedRetry = 1;
 
@@ -95,11 +93,8 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     {
         long generation = Volatile.Read(ref _generation);
         if (Volatile.Read(ref _stopping) != 0) return;
-        int ticket = BackgroundSolveScheduler.Acquire(ref _expiryPosted, ref _expirySequence);
-        if (ticket == 0) return;
         BackgroundSolveScheduler.Request(this,
-            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
-            release: () => Interlocked.CompareExchange(ref _expiryPosted, 0, ticket));
+            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0);
     }
 
     public void PrepareForRemoval(ActionList undo) => StopListener();
@@ -231,7 +226,6 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
         Volatile.Write(ref _stopping, 1);
         Volatile.Write(ref _abandonedRetry, 0);
         Interlocked.Increment(ref _generation);
-        Interlocked.Exchange(ref _expiryPosted, 0);
         try
         {
             Volatile.Read(ref _lifetime).Cancel();

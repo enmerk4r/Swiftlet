@@ -98,14 +98,12 @@ else if(action=="fixture-cancel")
  var method=((object)doc.Solution).GetType().GetMethods().Single(m=>m.Name=="StartWait"&&m.GetParameters().Length==2);
  try{method.Invoke(doc.Solution,new object[]{cts,Enum.ToObject(method.GetParameters()[1].ParameterType,0)});}catch(TargetInvocationException error)when(error.InnerException is OperationCanceledException){}
 }
-else if(action=="resume-ws")sw.GetType("Swiftlet.Gh2.ListenerComponent").GetField("_expiryPosted",Private).SetValue((object)Find(names[3]),0);
-else if(action=="delay")
+else if(action=="resume-ws"||action=="suppress-ws")
 {
- dynamic ws=Find(names[3]);dynamic send=Find("WebSocketSendComponent");dynamic throttle=Add("ThrottleComponent");Set(throttle,1,2000);
- gh.GetType("Grasshopper2.Parameters.Connections").GetMethod("DisconnectAllInputs").Invoke(null,new object[]{send.Parameters.Input(1),null});
- Connect(ws,2,throttle,0);Connect(throttle,0,send,1);doc.Solution.StartWait();
+ dynamic ws=Find(names[3]);object session=((object)ws).GetType().GetField("_session",Private).GetValue(ws);
+ var changed=session.GetType().GetEvent("StateChanged");var handler=Delegate.CreateDelegate(changed.EventHandlerType,(object)ws,((object)ws).GetType().GetMethod("OnStateChanged",Private));
+ changed.RemoveEventHandler(session,handler);if(action=="resume-ws")changed.AddEventHandler(session,handler);
 }
-else if(action=="suppress-ws")sw.GetType("Swiftlet.Gh2.ListenerComponent").GetField("_expiryPosted",Private).SetValue((object)Find(names[3]),1);
 else if(action=="publish-cancel")
 {
  Find(names[3]).Expire();using var cts=new System.Threading.CancellationTokenSource();cts.CancelAfter(200);

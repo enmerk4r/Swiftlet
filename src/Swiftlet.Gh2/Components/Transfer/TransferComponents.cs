@@ -21,8 +21,6 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
     /// <summary>The component's transfer; derived classes create it in a field initializer.</summary>
     private protected abstract FileTransferJob Job { get; }
     private long _generation;
-    private int _expiryPosted;
-    private int _expirySequence;
 
     protected TransferComponent(string name, string info) : base(name, info, Sections.Send) => Initialize();
 
@@ -46,18 +44,14 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
     protected void Stop()
     {
         Interlocked.Increment(ref _generation);
-        Interlocked.Exchange(ref _expiryPosted, 0);
         Job.Reset();
     }
 
     private void PostExpiry()
     {
         long generation = Volatile.Read(ref _generation);
-        int ticket = BackgroundSolveScheduler.Acquire(ref _expiryPosted, ref _expirySequence);
-        if (ticket == 0) return;
         BackgroundSolveScheduler.Request(this,
-            () => generation == Volatile.Read(ref _generation),
-            release: () => Interlocked.CompareExchange(ref _expiryPosted, 0, ticket));
+            () => generation == Volatile.Read(ref _generation));
     }
 
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)
