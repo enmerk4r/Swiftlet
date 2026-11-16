@@ -11,6 +11,7 @@
 - Leaves archived Socket Listener and Create Multipart Form Body Named/Unnamed on GH1 interop hosts; third-party and scripting components may also need GH1 hosting. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
 - Adds 15 `.ghz` example counterparts, retaining the original `.gh` files and recreating their notes; the OpenAI example was reopened but not executed without a key. [c3d55bb](https://github.com/enmerk4r/Swiftlet/commit/c3d55bb38f2a865610b6a1007f3668df2b271cc6)
 - Keeps GH1's optional-input behavior for HTML Recursive, CSV Delimiter, Byte Array To Text Encoding and the four QR settings, including fallback values when their pin data is cleared. [65baefe](https://github.com/enmerk4r/Swiftlet/commit/65baefeb9c75c9d8e7403ccfb4d7bf8ab07ace4d)
+- Shows GH1-equivalent component status text through GH2 labels, including listener URLs, transfer progress and OAuth state. [3598797](https://github.com/enmerk4r/Swiftlet/commit/3598797698dd3797d9262d9079d4f1a24f82e0c1)
 - Uses vector icons and palette groups matching GH1's exposure rows. [d731741](https://github.com/enmerk4r/Swiftlet/commit/d731741bd924810768678b3d7e90e15125853a19) [f54cddc](https://github.com/enmerk4r/Swiftlet/commit/f54cddc104f72c8fb067ae1852a24f10a404856c)
 
 ### Changes affecting Grasshopper 1
@@ -44,6 +45,8 @@ These changes also apply to GH2 where the implementation is shared; the GH1 asse
 For callers of the shared HTTP API, explicit caller cancellation now propagates as cancellation rather than an HTTP failure response; existing GH1 request components do not supply that token, and timeout responses remain unchanged. [8ee85ff](https://github.com/enmerk4r/Swiftlet/commit/8ee85ff5c8bb2e30f3d8aa6a62b980741c17b484)
 
 ### Compatibility and verification notes
+
+- **Release blocker:** a fresh mixed 13-component canvas can enter repeated solve cancellation and fail to settle; the scheduling correction and delivery/stress regressions are still in progress. The committed reproduction checks bounded solve counts, final component states and an active WebSocket listener. [f81344a](https://github.com/enmerk4r/Swiftlet/commit/f81344aa6975690a2d1113d9b7b9b79f7df40bb7)
 
 - Windows Rhino 9.1 checks cover 239 GH1/GH2 cases, 134 migration rules, and whole-file conversion of 21 examples; two examples retain only the archived Swiftlet components listed above as GH1 hosts. [4350fd9](https://github.com/enmerk4r/Swiftlet/commit/4350fd92e266c9bcf754a5c98dc41ac31a12016b) [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
 - Whole-file checks report missing third-party objects and non-Swiftlet wire differences; they are not a promise that arbitrary third-party definitions convert losslessly. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
