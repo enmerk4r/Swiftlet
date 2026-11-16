@@ -13,6 +13,9 @@ public sealed class ServerMigrationTable : IMigrationTable
     {
         yield return new ServerInputMigration();
         yield return new ListenerRequestMigration();
+        yield return Gh1MigrationRule.Identity("b2c3d4e5-f6a7-8901-bcde-f12345678901",ComponentIds.DeconstructRequest,1,6);
+        yield return Gh1MigrationRule.Identity("c3d4e5f6-a7b8-9012-cdef-123456789012",ComponentIds.ServerResponse,4,1);
+
     }
 }
 

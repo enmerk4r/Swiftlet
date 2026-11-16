@@ -10,7 +10,8 @@ public sealed class ListenerRequestTypeAssistant : TypeAssistant<ModernServerReq
     public ListenerRequestTypeAssistant() : base("Listener Request") { }
     // Copies share the same one-shot response handle, as GH1 ListenerRequestGoo.Duplicate does.
     public override ModernServerRequestContext Copy(ModernServerRequestContext instance) => instance;
-    public override string DescribePrimary(Pear<ModernServerRequestContext> pear) => "LISTENER REQUEST";
+    public override string DescribePrimary(Pear<ModernServerRequestContext> pear) => Format(pear.Item);
+    public override string Format(ModernServerRequestContext instance) => "LISTENER REQUEST";
     // Live network connections cannot survive saving/reopening a definition.
     public override bool Write(IWriter writer, Name location, ModernServerRequestContext instance) => false;
     public override bool Read(IReader reader, Name location, out ModernServerRequestContext instance)

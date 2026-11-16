@@ -38,24 +38,7 @@ public sealed class CreateMcpImageContentComponent : GH_Component
 
         DA.GetData(1, ref format);
 
-        if (!ImageFormatParser.TryParse(format, out SwiftletImageFormat imageFormat))
-        {
-            throw new Exception($"Format {format} is not supported");
-        }
-
-        byte[] bytes = ImageCodec.Save(bitmapGoo.Value, imageFormat);
-        string base64 = Convert.ToBase64String(bytes);
-        string mimeType = imageFormat switch
-        {
-            SwiftletImageFormat.Png => "image/png",
-            SwiftletImageFormat.Bmp => "image/bmp",
-            SwiftletImageFormat.Jpeg => "image/jpeg",
-            SwiftletImageFormat.Gif => "image/gif",
-            SwiftletImageFormat.Tiff => "image/tiff",
-            _ => throw new ArgumentOutOfRangeException(nameof(imageFormat)),
-        };
-
-        DA.SetData(0, new McpContentBlockGoo(new McpImageContentBlock(mimeType, base64)));
+        DA.SetData(0, new McpContentBlockGoo(McpContentFactory.CreateImage(bitmapGoo.Value, format)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
