@@ -39,6 +39,8 @@
           "target": "HttpHeaderParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -73,6 +75,8 @@
           "target": "HttpResponseDataParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -107,6 +111,8 @@
           "target": "MultipartFieldParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -141,6 +147,8 @@
           "target": "QueryParameterParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -175,6 +183,8 @@
           "target": "RequestBodyParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -209,6 +219,8 @@
           "target": "JsonArrayParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -243,6 +255,8 @@
           "target": "JsonObjectParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -277,6 +291,8 @@
           "target": "JsonNodeParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -311,6 +327,8 @@
           "target": "JsonValueParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -345,6 +363,8 @@
           "target": "HtmlNodeParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -379,6 +399,8 @@
           "target": "XmlNodeParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -413,6 +435,8 @@
           "target": "BitmapParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -447,6 +471,8 @@
           "target": "ByteArrayParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -481,6 +507,8 @@
           "target": "ListenerRequestParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -515,6 +543,8 @@
           "target": "WebSocketConnectionParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -549,6 +579,8 @@
           "target": "McpContentBlockParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -583,6 +615,8 @@
           "target": "McpToolCallRequestParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -617,6 +651,8 @@
           "target": "McpToolDefinitionParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -651,6 +687,8 @@
           "target": "McpToolParameterParameter"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -727,6 +765,12 @@
           "target": "ApiKeyAuthComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -793,6 +837,12 @@
           "target": "BasicAuthComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -849,6 +899,12 @@
           "target": "BearerTokenAuthComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 2,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -985,6 +1041,12 @@
           "target": "OAuthAuthorizeComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 9,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -1159,6 +1221,12 @@
           "target": "OAuthTokenComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 13,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -1225,6 +1293,28 @@
           "target": "CreateByteArrayBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "in[1] ContentType",
+              "gh1": "T",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1291,6 +1381,28 @@
           "target": "CreateByteArrayBodyFromFileComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[1] ContentType",
+              "gh1": "T",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1359,6 +1471,28 @@
           "target": "CreateFormUrlEncodedBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Keys",
+              "gh1": "K",
+              "gh2": "Ks"
+            },
+            {
+              "pin": "in[1] Values",
+              "gh1": "V",
+              "gh2": "Vs"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1425,6 +1559,28 @@
           "target": "CreateHttpHeaderComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Key",
+              "gh1": "K",
+              "gh2": "Ky"
+            },
+            {
+              "pin": "in[1] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            },
+            {
+              "pin": "out[0] Header",
+              "gh1": "H",
+              "gh2": "Hd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1481,6 +1637,23 @@
           "target": "CreateJsonArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JTokens",
+              "gh1": "JT",
+              "gh2": "Jt"
+            },
+            {
+              "pin": "out[0] JArray",
+              "gh1": "JA",
+              "gh2": "Ja"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1547,6 +1720,28 @@
           "target": "CreateJsonObjectComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Keys",
+              "gh1": "K",
+              "gh2": "Ks"
+            },
+            {
+              "pin": "in[1] Values",
+              "gh1": "V",
+              "gh2": "Vs"
+            },
+            {
+              "pin": "out[0] JObject",
+              "gh1": "O",
+              "gh2": "Jo"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1603,6 +1798,23 @@
           "target": "CreateJsonValueComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            },
+            {
+              "pin": "out[0] JValue",
+              "gh1": "JV",
+              "gh2": "Jv"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1689,6 +1901,38 @@
           "target": "CreateMultipartFieldBytesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Name",
+              "gh1": "N",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "in[1] Bytes",
+              "gh1": "B",
+              "gh2": "By"
+            },
+            {
+              "pin": "in[2] FileName",
+              "gh1": "F",
+              "gh2": "Fn"
+            },
+            {
+              "pin": "in[3] ContentType",
+              "gh1": "C",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "out[0] Field",
+              "gh1": "F",
+              "gh2": "Fd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1765,6 +2009,33 @@
           "target": "CreateMultipartFieldTextComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Name",
+              "gh1": "N",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "in[1] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[2] ContentType",
+              "gh1": "C",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "out[0] Field",
+              "gh1": "F",
+              "gh2": "Fd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1821,6 +2092,23 @@
           "target": "CreateMultipartFormBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Fields",
+              "gh1": "F",
+              "gh2": "Fs"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1887,6 +2175,28 @@
           "target": "CreateQueryParamComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Key",
+              "gh1": "K",
+              "gh2": "Ky"
+            },
+            {
+              "pin": "in[1] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            },
+            {
+              "pin": "out[0] Param",
+              "gh1": "P",
+              "gh2": "Pr"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -1950,6 +2260,23 @@
           "target": "CreateTextBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2019,6 +2346,28 @@
           "target": "CreateTextBodyCustomComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "in[1] ContentType",
+              "gh1": "T",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "out[0] Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2105,6 +2454,38 @@
           "target": "CreateUrlComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Scheme",
+              "gh1": "S",
+              "gh2": "Sc"
+            },
+            {
+              "pin": "in[1] Host",
+              "gh1": "H",
+              "gh2": "Hs"
+            },
+            {
+              "pin": "in[2] Port",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[3] Route",
+              "gh1": "R",
+              "gh2": "Rt"
+            },
+            {
+              "pin": "out[0] URL",
+              "gh1": "U",
+              "gh2": "Ur"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2211,6 +2592,48 @@
           "target": "CreateXmlElementComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Name",
+              "gh1": "N",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "in[1] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[2] Namespace",
+              "gh1": "NS",
+              "gh2": "Ns"
+            },
+            {
+              "pin": "in[3] Attr Names",
+              "gh1": "AN",
+              "gh2": "An"
+            },
+            {
+              "pin": "in[4] Attr Values",
+              "gh1": "AV",
+              "gh2": "Av"
+            },
+            {
+              "pin": "in[5] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            },
+            {
+              "pin": "out[0] Element",
+              "gh1": "E",
+              "gh2": "El"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2290,6 +2713,33 @@
           "target": "MergeJsonObjectsComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JSON Object A",
+              "gh1": "A",
+              "gh2": "Ja"
+            },
+            {
+              "pin": "in[1] JSON Object B",
+              "gh1": "B",
+              "gh2": "Jb"
+            },
+            {
+              "pin": "in[2] Mode",
+              "gh1": "M",
+              "gh2": "Md"
+            },
+            {
+              "pin": "out[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2356,6 +2806,28 @@
           "target": "RemoveJsonKeyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            },
+            {
+              "pin": "in[1] Key",
+              "gh1": "K",
+              "gh2": "Ky"
+            },
+            {
+              "pin": "out[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2432,6 +2904,33 @@
           "target": "SetJsonKeyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            },
+            {
+              "pin": "in[1] Key",
+              "gh1": "K",
+              "gh2": "Ky"
+            },
+            {
+              "pin": "in[2] JToken",
+              "gh1": "JT",
+              "gh2": "Jt"
+            },
+            {
+              "pin": "out[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -2494,6 +2993,8 @@
         "status": "archived",
         "migration": null,
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -2546,6 +3047,8 @@
         "status": "archived",
         "migration": null,
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -2605,6 +3108,8 @@
           "target": "CreateTextBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -2711,6 +3216,12 @@
           "target": "DeleteRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 6,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -2787,6 +3298,12 @@
           "target": "DeconstructBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -2853,6 +3370,12 @@
           "target": "DeconstructHeaderComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -2909,6 +3432,12 @@
           "target": "DeconstructMultipartBodyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 2,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3005,6 +3534,12 @@
           "target": "DeconstructMultipartFieldComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 6,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3071,6 +3606,12 @@
           "target": "DeconstructQueryParamComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3187,6 +3728,12 @@
           "target": "DeconstructHttpResponseComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 8,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3283,6 +3830,12 @@
           "target": "DeconstructUrlComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 6,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3450,6 +4003,68 @@
           "target": "DownloadFileComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "mixed",
+          "same": 1,
+          "differ": [
+            {
+              "pin": "in[0] URL",
+              "gh1": "U",
+              "gh2": "Ur"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[2] Params",
+              "gh1": "Q",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[3] Headers",
+              "gh1": "H",
+              "gh2": "Hd"
+            },
+            {
+              "pin": "in[4] Run",
+              "gh1": "R",
+              "gh2": "Rn"
+            },
+            {
+              "pin": "in[5] Overwrite",
+              "gh1": "O",
+              "gh2": "Ow"
+            },
+            {
+              "pin": "out[0] Done",
+              "gh1": "D",
+              "gh2": "Dn"
+            },
+            {
+              "pin": "out[1] Progress",
+              "gh1": "P",
+              "gh2": "Pg"
+            },
+            {
+              "pin": "out[2] Path",
+              "gh1": "F",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[3] Status",
+              "gh1": "S",
+              "gh2": "St"
+            },
+            {
+              "pin": "out[5] Error",
+              "gh1": "E",
+              "gh2": "Er"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -3556,6 +4171,12 @@
           "target": "GetRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 6,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3682,6 +4303,12 @@
           "target": "HttpRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 8,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3798,6 +4425,12 @@
           "target": "PatchRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 7,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -3914,6 +4547,12 @@
           "target": "PostRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 7,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -4030,6 +4669,12 @@
           "target": "PutRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 7,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -4099,6 +4744,12 @@
           "target": "ThrottleComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -4185,6 +4836,12 @@
           "target": "UdpStreamComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 5,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -4355,6 +5012,73 @@
           "target": "UploadFileComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] URL",
+              "gh1": "U",
+              "gh2": "Ur"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[2] Method",
+              "gh1": "M",
+              "gh2": "Md"
+            },
+            {
+              "pin": "in[3] Content Type",
+              "gh1": "T",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "in[4] Params",
+              "gh1": "Q",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[5] Headers",
+              "gh1": "H",
+              "gh2": "Hd"
+            },
+            {
+              "pin": "in[6] Run",
+              "gh1": "R",
+              "gh2": "Rn"
+            },
+            {
+              "pin": "out[0] Done",
+              "gh1": "D",
+              "gh2": "Dn"
+            },
+            {
+              "pin": "out[1] Progress",
+              "gh1": "P",
+              "gh2": "Pg"
+            },
+            {
+              "pin": "out[2] Status",
+              "gh1": "S",
+              "gh2": "St"
+            },
+            {
+              "pin": "out[3] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "out[4] Error",
+              "gh1": "E",
+              "gh2": "Er"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4538,6 +5262,73 @@
           "target": "UploadFileMultipartComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "mixed",
+          "same": 1,
+          "differ": [
+            {
+              "pin": "in[0] URL",
+              "gh1": "U",
+              "gh2": "Ur"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[2] Field Name",
+              "gh1": "N",
+              "gh2": "Fn"
+            },
+            {
+              "pin": "in[3] File Name",
+              "gh1": "F",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "in[4] Content Type",
+              "gh1": "T",
+              "gh2": "Ty"
+            },
+            {
+              "pin": "in[6] Headers",
+              "gh1": "H",
+              "gh2": "Hd"
+            },
+            {
+              "pin": "in[7] Run",
+              "gh1": "R",
+              "gh2": "Rn"
+            },
+            {
+              "pin": "out[0] Done",
+              "gh1": "D",
+              "gh2": "Dn"
+            },
+            {
+              "pin": "out[1] Progress",
+              "gh1": "P",
+              "gh2": "Pg"
+            },
+            {
+              "pin": "out[2] Status",
+              "gh1": "S",
+              "gh2": "St"
+            },
+            {
+              "pin": "out[3] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "out[4] Error",
+              "gh1": "E",
+              "gh2": "Er"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4594,6 +5385,23 @@
           "target": "FormatJsonStringComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JSON String",
+              "gh1": "J",
+              "gh2": "Js"
+            },
+            {
+              "pin": "out[0] Pretty JSON",
+              "gh1": "P",
+              "gh2": "Pj"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4660,6 +5468,28 @@
           "target": "GetJsonObjectKeyComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            },
+            {
+              "pin": "in[1] Key",
+              "gh1": "K",
+              "gh2": "Ky"
+            },
+            {
+              "pin": "out[0] JToken",
+              "gh1": "JT",
+              "gh2": "Jt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4716,6 +5546,23 @@
           "target": "ParseJsonStringComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "out[0] JToken",
+              "gh1": "JT",
+              "gh2": "Jt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4772,6 +5619,23 @@
           "target": "ReadJsonArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Array",
+              "gh1": "JA",
+              "gh2": "Ja"
+            },
+            {
+              "pin": "out[0] JTokens",
+              "gh1": "JT",
+              "gh2": "Jt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4838,6 +5702,28 @@
           "target": "ReadJsonObjectComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JObject",
+              "gh1": "JO",
+              "gh2": "Jo"
+            },
+            {
+              "pin": "out[0] Keys",
+              "gh1": "K",
+              "gh2": "Ks"
+            },
+            {
+              "pin": "out[1] JTokens",
+              "gh1": "JT",
+              "gh2": "Jt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4914,6 +5800,33 @@
           "target": "ReadJsonValueComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JValue",
+              "gh1": "JV",
+              "gh2": "Jv"
+            },
+            {
+              "pin": "out[0] AsString",
+              "gh1": "S",
+              "gh2": "As"
+            },
+            {
+              "pin": "out[1] AsNumber",
+              "gh1": "N",
+              "gh2": "An"
+            },
+            {
+              "pin": "out[2] AsBool",
+              "gh1": "B",
+              "gh2": "Ab"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -4990,6 +5903,33 @@
           "target": "SeparateJsonTokensComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JTokens",
+              "gh1": "JT",
+              "gh2": "Jt"
+            },
+            {
+              "pin": "out[0] JObjects",
+              "gh1": "JO",
+              "gh2": "Jo"
+            },
+            {
+              "pin": "out[1] JArrays",
+              "gh1": "JA",
+              "gh2": "Ja"
+            },
+            {
+              "pin": "out[2] JValues",
+              "gh1": "JV",
+              "gh2": "Jv"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5046,6 +5986,23 @@
           "target": "StringifyJsonTokenComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] JToken",
+              "gh1": "JT",
+              "gh2": "Jt"
+            },
+            {
+              "pin": "out[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5112,6 +6069,28 @@
           "target": "GetHtmlAttributeValueComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            },
+            {
+              "pin": "in[1] Attribute",
+              "gh1": "A",
+              "gh2": "At"
+            },
+            {
+              "pin": "out[0] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5168,6 +6147,23 @@
           "target": "GetHtmlNodeChildrenComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5234,6 +6230,28 @@
           "target": "GetElementByIdComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] ID",
+              "gh1": "I",
+              "gh2": "Id"
+            },
+            {
+              "pin": "out[0] Element",
+              "gh1": "E",
+              "gh2": "El"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5323,6 +6341,38 @@
           "target": "GetElementsByAttributeValueComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] Attribute",
+              "gh1": "A",
+              "gh2": "At"
+            },
+            {
+              "pin": "in[2] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            },
+            {
+              "pin": "in[3] Recursive",
+              "gh1": "R",
+              "gh2": "Rc"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5402,6 +6452,33 @@
           "target": "GetElementsByClassNameComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] Class",
+              "gh1": "C",
+              "gh2": "Cl"
+            },
+            {
+              "pin": "in[2] Recursive",
+              "gh1": "R",
+              "gh2": "Rc"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5481,6 +6558,33 @@
           "target": "GetElementsByTagNameComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] Tag",
+              "gh1": "T",
+              "gh2": "Tg"
+            },
+            {
+              "pin": "in[2] Recursive",
+              "gh1": "R",
+              "gh2": "Rc"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5547,6 +6651,28 @@
           "target": "GetElementsByXPathComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] XPATH",
+              "gh1": "X",
+              "gh2": "Xp"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5613,6 +6739,28 @@
           "target": "GetHtmlAttributesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            },
+            {
+              "pin": "out[0] Names",
+              "gh1": "N",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "out[1] Values",
+              "gh1": "V",
+              "gh2": "Vl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5669,6 +6817,23 @@
           "target": "GetInnerHtmlComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            },
+            {
+              "pin": "out[0] HTML",
+              "gh1": "H",
+              "gh2": "Ht"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5725,6 +6890,23 @@
           "target": "ReadHtmlComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] HTML",
+              "gh1": "H",
+              "gh2": "Ht"
+            },
+            {
+              "pin": "out[0] Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5781,6 +6963,23 @@
           "target": "StringifyHtmlNodeComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] HTML Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            },
+            {
+              "pin": "out[0] HTML",
+              "gh1": "H",
+              "gh2": "Ht"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5847,6 +7046,28 @@
           "target": "GetXmlAttributeValueComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Element",
+              "gh1": "E",
+              "gh2": "El"
+            },
+            {
+              "pin": "in[1] Attribute",
+              "gh1": "A",
+              "gh2": "At"
+            },
+            {
+              "pin": "out[0] Value",
+              "gh1": "V",
+              "gh2": "Vl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5913,6 +7134,28 @@
           "target": "GetXmlAttributesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Element",
+              "gh1": "E",
+              "gh2": "El"
+            },
+            {
+              "pin": "out[0] Names",
+              "gh1": "N",
+              "gh2": "Nm"
+            },
+            {
+              "pin": "out[1] Values",
+              "gh1": "V",
+              "gh2": "Vl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -5969,6 +7212,23 @@
           "target": "GetXmlChildNodesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "out[0] Children",
+              "gh1": "C",
+              "gh2": "Ch"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6035,6 +7295,28 @@
           "target": "GetXmlElementsByTagComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] Tag",
+              "gh1": "T",
+              "gh2": "Tg"
+            },
+            {
+              "pin": "out[0] Elements",
+              "gh1": "E",
+              "gh2": "El"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6101,6 +7383,28 @@
           "target": "GetXmlElementsByXPathComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Parent",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[1] XPath",
+              "gh1": "X",
+              "gh2": "Xp"
+            },
+            {
+              "pin": "out[0] Elements",
+              "gh1": "E",
+              "gh2": "El"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6167,6 +7471,28 @@
           "target": "GetXmlInnerTextComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Element",
+              "gh1": "E",
+              "gh2": "El"
+            },
+            {
+              "pin": "out[0] InnerText",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "out[1] InnerXml",
+              "gh1": "X",
+              "gh2": "Xm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6223,6 +7549,23 @@
           "target": "ParseXmlComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] XML",
+              "gh1": "X",
+              "gh2": "Xm"
+            },
+            {
+              "pin": "out[0] Document",
+              "gh1": "D",
+              "gh2": "Dc"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6292,6 +7635,28 @@
           "target": "StringifyXmlNodeComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Node",
+              "gh1": "N",
+              "gh2": "Nd"
+            },
+            {
+              "pin": "in[1] Indent",
+              "gh1": "I",
+              "gh2": "In"
+            },
+            {
+              "pin": "out[0] XML",
+              "gh1": "X",
+              "gh2": "Xm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6348,6 +7713,23 @@
           "target": "Base64ToByteArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Base64",
+              "gh1": "B",
+              "gh2": "B6"
+            },
+            {
+              "pin": "out[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6417,6 +7799,28 @@
           "target": "Base64ToTextComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Base64",
+              "gh1": "B",
+              "gh2": "B6"
+            },
+            {
+              "pin": "in[1] Encoding",
+              "gh1": "E",
+              "gh2": "En"
+            },
+            {
+              "pin": "out[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6483,6 +7887,28 @@
           "target": "BitmapToByteArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            },
+            {
+              "pin": "in[1] Format",
+              "gh1": "F",
+              "gh2": "Fm"
+            },
+            {
+              "pin": "out[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6579,6 +8005,43 @@
           "target": "BitmapToMeshComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            },
+            {
+              "pin": "in[1] Rectangle",
+              "gh1": "R",
+              "gh2": "Rc"
+            },
+            {
+              "pin": "out[0] Mesh",
+              "gh1": "M",
+              "gh2": "Ms"
+            },
+            {
+              "pin": "out[1] Colors",
+              "gh1": "C",
+              "gh2": "Cl"
+            },
+            {
+              "pin": "out[2] Width",
+              "gh1": "W",
+              "gh2": "Wd"
+            },
+            {
+              "pin": "out[3] Height",
+              "gh1": "H",
+              "gh2": "Ht"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6635,6 +8098,23 @@
           "target": "ByteArrayToBase64Component"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            },
+            {
+              "pin": "out[0] Base64",
+              "gh1": "B",
+              "gh2": "B6"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6691,6 +8171,23 @@
           "target": "ByteArrayToBitmapComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            },
+            {
+              "pin": "out[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6747,6 +8244,23 @@
           "target": "ByteArrayToListComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            },
+            {
+              "pin": "out[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6816,6 +8330,28 @@
           "target": "ByteArrayToTextComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            },
+            {
+              "pin": "in[1] Encoding",
+              "gh1": "E",
+              "gh2": "En"
+            },
+            {
+              "pin": "out[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6882,6 +8418,28 @@
           "target": "ByteArrayToFileComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6938,6 +8496,23 @@
           "target": "ColorToHexComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Color",
+              "gh1": "C",
+              "gh2": "Cl"
+            },
+            {
+              "pin": "out[0] Hex",
+              "gh1": "H",
+              "gh2": "Hx"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -6994,6 +8569,23 @@
           "target": "CompressDataComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Uncompressed",
+              "gh1": "U",
+              "gh2": "Un"
+            },
+            {
+              "pin": "out[0] Compressed",
+              "gh1": "C",
+              "gh2": "Cm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7063,6 +8655,28 @@
           "target": "CreateCsvLineComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Cells",
+              "gh1": "C",
+              "gh2": "Cl"
+            },
+            {
+              "pin": "in[1] Delimiter",
+              "gh1": "D",
+              "gh2": "Dl"
+            },
+            {
+              "pin": "out[0] Line",
+              "gh1": "L",
+              "gh2": "Ln"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7119,6 +8733,23 @@
           "target": "DecompressDataComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Compressed",
+              "gh1": "C",
+              "gh2": "Cm"
+            },
+            {
+              "pin": "out[0] Uncompressed",
+              "gh1": "U",
+              "gh2": "Un"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7175,6 +8806,23 @@
           "target": "FileToByteArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7247,6 +8895,28 @@
           "target": "GenerateGuidComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Generate",
+              "gh1": "G",
+              "gh2": "Gn"
+            },
+            {
+              "pin": "in[1] Format",
+              "gh1": "F",
+              "gh2": "Fm"
+            },
+            {
+              "pin": "out[0] GUID",
+              "gh1": "G",
+              "gh2": "Gd"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7355,6 +9025,43 @@
           "target": "GenerateQrCodeComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[1] Pixels",
+              "gh1": "P",
+              "gh2": "Px"
+            },
+            {
+              "pin": "in[2] Dark",
+              "gh1": "D",
+              "gh2": "Dk"
+            },
+            {
+              "pin": "in[3] Light",
+              "gh1": "L",
+              "gh2": "Lt"
+            },
+            {
+              "pin": "in[4] Quiet",
+              "gh1": "Q",
+              "gh2": "Qt"
+            },
+            {
+              "pin": "out[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7411,6 +9118,23 @@
           "target": "HexToColorComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Hex",
+              "gh1": "H",
+              "gh2": "Hx"
+            },
+            {
+              "pin": "out[0] Color",
+              "gh1": "C",
+              "gh2": "Cl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7467,6 +9191,23 @@
           "target": "ListToByteArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            },
+            {
+              "pin": "out[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7536,6 +9277,28 @@
           "target": "ReadCsvLineComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Line",
+              "gh1": "L",
+              "gh2": "Ln"
+            },
+            {
+              "pin": "in[1] Delimiter",
+              "gh1": "D",
+              "gh2": "Dl"
+            },
+            {
+              "pin": "out[0] Cells",
+              "gh1": "C",
+              "gh2": "Cl"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7602,6 +9365,28 @@
           "target": "ReplaceEmptyBranchesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Tree",
+              "gh1": "T",
+              "gh2": "Tr"
+            },
+            {
+              "pin": "in[1] Replacement",
+              "gh1": "R",
+              "gh2": "Rp"
+            },
+            {
+              "pin": "out[0] Tree",
+              "gh1": "T",
+              "gh2": "Tr"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7668,6 +9453,28 @@
           "target": "SaveCsvComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Lines",
+              "gh1": "L",
+              "gh2": "Ln"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7734,6 +9541,28 @@
           "target": "SaveTextComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7806,6 +9635,28 @@
           "target": "SaveWebResponseComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Response",
+              "gh1": "R",
+              "gh2": "Rs"
+            },
+            {
+              "pin": "in[1] Path",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Bytes",
+              "gh1": "B",
+              "gh2": "Bt"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7865,6 +9716,23 @@
           "target": "ScreenCaptureActiveViewportComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Capture",
+              "gh1": "C",
+              "gh2": "Cp"
+            },
+            {
+              "pin": "out[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7934,6 +9802,28 @@
           "target": "ScreenCaptureViewportComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Capture",
+              "gh1": "C",
+              "gh2": "Cp"
+            },
+            {
+              "pin": "in[1] Viewport Name",
+              "gh1": "V",
+              "gh2": "Vp"
+            },
+            {
+              "pin": "out[0] Bitmap",
+              "gh1": "B",
+              "gh2": "Bm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -7990,6 +9880,23 @@
           "target": "SplitTextIntoLinesComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "out[0] Lines",
+              "gh1": "L",
+              "gh2": "Ln"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8059,6 +9966,28 @@
           "target": "TextToBase64Component"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[1] Encoding",
+              "gh1": "E",
+              "gh2": "En"
+            },
+            {
+              "pin": "out[0] Base64",
+              "gh1": "B",
+              "gh2": "B6"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8128,6 +10057,28 @@
           "target": "TextToByteArrayComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[1] Encoding",
+              "gh1": "E",
+              "gh2": "En"
+            },
+            {
+              "pin": "out[0] Byte Array",
+              "gh1": "A",
+              "gh2": "By"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8197,6 +10148,28 @@
           "target": "UrlEncodeComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Text",
+              "gh1": "T",
+              "gh2": "Tx"
+            },
+            {
+              "pin": "in[1] Encoding",
+              "gh1": "E",
+              "gh2": "En"
+            },
+            {
+              "pin": "out[0] Encoded",
+              "gh1": "E",
+              "gh2": "Ec"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8303,6 +10276,12 @@
           "target": "DeconstructRequestComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 7,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -8413,6 +10392,50 @@
           "target": "HttpListenerComponent"
         },
         "diffs": [],
+        "warnings": [
+          "in[0] Port: description differs"
+        ],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Port",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[1] Route",
+              "gh1": "R",
+              "gh2": "Rt"
+            },
+            {
+              "pin": "in[2] Response Body",
+              "gh1": "B",
+              "gh2": "Bd"
+            },
+            {
+              "pin": "out[0] Method",
+              "gh1": "M",
+              "gh2": "Mt"
+            },
+            {
+              "pin": "out[1] Headers",
+              "gh1": "H",
+              "gh2": "Hd"
+            },
+            {
+              "pin": "out[2] Query Params",
+              "gh1": "Q",
+              "gh2": "Qr"
+            },
+            {
+              "pin": "out[3] Content",
+              "gh1": "C",
+              "gh2": "Ct"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8477,6 +10500,16 @@
           "target": "ServerInputComponent"
         },
         "diffs": [],
+        "warnings": [
+          "component description differs",
+          "in[0] Port: description differs",
+          "out[0] Root: description differs"
+        ],
+        "nicknames": {
+          "status": "gh1",
+          "same": 2,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -8566,6 +10599,12 @@
           "target": "ServerResponseComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 5,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -8637,6 +10676,28 @@
           "target": "UdpListenerComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Port",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "out[0] Data",
+              "gh1": "D",
+              "gh2": "Dt"
+            },
+            {
+              "pin": "out[1] Remote",
+              "gh1": "R",
+              "gh2": "Rm"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8750,6 +10811,48 @@
           "target": "WebSocketClientComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] URL",
+              "gh1": "U",
+              "gh2": "Ur"
+            },
+            {
+              "pin": "in[1] Params",
+              "gh1": "P",
+              "gh2": "Pr"
+            },
+            {
+              "pin": "in[2] Run",
+              "gh1": "R",
+              "gh2": "Rn"
+            },
+            {
+              "pin": "out[0] Connection",
+              "gh1": "C",
+              "gh2": "Cn"
+            },
+            {
+              "pin": "out[1] Message",
+              "gh1": "M",
+              "gh2": "Ms"
+            },
+            {
+              "pin": "out[2] Messages",
+              "gh1": "Ms",
+              "gh2": "Mm"
+            },
+            {
+              "pin": "out[3] Status",
+              "gh1": "S",
+              "gh2": "St"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8839,6 +10942,33 @@
           "target": "WebSocketSendComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "mixed",
+          "same": 1,
+          "differ": [
+            {
+              "pin": "in[0] Connection",
+              "gh1": "C",
+              "gh2": "Cn"
+            },
+            {
+              "pin": "in[1] Message",
+              "gh1": "M",
+              "gh2": "Ms"
+            },
+            {
+              "pin": "in[2] Send",
+              "gh1": "S",
+              "gh2": "Sn"
+            },
+            {
+              "pin": "out[0] Success",
+              "gh1": "S",
+              "gh2": "Sc"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -8955,6 +11085,48 @@
           "target": "WebSocketServerComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "own",
+          "same": 0,
+          "differ": [
+            {
+              "pin": "in[0] Port",
+              "gh1": "P",
+              "gh2": "Pt"
+            },
+            {
+              "pin": "in[1] Run",
+              "gh1": "R",
+              "gh2": "Rn"
+            },
+            {
+              "pin": "out[0] Connection",
+              "gh1": "C",
+              "gh2": "Cn"
+            },
+            {
+              "pin": "out[1] Message",
+              "gh1": "M",
+              "gh2": "Ms"
+            },
+            {
+              "pin": "out[2] Messages",
+              "gh1": "Ms",
+              "gh2": "Mm"
+            },
+            {
+              "pin": "out[3] Clients",
+              "gh1": "N",
+              "gh2": "Nc"
+            },
+            {
+              "pin": "out[4] Status",
+              "gh1": "S",
+              "gh2": "St"
+            }
+          ]
+        },
         "notes": ""
       }
     },
@@ -9031,6 +11203,8 @@
         "status": "archived",
         "migration": null,
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     },
@@ -9110,6 +11284,12 @@
           "target": "CreateMcpEmbeddedBinaryResourceComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9189,6 +11369,12 @@
           "target": "CreateMcpEmbeddedTextResourceComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9258,6 +11444,12 @@
           "target": "CreateMcpImageContentComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9354,6 +11546,12 @@
           "target": "CreateMcpResourceLinkComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 6,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9410,6 +11608,12 @@
           "target": "CreateMcpTextContentComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 2,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9486,6 +11690,12 @@
           "target": "DeconstructToolCallComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9562,6 +11772,12 @@
           "target": "DefineToolComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 4,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9657,6 +11873,12 @@
           "target": "DefineToolParameterComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 5,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9735,6 +11957,12 @@
           "target": "McpServerComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 3,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9824,6 +12052,12 @@
           "target": "McpToolResponseComponent"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": {
+          "status": "gh1",
+          "same": 5,
+          "differ": []
+        },
         "notes": ""
       }
     },
@@ -9903,6 +12137,8 @@
           "target": "McpToolResponseComponent_ARCHIVED"
         },
         "diffs": [],
+        "warnings": [],
+        "nicknames": null,
         "notes": ""
       }
     }
