@@ -33,8 +33,8 @@ public sealed class ApiKeyAuthComponent : GH_Component
         DA.GetData(0, ref key);
         DA.GetData(1, ref value);
 
-        DA.SetData(0, new HttpHeaderGoo(key, value));
-        DA.SetData(1, new QueryParameterGoo(key, value));
+        DA.SetData(0, new HttpHeaderGoo(AuthHeaderWorkflow.ApiHeader(key, value)));
+        DA.SetData(1, new QueryParameterGoo(AuthHeaderWorkflow.ApiQuery(key, value)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

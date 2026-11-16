@@ -27,7 +27,7 @@ public sealed class BearerTokenAuthComponent : GH_Component
     {
         string token = string.Empty;
         DA.GetData(0, ref token);
-        DA.SetData(0, new HttpHeaderGoo("Authorization", $"Bearer {token}"));
+        DA.SetData(0, new HttpHeaderGoo(AuthHeaderWorkflow.Bearer(token)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
