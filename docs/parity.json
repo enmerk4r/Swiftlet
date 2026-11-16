@@ -1,5 +1,5 @@
 {
-  "about": "GH1 -> GH2 parity checklist. GH1 fields are generated from a runtime dump of the built GH1 assembly plus a source scan (build/parity/build_parity_catalog.py); the 'gh2' block is filled in by hand as components are ported. 'migration' records the GH1->GH2 mapping (Gh1MigrationRule / IMigrateComponent) for each entry.",
+  "about": "GH1 -> GH2 parity checklist. GH1 fields are generated from a runtime dump of the built GH1 assembly plus a source scan (build/parity/build_parity_catalog.py). The 'gh2' blocks are generated from the built GH2 assembly and its migration rules by build/parity/build_parity_gh2.py (status, diffs); only 'notes' is edited by hand.",
   "gh1Assembly": "Swiftlet.Gh.Rhino8",
   "counts": {
     "components": 120,
@@ -30,10 +30,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "HttpHeaderParameter",
+        "ioId": "dcf30b22-08dd-4484-882a-b34d1ac2378c",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -59,10 +60,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "HttpResponseDataParameter",
+        "ioId": "6b0d67e8-c654-4fe7-8eb6-79af07492523",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -88,10 +90,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "MultipartFieldParameter",
+        "ioId": "d55479ed-105c-4569-86d6-b141ad8e41e3",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -117,10 +120,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "QueryParameterParameter",
+        "ioId": "8255113b-b1df-4538-97bc-d4c7b5602b6d",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -146,10 +150,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "RequestBodyParameter",
+        "ioId": "2864dc48-afcf-4f66-a7bc-79f20beb6f0f",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -175,10 +180,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "JsonArrayParameter",
+        "ioId": "5e3a65df-cdb7-4a3c-94d8-839e95021754",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -204,10 +210,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "JsonObjectParameter",
+        "ioId": "97f24849-0c11-4c04-bbbb-4c4ecba27c05",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -233,10 +240,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "JsonNodeParameter",
+        "ioId": "f2e84d65-fa8b-4f1f-afb9-c8cf879064ad",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -262,10 +270,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "JsonValueParameter",
+        "ioId": "155556e6-1a49-4bdd-9eb0-9db4efb09321",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -291,10 +300,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "HtmlNodeParameter",
+        "ioId": "c3e60aeb-d3f7-47a3-b340-cf776eb61e3f",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -320,10 +330,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "XmlNodeParameter",
+        "ioId": "7edc46ea-2677-4802-9378-b93c7b072823",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -349,10 +360,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "BitmapParameter",
+        "ioId": "541bf8de-09db-45a6-8f33-d526d777ff5a",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -378,10 +390,11 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
+        "class": "ByteArrayParameter",
+        "ioId": "335bf2b6-aafa-4b88-bfce-f47eea6555b7",
+        "status": "no-rule",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -407,10 +420,17 @@
       "access": "item",
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ListenerRequestParameter",
+        "ioId": "9f413423-370d-4f17-9ca0-7b44d1395952",
+        "status": "mismatch",
+        "migration": {
+          "rule": "ListenerRequestMigration",
+          "table": "ServerMigrationTable",
+          "target": "ListenerRequestParameter"
+        },
+        "diffs": [
+          "2 migration rules for this GH1 GUID (ServerMigrationTable, ListenerRequestMigration)"
+        ],
         "notes": ""
       }
     },
@@ -438,8 +458,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -467,8 +488,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -496,8 +518,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -525,8 +548,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -554,8 +578,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -625,8 +650,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -686,8 +712,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -737,8 +764,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -868,8 +896,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1037,8 +1066,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1096,10 +1126,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateByteArrayBodyComponent",
+        "ioId": "51a6d555-eb94-475f-813b-9080ae5816f4",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateByteArrayBodyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1157,10 +1192,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateByteArrayBodyFromFileComponent",
+        "ioId": "d1fd72ea-5f44-4c1b-8750-64d1d02c80fc",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateByteArrayBodyFromFileComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1220,10 +1260,15 @@
         "runtimeMessage": "component Message text"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateFormUrlEncodedBodyComponent",
+        "ioId": "b190b78a-7744-4dc6-a75b-91057fa461bc",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateFormUrlEncodedBodyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1281,10 +1326,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateHttpHeaderComponent",
+        "ioId": "f98348ab-4ea6-46fc-b768-7be8cac59404",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateHttpHeaderComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1332,10 +1382,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateJsonArrayComponent",
+        "ioId": "63780253-c372-4519-acd4-83924231e2fc",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateJsonArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1393,10 +1448,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateJsonObjectComponent",
+        "ioId": "812cf656-b567-4ca6-8d20-5505f6515b5f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateJsonObjectComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1444,10 +1504,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateJsonValueComponent",
+        "ioId": "8a3f63de-4907-4086-930f-71d758c42584",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateJsonValueComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1525,10 +1590,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateMultipartFieldBytesComponent",
+        "ioId": "6b54c858-0d71-4e90-9220-d46ee4111e20",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateMultipartFieldBytesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1596,10 +1666,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateMultipartFieldTextComponent",
+        "ioId": "f5fc2c03-ee6a-41dd-9781-0e17e51f37bc",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateMultipartFieldTextComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1647,10 +1722,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateMultipartFormBodyComponent",
+        "ioId": "831173a1-2502-49af-901d-3fad8b70f726",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateMultipartFormBodyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1708,10 +1788,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateQueryParamComponent",
+        "ioId": "30c9760c-7cd4-4cbe-8409-675d7572cc5f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateQueryParamComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1766,10 +1851,15 @@
         "windowsUi": "WinForms / clipboard (GH2: Eto only)"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateTextBodyComponent",
+        "ioId": "2147ae2b-8857-4d13-8f94-4ff852cb2b27",
+        "status": "ported",
+        "migration": {
+          "rule": "TextBodyMigration",
+          "table": "TextBodyMigration",
+          "target": "CreateTextBodyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1830,10 +1920,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateTextBodyCustomComponent",
+        "ioId": "1bbdc426-42a9-4429-82b9-2e453746b3b9",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateTextBodyCustomComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -1911,10 +2006,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateUrlComponent",
+        "ioId": "5540f793-d4c3-4575-a895-e62be13ba666",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "CreateUrlComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2012,10 +2112,17 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateXmlElementComponent",
+        "ioId": "fa8f756d-3fc5-4245-ba23-b98292ba2bf1",
+        "status": "mismatch",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "CreateXmlElementComponent"
+        },
+        "diffs": [
+          "in[5] Children: optional True vs requirement MustExist"
+        ],
         "notes": ""
       }
     },
@@ -2086,10 +2193,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "MergeJsonObjectsComponent",
+        "ioId": "aa264a3c-c69c-4c69-93c1-1d652007080d",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "MergeJsonObjectsComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2147,10 +2259,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "RemoveJsonKeyComponent",
+        "ioId": "911a1622-8dca-43cb-aa19-76c6c9d53216",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "RemoveJsonKeyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2218,10 +2335,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SetJsonKeyComponent",
+        "ioId": "d46190a5-c3d8-40f8-ad02-fce05639d66e",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "RequestMigrationTable",
+          "target": "SetJsonKeyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2281,8 +2403,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "decide",
+        "status": "archived",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2332,8 +2455,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "decide",
+        "status": "archived",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2384,10 +2508,15 @@
         "runtimeMessage": "component Message text"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "decide",
-        "migration": null,
+        "class": "CreateTextBodyComponent",
+        "ioId": "2147ae2b-8857-4d13-8f94-4ff852cb2b27",
+        "status": "archived",
+        "migration": {
+          "rule": "ArchivedTextBodyMigration",
+          "table": "ArchivedTextBodyMigration",
+          "target": "CreateTextBodyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2487,8 +2616,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2558,8 +2688,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2619,8 +2750,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2670,8 +2802,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2761,8 +2894,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2822,8 +2956,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -2933,8 +3068,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3024,8 +3160,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3186,8 +3323,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3285,10 +3423,18 @@
         "windowsUi": "WinForms / clipboard (GH2: Eto only)"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetRequestComponent",
+        "ioId": "3bad80b0-77e4-4c32-b35c-d0a73ff6bf59",
+        "status": "mismatch",
+        "migration": {
+          "rule": "GetRequestMigration",
+          "table": "GetRequestMigration",
+          "target": "GetRequestComponent"
+        },
+        "diffs": [
+          "in[1] Params: optional True vs requirement MustExist",
+          "in[2] Headers: optional True vs requirement MustExist"
+        ],
         "notes": ""
       }
     },
@@ -3408,8 +3554,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3519,8 +3666,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3630,8 +3778,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3741,8 +3890,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3805,8 +3955,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -3886,8 +4037,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4051,8 +4203,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4229,8 +4382,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4278,10 +4432,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "FormatJsonStringComponent",
+        "ioId": "ce48ae7b-b793-4fb7-a765-7712861d43ce",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "FormatJsonStringComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4339,10 +4498,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetJsonObjectKeyComponent",
+        "ioId": "49343eee-d7f1-48b8-b225-085d78d7f0cc",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "GetJsonObjectKeyComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4390,10 +4554,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ParseJsonStringComponent",
+        "ioId": "680fd893-664b-425a-8450-9346160e52f0",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "ParseJsonStringComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4441,10 +4610,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReadJsonArrayComponent",
+        "ioId": "fecd0785-39c9-471f-b64e-5ec27adec920",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "ReadJsonArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4502,10 +4676,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReadJsonObjectComponent",
+        "ioId": "f17d398a-e127-49e3-be13-5677e712ea44",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "ReadJsonObjectComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4573,10 +4752,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReadJsonValueComponent",
+        "ioId": "9a6c58c3-e2bf-4695-944d-a9dc168ff025",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "ReadJsonValueComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4644,10 +4828,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SeparateJsonTokensComponent",
+        "ioId": "5137fce1-fa35-4171-948f-c1636bd488a1",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "SeparateJsonTokensComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4695,10 +4884,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "StringifyJsonTokenComponent",
+        "ioId": "f24c685d-c3ad-492d-8b2c-5e7cf14c5767",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "ReadJsonMigrationTable",
+          "target": "StringifyJsonTokenComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4756,10 +4950,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetHtmlAttributeValueComponent",
+        "ioId": "cdb5eab7-539e-45f5-9a8b-45d9d1721e3f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetHtmlAttributeValueComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4807,10 +5006,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetHtmlNodeChildrenComponent",
+        "ioId": "bfd894fc-b4a3-4d31-915a-8a3b3e2445e8",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetHtmlNodeChildrenComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4868,10 +5072,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetElementByIdComponent",
+        "ioId": "15ba99d5-626e-4963-b116-aaebd10f695c",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetElementByIdComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -4952,10 +5161,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetElementsByAttributeValueComponent",
+        "ioId": "28fc80e8-3164-4e60-8ebf-737e62909c44",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetElementsByAttributeValueComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5026,10 +5240,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetElementsByClassNameComponent",
+        "ioId": "943f39fa-2eee-4746-934c-5133afe79e52",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetElementsByClassNameComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5100,10 +5319,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetElementsByTagNameComponent",
+        "ioId": "abbe1019-5737-4928-a051-02e3d082298c",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetElementsByTagNameComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5161,10 +5385,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetElementsByXPathComponent",
+        "ioId": "a13c022d-256c-4813-a128-e9c3bac95d83",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetElementsByXPathComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5222,10 +5451,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetHtmlAttributesComponent",
+        "ioId": "70dc5b71-9a09-4cbe-a5ad-5780348b0223",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetHtmlAttributesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5273,10 +5507,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetInnerHtmlComponent",
+        "ioId": "2de4f514-2501-4d3d-a9cb-6721172484b3",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetInnerHtmlComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5324,10 +5563,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReadHtmlComponent",
+        "ioId": "b5b0e3d6-10fa-4b91-b963-2daacf1d7e7f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "ReadHtmlComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5375,10 +5619,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "StringifyHtmlNodeComponent",
+        "ioId": "70aa0832-fdd4-4cf9-a40f-44570019dbe3",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "StringifyHtmlNodeComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5436,10 +5685,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlAttributeValueComponent",
+        "ioId": "09c3b764-5e35-47a1-a9ce-6540c93c492a",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlAttributeValueComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5497,10 +5751,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlAttributesComponent",
+        "ioId": "55a5d63b-df29-4c09-a5a7-fe5bafffb47b",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlAttributesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5548,10 +5807,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlChildNodesComponent",
+        "ioId": "e141eb1d-a958-473a-b0b3-c0fe366136e5",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlChildNodesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5609,10 +5873,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlElementsByTagComponent",
+        "ioId": "2106817f-aac6-4157-a41a-72aa88dad4aa",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlElementsByTagComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5670,10 +5939,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlElementsByXPathComponent",
+        "ioId": "1ea7cc29-58ab-4911-99f1-79c434024481",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlElementsByXPathComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5731,10 +6005,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GetXmlInnerTextComponent",
+        "ioId": "6d64f886-1ec7-4092-adf1-a157bd9cf625",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "GetXmlInnerTextComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5782,10 +6061,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ParseXmlComponent",
+        "ioId": "5a136b7f-cfd6-4470-854b-da4083fa8a2f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "ParseXmlComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5846,10 +6130,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "StringifyXmlNodeComponent",
+        "ioId": "2eae0958-83a5-4a66-9838-8ffd8c4bbe30",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "MarkupMigrationTable",
+          "target": "StringifyXmlNodeComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5897,10 +6186,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "Base64ToByteArrayComponent",
+        "ioId": "1cf4bd6d-c8ad-4ea6-a3d5-68c82135d587",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "Base64ToByteArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -5961,10 +6255,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "Base64ToTextComponent",
+        "ioId": "2ce77382-de03-447c-a2c6-e015c22738d5",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "Base64ToTextComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6022,10 +6321,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "BitmapToByteArrayComponent",
+        "ioId": "ef3d7392-b41b-48f6-adfc-d85db22f6668",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "BitmapToByteArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6113,10 +6417,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "BitmapToMeshComponent",
+        "ioId": "803a33b8-b6ce-4981-beea-0348f9ff1dd0",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "BitmapToMeshComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6164,10 +6473,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ByteArrayToBase64Component",
+        "ioId": "9f7fc276-7a61-45f1-bd88-e95028e59396",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ByteArrayToBase64Component"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6215,10 +6529,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ByteArrayToBitmapComponent",
+        "ioId": "0656e7d8-3e5a-4b56-aa8f-01c5e6138d0c",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ByteArrayToBitmapComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6266,10 +6585,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ByteArrayToListComponent",
+        "ioId": "4c4dcb22-757d-410d-a7b6-5e70c06869a4",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ByteArrayToListComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6330,10 +6654,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ByteArrayToTextComponent",
+        "ioId": "566b1c17-0d58-4029-ab37-85ebaee65b36",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ByteArrayToTextComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6391,10 +6720,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ByteArrayToFileComponent",
+        "ioId": "95a8ec2c-b3ff-4c1d-a509-404c59404a7e",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ByteArrayToFileComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6442,10 +6776,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ColorToHexComponent",
+        "ioId": "f3454508-9fd8-412a-94e6-76bed33c278b",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ColorToHexComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6493,10 +6832,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CompressDataComponent",
+        "ioId": "d8f97e78-8961-418e-88a9-da692c688f07",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "CompressDataComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6557,10 +6901,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "CreateCsvLineComponent",
+        "ioId": "a243101b-7656-4152-9c13-7f4fc2ae2ce2",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "CreateCsvLineComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6608,10 +6957,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "DecompressDataComponent",
+        "ioId": "a0dcccb5-dfa1-432e-97b1-4b695a02c672",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "DecompressDataComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6659,10 +7013,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "FileToByteArrayComponent",
+        "ioId": "eae45216-c6f1-4af1-9af1-0e4ed2a2f60a",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "FileToByteArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6726,10 +7085,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GenerateGuidComponent",
+        "ioId": "d9d7030d-7072-423d-b8f4-6be32ac05023",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "GenerateGuidComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6829,10 +7193,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "GenerateQrCodeComponent",
+        "ioId": "487c3d1f-80aa-4f71-beeb-2ca474a12d4c",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "GenerateQrCodeComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6880,10 +7249,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "HexToColorComponent",
+        "ioId": "7b488896-e459-49ef-ba45-2ed56501443d",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "HexToColorComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6931,10 +7305,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ListToByteArrayComponent",
+        "ioId": "90f02483-6949-4c08-bc71-4d8013294f3f",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ListToByteArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -6995,10 +7374,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReadCsvLineComponent",
+        "ioId": "d706e233-108e-434a-9e65-e0c3c4c3deaf",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ReadCsvLineComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7056,10 +7440,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ReplaceEmptyBranchesComponent",
+        "ioId": "1cc0a432-f0fc-40ec-8a48-ea23dfb1eb82",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ReplaceEmptyBranchesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7117,10 +7506,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SaveCsvComponent",
+        "ioId": "cbfca6c8-c145-4227-99f8-82798fa6eb2b",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "SaveCsvComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7178,10 +7572,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SaveTextComponent",
+        "ioId": "27f25e9b-8d98-47b4-8491-4c4baaad6c21",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "SaveTextComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7245,10 +7644,15 @@
         "windowsUi": "WinForms / clipboard (GH2: Eto only)"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SaveWebResponseComponent",
+        "ioId": "38812362-7441-4c00-9460-a0dbe4bbf654",
+        "status": "ported",
+        "migration": {
+          "rule": "SaveWebResponseMigration",
+          "table": "SaveWebResponseMigration",
+          "target": "SaveWebResponseComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7299,10 +7703,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ScreenCaptureActiveViewportComponent",
+        "ioId": "214ff612-51c5-41a8-8a59-b437d1344d8b",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ScreenCaptureActiveViewportComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7363,10 +7772,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ScreenCaptureViewportComponent",
+        "ioId": "cd4f0efc-964f-4aa2-9717-761b8112d2f4",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "ScreenCaptureViewportComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7414,10 +7828,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "SplitTextIntoLinesComponent",
+        "ioId": "b9184c8c-9019-4db5-9b28-057f5a14e0b2",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "SplitTextIntoLinesComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7478,10 +7897,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "TextToBase64Component",
+        "ioId": "9ed954e1-b6b0-4904-8bbd-8a77f578cd6e",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "TextToBase64Component"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7542,10 +7966,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "TextToByteArrayComponent",
+        "ioId": "4a1209a1-8bc9-4393-80eb-b5d4a1f79578",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "TextToByteArrayComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7606,10 +8035,15 @@
       ],
       "portNotes": {},
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "UrlEncodeComponent",
+        "ioId": "c832cbf1-ab1e-4716-a495-074b3cc39603",
+        "status": "ported",
+        "migration": {
+          "rule": "Gh1MigrationRule",
+          "table": "UtilitiesMigrationTable",
+          "target": "UrlEncodeComponent"
+        },
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7709,8 +8143,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7814,8 +8249,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -7871,10 +8307,17 @@
         "runtimeMessage": "component Message text"
       },
       "gh2": {
-        "class": null,
-        "ioId": null,
-        "status": "todo",
-        "migration": null,
+        "class": "ServerInputComponent",
+        "ioId": "ca0649f0-c07b-4e52-8c70-4c19d83fc409",
+        "status": "mismatch",
+        "migration": {
+          "rule": "ServerInputMigration",
+          "table": "ServerMigrationTable",
+          "target": "ServerInputComponent"
+        },
+        "diffs": [
+          "2 migration rules for this GH1 GUID (ServerMigrationTable, ServerInputMigration)"
+        ],
         "notes": ""
       }
     },
@@ -7957,8 +8400,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8023,8 +8467,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8131,8 +8576,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8215,8 +8661,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8326,8 +8773,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8401,8 +8849,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "decide",
+        "status": "archived",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8475,8 +8924,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8549,8 +8999,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8613,8 +9064,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8704,8 +9156,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8755,8 +9208,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8826,8 +9280,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8897,8 +9352,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -8987,8 +9443,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -9060,8 +9517,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -9144,8 +9602,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "todo",
+        "status": "missing",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     },
@@ -9218,8 +9677,9 @@
       "gh2": {
         "class": null,
         "ioId": null,
-        "status": "decide",
+        "status": "archived",
         "migration": null,
+        "diffs": [],
         "notes": ""
       }
     }

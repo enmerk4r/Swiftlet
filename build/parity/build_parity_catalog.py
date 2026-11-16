@@ -61,6 +61,11 @@ def main():
     icons = json.load(open(os.path.join(R, "Assets", "Icons", "icons.json")))["icons"]
     slug_by_class = {c: s for s, m in icons.items() for c in m["classes"]}
 
+    # The "gh2" blocks are produced by build_parity_gh2.py; keep them when regenerating the GH1 side.
+    existing = {}
+    old_path = os.path.join(R, "docs", "parity.json")
+    if os.path.exists(old_path):
+        existing = {e["gh1Guid"]: e.get("gh2") for e in json.load(open(old_path, encoding="utf-8"))["entries"]}
     entries = []
     for o in runtime["objects"]:
         cls = o["class"]
@@ -97,16 +102,16 @@ def main():
             e["typeName"] = o.get("typeName")
             e["access"] = o.get("access")
         e["portNotes"] = feats
-        e["gh2"] = {"class": None, "ioId": None, "status": "todo" if not archived else "decide",
-                    "migration": None, "notes": ""}
+        e["gh2"] = existing.get(o.get("guid")) or {"class": None, "ioId": None, "status": "todo" if not archived else "decide",
+                                                     "migration": None, "notes": ""}
         entries.append(e)
 
     entries.sort(key=lambda e: (e["kind"] != "param", e["panel"] or "", e["archived"], e["name"] or ""))
     doc = {
         "about": "GH1 -> GH2 parity checklist. GH1 fields are generated from a runtime dump of the built "
-                 "GH1 assembly plus a source scan (build/parity/build_parity_catalog.py); the 'gh2' block "
-                 "is filled in by hand as components are ported. 'migration' records the GH1->GH2 mapping "
-                 "(Gh1MigrationRule / IMigrateComponent) for each entry.",
+                 "GH1 assembly plus a source scan (build/parity/build_parity_catalog.py). The 'gh2' blocks are "
+                 "generated from the built GH2 assembly and its migration rules by build/parity/"
+                 "build_parity_gh2.py (status, diffs); only 'notes' is edited by hand.",
         "gh1Assembly": "Swiftlet.Gh.Rhino8",
         "counts": {
             "components": sum(e["kind"] == "component" for e in entries),

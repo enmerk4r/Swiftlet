@@ -251,11 +251,8 @@ public sealed class CreateMultipartFieldBytesComponent : SwiftletComponent
     protected override void AddInputs(InputAdder inputs)
     {
         inputs.AddText("Name", "Nm", "Field name (optional)", Access.Item, Requirement.MayBeMissing);
-        // An optional item with no data at all gives zero iterations; an explicit empty default keeps
-        // the component running when nothing is connected, as GH1 does (empty bytes).
-        var bytes = new ByteArrayParameter("Bytes", "By", "Field bytes") { Requirement = Requirement.MayBeMissing };
-        bytes.Set(new[] { Array.Empty<byte>() });
-        inputs.Add(bytes);
+        // InputAdder.Add resets Requirement to its own argument (default MustExist): pass it explicitly.
+        inputs.Add(new ByteArrayParameter("Bytes", "By", "Field bytes"), Requirement.MayBeMissing);
         inputs.AddText("FileName", "Fn", "Optional filename", Access.Item, Requirement.MayBeMissing);
         inputs.AddText("ContentType", "Ty", "Field content type", Access.Item, Requirement.MayBeMissing);
     }
@@ -284,9 +281,9 @@ public sealed class CreateMultipartFormBodyComponent : SwiftletComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        var fields = new MultipartFieldParameter("Fields", "Fs", "Multipart form fields", Access.Twig) { Requirement = Requirement.MayBeMissing };
+        var fields = new MultipartFieldParameter("Fields", "Fs", "Multipart form fields", Access.Twig);
         fields.Set(Array.Empty<MultipartField>());
-        inputs.Add(fields);
+        inputs.Add(fields, Requirement.MayBeMissing); // Add resets Requirement unless passed explicitly
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>

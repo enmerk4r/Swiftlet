@@ -54,9 +54,10 @@ public sealed class CreateJsonObjectComponent : Component
     {
         // Optional lists need an explicit empty twig or the component never runs (see porting guide).
         inputs.AddText("Keys", "Ks", "List of JObject keys", Access.Twig, Requirement.MayBeMissing).Set(Array.Empty<string>());
-        var values = new JsonNodeParameter("Values", "Vs", "List of JObject values", Access.Twig) { Requirement = Requirement.MayBeMissing };
+        // InputAdder.Add resets Requirement to its own argument (default MustExist): pass it explicitly.
+        var values = new JsonNodeParameter("Values", "Vs", "List of JObject values", Access.Twig);
         values.Set(Array.Empty<JsonToken>());
-        inputs.Add(values);
+        inputs.Add(values, Requirement.MayBeMissing);
     }
 
     protected override void AddOutputs(OutputAdder outputs) =>
