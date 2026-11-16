@@ -136,6 +136,7 @@ internal static class IconSlugs
         ["StringifyHtmlNodeComponent"] = "stringify-html-node",
         ["StringifyJsonTokenComponent"] = "stringify-json-token",
         ["StringifyXmlNodeComponent"] = "stringify-xml-node",
+        ["SwiftletPlugin"] = "swiftlet-logo",
         ["TextToBase64Component"] = "text-to-base64",
         ["TextToByteArrayComponent"] = "text-to-byte-array",
         ["ThrottleComponent"] = "throttle",

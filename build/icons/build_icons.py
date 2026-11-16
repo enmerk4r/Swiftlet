@@ -7,8 +7,8 @@ Outputs (paths relative to the repository root):
   src/Swiftlet.Runtime/IconSlugs.g.cs   class name -> slug lookup shared by the GH1 and GH2 shells
 
 The artboard for each legacy PNG is found by pixel comparison (the .ai has no usable artboard
-names), with explicit overrides where two artboards are near-identical. Class names come from the
-GH1 icon map in ShellIcons.cs.
+names), with explicit overrides where two artboards are near-identical. Class names are kept in
+icons.json (originally bootstrapped from the GH1 icon switch in ShellIcons.cs); edit them there.
 
 Usage:  python build/icons/build_icons.py [--repo PATH] [--sheet OUT.png] [--map-only]
         --map-only regenerates IconSlugs.g.cs from the existing icons.json without reconverting.
@@ -24,6 +24,10 @@ import convert  # noqa: E402
 OVERRIDES = {
     "Icons_create_multipart_form_data_named_24x24.png": 81,    # "BM" with N superscript
     "Icons_create_multipart_form_data_unnamed_24x24.png": 82,  # "BM" with U superscript
+}
+# Icons that come from other artwork files: slug -> (source .ai, page index, legacy 24px PNG, classes).
+EXTRA = {
+    "swiftlet-logo": ("Assets/Logo/Logo.ai", 0, "Assets/Logo/Logo_24x24.png", ["SwiftletPlugin"]),
 }
 # Legacy PNGs that are not referenced anywhere and duplicate another icon.
 IGNORE = {"Icons-102.png"}
@@ -82,9 +86,16 @@ def main():
     doc = pymupdf.open(ai)
     pages24 = [on_white(render_page(p, 24)) for p in doc]
 
+    # Class lists live in icons.json (the source of truth since ShellIcons.cs switched to the generated
+    # map). The original mapping was bootstrapped from the hand-written switch in ShellIcons.cs.
     classes_by_png = {}
-    for cls, png in parse_shell_icons(os.path.join(R, "src", "Swiftlet.Gh.Rhino8", "ShellIcons.cs")):
-        classes_by_png.setdefault(png, []).append(cls)
+    existing = os.path.join(R, "Assets", "Icons", "icons.json")
+    if os.path.exists(existing):
+        for m in json.load(open(existing))["icons"].values():
+            classes_by_png.setdefault(m["legacyPng"], []).extend(m["classes"])
+    else:
+        for cls, png in parse_shell_icons(os.path.join(R, "src", "Swiftlet.Gh1", "ShellIcons.cs")):
+            classes_by_png.setdefault(png, []).append(cls)
 
     legacy = sorted(f for f in os.listdir(legacy_dir) if f.lower().endswith(".png") and f not in IGNORE)
     manifest, problems = {}, []
@@ -100,7 +111,7 @@ def main():
             problems.append(f"duplicate slug {slug} ({png} vs {manifest[slug]['legacyPng']})")
         classes = sorted(classes_by_png.get(png, []))
         if not classes:
-            problems.append(f"{png}: not referenced by ShellIcons.cs")
+            problems.append(f"{png}: no classes mapped")
         manifest[slug] = {"artboard": page + 1, "legacyPng": png, "matchError": err, "classes": classes}
 
     used_pages = {m["artboard"] - 1 for m in manifest.values()}
@@ -108,11 +119,18 @@ def main():
         if p not in used_pages:
             problems.append(f"artboard {p + 1} not matched to any legacy PNG")
     for png in classes_by_png:
-        if png not in legacy and not png.startswith("Logo_"):
-            problems.append(f"ShellIcons references missing {png}")
+        if png not in legacy and not png.startswith(("Logo_", "../")):
+            problems.append(f"mapping references missing {png}")
 
+    for slug, (src, page, png, classes) in EXTRA.items():
+        manifest[slug] = {"source": src, "artboard": page + 1, "legacyPng": os.path.relpath(os.path.join(R, png), legacy_dir).replace(os.sep, "/"),
+                          "matchError": None, "classes": classes}
+    docs = {}
     for slug, m in sorted(manifest.items()):
-        svg, faces, shadows = convert.convert(doc[m["artboard"] - 1])
+        src = m.get("source", "Assets/ComponentIcons/Icons.ai")
+        if src not in docs:
+            docs[src] = pymupdf.open(os.path.join(R, src))
+        svg, faces, shadows = convert.convert(docs[src][m["artboard"] - 1])
         open(os.path.join(out_svg, slug + ".svg"), "w", newline="\n").write(svg)
         render_svg(svg, 24).save(os.path.join(out_png, slug + ".png"))
         m["faces"], m["shadows"] = faces, shadows
@@ -124,6 +142,7 @@ def main():
     with open(os.path.join(R, "Assets", "Icons", "icons.json"), "w", newline="\n") as f:
         json.dump({"source": "Assets/ComponentIcons/Icons.ai", "icons": dict(sorted(manifest.items()))}, f, indent=2)
         f.write("\n")
+    write_slug_map(R, manifest)
     print(f"\n{len(manifest)} icons written.")
     for p in problems:
         print("NOTE:", p)

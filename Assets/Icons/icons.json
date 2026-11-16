@@ -1349,6 +1349,18 @@
       "shadows": 1,
       "diffVsLegacy": 7.28
     },
+    "swiftlet-logo": {
+      "source": "Assets/Logo/Logo.ai",
+      "artboard": 1,
+      "legacyPng": "../Logo/Logo_24x24.png",
+      "matchError": null,
+      "classes": [
+        "SwiftletPlugin"
+      ],
+      "faces": 9,
+      "shadows": 3,
+      "diffVsLegacy": 3.76
+    },
     "text-to-base64": {
       "artboard": 61,
       "legacyPng": "Icons_text_to_base64_24x24.png",
