@@ -1,0 +1,131 @@
+[
+  {
+    "name": "OAuth Token: missing URL",
+    "gh1": "OAuthTokenComponent",
+    "inputs": [
+      {
+        "text": ""
+      },
+      {
+        "text": "client"
+      },
+      {
+        "text": "code"
+      },
+      null,
+      {
+        "text": "http://localhost/callback/"
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true,
+    "expect": [
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        {
+          "text": "Token URL is required"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "OAuth Token: waiting for code",
+    "gh1": "OAuthTokenComponent",
+    "inputs": [
+      {
+        "text": "https://example.test/token"
+      },
+      {
+        "text": "client"
+      },
+      {
+        "text": ""
+      },
+      null,
+      {
+        "text": "http://localhost/callback/"
+      }
+    ]
+  },
+  {
+    "name": "OAuth Authorize: ready defaults",
+    "gh1": "OAuthAuthorizeComponent",
+    "inputs": [
+      {
+        "text": "https://example.test/authorize"
+      },
+      {
+        "text": "client"
+      }
+    ],
+    "expect": [
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        {
+          "text": "http://localhost:8888/callback/"
+        }
+      ],
+      [
+        {
+          "text": "Ready (set Authorize to true to start)"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "OAuth Authorize: invalid port",
+    "gh1": "OAuthAuthorizeComponent",
+    "inputs": [
+      {
+        "text": "https://example.test/authorize"
+      },
+      {
+        "text": "client"
+      },
+      null,
+      {
+        "int": 65536
+      },
+      {
+        "bool": false
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true,
+    "expect": [
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        null
+      ],
+      [
+        {
+          "text": "Error: Invalid port"
+        }
+      ]
+    ]
+  }
+]

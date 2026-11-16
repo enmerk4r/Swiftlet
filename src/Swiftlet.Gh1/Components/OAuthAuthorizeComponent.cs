@@ -5,15 +5,12 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed class OAuthAuthorizeComponent : GH_Component
 {
-    private readonly RhinoHostServices _hostServices = new();
-    private readonly ModernOAuthAuthorizationFlow _flow;
-    private int _runId;
-    private int _updateScheduled;
-    private bool _previousAuthorize;
-    private string? _launchMessage;
-    private string? _componentError;
+    private readonly OAuthAuthorizationController _controller;
+    private long _generation;
 
-    public OAuthAuthorizeComponent()
+    public OAuthAuthorizeComponent() : this(new RhinoHostServices()) { }
+
+    public OAuthAuthorizeComponent(IHostServices host)
         : base(
             "OAuth Authorize",
             "OAuth",
@@ -21,7 +18,8 @@ public sealed class OAuthAuthorizeComponent : GH_Component
             ShellNaming.Category,
             ShellNaming.Auth)
     {
-        _flow = new ModernOAuthAuthorizationFlow(_hostServices);
+        _controller = new OAuthAuthorizationController(host);
+        _controller.Changed += OnChanged;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -60,200 +58,37 @@ public sealed class OAuthAuthorizeComponent : GH_Component
         DA.GetDataList(2, scopes);
         DA.GetData(3, ref port);
         DA.GetData(4, ref authorize);
-        bool authorizeTriggered = authorize && !_previousAuthorize;
-        _previousAuthorize = authorize;
-
-        string redirectUri = $"http://localhost:{port}/callback/";
-
-        if (string.IsNullOrWhiteSpace(authorizationUrl))
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Authorization URL is required");
-            DA.SetData(3, "Error: No authorization URL");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(clientId))
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Client ID is required");
-            DA.SetData(3, "Error: No client ID");
-            return;
-        }
-
-        if (port < 1 || port > 65535)
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port must be between 1 and 65535");
-            DA.SetData(3, "Error: Invalid port");
-            return;
-        }
-
-        if (authorizeTriggered)
-        {
-            ResetFlow();
-            StartAuthorizationFlow(authorizationUrl, clientId, redirectUri, scopes);
-        }
-
-        string status = GetStatusMessage();
-
-        Message = _flow.IsCompleted && !string.IsNullOrWhiteSpace(_flow.AuthorizationCode)
-            ? "Authorized"
-            : _flow.IsCompleted && !string.IsNullOrWhiteSpace(_flow.Error)
-                ? "Error"
-                : !string.IsNullOrWhiteSpace(_componentError)
-                    ? "Error"
-                : _flow.IsWaiting
-                    ? "Waiting..."
-                    : string.Empty;
-
-        DA.SetData(0, _flow.AuthorizationCode);
-        DA.SetData(1, _flow.Session?.CodeVerifier);
-        DA.SetData(2, _flow.Session?.RedirectUri ?? redirectUri);
-        DA.SetData(3, status);
+        var value = _controller.EvaluateAsync(authorizationUrl, clientId, scopes, port, authorize).GetAwaiter().GetResult();
+        DA.SetData(0, value.Code); DA.SetData(1, value.Verifier); DA.SetData(2, value.RedirectUri); DA.SetData(3, value.Status);
+        if (value.ReportError && value.Error is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Error, value.Error);
+        if (value.Warning is not null) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, value.Warning);
+        Message = value.IsWaiting ? "Waiting..." : value.Code is not null ? "Authorized" : value.Error is not null ? "Error" : string.Empty;
     }
-
+    private void OnChanged(object? sender, EventArgs args)
+    {
+        if (args is not OAuthAuthorizationChangedEventArgs change || change.Generation != _controller.Generation) return;
+        long generation = Volatile.Read(ref _generation);
+        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        {
+            if (generation != Volatile.Read(ref _generation) || change.Generation != _controller.Generation) return;
+            OnPingDocument()?.ScheduleSolution(5, _ =>
+            {
+                if (generation == Volatile.Read(ref _generation) && change.Generation == _controller.Generation) ExpireSolution(false);
+            });
+        }));
+    }
+    private void Stop()
+    {
+        Interlocked.Increment(ref _generation);
+        _controller.ResetAsync().GetAwaiter().GetResult();
+    }
     public override void RemovedFromDocument(GH_Document document)
-    {
-        ResetFlow();
-        _flow.DisposeAsync().AsTask().GetAwaiter().GetResult();
-        base.RemovedFromDocument(document);
-    }
-
+    { Stop(); base.RemovedFromDocument(document); }
     public override void DocumentContextChanged(GH_Document document, GH_DocumentContext context)
-    {
-        if (context == GH_DocumentContext.Close)
-        {
-            ResetFlow();
-        }
-
-        base.DocumentContextChanged(document, context);
-    }
+    { if (context == GH_DocumentContext.Close) Stop(); base.DocumentContextChanged(document, context); }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
     public override Guid ComponentGuid => new("B2C3D4E5-F6A7-4B8C-9D0E-1F2A3B4C5D6E");
 
-    private void StartAuthorizationFlow(
-        string authorizationUrl,
-        string clientId,
-        string redirectUri,
-        IReadOnlyList<string> scopes)
-    {
-        try
-        {
-            _componentError = null;
-            _launchMessage = null;
-
-            HostActionResult launchResult = _flow
-                .StartAsync(authorizationUrl, clientId, redirectUri, scopes)
-                .GetAwaiter()
-                .GetResult();
-
-            if (!launchResult.IsSuccess && !launchResult.RequiresManualAction)
-            {
-                _componentError = launchResult.Message;
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, launchResult.Message);
-                return;
-            }
-
-            if (launchResult.RequiresManualAction)
-            {
-                _launchMessage = string.IsNullOrWhiteSpace(launchResult.ManualActionText)
-                    ? launchResult.Message
-                    : $"{launchResult.Message} {launchResult.ManualActionText}";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, _launchMessage);
-            }
-
-            int runId = ++_runId;
-            _ = WaitForAuthorizationAsync(runId);
-
-            ScheduleComponentUpdate();
-        }
-        catch (Exception ex)
-        {
-            _componentError = ex.Message;
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-        }
-    }
-
-    private async Task WaitForAuthorizationAsync(int runId)
-    {
-        try
-        {
-            await _flow.WaitForCompletionAsync().ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            if (runId == _runId)
-            {
-                _componentError = ex.Message;
-            }
-        }
-        finally
-        {
-            ScheduleComponentUpdate();
-        }
-    }
-
-    private string GetStatusMessage()
-    {
-        if (_flow.IsCompleted && !string.IsNullOrWhiteSpace(_flow.AuthorizationCode))
-        {
-            return "Authorization successful";
-        }
-
-        if (_flow.IsCompleted && !string.IsNullOrWhiteSpace(_flow.Error))
-        {
-            return $"Error: {_flow.Error}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(_componentError))
-        {
-            return $"Error: {_componentError}";
-        }
-
-        if (!string.IsNullOrWhiteSpace(_launchMessage))
-        {
-            return _launchMessage;
-        }
-
-        if (_flow.IsWaiting)
-        {
-            return "Waiting for authorization... (check your browser)";
-        }
-
-        return "Ready (set Authorize to true to start)";
-    }
-
-    private void ResetFlow()
-    {
-        _runId++;
-        _flow.ResetAsync().GetAwaiter().GetResult();
-        _launchMessage = null;
-        _componentError = null;
-        Message = string.Empty;
-    }
-
-    private void ScheduleComponentUpdate()
-    {
-        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
-        {
-            return;
-        }
-
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
-        {
-            GH_Document? document = OnPingDocument();
-            if (document is null)
-            {
-                Interlocked.Exchange(ref _updateScheduled, 0);
-                return;
-            }
-
-            document.ScheduleSolution(5, _ =>
-            {
-                Interlocked.Exchange(ref _updateScheduled, 0);
-                ExpireSolution(false);
-            });
-        }));
-    }
 }
-

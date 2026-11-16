@@ -46,6 +46,18 @@ GET stores TimeoutSeconds explicitly through Store/IReader and in CustomValues f
 
 A component can compile, register and solve while still failing persistence. Test component serialization, persistent custom parameters, and document archives. GrasshopperIO.IO.ReadStorableFromFile<Document> is required when reading the document archive used by the spike; the untyped overload cannot infer Document from an IoId. These archive tests do not replace actual UI save/open, copy/paste, undo/redo, or a cold restart.
 
+## OAuth sessions and lifecycle
+
+Both shells use Runtime.OAuthTokenSession and OAuthAuthorizationController. Token requests serialize through a gate, suppress repeated one-use authorization codes, and refresh on the rising Refresh edge. Lowering Refresh must not replay the original authorization code. A canceled refresh retains the last successful token and can be retried. OAuthTokenClient awaits without capturing the caller context; GH1 schedules completion asynchronously, while GH2 waits on its worker with the solution/lifetime cancellation token.
+
+Authorization attempts own their callback listener, cancellation source and generation. Reset, deletion, disable and document close cancel and release that listener. Every queued completion carries its attempt generation; both adapters recheck it on the UI thread, and GH1 checks again in its scheduled solution callback. An old completion must not expire a new or removed component. There is only one completion notification per attempt, so no cross-attempt notification coalescing is needed.
+
+Live credentials, codes and verifiers are transient. GH1 Write/Read and GH2 archive duplication must produce fresh sessions, rather than restore cached credentials. The controller preserves GH1's distinction between setup validation errors (runtime errors) and provider callback failures (Status output).
+
+`Validation/validate_oauth.py --port <slot>` checks both hosts against local token/callback fixtures: deduplication, refresh edges, real callbacks, cancellation, deletion, disable/re-enable, credential-free archives, and active document close with post-close same-PID/API liveness. It uses an injected manual browser service and never authenticates to an external provider. The four strict static parity cases are in `tests/Swiftlet.Cases/cases/oauth.json`.
+
+`Validation/validate_oauth_close.py --slot-script tests/Swiftlet.Cases/slot.py --count 10 --report <json>` repeats the waiting-authorizer active-canvas close in fresh owned processes, checks listener port release and same-PID API liveness, and retains each router log. Start routers with machine-wide .NET; do not inherit DOTNET_ROOT pointing to a user-local .NET 8-only installation. Real interactive browser-provider login, copy/paste and undo remain separate release checks.
+
 ## Migration
 
 RequestMigrationTable (formerly HeaderMigrationTable) demonstrates a simple Gh1MigrationRule.Identity pin map. This is sufficient only for stateless one-to-one cases.

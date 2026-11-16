@@ -1,5 +1,4 @@
 using Grasshopper.Kernel;
-using Swiftlet.Core.Auth;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
 
@@ -7,17 +6,10 @@ namespace Swiftlet.Gh.Rhino8.Components;
 
 public sealed class OAuthTokenComponent : GH_Component
 {
-    private readonly OAuthTokenClient _tokenClient = new();
-    private string _cachedAccessToken = string.Empty;
-    private string _cachedRefreshToken = string.Empty;
-    private int _cachedExpiresIn;
-    private string _cachedTokenType = "Bearer";
-    private string? _lastCompletedRequestKey;
-    private string? _lastFailedRequestKey;
-    private string? _lastError;
-    private bool _isExchanging;
-    private bool _isRefreshExchange;
-    private bool _previousRefresh;
+    private OAuthTokenSession _session = new();
+    private CancellationTokenSource _lifetime = new();
+    private Task<OAuthTokenSnapshot>? _pending;
+    private long _generation;
     private int _updateScheduled;
 
     public OAuthTokenComponent()
@@ -74,256 +66,68 @@ public sealed class OAuthTokenComponent : GH_Component
         DA.GetData(5, ref clientSecret);
         DA.GetData(6, ref refresh);
 
-        bool refreshTriggered = refresh && !_previousRefresh;
-        _previousRefresh = refresh;
-
-        if (refresh)
+        if (_lifetime.IsCancellationRequested)
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Refresh is enabled. Set back to False after refreshing to avoid repeated token requests.");
+            _lifetime.Dispose(); _lifetime = new(); _session = new(); _pending = null;
         }
-
-        if (string.IsNullOrWhiteSpace(tokenUrl))
+        if (refresh) AddRuntimeMessage(GH_RuntimeMessageLevel.Remark,
+            "Refresh is enabled. Set back to False after refreshing to avoid repeated token requests.");
+        if (_pending is { IsCompleted: true }) _pending = null;
+        _pending ??= _session.EvaluateAsync(new(tokenUrl, clientId, code, codeVerifier, redirectUri, clientSecret, refresh), _lifetime.Token);
+        if (_pending.IsCompletedSuccessfully)
         {
-            SetValidationError(DA, "Token URL is required");
-            return;
+            var result = _pending.Result; _pending = null;
+            Output(DA, result);
         }
-
-        if (string.IsNullOrWhiteSpace(clientId))
+        else if (_pending.IsCompleted)
         {
-            SetValidationError(DA, "Client ID is required");
-            return;
+            _pending.GetAwaiter().GetResult();
+            _pending = null;
         }
-
-        if (refresh)
+        else
         {
-            if (string.IsNullOrWhiteSpace(_cachedRefreshToken))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No refresh token available. Obtain tokens first with Refresh set to False.");
-                Message = "Error";
-                DA.SetData(5, "No refresh token available");
-                return;
-            }
-
-            string refreshRequestKey = BuildRefreshRequestKey(tokenUrl, clientId, clientSecret, _cachedRefreshToken);
-
-            if (_isExchanging)
-            {
-                OutputPending(DA, includeCachedTokens: true, _isRefreshExchange ? "Refreshing token..." : "Waiting for token request to finish...");
-                return;
-            }
-
-            if (!refreshTriggered)
-            {
-                OutputCachedTokens(DA);
-                Message = "Ready";
-                return;
-            }
-
-            StartExchange(
-                ModernOAuthWorkflow.CreateRefreshTokenRequest(tokenUrl, clientId, _cachedRefreshToken, clientSecret),
-                refreshRequestKey,
-                isRefresh: true);
-            OutputPending(DA, includeCachedTokens: true, "Refreshing token...");
-            return;
+            Output(DA, refresh ? _session.Cached with { Status = "Refreshing..." }
+                : new OAuthTokenSnapshot(Error: "Requesting token...", Status: "Requesting..."));
+            if (Interlocked.Exchange(ref _updateScheduled, 1) == 0)
+                _ = NotifyCompletionAsync(_pending, _generation);
         }
-
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            if (!string.IsNullOrWhiteSpace(_cachedAccessToken))
-            {
-                OutputCachedTokens(DA);
-                Message = "Ready";
-                return;
-            }
-
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Authorization code is required");
-            Message = "Waiting";
-            DA.SetData(5, "Waiting for authorization code");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(redirectUri))
-        {
-            SetValidationError(DA, "Redirect URI is required");
-            return;
-        }
-
-        OAuthTokenRequest request = ModernOAuthWorkflow.CreateAuthorizationCodeTokenRequest(
-            tokenUrl,
-            clientId,
-            code,
-            redirectUri,
-            string.IsNullOrWhiteSpace(codeVerifier) ? null : codeVerifier,
-            string.IsNullOrWhiteSpace(clientSecret) ? null : clientSecret);
-
-        string requestKey = BuildAuthorizationCodeRequestKey(tokenUrl, clientId, code, codeVerifier, redirectUri, clientSecret);
-
-        if (_isExchanging)
-        {
-            OutputPending(DA, includeCachedTokens: false, _isRefreshExchange ? "Waiting for refresh to finish..." : "Requesting token...");
-            return;
-        }
-
-        if (string.Equals(_lastCompletedRequestKey, requestKey, StringComparison.Ordinal) &&
-            !string.IsNullOrWhiteSpace(_cachedAccessToken))
-        {
-            OutputCachedTokens(DA);
-            Message = "Token received";
-            return;
-        }
-
-        if (string.Equals(_lastFailedRequestKey, requestKey, StringComparison.Ordinal))
-        {
-            Message = "Error";
-            DA.SetData(5, _lastError);
-            return;
-        }
-
-        StartExchange(request, requestKey, isRefresh: false);
-        OutputPending(DA, includeCachedTokens: false, "Requesting token...");
     }
+
+    private void Output(IGH_DataAccess access, OAuthTokenSnapshot value)
+    {
+        access.SetData(0, value.AccessToken); access.SetData(1, value.RefreshToken);
+        access.SetData(2, value.ExpiresIn); access.SetData(3, value.TokenType);
+        access.SetData(4, value.Header is { } header ? new HttpHeaderGoo(header) : null);
+        access.SetData(5, value.Error); Message = value.Status;
+        if (value.Diagnostic is not null) AddRuntimeMessage(value.IsWarning ? GH_RuntimeMessageLevel.Warning : GH_RuntimeMessageLevel.Error, value.Diagnostic);
+    }
+    private async Task NotifyCompletionAsync(Task<OAuthTokenSnapshot> pending, long generation)
+    {
+        try { await pending.ConfigureAwait(false); }
+        catch (Exception) { /* Observed here; the next solve reports a faulted task. */ }
+        finally
+        {
+            if (generation == Volatile.Read(ref _generation))
+                Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+                {
+                    if (generation != Volatile.Read(ref _generation)) return;
+                    Interlocked.Exchange(ref _updateScheduled, 0);
+                    OnPingDocument()?.ScheduleSolution(5, _ => ExpireSolution(false));
+                }));
+        }
+    }
+    private void StopExchange()
+    {
+        Interlocked.Increment(ref _generation); Interlocked.Exchange(ref _updateScheduled, 0);
+        _lifetime.Cancel(); _pending = null;
+    }
+    public override void RemovedFromDocument(GH_Document document)
+    { StopExchange(); base.RemovedFromDocument(document); }
+    public override void DocumentContextChanged(GH_Document document, GH_DocumentContext context)
+    { if (context == GH_DocumentContext.Close) StopExchange(); base.DocumentContextChanged(document, context); }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
 
     public override Guid ComponentGuid => new("C3D4E5F6-A7B8-4C9D-0E1F-2A3B4C5D6E7F");
 
-    private void StartExchange(OAuthTokenRequest request, string requestKey, bool isRefresh)
-    {
-        _isExchanging = true;
-        _isRefreshExchange = isRefresh;
-        _lastError = null;
-        _ = Task.Run(() => ExchangeTokenAsync(request, requestKey, isRefresh));
-    }
-
-    private void OutputCachedTokens(IGH_DataAccess DA)
-    {
-        DA.SetData(0, _cachedAccessToken);
-        DA.SetData(1, _cachedRefreshToken);
-        DA.SetData(2, _cachedExpiresIn);
-        DA.SetData(3, _cachedTokenType);
-
-        if (!string.IsNullOrWhiteSpace(_cachedAccessToken))
-        {
-            DA.SetData(4, new HttpHeaderGoo("Authorization", $"{_cachedTokenType} {_cachedAccessToken}"));
-        }
-
-        DA.SetData(5, null);
-    }
-
-    private void OutputPending(IGH_DataAccess dataAccess, bool includeCachedTokens, string status)
-    {
-        if (includeCachedTokens)
-        {
-            OutputCachedTokens(dataAccess);
-        }
-        else
-        {
-            dataAccess.SetData(0, null);
-            dataAccess.SetData(1, null);
-            dataAccess.SetData(2, null);
-            dataAccess.SetData(3, null);
-            dataAccess.SetData(4, null);
-            dataAccess.SetData(5, status);
-        }
-
-        Message = _isRefreshExchange ? "Refreshing..." : "Requesting...";
-    }
-
-    private async Task ExchangeTokenAsync(OAuthTokenRequest request, string requestKey, bool isRefresh)
-    {
-        try
-        {
-            OAuthTokenResponse response = await _tokenClient.ExchangeAsync(request).ConfigureAwait(false);
-            _cachedAccessToken = response.AccessToken;
-            if (!string.IsNullOrWhiteSpace(response.RefreshToken))
-            {
-                _cachedRefreshToken = response.RefreshToken;
-            }
-
-            _cachedExpiresIn = response.ExpiresIn;
-            _cachedTokenType = string.IsNullOrWhiteSpace(response.TokenType) ? "Bearer" : response.TokenType;
-            _lastCompletedRequestKey = requestKey;
-            _lastFailedRequestKey = null;
-            _lastError = null;
-        }
-        catch (OAuthTokenException ex)
-        {
-            _lastFailedRequestKey = requestKey;
-            _lastError = ex.Message;
-        }
-        catch (Exception ex)
-        {
-            _lastFailedRequestKey = requestKey;
-            _lastError = ex.Message;
-        }
-        finally
-        {
-            _isExchanging = false;
-            _isRefreshExchange = false;
-            ScheduleComponentUpdate();
-        }
-    }
-
-    private void SetValidationError(IGH_DataAccess dataAccess, string message)
-    {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, message);
-        dataAccess.SetData(5, message);
-    }
-
-    private void ScheduleComponentUpdate()
-    {
-        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
-        {
-            return;
-        }
-
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
-        {
-            GH_Document? document = OnPingDocument();
-            if (document is null)
-            {
-                Interlocked.Exchange(ref _updateScheduled, 0);
-                return;
-            }
-
-            document.ScheduleSolution(5, _ =>
-            {
-                Interlocked.Exchange(ref _updateScheduled, 0);
-                ExpireSolution(false);
-            });
-        }));
-    }
-
-    private static string BuildAuthorizationCodeRequestKey(
-        string tokenUrl,
-        string clientId,
-        string code,
-        string codeVerifier,
-        string redirectUri,
-        string clientSecret)
-    {
-        return string.Join("\n",
-            "authorization_code",
-            tokenUrl.Trim(),
-            clientId.Trim(),
-            code.Trim(),
-            codeVerifier.Trim(),
-            redirectUri.Trim(),
-            clientSecret.Trim());
-    }
-
-    private static string BuildRefreshRequestKey(
-        string tokenUrl,
-        string clientId,
-        string clientSecret,
-        string refreshToken)
-    {
-        return string.Join("\n",
-            "refresh_token",
-            tokenUrl.Trim(),
-            clientId.Trim(),
-            clientSecret.Trim(),
-            refreshToken.Trim());
-    }
 }
-
