@@ -29,3 +29,14 @@ The traffic-only driver repeats ordinary concurrent bursts without lifecycle mut
 `lifecycle_fresh_storm.py` runs one `solve_storm.py` placement per newly spawned Rhino process, retaining router logs and the original process PID/creation time. Five fresh-process gates comprise one primary-process run plus four helper runs. The helper cleans up only processes it created; its held process handle prevents PID reuse from redirecting cleanup.
 
 The scheduler uses one pending map per document and only expires/starts work after `CurrentlyRunning` is null. It never uses `DelayedExpire`, whose SDK contract permits cancellation of older solutions. The document scheduler is the only coalescer. It validates currentness inside the lock that selects the pending entry, so late stale callbacks cannot replace current demand; components hold no posted flags or tickets. MCP pin preparation runs only when the entry is valid and the document is quiescent. Per-component outbox confirmation follows `State.CurrentId`/`State.Data`, including retained results after a cancelled global solve. One automatic retry is allowed until a new external notification arrives; it is not an unlimited cancellation loop. This guarantee covers Swiftlet's serialized UI scheduling paths, not arbitrary external threads starting solutions on the same document.
+
+Run the focused acceptance checks before the combined stress:
+
+```powershell
+python tests/Swiftlet.Cases/checks/scheduler_races.py --port <Rhino-AI-port> --report artifacts/lifecycle/scheduler-races.json
+python tests/Swiftlet.Cases/checks/solve_storm.py --port <Rhino-AI-port> --only WsServer --rounds 5 --report artifacts/lifecycle/ws-storm.json
+python tests/Swiftlet.Parity/lifecycle_cancel_probe.py --port <Rhino-AI-port> --pid <Rhino-PID> --report artifacts/lifecycle/delivery.json
+python tests/Swiftlet.Parity/lifecycle_traffic_repro.py --port <Rhino-AI-port> --pid <Rhino-PID> --cycles 200 --report artifacts/lifecycle/traffic.json
+```
+
+The retained-result probe requires both Throttle and WebSocket Send to end Cancelled after the controlled solve; the discarded-result probe requires both the fixture publisher and WebSocket Send to end Cancelled. These assertions run before the exact-once echo checks. The full 13-component storm gate must also pass in five distinct fresh processes; run one in the primary process and four sequentially with `lifecycle_fresh_storm.py --count 4` after stopping the primary. Keep at most one Rhino test instance open per agent and close it when its run finishes.
