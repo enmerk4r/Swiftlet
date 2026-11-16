@@ -7,6 +7,8 @@ namespace Swiftlet.Gh2.Parameters;
 [IoId("6b0d67e8-c654-4fe7-8eb6-79af07492523")]
 public sealed class HttpResponseDataParameter : Parameter<HttpResponseData>
 {
+    protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
+
     public HttpResponseDataParameter() : base(new Nomen("Http Response", "HTTP response with metadata", "Swiftlet", "3. Send"), Access.Item) { }
     public HttpResponseDataParameter(string name, string userName, string info, Access access = Access.Item) : base(name, userName, info, access) { }
     public HttpResponseDataParameter(IReader reader) : base(reader) { }

@@ -14,6 +14,8 @@ namespace Swiftlet.Gh2.Components;
 [IoId("3bad80b0-77e4-4c32-b35c-d0a73ff6bf59")]
 public sealed class GetRequestComponent : Component
 {
+    protected override Grasshopper2.UI.Icon.IIcon IconInternal => Icons.SwiftletIcons.For(GetType()) ?? base.IconInternal;
+
     private static readonly int[] TimeoutOptions = { 1, 5, 10, 15, 30, 60, 100, 300, 600, 900 };
     // HttpClient permits parallel SendAsync calls and is retained for connection reuse.
     private static readonly HttpRequestExecutor Executor = new();
