@@ -202,12 +202,19 @@ def main():
     if not a.files:
         return 0
     cases = []
+    # "__REPO__" in a case file stands for the repository root and "__TMP__" for a fresh temp folder
+    # (forward slashes). A case's "files": {"name": base64} are written into __TMP__ before the run, so
+    # file-reading cases do not depend on checkout line endings.
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="swiftlet-cases-files-"))
     for f in a.files:
-        # "__REPO__" in a case file stands for the repository root (forward slashes), e.g. for file paths.
-        text = open(f, encoding="utf-8").read().replace("__REPO__", REPO.as_posix())
+        text = open(f, encoding="utf-8").read().replace("__REPO__", REPO.as_posix()).replace("__TMP__", tmp.as_posix())
         cases += json.loads(text)
     if a.only:
         cases = [c for c in cases if a.only in c["name"]]
+    import base64
+    for c in cases:
+        for name, data in (c.get("files") or {}).items():
+            (tmp / name).write_bytes(base64.b64decode(data))
     template = (HERE / "runner.cs").read_text(encoding="utf-8")
     script = template.replace("__CASES_JSON__", json.dumps(cases).replace('"', '""'))
     out = run_csharp(a.port, script)
