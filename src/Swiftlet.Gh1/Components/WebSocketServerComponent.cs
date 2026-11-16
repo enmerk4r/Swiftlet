@@ -27,7 +27,7 @@ public sealed class WebSocketServerComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (0-65535)", GH_ParamAccess.item, 8181);
+        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (1-65535)", GH_ParamAccess.item, 8181);
         pManager.AddBooleanParameter("Run", "R", "Set to true to start the server, false to stop", GH_ParamAccess.item, false);
     }
 
@@ -54,9 +54,9 @@ public sealed class WebSocketServerComponent : GH_Component
         DA.GetData(0, ref port);
         DA.GetData(1, ref run);
 
-        if (port < 0 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port must be between 0 and 65535");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ListenPorts.Error);
             DA.SetData(4, "Error: Invalid port");
             return;
         }

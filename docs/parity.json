@@ -4224,7 +4224,7 @@
         {
           "name": "Body",
           "nickname": "B",
-          "description": "POST Body",
+          "description": "Request body",
           "access": "item",
           "optional": true,
           "typeName": "Request Body",
@@ -10304,7 +10304,7 @@
         {
           "name": "Port",
           "nickname": "P",
-          "description": "Port number to listen at between 0 and 65535",
+          "description": "Port number to listen at between 1 and 65535",
           "access": "item",
           "optional": false,
           "typeName": "Integer",
@@ -10456,7 +10456,7 @@
         {
           "name": "Port",
           "nickname": "P",
-          "description": "Port number to listen on (0-65535)",
+          "description": "Port number to listen on (1-65535)",
           "access": "item",
           "optional": false,
           "typeName": "Integer",
@@ -10625,7 +10625,7 @@
         {
           "name": "Port",
           "nickname": "P",
-          "description": "Port number to listen on (0-65535)",
+          "description": "Port number to listen on (1-65535)",
           "access": "item",
           "optional": false,
           "typeName": "Integer",
@@ -10988,7 +10988,7 @@
         {
           "name": "Port",
           "nickname": "P",
-          "description": "Port number to listen on (0-65535)",
+          "description": "Port number to listen on (1-65535)",
           "access": "item",
           "optional": false,
           "typeName": "Integer",

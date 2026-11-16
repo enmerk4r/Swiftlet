@@ -50,7 +50,7 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
         try
         {
             if (Volatile.Read(ref _stopping) != 0 || Document is null || Activity == ObjectActivity.Disabled) return;
-            if (port < 1 || port > 65535) { StopUnderGate(); access.AddError("Invalid port", "Port number must be between 1 and 65535"); return; }
+            if (!ListenPorts.IsValid(port)) { StopUnderGate(); access.AddError("Invalid port", ListenPorts.Error); return; }
             Volatile.Write(ref _desiredTools, tools);
             if (NeedsOutputUpdate(tools)) { ScheduleUpdate(true); return; }
             if (_lifetime.IsCancellationRequested) { _lifetime.Dispose(); _lifetime = new(); }

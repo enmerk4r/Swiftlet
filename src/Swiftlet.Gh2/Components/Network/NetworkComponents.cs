@@ -24,7 +24,7 @@ public sealed class HttpListenerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen at between 0 and 65535");
+        inputs.AddInteger("Port", "Pt", "Port number to listen at between 1 and 65535");
         inputs.AddText("Route", "Rt", "Optional route prefix", Access.Item, Requirement.MayBeMissing);
         inputs.Add(new RequestBodyParameter("Response Body", "Bd", "Pre-canned response body that will be returned to the sender"), Requirement.MayBeMissing);
     }
@@ -45,8 +45,8 @@ public sealed class HttpListenerComponent : ListenerComponent
         access.GetItem(1, out string route);
         access.GetItem(2, out IRequestBody responseBody);
 
-        if (port < 0 || port > 65535)
-            throw new Exception("Port number must be between 0 and 65535");
+        if (!ListenPorts.IsValid(port))
+            throw new Exception(ListenPorts.Error);
 
         route ??= string.Empty;
         if (route.Length > 0 && !route.EndsWith('/'))
@@ -130,7 +130,7 @@ public sealed class UdpListenerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen on (0-65535)");
+        inputs.AddInteger("Port", "Pt", "Port number to listen on (1-65535)");
     }
 
     protected override void AddOutputs(OutputAdder outputs)
@@ -144,9 +144,9 @@ public sealed class UdpListenerComponent : ListenerComponent
         if (!access.GetItem(0, out int port))
             return;
 
-        if (port < 0 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
-            access.AddError("Invalid port", "Port must be between 0 and 65535");
+            access.AddError("Invalid port", ListenPorts.Error);
             return;
         }
 
@@ -363,7 +363,7 @@ public sealed class WebSocketServerComponent : ListenerComponent
 
     protected override void AddInputs(InputAdder inputs)
     {
-        inputs.AddInteger("Port", "Pt", "Port number to listen on (0-65535)").Set(8181);
+        inputs.AddInteger("Port", "Pt", "Port number to listen on (1-65535)").Set(8181);
         inputs.AddBoolean("Run", "Rn", "Set to true to start the server, false to stop").Set(false);
     }
 
@@ -383,9 +383,9 @@ public sealed class WebSocketServerComponent : ListenerComponent
         if (!access.GetItem(1, out bool run))
             run = false;
 
-        if (port < 0 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
-            access.AddError("Invalid port", "Port must be between 0 and 65535");
+            access.AddError("Invalid port", ListenPorts.Error);
             access.SetItem(4, "Error: Invalid port");
             return;
         }

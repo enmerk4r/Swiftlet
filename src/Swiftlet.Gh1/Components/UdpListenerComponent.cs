@@ -21,7 +21,7 @@ public sealed class UdpListenerComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (0-65535)", GH_ParamAccess.item);
+        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (1-65535)", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -44,9 +44,9 @@ public sealed class UdpListenerComponent : GH_Component
             return;
         }
 
-        if (port < 0 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port must be between 0 and 65535");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ListenPorts.Error);
             return;
         }
 

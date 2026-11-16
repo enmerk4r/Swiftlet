@@ -11,7 +11,7 @@ public sealed class HttpRequestComponent : HttpRequestComponentBase
 
     protected override bool SupportsBody => true;
 
-    protected override string BodyDescription => "POST Body";
+    protected override string BodyDescription => "Request body";
 
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
