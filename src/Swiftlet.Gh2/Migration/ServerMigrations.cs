@@ -13,6 +13,8 @@ public sealed class ServerMigrationTable : IMigrationTable
     {
         yield return new ServerInputMigration();
         yield return new ListenerRequestMigration();
+        foreach (var rule in NetworkMigrationRules.Create())
+            yield return rule;
     }
 }
 
