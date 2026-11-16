@@ -3,7 +3,8 @@
 Forces SolutionStopped before Requeue with the batch outside the pending map. Separately injects
 an actual transfer Changed notification after disable/Stop, waits for the scheduler to discard it,
 then re-enables and verifies progress and completion from a real throttled loopback download.
-Uses private reflection only to place the two race windows deterministically; no product hooks.
+Also checks stale/current notification orders and duplicate coalescing. Uses private reflection
+only to place the race windows deterministically; no product hooks.
 """
 import argparse, hashlib, http.server, json, pathlib, sys, tempfile, threading, time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
@@ -19,6 +20,19 @@ dynamic doc = editor.Canvas.Document;
 void Save(string key, object value) => AppDomain.CurrentDomain.SetData("swiftlet.races."+key, value);
 object Read(string key) => AppDomain.CurrentDomain.GetData("swiftlet.races."+key);
 void Print(object value) => Console.WriteLine("RACE:"+JsonSerializer.Serialize(value));
+int PendingCount(object component)
+{
+    var scheduler=sw.GetType("Swiftlet.Gh2.BackgroundSolveScheduler",true);
+    var table=scheduler.GetField("Documents",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
+    object[] found={(object)doc,null};
+    if (!(bool)table.GetType().GetMethod("TryGetValue").Invoke(table,found)) return 0;
+    var co=found[1]; var sync=co.GetType().GetField("_sync",flags).GetValue(co);
+    lock(sync)
+    {
+        var pending=(IDictionary)co.GetType().GetField("_pending",flags).GetValue(co);
+        return pending.Contains((Guid)((dynamic)component).InstanceId) ? 1 : 0;
+    }
+}
 '''
 REQUEUE = r'''
 if (doc.Solution.State.CurrentlyRunning != null) throw new Exception("slot not idle");
@@ -73,11 +87,11 @@ Save("transfer",c);
 var job = bt.GetProperty("Job",flags).GetValue(c);
 var changed = (Delegate)job.GetType().BaseType.GetField("Changed",flags).GetValue(job);
 changed.DynamicInvoke(false);
-Print(new { queued=(int)bt.GetField("_expiryPosted",flags).GetValue(c), activity=activity.GetValue(c).ToString() });
+Print(new { queued=PendingCount(c), activity=activity.GetValue(c).ToString() });
 '''
 TRANSFER_FLAG = r'''
 var c = Read("transfer");
-Print(new { queued=(int)c.GetType().BaseType.GetField("_expiryPosted",flags).GetValue(c) });
+Print(new { queued=PendingCount(c) });
 '''
 TRANSFER_START = r'''
 dynamic c = Read("transfer");
@@ -93,7 +107,7 @@ object[] Values(int i) => data == null ? Array.Empty<object>() : ((IEnumerable)d
 var done=Values(0); var progress=Values(1); var status=Values(3); var error=Values(5);
 Print(new { done=done.Length>0 && done[0] is bool b && b, progress=progress.Length>0 ? Convert.ToDouble(progress[0]) : -1,
  status=status.Select(x=>x?.ToString()).ToArray(), errors=error.Select(x=>x?.ToString()).ToArray(), phase=state.Phase.ToString(),
- queued=(int)((object)c).GetType().BaseType.GetField("_expiryPosted",flags).GetValue((object)c) });
+ queued=PendingCount((object)c) });
 '''
 TRANSFER_CLEAN = r'''
 if (Read("transfer") is object c) doc.Objects.Remove((dynamic)c);
@@ -101,38 +115,42 @@ Print(new { cleaned=true });
 '''
 
 
-TICKETS = r'''
-var c = Activator.CreateInstance(sw.GetTypes().First(t => t.Name == "DownloadFileComponent"));
+GENERATION = r'''
+var c=Activator.CreateInstance(sw.GetTypes().First(t=>t.Name=="CreateTextBodyComponent"));
 doc.Objects.Add((dynamic)c);
-var bt = c.GetType().BaseType;
-var post = bt.GetMethod("PostExpiry",flags); var stop = bt.GetMethod("Stop",flags);
-var field = bt.GetField("_expiryPosted",flags);
-var scheduler = sw.GetType("Swiftlet.Gh2.BackgroundSolveScheduler",true);
-var table = scheduler.GetField("Documents",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null);
-object[] found = {(object)doc,null};
-try
+var scheduler=sw.GetType("Swiftlet.Gh2.BackgroundSolveScheduler",true);
+var request=scheduler.GetMethod("Request",BindingFlags.Public|BindingFlags.Static);
+var generation=new int[]{0}; var counts=new int[2];
+Func<bool> oldCurrent=()=>generation[0]==0;
+Func<bool> newCurrent=()=>generation[0]==1;
+Action oldPrepare=()=>System.Threading.Interlocked.Increment(ref counts[0]);
+Action newPrepare=()=>System.Threading.Interlocked.Increment(ref counts[1]);
+void Queue(Func<bool> current,Action prepare)
 {
-    post.Invoke(c,null);
-    table.GetType().GetMethod("TryGetValue").Invoke(table,found);
-    var co=found[1]; var pending=(IDictionary)co.GetType().GetField("_pending",flags).GetValue(co);
-    Guid id=(Guid)((dynamic)c).InstanceId;
-    var old=pending[id]; int first=(int)field.GetValue(c);
-    // Hold the old request outside the pending map, exactly as an in-flight batch would.
-    pending.Remove(id);
-    stop.Invoke(c,null);
-    post.Invoke(c,null);
-    var current=pending[id]; int second=(int)field.GetValue(c);
-    old.GetType().GetMethod("Release").Invoke(old,null);
-    int afterOld=(int)field.GetValue(c);
-    // Release is idempotent even after another lease has been acquired.
-    old.GetType().GetMethod("Release").Invoke(old,null);
-    int afterRepeat=(int)field.GetValue(c);
-    current.GetType().GetMethod("Release").Invoke(current,null);
-    int afterCurrent=(int)field.GetValue(c);
-    Print(new { first,second,afterOld,afterRepeat,afterCurrent,
-        passed=first!=0 && second!=0 && first!=second && afterOld==second && afterRepeat==second && afterCurrent==0 });
+    object[] args=request.GetParameters().Length==4 ? new object[]{c,current,prepare,null} : new object[]{c,current,prepare};
+    request.Invoke(null,args);
 }
-finally { doc.Objects.Remove((dynamic)c); }
+if ("__ORDER__"=="stale_then_current")
+{
+    Queue(oldCurrent,oldPrepare); generation[0]=1; Queue(newCurrent,newPrepare);
+}
+else
+{
+    generation[0]=1; Queue(newCurrent,newPrepare); Queue(oldCurrent,oldPrepare);
+}
+// Duplicate current demand must still dispatch only once.
+// Do not send it in the reverse-order case: that would conceal stale replacement of the good entry.
+if ("__ORDER__"=="stale_then_current") Queue(newCurrent,newPrepare);
+Save("generationComponent",c); Save("generationCounts",counts);
+Print(new { queued=PendingCount(c) });
+'''
+GENERATION_READ = r'''
+var c=Read("generationComponent"); var counts=(int[])Read("generationCounts");
+Print(new { stale=counts[0],current=counts[1],pending=PendingCount(c) });
+'''
+GENERATION_CLEAN = r'''
+if (Read("generationComponent") is object c) doc.Objects.Remove((dynamic)c);
+Print(new { cleaned=true });
 '''
 
 
@@ -179,7 +197,14 @@ def main():
         report['checks']['late_transfer_after_stop']={'passed':released['queued']==0 and progress and row['done'] and file_ok,'setup':setup,'release':released,'releaseHistory':release_history,'progressObserved':progress,'fileMatches':file_ok,'result':row,'history':history}
     finally:
         run(TRANSFER_CLEAN); server.shutdown(); server.server_close()
-    report['checks']['old_ticket_new_ticket']=run(TICKETS)
+    for order in ['stale_then_current','current_then_stale']:
+        try:
+            setup=run(GENERATION.replace('__ORDER__',order))
+            row,history=poll(GENERATION_READ,lambda r:r['current']==1 and r['pending']==0,3)
+            # Observe a quiescent interval to catch an extra deferred dispatch.
+            time.sleep(.2); row=run(GENERATION_READ)
+            report['checks'][order]={'passed':row['stale']==0 and row['current']==1 and row['pending']==0,'setup':setup,'result':row,'history':history}
+        finally: run(GENERATION_CLEAN)
     report['alive']=run('Print(new { pid=System.Environment.ProcessId });')
     report['passed']=all(r['passed'] for r in report['checks'].values()) and report['alive']['pid']==report['assembly']['pid']
     path=pathlib.Path(args.report); path.parent.mkdir(parents=True,exist_ok=True); path.write_text(json.dumps(report,indent=2))
