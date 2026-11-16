@@ -11,9 +11,12 @@ public static class McpContentFactory
             throw new Exception($"Format {format} is not supported");
         string mime = parsed switch
         {
-            SwiftletImageFormat.Png => "image/png", SwiftletImageFormat.Bmp => "image/bmp",
-            SwiftletImageFormat.Jpeg => "image/jpeg", SwiftletImageFormat.Gif => "image/gif",
-            SwiftletImageFormat.Tiff => "image/tiff", _ => throw new ArgumentOutOfRangeException(nameof(format))
+            SwiftletImageFormat.Png => "image/png",
+            SwiftletImageFormat.Bmp => "image/bmp",
+            SwiftletImageFormat.Jpeg => "image/jpeg",
+            SwiftletImageFormat.Gif => "image/gif",
+            SwiftletImageFormat.Tiff => "image/tiff",
+            _ => throw new ArgumentOutOfRangeException(nameof(format))
         };
         return new McpImageContentBlock(mime, Convert.ToBase64String(ImageCodec.Save(image, parsed)));
     }

@@ -10,7 +10,7 @@ namespace Swiftlet.Gh2.Parameters;
 public sealed class McpToolDefinitionParameter : Parameter<McpToolDefinition>
 {
     public McpToolDefinitionParameter() : base(new Nomen("MCP Tool Definition", "A tool definition for an MCP server", "Swiftlet", Sections.Mcp), Access.Item) { }
-    public McpToolDefinitionParameter(string name, string userName, string info, Access access = Access.Item) : base(name,userName,info,access) { }
+    public McpToolDefinitionParameter(string name, string userName, string info, Access access = Access.Item) : base(name, userName, info, access) { }
     public McpToolDefinitionParameter(IReader reader) : base(reader) { }
     protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
 }

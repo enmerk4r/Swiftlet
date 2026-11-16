@@ -59,4 +59,3 @@ public sealed class McpToolCallRequestTypeAssistant : TypeAssistant<ModernMcpToo
     public override bool Write(IWriter writer, Name location, ModernMcpToolCallContext instance) => false;
     public override bool Read(IReader reader, Name location, out ModernMcpToolCallContext instance) { instance = null!; return false; }
 }
-

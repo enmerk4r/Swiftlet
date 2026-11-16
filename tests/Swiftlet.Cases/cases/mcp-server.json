@@ -1,0 +1,544 @@
+[
+  {
+    "name": "MCP text Unicode",
+    "gh1": "CreateMcpTextContentComponent",
+    "inputs": [
+      {
+        "text": "hello λ"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "text",
+            "text": "hello λ"
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP text empty",
+    "gh1": "CreateMcpTextContentComponent",
+    "inputs": [
+      {
+        "text": ""
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "text",
+            "text": ""
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP resource link minimal",
+    "gh1": "CreateMcpResourceLinkComponent",
+    "inputs": [
+      {
+        "text": "file:///a.txt"
+      },
+      {
+        "text": "a"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource_link",
+            "uri": "file:///a.txt",
+            "name": "a"
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP resource link metadata",
+    "gh1": "CreateMcpResourceLinkComponent",
+    "inputs": [
+      {
+        "text": "https://example.com/a"
+      },
+      {
+        "text": "a"
+      },
+      {
+        "text": "Title"
+      },
+      {
+        "text": "Description"
+      },
+      {
+        "text": "text/plain"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource_link",
+            "uri": "https://example.com/a",
+            "name": "a",
+            "title": "Title",
+            "description": "Description",
+            "mimeType": "text/plain"
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP resource link invalid URI",
+    "gh1": "CreateMcpResourceLinkComponent",
+    "inputs": [
+      {
+        "text": ""
+      },
+      {
+        "text": "name"
+      }
+    ],
+    "expectError": true
+  },
+  {
+    "name": "MCP embedded text default mime",
+    "gh1": "CreateMcpEmbeddedTextResourceComponent",
+    "inputs": [
+      {
+        "text": "file:///hello.txt"
+      },
+      {
+        "text": "λ\nline"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource",
+            "resource": {
+              "uri": "file:///hello.txt",
+              "text": "λ\nline",
+              "mimeType": "text/plain"
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP embedded text custom mime",
+    "gh1": "CreateMcpEmbeddedTextResourceComponent",
+    "inputs": [
+      {
+        "text": "file:///a.json"
+      },
+      {
+        "text": "{\"a\":1}"
+      },
+      {
+        "text": "application/json"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource",
+            "resource": {
+              "uri": "file:///a.json",
+              "text": "{\"a\":1}",
+              "mimeType": "application/json"
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP embedded binary exact bytes",
+    "gh1": "CreateMcpEmbeddedBinaryResourceComponent",
+    "inputs": [
+      {
+        "text": "file:///a.bin"
+      },
+      {
+        "bytes": "AAEC/v8="
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource",
+            "resource": {
+              "uri": "file:///a.bin",
+              "blob": "AAEC/v8=",
+              "mimeType": "application/octet-stream"
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP embedded binary empty",
+    "gh1": "CreateMcpEmbeddedBinaryResourceComponent",
+    "inputs": [
+      {
+        "text": "file:///empty"
+      },
+      {
+        "bytes": ""
+      },
+      {
+        "text": "application/x-empty"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "type": "resource",
+            "resource": {
+              "uri": "file:///empty",
+              "blob": "",
+              "mimeType": "application/x-empty"
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP parameter defaults",
+    "gh1": "DefineToolParameterComponent",
+    "inputs": [
+      {
+        "text": "name"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "type": "McpToolParameter",
+          "props": {
+            "Name": {
+              "text": "name"
+            },
+            "Type": {
+              "text": "string"
+            },
+            "Description": {
+              "text": ""
+            },
+            "Required": {
+              "bool": true
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP parameter alias and optional",
+    "gh1": "DefineToolParameterComponent",
+    "inputs": [
+      {
+        "text": "count"
+      },
+      {
+        "text": "int32"
+      },
+      {
+        "text": "how many"
+      },
+      {
+        "bool": false
+      }
+    ],
+    "expect": [
+      [
+        {
+          "type": "McpToolParameter",
+          "props": {
+            "Name": {
+              "text": "count"
+            },
+            "Type": {
+              "text": "integer"
+            },
+            "Description": {
+              "text": "how many"
+            },
+            "Required": {
+              "bool": false
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP parameter whitespace name",
+    "gh1": "DefineToolParameterComponent",
+    "inputs": [
+      {
+        "text": " "
+      }
+    ],
+    "expectError": true
+  },
+  {
+    "name": "MCP tool empty optional list",
+    "gh1": "DefineToolComponent",
+    "inputs": [
+      {
+        "text": "hello"
+      },
+      {
+        "text": "say hello"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "name": "hello",
+            "description": "say hello",
+            "inputSchema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP tool schema required and optional",
+    "gh1": "DefineToolComponent",
+    "inputs": [
+      {
+        "text": "count"
+      },
+      {
+        "text": "counts"
+      },
+      [
+        {
+          "mcpparam": {
+            "name": "n",
+            "type": "int",
+            "required": true
+          }
+        },
+        {
+          "mcpparam": {
+            "name": "label",
+            "required": false
+          }
+        }
+      ]
+    ],
+    "expect": [
+      [
+        {
+          "mcp": {
+            "name": "count",
+            "description": "counts",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "n"
+              ]
+            }
+          }
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP tool invalid name",
+    "gh1": "DefineToolComponent",
+    "inputs": [
+      {
+        "text": ""
+      },
+      {
+        "text": "desc"
+      }
+    ],
+    "expectError": true
+  },
+  {
+    "name": "MCP live request deconstruction",
+    "gh1": "DeconstructToolCallComponent",
+    "inputs": [
+      {
+        "mcpcall": {
+          "id": "fixed",
+          "tool": "count",
+          "arguments": "{\"n\":2}"
+        }
+      }
+    ]
+  },
+  {
+    "name": "MCP text response one shot",
+    "gh1": "McpToolResponseComponent",
+    "inputs": [
+      {
+        "mcpcall": {}
+      },
+      [
+        {
+          "mcptext": "hello"
+        }
+      ],
+      null,
+      {
+        "bool": false
+      }
+    ],
+    "expect": [
+      [
+        {
+          "bool": true
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP mixed response with structured content",
+    "gh1": "McpToolResponseComponent",
+    "inputs": [
+      {
+        "mcpcall": {}
+      },
+      [
+        {
+          "mcptext": "hello"
+        },
+        {
+          "mcpbinary": {
+            "uri": "file:///a",
+            "bytes": "AQI="
+          }
+        }
+      ],
+      {
+        "jobject": "{\"answer\":42}"
+      },
+      {
+        "bool": true
+      }
+    ],
+    "expect": [
+      [
+        {
+          "bool": true
+        }
+      ]
+    ]
+  },
+  {
+    "name": "MCP structured-only response",
+    "gh1": "McpToolResponseComponent",
+    "inputs": [
+      {
+        "mcpcall": {}
+      },
+      null,
+      {
+        "jobject": "{\"answer\":42}"
+      }
+    ],
+    "expect": [
+      [
+        {
+          "bool": true
+        }
+      ]
+    ]
+  },
+  {
+    "name": "Server request deconstruction",
+    "gh1": "DeconstructRequestComponent",
+    "inputs": [
+      {
+        "listenerrequest": {
+          "method": "POST",
+          "route": "/api",
+          "path": "/api/case",
+          "body": "hi λ"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Server response default empty",
+    "gh1": "ServerResponseComponent",
+    "inputs": [
+      {
+        "listenerrequest": {}
+      }
+    ],
+    "expect": [
+      [
+        {
+          "bool": true
+        }
+      ]
+    ]
+  },
+  {
+    "name": "Server response body and headers",
+    "gh1": "ServerResponseComponent",
+    "inputs": [
+      {
+        "listenerrequest": {}
+      },
+      {
+        "bodytext": [
+          "text/plain",
+          "hello"
+        ]
+      },
+      {
+        "int": 202
+      },
+      [
+        {
+          "header": [
+            "X-Test",
+            "yes"
+          ]
+        }
+      ]
+    ],
+    "expect": [
+      [
+        {
+          "bool": true
+        }
+      ]
+    ]
+  }
+]

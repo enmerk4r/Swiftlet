@@ -10,8 +10,11 @@ public static class McpArchiveCodec
     public static McpToolParameter Parameter(JsonObject json) => new(
         (string)json["name"]!, (string)json["type"]!, (string?)json["description"] ?? "", (bool?)json["required"] ?? true);
     public static JsonObject Tool(McpToolDefinition tool) => new()
-    { ["name"] = tool.Name, ["description"] = tool.Description,
-        ["parameters"] = new JsonArray(tool.Parameters.Select(p => (JsonNode)Parameter(p)).ToArray()) };
+    {
+        ["name"] = tool.Name,
+        ["description"] = tool.Description,
+        ["parameters"] = new JsonArray(tool.Parameters.Select(p => (JsonNode)Parameter(p)).ToArray())
+    };
     public static McpToolDefinition Tool(JsonObject json) => new((string)json["name"]!, (string?)json["description"] ?? "",
         ((JsonArray)json["parameters"]!).Select(p => Parameter((JsonObject)p!)));
     public static McpContentBlock Content(JsonObject json)
