@@ -18,6 +18,7 @@
     <Grasshopper2SdkVersion Condition="'$(Grasshopper2SdkVersion)' == ''">9.0.26300.9401</Grasshopper2SdkVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
     <PackageReference Include="Grasshopper2" Version="$(Grasshopper2SdkVersion)" ExcludeAssets="runtime" />
     <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
     <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
