@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Swiftlet.Core.Auth;
 using Swiftlet.Core.Mcp;
 using Swiftlet.Gh.Rhino8;
+using Swiftlet.Runtime;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.HostAbstractions;
 using Swiftlet.Hosts.Desktop;
@@ -186,7 +187,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityCsvHelpersRoundTripAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityCsv");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityCsv");
         string line = (string)utilityType.GetMethod("CreateLine")!.Invoke(null, [new[] { "alpha", "be,ta", "say \"hi\"" }, ","])!;
         IReadOnlyList<string> parsed = (IReadOnlyList<string>)utilityType.GetMethod("ParseLine")!.Invoke(null, [line, ","])!;
 
@@ -201,7 +202,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityCompressionRoundTripsAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityCompression");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityCompression");
         byte[] original = Encoding.UTF8.GetBytes("swiftlet utilities round trip");
         byte[] compressed = (byte[])utilityType.GetMethod("Compress")!.Invoke(null, [original])!;
         byte[] decompressed = (byte[])utilityType.GetMethod("Decompress", [typeof(byte[])])!.Invoke(null, [compressed])!;
@@ -213,7 +214,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityUrlEncodingProducesExpectedOutputAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityUrlEncoding");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityUrlEncoding");
         string encoded = (string)utilityType.GetMethod("Encode")!.Invoke(null, ["cafe au lait+?", Encoding.UTF8])!;
 
         Assert.Equal("cafe+au+lait%2B%3F", encoded);
@@ -232,14 +233,14 @@ internal static class IntegrationTestRunner
 
         foreach ((string fileName, string expectedGuid) in archivedComponentGuids)
         {
-            string source = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "ARCHIVED", fileName));
+            string source = File.ReadAllText(RepoPath("src", "Swiftlet.Gh1", "ARCHIVED", fileName));
 
             Assert.Contains("[Obsolete(", source);
             Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.hidden;", source);
             Assert.Contains($"public override Guid ComponentGuid => new(\"{expectedGuid}\");", source);
         }
 
-        string currentTextBodySource = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "Components", "CreateTextBodyComponent.cs"));
+        string currentTextBodySource = File.ReadAllText(RepoPath("src", "Swiftlet.Gh1", "Components", "CreateTextBodyComponent.cs"));
         Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.secondary;", currentTextBodySource);
         Assert.Contains("public override Guid ComponentGuid => new(\"D5BF7D4A-9FC3-4984-90F7-FEB32AA96D9F\");", currentTextBodySource);
 
@@ -870,7 +871,13 @@ internal static class IntegrationTestRunner
 
         Assert.True(clientSession.IsConnected);
         Assert.NotNull(clientSession.Connection);
-        Assert.True(serverSession.TryGetAnyOpenConnection(out ModernWebSocketConnection? serverConnectionBeforeMessage));
+        // The server learns about the connection asynchronously (via the bridge), so poll briefly.
+        ModernWebSocketConnection? serverConnectionBeforeMessage = null;
+        for (int attempt = 0; attempt < 200 && !serverSession.TryGetAnyOpenConnection(out serverConnectionBeforeMessage); attempt++)
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+        }
+
         Assert.NotNull(serverConnectionBeforeMessage);
         Assert.Equal("Connected", serverConnectionBeforeMessage!.GetStatusString());
 
@@ -1091,6 +1098,7 @@ internal static class IntegrationTestRunner
     private static Type GetShellType(string fullName)
     {
         return typeof(ModernServer).Assembly.GetType(fullName)
+               ?? typeof(Swiftlet.Gh.Rhino8.Goo.ByteArrayGoo).Assembly.GetType(fullName)
                ?? throw new InvalidOperationException($"Unable to find shell type '{fullName}'.");
     }
 
@@ -1135,7 +1143,7 @@ internal static class IntegrationTestRunner
 
     private static string NormalizePathForTest(string path, bool isWindows)
     {
-        Type pathUtilityType = GetShellType("Swiftlet.Gh.Rhino8.FilePathUtility");
+        Type pathUtilityType = GetShellType("Swiftlet.Runtime.FilePathUtility");
         MethodInfo normalizeMethod = pathUtilityType.GetMethod(
             "NormalizePath",
             BindingFlags.NonPublic | BindingFlags.Static,

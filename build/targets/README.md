@@ -21,7 +21,7 @@ The packaging scripts read this metadata instead of hard-coding Rhino-specific p
 
 ## Notes
 
-- The current active shell is `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`.
+- The Grasshopper 1 shell is `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj` (assembly name `Swiftlet.Gh.Rhino8`).
 - That shell is intended to support Rhino 8 and newer while the binary remains compatible.
 - The `rhino9` packaging target is a packaging-layer retag of the same built binary for Yak discovery.
 - If Rhino 9 ever requires a different binary, `rhino9.json` should switch to a real Rhino 9 shell/project instead of retagging the Rhino 8 build.

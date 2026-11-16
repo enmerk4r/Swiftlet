@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>Swiftlet.Runtime</RootNamespace>
+    <AssemblyName>Swiftlet.Runtime</AssemblyName>
+    <Description>Host-neutral request, server, WebSocket, MCP and OAuth workflows shared by the Grasshopper 1 and Grasshopper 2 shells.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Swiftlet.Gh.Rhino8" />
+    <InternalsVisibleTo Include="Swiftlet.Gh2" />
+    <InternalsVisibleTo Include="Swiftlet.Integration.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
+    <ProjectReference Include="..\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
+  </ItemGroup>
+</Project>

@@ -84,7 +84,7 @@ The script:
 
 ## Optional Release Packaging
 
-`src/Swiftlet.Gh.Rhino8` can invoke `Publish-Target.ps1` after a Windows `Release` build, but this is disabled by default because release packaging now expects Linux and macOS ARM bridge artifacts from the build-only CI workflow.
+`src/Swiftlet.Gh1` can invoke `Publish-Target.ps1` after a Windows `Release` build, but this is disabled by default because release packaging now expects Linux and macOS ARM bridge artifacts from the build-only CI workflow.
 
 - It packages from the existing build output via `-PluginOutputDir`, so it does not rebuild the plug-in.
 - It passes `-NoRestore`, so it reuses the already-restored packages from the build machine.
@@ -94,14 +94,14 @@ The script:
 ## Current Target Model
 
 - `rhino8`
-  - builds from `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
+  - builds from `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
   - represents the active Rhino 8+ line
   - currently packages bridge artifacts for `win-x64`, `linux-x64`, `osx-arm64`, and `osx-x64`
   - uses Native AOT for `win-x64`, `linux-x64`, and `osx-arm64`
   - keeps `osx-x64` as a self-contained single-file bridge
   - produces a single `rh8-any` Yak package because Yak compatibility is derived from the referenced RhinoCommon SDK
 - `rhino9`
-  - builds from the same `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
+  - builds from the same `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
   - stages the same binary for Rhino 9 discovery
   - re-tags the generated `any` package to `rh9-*` after `yak build`
 
