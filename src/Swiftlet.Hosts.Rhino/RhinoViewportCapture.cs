@@ -6,15 +6,23 @@ namespace Swiftlet.Hosts.Rhino;
 
 internal static class RhinoViewportCapture
 {
-    public static bool TryCaptureActiveViewport(out SwiftletImage? image, out string? errorMessage)
+    public static bool TryCaptureActiveViewport(
+        out SwiftletImage? image,
+        out string? errorMessage,
+        CancellationToken cancellationToken = default)
     {
         return TryCapture(
             doc => doc.Views.ActiveView,
             out image,
-            out errorMessage);
+            out errorMessage,
+            cancellationToken);
     }
 
-    public static bool TryCaptureViewport(string viewportName, out SwiftletImage? image, out string? errorMessage)
+    public static bool TryCaptureViewport(
+        string viewportName,
+        out SwiftletImage? image,
+        out string? errorMessage,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(viewportName))
         {
@@ -26,24 +34,34 @@ internal static class RhinoViewportCapture
         return TryCapture(
             doc => doc.Views.Find(viewportName, false),
             out image,
-            out errorMessage);
+            out errorMessage,
+            cancellationToken);
     }
 
     private static bool TryCapture(
         Func<global::Rhino.RhinoDoc, RhinoView?> resolveView,
         out SwiftletImage? image,
-        out string? errorMessage)
+        out string? errorMessage,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(resolveView);
 
         SwiftletImage? capturedImage = null;
         string? capturedError = null;
-        using var done = new ManualResetEventSlim(false);
 
-        global::Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
+        // Not disposed on purpose: after a cancelled wait the queued UI action may still call Set().
+        var done = new ManualResetEventSlim(false);
+
+        Action capture = () =>
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    capturedError = "Viewport capture was cancelled.";
+                    return;
+                }
+
                 global::Rhino.RhinoDoc? doc = global::Rhino.RhinoDoc.ActiveDoc;
                 if (doc is null)
                 {
@@ -75,9 +93,28 @@ internal static class RhinoViewportCapture
             {
                 done.Set();
             }
-        }));
+        };
 
-        done.Wait();
+        if (global::Rhino.RhinoApp.InvokeRequired)
+        {
+            // Called from a solver thread (Grasshopper 2). Run on the UI thread, but stop waiting
+            // if the solution is cancelled while the UI thread is busy.
+            global::Rhino.RhinoApp.InvokeOnUiThread(capture);
+            try
+            {
+                done.Wait(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                image = null;
+                errorMessage = "Viewport capture was cancelled.";
+                return false;
+            }
+        }
+        else
+        {
+            capture();
+        }
 
         image = capturedImage;
         errorMessage = capturedError;

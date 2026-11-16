@@ -20,5 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Grasshopper2" Version="$(Grasshopper2SdkVersion)" ExcludeAssets="runtime" />
     <ProjectReference Include="..\Swiftlet.Core\Swiftlet.Core.csproj" />
+    <ProjectReference Include="..\Swiftlet.Imaging\Swiftlet.Imaging.csproj" />
+    <ProjectReference Include="..\Swiftlet.Hosts.Rhino\Swiftlet.Hosts.Rhino.csproj" />
   </ItemGroup>
 </Project>
