@@ -1,0 +1,345 @@
+[
+ {
+  "name": "ReadHtml: document",
+  "gh1": "ReadHtmlComponent",
+  "inputs": [
+   {
+    "text": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ReadHtml: malformed markup still parses",
+  "gh1": "ReadHtmlComponent",
+  "inputs": [
+   {
+    "text": "<p>open <b>x"
+   }
+  ]
+ },
+ {
+  "name": "ById: found",
+  "gh1": "GetElementByIdComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "a"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "html": "<p id=\"a\" class=\"x y\" data-k=\"1\">one</p>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ById: missing id gives no data",
+  "gh1": "GetElementByIdComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "nope"
+   }
+  ]
+ },
+ {
+  "name": "ByAttributeValue: recursive",
+  "gh1": "GetElementsByAttributeValueComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "data-k"
+   },
+   {
+    "text": "1"
+   },
+   {
+    "bool": true
+   }
+  ]
+ },
+ {
+  "name": "ByAttributeValue: recursive default when unset",
+  "gh1": "GetElementsByAttributeValueComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "data-k"
+   },
+   {
+    "text": "1"
+   },
+   null
+  ]
+ },
+ {
+  "name": "ByAttributeValue: direct children only",
+  "gh1": "GetElementsByAttributeValueComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "data-k"
+   },
+   {
+    "text": "1"
+   },
+   {
+    "bool": false
+   }
+  ]
+ },
+ {
+  "name": "ByAttributeValue: no match",
+  "gh1": "GetElementsByAttributeValueComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "data-k"
+   },
+   {
+    "text": "9"
+   },
+   {
+    "bool": true
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "ByClassName: recursive",
+  "gh1": "GetElementsByClassNameComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "y"
+   },
+   {
+    "bool": true
+   }
+  ]
+ },
+ {
+  "name": "ByClassName: direct children only",
+  "gh1": "GetElementsByClassNameComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "y"
+   },
+   {
+    "bool": false
+   }
+  ]
+ },
+ {
+  "name": "ByClassName: partial class name does not match",
+  "gh1": "GetElementsByClassNameComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "bi"
+   },
+   {
+    "bool": true
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "ByTagName: recursive",
+  "gh1": "GetElementsByTagNameComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "p"
+   },
+   {
+    "bool": true
+   }
+  ]
+ },
+ {
+  "name": "ByTagName: direct children only",
+  "gh1": "GetElementsByTagNameComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "li"
+   },
+   {
+    "bool": false
+   }
+  ],
+  "expect": [
+   []
+  ]
+ },
+ {
+  "name": "ByXPath: descendants",
+  "gh1": "GetElementsByXPathComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "//li"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "html": "<li class=\"y\">i1</li>"
+    },
+    {
+     "html": "<li>i2</li>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ByXPath: no match gives no data",
+  "gh1": "GetElementsByXPathComponent",
+  "inputs": [
+   {
+    "html": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "//table"
+   }
+  ]
+ },
+ {
+  "name": "AttributeValue: present",
+  "gh1": "GetHtmlAttributeValueComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "class"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "box big"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "AttributeValue: absent gives no data",
+  "gh1": "GetHtmlAttributeValueComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   },
+   {
+    "text": "href"
+   }
+  ]
+ },
+ {
+  "name": "Attributes: names and values",
+  "gh1": "GetHtmlAttributesComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "id"
+    },
+    {
+     "text": "class"
+    }
+   ],
+   [
+    {
+     "text": "root"
+    },
+    {
+     "text": "box big"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "ChildNodes",
+  "gh1": "GetHtmlNodeChildrenComponent",
+  "inputs": [
+   {
+    "htmlel": "<div id=\"root\" class=\"box big\"><p id=\"a\" class=\"x y\" data-k=\"1\">one</p><p class=\"y\" data-k=\"2\">two <b>bold</b></p><span data-k=\"1\">s</span><ul><li class=\"y\">i1</li><li>i2</li></ul></div>"
+   }
+  ]
+ },
+ {
+  "name": "InnerHtml",
+  "gh1": "GetInnerHtmlComponent",
+  "inputs": [
+   {
+    "htmlel": "<p>two <b>bold</b></p>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "two <b>bold</b>"
+    }
+   ]
+  ]
+ },
+ {
+  "name": "Stringify",
+  "gh1": "StringifyHtmlNodeComponent",
+  "inputs": [
+   {
+    "htmlel": "<p>two <b>bold</b></p>"
+   }
+  ],
+  "expect": [
+   [
+    {
+     "text": "<p>two <b>bold</b></p>"
+    }
+   ]
+  ]
+ }
+]

@@ -111,6 +111,14 @@ public sealed class JsonObjectData : JsonData
     /// <summary>Returns a new, unshared object.</summary>
     public JsonObject ToObject() => (JsonObject)JsonNode.Parse(Json)!;
 
+    /// <summary>Parses JSON text; throws <see cref="JsonException"/> when it is not a JSON object.</summary>
+    public static JsonObjectData Parse(string json)
+    {
+        return TryFrom(JsonToken.Parse(json), out JsonObjectData? result)
+            ? result!
+            : throw new JsonException("The text is not a JSON object.");
+    }
+
     public static bool TryFrom(JsonData data, out JsonObjectData? result)
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -137,6 +145,14 @@ public sealed class JsonArrayData : JsonData
     /// <summary>Returns a new, unshared array.</summary>
     public JsonArray ToArray() => (JsonArray)JsonNode.Parse(Json)!;
 
+    /// <summary>Parses JSON text; throws <see cref="JsonException"/> when it is not a JSON array.</summary>
+    public static JsonArrayData Parse(string json)
+    {
+        return TryFrom(JsonToken.Parse(json), out JsonArrayData? result)
+            ? result!
+            : throw new JsonException("The text is not a JSON array.");
+    }
+
     public static bool TryFrom(JsonData data, out JsonArrayData? result)
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -162,6 +178,14 @@ public sealed class JsonValueData : JsonData
 
     /// <summary>Returns a new, unshared value. JSON null gives a null reference.</summary>
     public JsonValue? ToValue() => JsonNode.Parse(Json) as JsonValue;
+
+    /// <summary>Parses JSON text; throws <see cref="JsonException"/> when it is not a JSON value (string, number, boolean or null).</summary>
+    public static JsonValueData Parse(string json)
+    {
+        return TryFrom(JsonToken.Parse(json), out JsonValueData? result)
+            ? result!
+            : throw new JsonException("The text is not a JSON value (string, number, boolean or null).");
+    }
 
     public static bool TryFrom(JsonData data, out JsonValueData? result)
     {
