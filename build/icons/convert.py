@@ -126,6 +126,12 @@ def vector_elements(page):
                 continue
             gop = float(e.values.get("opacity", 1.0)) if "opacity" in e.values else 1.0
             bb = p.bbox()
+            if bb is not None and (bb[0] >= N or bb[1] >= N or bb[2] <= 0 or bb[3] <= 0):
+                # Entirely outside the artboard: the organising captions under some artboards in
+                # Icons.ai ("JToken", "Bitmap", ...). Not part of the icon; GH2's SvgIcon does not clip
+                # to the viewBox, so they would be drawn below the icon.
+                vector_elements.removed += 1
+                continue
             is_backdrop = bb is not None and bb[2] - bb[0] >= N * 0.98 and bb[3] - bb[1] >= N * 0.98
             if is_backdrop and p.fill is not None and p.fill.value is not None and (p.fill.red, p.fill.green, p.fill.blue) == (255, 255, 255):
                 continue  # full-artboard white backdrop (present in Logo.ai)
@@ -139,6 +145,8 @@ def vector_elements(page):
                 join = str(e.values.get("stroke-linejoin", "miter"))
                 els.append(("stroke", stroke_outline(p, p.stroke_width, cap, join), (p.stroke.red, p.stroke.green, p.stroke.blue), op, False))
     return els
+
+vector_elements.removed = 0  # elements dropped for lying outside the artboard (reset per convert())
 
 def stroke_outline(p, width, cap, join):
     """Outline a stroked path into a shapely (Multi)Polygon in SVG units."""
@@ -202,6 +210,7 @@ def is_param_page(page):
     return False
 
 def convert(page, shadow_thresh=0.06, min_area_px=40):
+    vector_elements.removed = 0
     els = vector_elements(page)
     if is_param_page(page):
         from svgelements import Path as _P

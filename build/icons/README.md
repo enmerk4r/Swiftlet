@@ -23,6 +23,9 @@ no `transform`, `clipPath`, `mask`, filters, gradients, group opacity or arc com
 sub-path is filled on its own, so holes cannot be cut out. `convert.py` therefore writes a flat list of
 `<path d="…" fill="#rrggbb">` elements in a `0 0 24 24` viewBox using only absolute `M L C Z`, and:
 
+- drops anything lying entirely outside the 24 x 24 artboard: some artboards carry a small organising
+  caption below the icon ("JToken", "Bitmap", ...) that is not part of the icon, and `SvgIcon` does not
+  clip to the viewBox, so it would be drawn under the icon in GH2 (`outsideArtboardRemoved` in icons.json);
 - converts text to outlines and splits any shape with holes (letter counters) into hole-free pieces;
 - converts strokes to filled outlines;
 - replaces Illustrator's blurred, masked shadow images with flat polygons coloured with the shade
