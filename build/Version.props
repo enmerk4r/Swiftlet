@@ -2,5 +2,7 @@
   <PropertyGroup>
     <SwiftletVersion>0.4.0</SwiftletVersion>
     <SwiftletAssemblyVersion>0.4.0.0</SwiftletAssemblyVersion>
+    <!-- Yak compares the plug-in informational version with the manifest version; keep it free of the commit suffix. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>
