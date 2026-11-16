@@ -81,7 +81,7 @@ class Stress:
         self.requests = 0
         self.aborted = 0
         self.started = time.monotonic()
-        self.report = {'status': 'running', 'pid': a.pid, 'cycles': self.records, 'traffic_completed': 0, 'traffic_interrupted': 0, 'interruption_kinds': {}, 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()}
+        self.report = {'status': 'running', 'pid': a.pid, 'cycles': self.records, 'traffic_completed': 0, 'traffic_interrupted': 0, 'interruption_kinds': {}, 'duplicate_echoes': 0, 'duplicate_details': [], 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()}
 
     def save(self):
         self.report.update(elapsed_seconds=round(time.monotonic() - self.started, 2), traffic_completed=self.requests, traffic_interrupted=self.aborted)
@@ -184,6 +184,7 @@ class Stress:
         client = WebSocket(self.ports[3])
         expected = {f'stress-{n}-{i}' for i in range(8)}
         received = set()
+        duplicates = []
         try:
             for text in sorted(expected):
                 client.send(text)
@@ -192,13 +193,28 @@ class Stress:
             while received != expected:
                 text = client.receive()
                 assert text in expected, text
+                if text in received:
+                    duplicates.append(text)
                 received.add(text)
                 if time.monotonic() > deadline:
                     raise TimeoutError({'expected': expected, 'received': received})
+            observe_until = time.monotonic() + 0.2
+            while time.monotonic() < observe_until:
+                client.s.settimeout(max(0.001, observe_until - time.monotonic()))
+                try:
+                    text = client.receive()
+                except TimeoutError:
+                    break
+                assert text in expected, text
+                duplicates.append(text)
             return len(received)
         except TimeoutError as error:
             raise TimeoutError(f'WebSocket burst {n}: received={sorted(received)}, missing={sorted(expected-received)}') from error
         finally:
+            if duplicates:
+                self.report['duplicate_echoes'] += len(duplicates)
+                self.report['duplicate_details'].append({'burst': n, 'frames': duplicates})
+                raise AssertionError(f'Duplicate WebSocket echoes in burst {n}: {duplicates}')
             client.close()
 
     def callback(self, state):

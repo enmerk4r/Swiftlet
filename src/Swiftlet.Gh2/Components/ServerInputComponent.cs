@@ -120,15 +120,9 @@ public sealed class ServerInputComponent : Component, IRemovalAware
         if (sender is ModernServerSession source && !ReferenceEquals(source, _session)) return;
         long generation = Volatile.Read(ref _generation);
         if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _expiryPosted, 1) != 0) return;
-        Rhino.RhinoApp.InvokeOnUiThread((System.Action)(() =>
-        {
-            if (generation != Volatile.Read(ref _generation)) return;
-            Interlocked.Exchange(ref _expiryPosted, 0);
-            var document = Document;
-            if (Volatile.Read(ref _stopping) != 0 || document is null ||
-                document.State != DocumentState.Active || Activity == ObjectActivity.Disabled) return;
-            document.Solution.DelayedExpire(this);
-        }));
+        BackgroundSolveScheduler.Request(this,
+            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
+            () => Interlocked.Exchange(ref _expiryPosted, 0));
     }
     private void StopListener()
     {

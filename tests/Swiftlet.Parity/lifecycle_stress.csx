@@ -86,6 +86,34 @@ else if(action=="undo"||action=="redo")
  else {doc.Undo.Undo();InjectManualHost(Find(names[4]));Set(Find(names[4]),4,true);Solve();}
 }
 else if(action=="close"){doc.Close();Console.WriteLine("STRESS:"+JsonSerializer.Serialize(new{pid=Environment.ProcessId,closed=true}));return;}
+else if(action=="fixture")
+{
+ var assembly=Assembly.LoadFrom(command.GetProperty("path").GetString());dynamic fixture=Activator.CreateInstance(assembly.GetType("Swiftlet.Gh2.Fixtures.ControlledPublisherComponent"));doc.Objects.Add(fixture);
+ dynamic sender=Find("WebSocketSendComponent");gh.GetType("Grasshopper2.Parameters.Connections").GetMethod("DisconnectAllInputs").Invoke(null,new object[]{sender.Parameters.Input(1),null});Connect(fixture,0,sender,1);doc.Solution.StartWait();
+}
+else if(action=="fixture-cancel")
+{
+ dynamic fixture=Find("ControlledPublisherComponent");fixture.Enqueue("mid-process");fixture.CancelAfterPublish=true;fixture.Expire();
+ using var cts=new System.Threading.CancellationTokenSource();cts.CancelAfter(200);
+ var method=((object)doc.Solution).GetType().GetMethods().Single(m=>m.Name=="StartWait"&&m.GetParameters().Length==2);
+ try{method.Invoke(doc.Solution,new object[]{cts,Enum.ToObject(method.GetParameters()[1].ParameterType,0)});}catch(TargetInvocationException error)when(error.InnerException is OperationCanceledException){}
+}
+else if(action=="resume-ws")sw.GetType("Swiftlet.Gh2.ListenerComponent").GetField("_expiryPosted",Private).SetValue((object)Find(names[3]),0);
+else if(action=="delay")
+{
+ dynamic ws=Find(names[3]);dynamic send=Find("WebSocketSendComponent");dynamic throttle=Add("ThrottleComponent");Set(throttle,1,2000);
+ gh.GetType("Grasshopper2.Parameters.Connections").GetMethod("DisconnectAllInputs").Invoke(null,new object[]{send.Parameters.Input(1),null});
+ Connect(ws,2,throttle,0);Connect(throttle,0,send,1);doc.Solution.StartWait();
+}
+else if(action=="suppress-ws")sw.GetType("Swiftlet.Gh2.ListenerComponent").GetField("_expiryPosted",Private).SetValue((object)Find(names[3]),1);
+else if(action=="publish-cancel")
+{
+ Find(names[3]).Expire();using var cts=new System.Threading.CancellationTokenSource();cts.CancelAfter(200);
+ var method=((object)doc.Solution).GetType().GetMethods().Single(m=>m.Name=="StartWait"&&m.GetParameters().Length==2);
+ try{method.Invoke(doc.Solution,new object[]{cts,Enum.ToObject(method.GetParameters()[1].ParameterType,0)});}catch(TargetInvocationException error)when(error.InnerException is OperationCanceledException){}
+}
+else if(action=="cancel")doc.Solution.Stop();
+else if(action=="unrelated"){Find(names[2]).Expire();doc.Solution.StartWait();}
 else if(action=="solve")Solve();
 else if(action!="snapshot")throw new Exception("Unknown action "+action);
 var diagnostics=new List<object>();
@@ -100,8 +128,12 @@ foreach(string name in names)
  dynamic obj=((IEnumerable)doc.Objects.Forwards).Cast<object>().SingleOrDefault(o=>o.GetType().Name==name);if(obj==null)continue;
  int bridge=0;var field=((object)obj).GetType().GetField("_session",Private);
  if(field?.GetValue(obj)is{}session){var process=(System.Diagnostics.Process)session.GetType().GetField("_bridgeProcess",Private)?.GetValue(session);try{if(process!=null&&!process.HasExited)bridge=process.Id;}catch{}}
+ object outbox=null;var boxField=((object)obj).GetType().GetField("_received",Private)??((object)obj).GetType().GetField("_requests",Private);
+ if(boxField?.GetValue(obj)is{}box&&box.GetType().GetField("_items",Private)is{}itemsField)outbox=new{count=((IList)itemsField.GetValue(box)).Count,published=box.GetType().GetField("_publishedIn",Private).GetValue(box).ToString(),publishedCount=(int)box.GetType().GetField("_publishedCount",Private).GetValue(box)};
  bool waiting=false;string state=null,status=null;
  if(name==names[4]){dynamic c=((object)obj).GetType().GetField("_controller",Private).GetValue(obj);waiting=c.Snapshot.IsWaiting;status=c.Snapshot.Status;dynamic flow=c.GetType().GetField("_flow",Private).GetValue(c);if(flow!=null&&flow.Session!=null)state=flow.Session.State;}
- results.Add(new{name,id=(Guid)obj.InstanceId,activity=obj.Activity.ToString(),phase=obj.State.Phase.ToString(),fault=((Exception)obj.State.FaultException)?.Message,bridge,waiting,state,status,outputs=((IEnumerable)obj.Parameters.Outputs).Cast<object>().Select(p=>(string)((dynamic)p).UserName).ToArray()});
+ results.Add(new{name,id=(Guid)obj.InstanceId,activity=obj.Activity.ToString(),phase=obj.State.Phase.ToString(),fault=((Exception)obj.State.FaultException)?.Message,bridge,outbox,waiting,state,status,outputs=((IEnumerable)obj.Parameters.Outputs).Cast<object>().Select(p=>(string)((dynamic)p).UserName).ToArray()});
 }
-Console.WriteLine("STRESS:"+JsonSerializer.Serialize(new{pid=Environment.ProcessId,root=Environment.GetEnvironmentVariable("DOTNET_ROOT"),components=results,diagnostics}));
+dynamic testFixture=((IEnumerable)doc.Objects.Forwards).Cast<object>().SingleOrDefault(o=>o.GetType().Name=="ControlledPublisherComponent");
+object fixtureState=testFixture==null?null:new{attempts=(int)testFixture.Attempts,cancelled=(int)testFixture.CancelledPublications,pending=(bool)testFixture.Pending,phase=testFixture.State.Phase.ToString(),current=testFixture.State.CurrentId.ToString()};
+Console.WriteLine("STRESS:"+JsonSerializer.Serialize(new{pid=Environment.ProcessId,root=Environment.GetEnvironmentVariable("DOTNET_ROOT"),components=results,diagnostics,fixture=fixtureState}));

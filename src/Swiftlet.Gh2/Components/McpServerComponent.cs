@@ -91,15 +91,13 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
         if (outputs) Interlocked.Exchange(ref _updateOutputs, 1);
         long generation = Volatile.Read(ref _generation);
         if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _updatePosted, 1) != 0) return;
-        Rhino.RhinoApp.InvokeOnUiThread((System.Action)(() =>
-        {
-            if (generation != Volatile.Read(ref _generation)) return;
-            Interlocked.Exchange(ref _updatePosted, 0);
-            var document = Document;
-            if (Volatile.Read(ref _stopping) != 0 || document?.State != DocumentState.Active || Activity == ObjectActivity.Disabled) return;
-            if (Interlocked.Exchange(ref _updateOutputs, 0) != 0) SynchronizeOutputs();
-            document.Solution.DelayedExpire(this);
-        }));
+        BackgroundSolveScheduler.Request(this,
+            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
+            () =>
+            {
+                Interlocked.Exchange(ref _updatePosted, 0);
+                if (Interlocked.Exchange(ref _updateOutputs, 0) != 0) SynchronizeOutputs();
+            });
     }
     public override bool CanCreateParameter(Side side, int index) => false;
     public override bool CanRemoveParameter(Side side, int index) => false;

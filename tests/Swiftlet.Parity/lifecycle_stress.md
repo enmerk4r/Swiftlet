@@ -1,4 +1,4 @@
-﻿# Combined GH2 lifecycle stress
+# Combined GH2 lifecycle stress
 
 Use a dedicated Rhino 9 slot with both current Swiftlet shells loaded (`cases.py --load`). The harness creates and closes its own GH2 scratch documents; it must never run on a user's working canvas.
 
@@ -23,3 +23,5 @@ Deletion archives OAuth with Authorize=false. After undo, the fixture reinjects 
 Ports are inspected through OS LISTEN state, without connecting: a probe connection could itself consume a one-shot callback accept. SwiftletBridge processes are counted with Windows CIM, restricted to the owned Rhino parent PID. Four bridges are expected while all services run, three while WebSocket Run=false, and zero after disable/delete/close. Each command checks Rhino's PID and requires DOTNET_ROOT to remain unset. Final cleanup checks every previously used port owned by Rhino, zero owned bridges, and another successful Rhino AI call.
 
 Transport errors and explicit server-stop errors from requests deliberately interrupted by a lifecycle change are counted separately. Assertion failures, lost ordinary traffic, faults, unexpected listening ports, wrong bridge counts or loss of Rhino liveness fail the run. The JSON report is updated after every cycle and retained on failure, including cleanup status.
+
+The traffic-only driver repeats ordinary concurrent bursts without lifecycle mutations. `lifecycle_cancel_probe.py` adds a two-second downstream Throttle and uses an explicitly cancelled solution to inspect GH2's cache behavior. It deliberately suppresses WebSocket self-recompute for that experiment, then starts a solution expiring only an unrelated listener. This distinguishes host cache reuse from the product's explicit outbox retry. Duplicate echo frames are counted separately, including a 200 ms observation window after each complete burst; duplicate counting is an observation, not an exactly-once delivery claim.

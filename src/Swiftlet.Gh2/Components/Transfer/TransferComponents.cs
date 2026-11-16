@@ -12,8 +12,8 @@ namespace Swiftlet.Gh2.Components.Transfer;
 
 /// <summary>
 /// Shared lifecycle for the background file-transfer components, following the Server Input pattern:
-/// solves are single-threaded per component, job callbacks post one coalesced Expire + Solution.Start to
-/// the UI thread (dropped if the component was stopped meanwhile, tracked by a generation counter), and
+/// solves are single-threaded per component, job callbacks queue one coalesced recompute on
+/// the UI thread after any running solution stops (guarded by a generation counter), and
 /// the transfer is cancelled when the component is removed, disabled or its document closes.
 /// </summary>
 public abstract class TransferComponent : SwiftletComponent, IRemovalAware
@@ -54,17 +54,9 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
         long generation = Volatile.Read(ref _generation);
         if (Interlocked.Exchange(ref _expiryPosted, 1) != 0)
             return;
-        Rhino.RhinoApp.InvokeOnUiThread((System.Action)(() =>
-        {
-            Interlocked.Exchange(ref _expiryPosted, 0);
-            if (generation != Volatile.Read(ref _generation))
-                return;
-            var document = Document;
-            if (document is null || document.State != DocumentState.Active || Activity == ObjectActivity.Disabled)
-                return;
-            Expire();
-            document.Solution.Start();
-        }));
+        BackgroundSolveScheduler.Request(this,
+            () => generation == Volatile.Read(ref _generation),
+            () => Interlocked.Exchange(ref _expiryPosted, 0));
     }
 
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)
