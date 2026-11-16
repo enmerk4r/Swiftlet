@@ -38,7 +38,7 @@ public sealed class HttpRequestExecutor
 
         try
         {
-            using HttpResponseMessage response = await _httpClient.SendAsync(request, timeoutSource.Token);
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, timeoutSource.Token).ConfigureAwait(false);
             return HttpResponseData.FromHttpResponseMessage(response);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

@@ -35,6 +35,7 @@ internal static class TestRunner
             ("OAuth token client parses successful token responses", OAuthTokenClientParsesSuccessfulResponses),
             ("HttpRequestDefinition builds full URL and preserves headers", HttpRequestDefinitionBuildsRequestData),
             ("HttpRequestExecutor returns response data from handler", HttpRequestExecutorReturnsResponseData),
+            ("HTTP synchronous adapter does not capture a blocked caller context", HttpSynchronousAdapterDoesNotCaptureContext),
             ("HTTP caller cancellation propagates instead of becoming response data", HttpCallerCancellationPropagates),
             ("HTTP timeout remains a failure response", HttpTimeoutRemainsFailureResponse),
             ("JSON object merger recursively merges nested objects", JsonObjectMergerRecursivelyMergesNestedObjects),
@@ -370,6 +371,33 @@ internal static class TestRunner
         Assert.Equal(202, response.StatusCode);
         Assert.Equal("{\"status\":\"ok\"}", response.Content);
         Assert.Equal("abc", response.Headers.Single(header => header.Key == "X-Test").Value);
+    }
+
+    private static void HttpSynchronousAdapterDoesNotCaptureContext()
+    {
+        using var handler = new DeferredHttpMessageHandler();
+        using var client = new HttpClient(handler);
+        var context = new NonPumpingContext();
+        var completed = new TaskCompletionSource<HttpResponseData>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(context);
+            try { completed.SetResult(new HttpRequestExecutor(client).Execute(new HttpRequestDefinition("https://example.test", "GET"))); }
+            catch (Exception error) { completed.SetException(error); }
+        }) { IsBackground = true };
+        thread.Start();
+        Assert.True(handler.Started.Task.Wait(TimeSpan.FromSeconds(5)), "Request never reached handler.");
+        // The await must be installed before the response completes. An async signal from the
+        // handler plus this spin waits for either the sync caller to block or an unexpected exit.
+        Assert.True(SpinWait.SpinUntil(() => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0, TimeSpan.FromSeconds(5)), "Caller never blocked.");
+        handler.Response.SetResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+        try
+        {
+            Assert.True(completed.Task.Wait(TimeSpan.FromSeconds(5)), "HTTP sync adapter deadlocked on caller context.");
+            Assert.Equal(200, completed.Task.GetAwaiter().GetResult().StatusCode);
+            Assert.Equal(0, context.PostCount);
+        }
+        finally { context.Release(); thread.Join(TimeSpan.FromSeconds(5)); }
     }
 
     private static void HttpCallerCancellationPropagates()
@@ -983,4 +1011,21 @@ internal static class Assert
             throw new InvalidOperationException($"Expected '{actual}' to contain '{expectedSubstring}'.");
         }
     }
+}
+
+internal sealed class DeferredHttpMessageHandler : HttpMessageHandler
+{
+    public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource<HttpResponseMessage> Response { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    { Started.TrySetResult(true); return Response.Task; }
+}
+internal sealed class NonPumpingContext : SynchronizationContext
+{
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(SendOrPostCallback Callback, object? State)> _pending = new();
+    public int PostCount;
+    public override void Post(SendOrPostCallback callback, object? state)
+    { Interlocked.Increment(ref PostCount); _pending.Enqueue((callback, state)); }
+    public void Release()
+    { while (_pending.TryDequeue(out var work)) ThreadPool.QueueUserWorkItem(_ => work.Callback(work.State)); }
 }

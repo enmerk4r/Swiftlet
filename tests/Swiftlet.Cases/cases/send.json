@@ -1,0 +1,327 @@
+[
+  {
+    "name": "DeconstructHeader: unicode",
+    "gh1": "DeconstructHeaderComponent",
+    "inputs": [
+      {
+        "header": [
+          "X-Key",
+          "\u03bb"
+        ]
+      }
+    ],
+    "expect": [
+      [
+        {
+          "text": "X-Key"
+        }
+      ],
+      [
+        {
+          "text": "\u03bb"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "DeconstructQueryParam: escaped content",
+    "gh1": "DeconstructQueryParamComponent",
+    "inputs": [
+      {
+        "query": [
+          "q",
+          "a & \u03bb"
+        ]
+      }
+    ],
+    "expect": [
+      [
+        {
+          "text": "q"
+        }
+      ],
+      [
+        {
+          "text": "a & \u03bb"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "DeconstructUrl: duplicate values",
+    "gh1": "DeconstructUrlComponent",
+    "inputs": [
+      {
+        "text": "https://example.test:8443/a%20b?q=a+b&q=c&flag=hello#frag"
+      }
+    ]
+  },
+  {
+    "name": "DeconstructUrl: no query",
+    "gh1": "DeconstructUrlComponent",
+    "inputs": [
+      {
+        "text": "https://example.test/a"
+      }
+    ]
+  },
+  {
+    "name": "DeconstructUrl: invalid scheme",
+    "gh1": "DeconstructUrlComponent",
+    "inputs": [
+      {
+        "text": "ftp://example.test"
+      }
+    ],
+    "expectError": true
+  },
+  {
+    "name": "DeconstructHeader: two items",
+    "gh1": "DeconstructHeaderComponent",
+    "inputs": [
+      [
+        {
+          "header": [
+            "A",
+            "one"
+          ]
+        },
+        {
+          "header": [
+            "B",
+            "two"
+          ]
+        }
+      ]
+    ]
+  },
+  {
+    "name": "DeconstructQueryParam: missing",
+    "gh1": "DeconstructQueryParamComponent",
+    "inputs": [
+      null
+    ]
+  },
+  {
+    "name": "DeconstructBody: UTF8 text",
+    "gh1": "DeconstructBodyComponent",
+    "inputs": [
+      {
+        "bodytext": [
+          "text/plain",
+          "hello \u03bb"
+        ]
+      }
+    ],
+    "expect": [
+      [
+        {
+          "text": "text/plain"
+        }
+      ],
+      [
+        {
+          "text": "hello \u03bb"
+        }
+      ],
+      [
+        {
+          "bytes": "aGVsbG8gzrs="
+        }
+      ]
+    ]
+  },
+  {
+    "name": "DeconstructBody: binary replacement decode",
+    "gh1": "DeconstructBodyComponent",
+    "inputs": [
+      {
+        "bodybytes": [
+          "application/octet-stream",
+          "AP8="
+        ]
+      }
+    ]
+  },
+  {
+    "name": "DeconstructMultipartField: text",
+    "gh1": "DeconstructMultipartFieldComponent",
+    "inputs": [
+      {
+        "field": {
+          "name": "a",
+          "text": "\u03bb"
+        }
+      }
+    ]
+  },
+  {
+    "name": "DeconstructMultipartField: binary",
+    "gh1": "DeconstructMultipartFieldComponent",
+    "inputs": [
+      {
+        "field": {
+          "name": "a",
+          "bytes": "AP8=",
+          "fileName": "x.bin"
+        }
+      }
+    ]
+  },
+  {
+    "name": "DeconstructMultipartBody: fields",
+    "gh1": "DeconstructMultipartBodyComponent",
+    "inputs": [
+      {
+        "multipart": [
+          {
+            "name": "a",
+            "text": "hello"
+          },
+          {
+            "name": "b",
+            "bytes": "AP8=",
+            "fileName": "x.bin"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "DeconstructMultipartBody: nonmultipart",
+    "gh1": "DeconstructMultipartBodyComponent",
+    "inputs": [
+      {
+        "bodytext": [
+          "text/plain",
+          "hello"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "DeconstructHttpResponse: all fields",
+    "gh1": "DeconstructHttpResponseComponent",
+    "inputs": [
+      {
+        "response": {
+          "version": "2.0",
+          "status": 201,
+          "reason": "Created",
+          "headers": [
+            [
+              "X-Swiftlet",
+              "\u03bb"
+            ]
+          ],
+          "success": true,
+          "content": "hello",
+          "bytes": "AP8="
+        }
+      }
+    ]
+  },
+  {
+    "name": "Throttle: default delay",
+    "gh1": "ThrottleComponent",
+    "inputs": [
+      {
+        "text": "hello \u03bb"
+      },
+      null
+    ],
+    "expect": [
+      [
+        {
+          "text": "hello \u03bb"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "Throttle: negative delay",
+    "gh1": "ThrottleComponent",
+    "inputs": [
+      {
+        "text": "hello"
+      },
+      {
+        "int": -10
+      }
+    ],
+    "expect": [
+      [
+        {
+          "text": "hello"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "Throttle: missing data",
+    "gh1": "ThrottleComponent",
+    "inputs": [
+      null,
+      {
+        "int": 0
+      }
+    ]
+  },
+  {
+    "name": "UDP: no data",
+    "gh1": "UdpStreamComponent",
+    "inputs": [
+      {
+        "text": "127.0.0.1"
+      },
+      {
+        "int": 12345
+      },
+      null
+    ],
+    "expect": [
+      [
+        {
+          "bool": false
+        }
+      ],
+      [
+        {
+          "int": 0
+        }
+      ]
+    ]
+  },
+  {
+    "name": "UDP: invalid host",
+    "gh1": "UdpStreamComponent",
+    "inputs": [
+      {
+        "text": "http://127.0.0.1"
+      },
+      {
+        "int": 12345
+      },
+      {
+        "bytes": "AQI="
+      }
+    ],
+    "expectError": true
+  },
+  {
+    "name": "UDP: invalid port",
+    "gh1": "UdpStreamComponent",
+    "inputs": [
+      {
+        "text": "127.0.0.1"
+      },
+      {
+        "int": -1
+      },
+      {
+        "bytes": "AQI="
+      }
+    ],
+    "expectError": true
+  }
+]

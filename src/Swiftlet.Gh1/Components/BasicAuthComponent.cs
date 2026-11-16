@@ -1,4 +1,3 @@
-using System.Text;
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -33,8 +32,7 @@ public sealed class BasicAuthComponent : GH_Component
         DA.GetData(0, ref userName);
         DA.GetData(1, ref password);
 
-        string credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{userName}:{password}"));
-        DA.SetData(0, new HttpHeaderGoo("Authorization", $"Basic {credentials}"));
+        DA.SetData(0, new HttpHeaderGoo(AuthHeaderWorkflow.Basic(userName, password)));
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
