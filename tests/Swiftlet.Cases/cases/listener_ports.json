@@ -1,0 +1,100 @@
+[
+  {
+    "name": "HTTP Listener: port 0 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "HttpListenerComponent",
+    "inputs": [
+      {
+        "int": 0
+      },
+      null,
+      null
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "HTTP Listener: port 65536 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "HttpListenerComponent",
+    "inputs": [
+      {
+        "int": 65536
+      },
+      null,
+      null
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "WebSocket Server: port 0 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "WebSocketServerComponent",
+    "inputs": [
+      {
+        "int": 0
+      },
+      {
+        "bool": true
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "WebSocket Server: port 65536 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "WebSocketServerComponent",
+    "inputs": [
+      {
+        "int": 65536
+      },
+      {
+        "bool": true
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "Server Input: port 0 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "ServerInputComponent",
+    "inputs": [
+      {
+        "int": 0
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "Server Input: port 65536 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "ServerInputComponent",
+    "inputs": [
+      {
+        "int": 65536
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "UDP Listener: port 0 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "UdpListenerComponent",
+    "inputs": [
+      {
+        "int": 0
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  },
+  {
+    "name": "UDP Listener: port 65536 is rejected before anything starts (valid range 1-65535)",
+    "gh1": "UdpListenerComponent",
+    "inputs": [
+      {
+        "int": 65536
+      }
+    ],
+    "expectError": true,
+    "allowErrorData": true
+  }
+]

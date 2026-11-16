@@ -17,7 +17,7 @@ Every component and parameter needs both its normal constructor and `(IReader re
 - Match access (`Item`, `Twig`, `Tree`) to both Get and Set calls; a mismatch can compile and fail only during solving.
 - **Pass optionality to Add:** `inputs.Add(parameter, Requirement.MayBeMissing)`; `Add(parameter)` overwrites a pre-set requirement with its default `MustExist`.
 - Do not invent empty values or null-item defaults to make optional pins execute; truly empty optional custom Item/Twig inputs were verified with live HTTP/UDP fixtures.
-- Preserve optionality even when a pin has a persistent default. Ten pins across HTML search, CSV, Byte Array To Text and QR retain `MayBeMissing` plus their defaults; `Validation/ValidateOptionalDefaults.csx` clears the defaults and verifies all seven components still produce the expected fallback output. The previous build was not tested with this check, so this is verified alignment, not a demonstrated before/after failure.
+- Preserve optionality even when a pin has a persistent default. Ten pins across HTML search, CSV, Byte Array To Text and QR retain `MayBeMissing` plus their defaults; `tests/Swiftlet.Gh2.Validation/ValidateOptionalDefaults.csx` clears the defaults and verifies all seven components still produce the expected fallback output. The previous build was not tested with this check, so this is verified alignment, not a demonstrated before/after failure.
 - Preserve failure output shape: a GH1 exception gives empty output trees, whereas an error message followed by return can leave null slots; choose GH2 throw versus `AddError` accordingly.
 - After programmatically changing persistent data, expire the input parameter and component before solving.
 
@@ -92,7 +92,7 @@ python tests/Swiftlet.Cases/checks/migrate_files.py --port PORT --report migrati
 
 The loader stages GH1/GH2 together in one temporary folder; never load build output directly, and restart Rhino after changing binaries. If the machine lacks a net7 runtime, use `DOTNET_ROLL_FORWARD=Major` for the net7 test executables, not a .NET 8-only DOTNET_ROOT override.
 
-The 239-case suite compares exact GH1/GH2 results; network, transfers, OAuth, archives and settings have separate live harnesses under `tests/Swiftlet.Cases/checks`, `tests/Swiftlet.Parity` and `src/Swiftlet.Gh2/Validation`. Close tests must check listener/bridge cleanup **and** a post-close call to the same Rhino PID. Use OS LISTEN-state inspection for OAuth port checks: a bare TCP probe is itself a client connection.
+The 239-case suite compares exact GH1/GH2 results; network, transfers, OAuth, archives and settings have separate live harnesses under `tests/Swiftlet.Cases/checks`, `tests/Swiftlet.Parity` and `tests/Swiftlet.Gh2.Validation`. Close tests must check listener/bridge cleanup **and** a post-close call to the same Rhino PID. Use OS LISTEN-state inspection for OAuth port checks: a bare TCP probe is itself a client connection.
 
 The Rhino 9 Yak payload must contain both shells and one consistent set of versioned shared DLLs. Packaging checks assembly identities; cold-start checks point `RHINO_PACKAGE_DIRS` at the package contents and exercise its bundled bridge. Windows cold start and packaged network checks passed; actual user install/update/uninstall, other platforms, pointer/focus checks and the final combined stress result remain separate release evidence. Do not infer them from a successful compile or component archive clone.
 

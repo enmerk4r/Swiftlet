@@ -2,7 +2,7 @@
 import argparse, base64, json, re, socket, sys, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[3]
+ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"))
 from cases import run_csharp,evaluate,flatten
 sys.path.insert(0,str(ROOT/"tests/Swiftlet.Parity"))

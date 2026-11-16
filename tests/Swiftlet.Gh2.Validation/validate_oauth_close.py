@@ -1,6 +1,6 @@
 """Repeat a waiting OAuth active-canvas close in fresh, explicitly owned Rhino processes."""
 import argparse, json, os, pathlib, socket, subprocess, sys
-ROOT = pathlib.Path(__file__).resolve().parents[3]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tests/Swiftlet.Cases"))
 import cases
 ap=argparse.ArgumentParser()

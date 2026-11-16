@@ -1,7 +1,7 @@
 """Native variable-parameter/persistent-data actions, Undo/Redo and live route checks."""
 import argparse,concurrent.futures,json,socket,sys,time,urllib.request
 from pathlib import Path
-HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[2];sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1];sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
 ap=argparse.ArgumentParser();ap.add_argument("--port",type=int,required=True);ap.add_argument("--report",type=Path,required=True);a=ap.parse_args()
 source=(HERE/"VariableSettingsHarness.csx").read_text();evidence=[]
 def call(**cmd):

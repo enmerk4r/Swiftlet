@@ -27,7 +27,7 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (0-65535)", GH_ParamAccess.item, 8080);
+        pManager.AddIntegerParameter("Port", "P", "Port number to listen on (1-65535)", GH_ParamAccess.item, 8080);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -48,9 +48,9 @@ public sealed class ServerInputComponent : GH_Component, IGH_VariableParameterCo
         int port = 8080;
         DA.GetData(0, ref port);
 
-        if (port < 0 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port number must be between 0 and 65535");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ListenPorts.Error);
             return;
         }
 

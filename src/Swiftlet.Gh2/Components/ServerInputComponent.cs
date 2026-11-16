@@ -51,10 +51,10 @@ public sealed class ServerInputComponent : Component, IRemovalAware
         try
         {
             if (Volatile.Read(ref _stopping) != 0 || Document is null || Activity == ObjectActivity.Disabled) return;
-            if (port < 1 || port > 65535)
+            if (!ListenPorts.IsValid(port))
             {
                 StopSessionUnderGate();
-                access.AddError("Invalid port", "Port number must be between 1 and 65535.");
+                access.AddError("Invalid port", ListenPorts.Error);
                 return;
             }
             if (_lifetime.IsCancellationRequested) { _lifetime.Dispose(); _lifetime = new(); }

@@ -50,11 +50,11 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         DA.GetDataList(1, toolGoos);
         DA.GetData(2, ref serverName);
 
-        if (port < 1 || port > 65535)
+        if (!ListenPorts.IsValid(port))
         {
             _calls.Clear();
             _session.StopAsync().GetAwaiter().GetResult();
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port number must be between 1 and 65535");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ListenPorts.Error);
             return;
         }
 

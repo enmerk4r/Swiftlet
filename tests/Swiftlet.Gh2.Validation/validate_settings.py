@@ -2,7 +2,7 @@
 import argparse,json,sys,tempfile,threading,time
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
-HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[2]
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[1]
 sys.path.insert(0,str(ROOT/"tests/Swiftlet.Cases"));import cases
 ap=argparse.ArgumentParser();ap.add_argument("--port",type=int,required=True);ap.add_argument("--report",type=Path,required=True);a=ap.parse_args()
 source=(HERE/"SettingsHarness.csx").read_text();evidence=[]
