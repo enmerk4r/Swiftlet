@@ -28,19 +28,7 @@ public sealed class CreateCsvLineComponent : GH_Component
         DA.GetDataList(0, cells);
         DA.GetData(1, ref delimiter);
 
-        string line = string.Empty;
-        foreach (string cell in cells)
-        {
-            string cleanCell = cell;
-            if (cell.Contains(delimiter))
-            {
-                cleanCell = $"\"{cell}\"";
-            }
-
-            line += $"{cleanCell}{delimiter}";
-        }
-
-        line = line.Remove(line.Length - 1, 1);
+        string line = CsvLines.Create(cells, delimiter);
         DA.SetData(0, line);
     }
 
