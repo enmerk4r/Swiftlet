@@ -1,4 +1,3 @@
-using System.Text;
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -36,16 +35,7 @@ public sealed class DeconstructBodyComponent : GH_Component
         }
 
         byte[] bytes = goo.Value.ToByteArray();
-        string text;
-
-        try
-        {
-            text = Encoding.UTF8.GetString(bytes);
-        }
-        catch
-        {
-            text = string.Empty;
-        }
+        string text = HttpDeconstructionWorkflow.DecodeBodyText(bytes);
 
         DA.SetData(0, goo.Value.ContentType ?? string.Empty);
         DA.SetData(1, text);

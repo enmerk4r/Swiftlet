@@ -1,5 +1,3 @@
-using System.Collections.Specialized;
-using System.Web;
 using Grasshopper.Kernel;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.Gh.Rhino8.Params;
@@ -37,28 +35,13 @@ public sealed class DeconstructUrlComponent : GH_Component
             return;
         }
 
-        if (!url.StartsWith("http", StringComparison.Ordinal))
-        {
-            throw new Exception(" A valid URL must include a scheme (http or https)");
-        }
+        var parts = HttpDeconstructionWorkflow.DeconstructUrl(url);
+        DA.SetData(0, parts.Base);
+        DA.SetData(1, parts.Scheme);
+        DA.SetData(2, parts.Host);
+        DA.SetData(3, parts.Route);
+        DA.SetDataList(4, parts.Parameters.Select(static p => new QueryParameterGoo(p)));
 
-        Uri uri = new(url);
-        NameValueCollection query = HttpUtility.ParseQueryString(uri.Query);
-        List<QueryParameterGoo> parameters = [];
-        foreach (string? key in query.AllKeys)
-        {
-            if (key is not null)
-            {
-                parameters.Add(new QueryParameterGoo(key, query[key] ?? string.Empty));
-            }
-        }
-
-        string baseUri = url.Split('?').First();
-        DA.SetData(0, baseUri);
-        DA.SetData(1, uri.Scheme);
-        DA.SetData(2, uri.Host);
-        DA.SetData(3, uri.AbsolutePath);
-        DA.SetDataList(4, parameters);
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());

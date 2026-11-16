@@ -33,42 +33,21 @@ public sealed class DeconstructMultipartBodyComponent : GH_Component
             return;
         }
 
-        List<MultipartFieldGoo> fields;
-
-        if (goo.Value is RequestBodyMultipartForm multipartBody)
-        {
-            fields = multipartBody.Fields
-                .Select(static field => new MultipartFieldGoo(field))
-                .ToList();
-        }
-        else if (goo.Value.ContentType is not null
-            && goo.Value.ContentType.StartsWith("multipart/form-data", StringComparison.OrdinalIgnoreCase))
-        {
-            fields = ParseMultipartBytes(goo.Value.ToByteArray(), goo.Value.ContentType);
-        }
-        else
-        {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Body is not multipart/form-data");
-            return;
-        }
-
-        DA.SetDataList(0, fields);
-    }
-
-    private List<MultipartFieldGoo> ParseMultipartBytes(byte[] bytes, string contentType)
-    {
         try
         {
-            return MultipartBodyParser.Parse(bytes, contentType)
-                .Select(static field => new MultipartFieldGoo(field))
-                .ToList();
+            var fields = HttpDeconstructionWorkflow.DeconstructMultipart(goo.Value);
+            if (fields is null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Body is not multipart/form-data");
+                return;
+            }
+            DA.SetDataList(0, fields.Select(static field => new MultipartFieldGoo(field)));
         }
         catch (FormatException ex)
         {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to parse multipart body: {ex.Message}");
+            DA.SetDataList(0, Array.Empty<MultipartFieldGoo>());
         }
-
-        return [];
     }
 
     protected override System.Drawing.Bitmap? Icon => ShellIcons.For(GetType());
