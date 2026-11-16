@@ -19,6 +19,7 @@ public sealed class McpMigrationTable : IMigrationTable
         yield return Gh1MigrationRule.Identity("f6a7b8c9-d0e1-2345-f012-456789012345", ComponentIds.DefineToolParameter, 4, 1);
         yield return Gh1MigrationRule.Identity("e5f6a7b8-c9d0-1234-ef01-345678901234", ComponentIds.DefineTool, 3, 1);
         yield return Gh1MigrationRule.Identity("a7b8c9d0-e1f2-3456-0123-567890123456", ComponentIds.DeconstructToolCall, 1, 3);
+        yield return Gh1MigrationRule.Identity("b8c9d0e1-f2a3-4567-1234-678901234567", ComponentIds.McpToolResponseArchived, 3, 1);
         yield return Gh1MigrationRule.Identity("08814cbb-0f3d-44cc-b3d8-41b2053101de", ComponentIds.McpToolResponse, 4, 1);
     }
 }

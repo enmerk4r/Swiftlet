@@ -87,6 +87,9 @@ class Validation:
 
     def run(self):
         self.client.call("g2_start")
+        self.script('ed.Canvas.Document=(dynamic)gh.GetType("Grasshopper2.Doc.Document").GetMethod("NewActiveDocument").Invoke(null,null);')
+        host_pid = int(self.script("Console.WriteLine(Environment.ProcessId);"))
+        self.client.call("g2_start")
         listener = free_port()
         self.setup(listener)
         with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
@@ -145,7 +148,8 @@ class Validation:
             pending.result(timeout=8)
             wait_closed(changed)
             self.component_id = None
-            self.checks.append("document close cancels in-flight request and releases listener port")
+            assert int(self.script("Console.WriteLine(Environment.ProcessId);")) == host_pid
+            self.checks.append("document close cancels in-flight request, releases listener port, and leaves Rhino responsive")
         return self.checks
 
 

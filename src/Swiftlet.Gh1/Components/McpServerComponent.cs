@@ -13,13 +13,16 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private readonly ModernMcpServerSession _session = new();
     private readonly RhinoHostServices _hostServices = new();
     private IReadOnlyList<McpToolDefinition> _tools = [];
-    private bool _requestTriggeredSolve;
+    private readonly McpCallRequestState _calls = new();
+    private int _stopping;
+    private long _generation;
     private int _updateScheduled;
 
     public McpServerComponent()
         : base("MCP Server", "MCP", "Starts an MCP server and exposes the connected tools to MCP clients. Each connected tool appears as its own output and emits a request when that tool is called.", ShellNaming.Category, ShellNaming.Mcp)
     {
         _session.RequestQueued += OnRequestQueued;
+        _calls.RequestReady += OnRequestQueued;
     }
 
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -47,11 +50,15 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
         DA.GetDataList(1, toolGoos);
         DA.GetData(2, ref serverName);
 
-        if (port < 0 || port > 65535)
+        if (port < 1 || port > 65535)
         {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port number must be between 0 and 65535");
+            _calls.Clear();
+            _session.StopAsync().GetAwaiter().GetResult();
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Port number must be between 1 and 65535");
             return;
         }
+
+        if (Volatile.Read(ref _stopping) != 0 || Locked) return;
 
         _tools = toolGoos
             .Where(static goo => goo?.Value is not null)
@@ -66,6 +73,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
 
         try
         {
+            if (_session.Port != port) _calls.Clear();
             _session.ReconfigureAsync(port, serverName, _tools).GetAwaiter().GetResult();
             Message = _session.StatusMessage ?? string.Empty;
         }
@@ -76,33 +84,11 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
             return;
         }
 
-        if (!_requestTriggeredSolve)
-        {
-            foreach (McpToolDefinition tool in _tools)
-            {
-                while (_session.TryDequeuePendingCall(tool.Name, out _))
-                {
-                }
-            }
-        }
+        var calls = _calls.Capture(Params.Output.Select(output => output.NickName),
+            name => _session.TryDequeuePendingCall(name, out var call) ? call : null);
+        for (int index = 0; index < calls.Length; index++)
+            DA.SetData(index, calls[index] is { } call ? new McpToolCallRequestGoo(call) : null);
 
-        for (int i = 0; i < Params.Output.Count; i++)
-        {
-            string outputName = Params.Output[i].NickName;
-            string toolName = outputName;
-            if (_requestTriggeredSolve &&
-                _session.TryDequeuePendingCall(toolName, out ModernMcpToolCallContext? context) &&
-                context is not null)
-            {
-                DA.SetData(i, new McpToolCallRequestGoo(context));
-            }
-            else
-            {
-                DA.SetData(i, null);
-            }
-        }
-
-        _requestTriggeredSolve = false;
     }
 
     public bool CanInsertParameter(GH_ParameterSide side, int index) => false;
@@ -120,10 +106,30 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     {
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        Volatile.Write(ref _stopping, 0);
+        _session.RequestQueued -= OnRequestQueued;
+        _session.RequestQueued += OnRequestQueued;
+        _calls.RequestReady -= OnRequestQueued;
+        _calls.RequestReady += OnRequestQueued;
+    }
+
+    private void StopServer()
+    {
+        Volatile.Write(ref _stopping, 1);
+        Interlocked.Increment(ref _generation);
+        Interlocked.Exchange(ref _updateScheduled, 0);
+        _calls.Clear();
+        _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+    }
+
     public override void RemovedFromDocument(GH_Document document)
     {
         _session.RequestQueued -= OnRequestQueued;
-        _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        _calls.RequestReady -= OnRequestQueued;
+        StopServer();
         base.RemovedFromDocument(document);
     }
 
@@ -131,7 +137,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     {
         if (context == GH_DocumentContext.Close)
         {
-            _session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            StopServer();
         }
 
         base.DocumentContextChanged(document, context);
@@ -151,7 +157,8 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
     private void ScheduleOutputUpdate()
     {
         GH_Document? document = OnPingDocument();
-        document?.ScheduleSolution(5, _ => UpdateOutputsFromTools());
+        long generation = Volatile.Read(ref _generation);
+        document?.ScheduleSolution(5, _ => { if (generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0) UpdateOutputsFromTools(); });
     }
 
     private void UpdateOutputsFromTools()
@@ -197,19 +204,20 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
 
     private void OnRequestQueued(object? sender, EventArgs e)
     {
-        _requestTriggeredSolve = true;
         ScheduleComponentUpdate();
     }
 
     private void ScheduleComponentUpdate()
     {
-        if (Interlocked.Exchange(ref _updateScheduled, 1) == 1)
+        long generation = Volatile.Read(ref _generation);
+        if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _updateScheduled, 1) == 1)
         {
             return;
         }
 
         Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
         {
+            if (generation != Volatile.Read(ref _generation) || Volatile.Read(ref _stopping) != 0) return;
             GH_Document? document = OnPingDocument();
             if (document is null)
             {
@@ -220,7 +228,7 @@ public sealed partial class McpServerComponent : GH_Component, IGH_VariableParam
             document.ScheduleSolution(5, _ =>
             {
                 Interlocked.Exchange(ref _updateScheduled, 0);
-                ExpireSolution(false);
+                if (generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0 && !Locked) ExpireSolution(false);
             });
         }));
     }

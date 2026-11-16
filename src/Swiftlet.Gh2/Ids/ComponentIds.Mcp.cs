@@ -14,4 +14,6 @@ internal static partial class ComponentIds
     public const string DefineTool = "9df50df4-82e7-5921-b724-d6dc35485aed";
     public const string DeconstructToolCall = "bf035d09-2ba3-5f76-9440-c11eaea3d621";
     public const string McpToolResponse = "33d16e46-3796-511d-81ad-2fa414f3f023";
+    public const string McpToolResponseArchived = "8beef554-acd3-5cf8-a32d-f434dcf9723a";
+    public const string McpServer = "1ea3f102-d640-4c21-955a-b8791728eb8a";
 }

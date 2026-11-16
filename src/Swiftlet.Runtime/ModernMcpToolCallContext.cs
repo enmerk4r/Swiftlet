@@ -8,6 +8,7 @@ public sealed class ModernMcpToolCallContext
     private readonly Func<McpToolResult, bool> _resultSender;
     private readonly object _responseSync = new();
     private bool _hasResponded;
+    private readonly TaskCompletionSource<bool> _responseCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public ModernMcpToolCallContext(
         string callId,
@@ -31,7 +32,9 @@ public sealed class ModernMcpToolCallContext
 
     public JsonObject Arguments { get; }
 
-    public bool HasResponded => _hasResponded;
+    public bool HasResponded => Volatile.Read(ref _hasResponded);
+
+    public Task ResponseTask => _responseCompleted.Task;
 
     public bool TryRespondWithText(string textContent)
     {
@@ -59,7 +62,8 @@ public sealed class ModernMcpToolCallContext
             bool sent = _resultSender(result.Duplicate());
             if (sent)
             {
-                _hasResponded = true;
+                Volatile.Write(ref _hasResponded, true);
+                _responseCompleted.TrySetResult(true);
             }
 
             return sent;
