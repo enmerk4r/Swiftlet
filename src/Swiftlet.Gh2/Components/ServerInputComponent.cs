@@ -122,7 +122,7 @@ public sealed class ServerInputComponent : Component, IRemovalAware
         if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _expiryPosted, 1) != 0) return;
         BackgroundSolveScheduler.Request(this,
             () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
-            () => Interlocked.Exchange(ref _expiryPosted, 0));
+            release: () => { if (generation == Volatile.Read(ref _generation)) Interlocked.Exchange(ref _expiryPosted, 0); });
     }
     private void StopListener()
     {

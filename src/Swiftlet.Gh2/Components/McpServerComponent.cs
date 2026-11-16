@@ -95,9 +95,9 @@ public sealed class McpServerComponent : SwiftletComponent, IRemovalAware
             () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0,
             () =>
             {
-                Interlocked.Exchange(ref _updatePosted, 0);
                 if (Interlocked.Exchange(ref _updateOutputs, 0) != 0) SynchronizeOutputs();
-            });
+            },
+            release: () => { if (generation == Volatile.Read(ref _generation)) Interlocked.Exchange(ref _updatePosted, 0); });
     }
     public override bool CanCreateParameter(Side side, int index) => false;
     public override bool CanRemoveParameter(Side side, int index) => false;

@@ -56,7 +56,7 @@ public abstract class TransferComponent : SwiftletComponent, IRemovalAware
             return;
         BackgroundSolveScheduler.Request(this,
             () => generation == Volatile.Read(ref _generation),
-            () => Interlocked.Exchange(ref _expiryPosted, 0));
+            release: () => { if (generation == Volatile.Read(ref _generation)) Interlocked.Exchange(ref _expiryPosted, 0); });
     }
 
     private void OnDocumentChanged(object? sender, ObjectDocumentEventArgs args)
