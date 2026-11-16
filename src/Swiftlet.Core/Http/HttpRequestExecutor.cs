@@ -41,6 +41,11 @@ public sealed class HttpRequestExecutor
             using HttpResponseMessage response = await _httpClient.SendAsync(request, timeoutSource.Token);
             return HttpResponseData.FromHttpResponseMessage(response);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Caller cancellation is control flow, not an HTTP failure response.
+            throw;
+        }
         catch (Exception ex)
         {
             return new HttpResponseData("0.0", -1, ex.Message, [], false, string.Empty, []);
