@@ -19,7 +19,6 @@ public sealed class ServerInputComponent : Component, IRemovalAware
     private ModernServerSession? _session;
     private CancellationTokenSource _lifetime = new();
     private int _stopping;
-    private int _expiryPosted;
     private long _generation;
 
     public ServerInputComponent()
@@ -119,23 +118,14 @@ public sealed class ServerInputComponent : Component, IRemovalAware
     {
         if (sender is ModernServerSession source && !ReferenceEquals(source, _session)) return;
         long generation = Volatile.Read(ref _generation);
-        if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _expiryPosted, 1) != 0) return;
-        Rhino.RhinoApp.InvokeOnUiThread((System.Action)(() =>
-        {
-            if (generation != Volatile.Read(ref _generation)) return;
-            Interlocked.Exchange(ref _expiryPosted, 0);
-            var document = Document;
-            if (Volatile.Read(ref _stopping) != 0 || document is null ||
-                document.State != DocumentState.Active || Activity == ObjectActivity.Disabled) return;
-            Expire();
-            document.Solution.Start();
-        }));
+        if (Volatile.Read(ref _stopping) != 0) return;
+        BackgroundSolveScheduler.Request(this,
+            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0);
     }
     private void StopListener()
     {
         Volatile.Write(ref _stopping, 1);
         Interlocked.Increment(ref _generation);
-        Interlocked.Exchange(ref _expiryPosted, 0);
         try { Volatile.Read(ref _lifetime).Cancel(); } catch (ObjectDisposedException) { }
         _sessionGate.Wait();
         try { StopSessionUnderGate(); }

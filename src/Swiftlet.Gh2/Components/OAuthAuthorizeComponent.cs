@@ -50,11 +50,8 @@ public sealed class OAuthAuthorizeComponent : OAuthComponentBase
         if (args is not OAuthAuthorizationChangedEventArgs change || change.Generation != _controller.Generation) return;
         var lifetime = LifetimeToken;
         if (lifetime.IsCancellationRequested) return;
-        Rhino.RhinoApp.InvokeOnUiThread((Action)(() =>
-        {
-            if (change.Generation != _controller.Generation || lifetime.IsCancellationRequested || Document is not { State: DocumentState.Active } document || Activity == ObjectActivity.Disabled) return;
-            Expire(); document.Solution.Start();
-        }));
+        BackgroundSolveScheduler.Request(this,
+            () => change.Generation == _controller.Generation && !lifetime.IsCancellationRequested);
     }
     protected override void OnStopped()
     { _controller.ResetAsync().GetAwaiter().GetResult(); }

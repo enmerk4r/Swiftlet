@@ -21,8 +21,8 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource _lifetime = new();
     private int _stopping;
-    private int _expiryPosted;
     private long _generation;
+    private int _abandonedRetry = 1;
 
     protected ListenerComponent(string name, string info, string section)
         : base(name, info, section) => Initialize();
@@ -69,6 +69,9 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
             }
 
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(access.Solution.Token, _lifetime.Token);
+            // The previous publication may still be a valid cached result, even after the enclosing
+            // solution was cancelled. Confirm it before a new Publish can replace its identity.
+            ConfirmCurrentPublication();
             ProcessListener(access, linked.Token);
         }
         finally
@@ -82,57 +85,49 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     /// </summary>
     protected void RequestRecompute()
     {
+        Volatile.Write(ref _abandonedRetry, 1);
+        QueueRecompute();
+    }
+
+    private void QueueRecompute()
+    {
         long generation = Volatile.Read(ref _generation);
-        if (Volatile.Read(ref _stopping) != 0 || Interlocked.Exchange(ref _expiryPosted, 1) != 0)
-            return;
-
-        Rhino.RhinoApp.InvokeOnUiThread((System.Action)(() =>
-        {
-            if (generation != Volatile.Read(ref _generation))
-                return;
-
-            Interlocked.Exchange(ref _expiryPosted, 0);
-            Document? document = Document;
-            if (Volatile.Read(ref _stopping) != 0 || document is null ||
-                document.State != DocumentState.Active || Activity == ObjectActivity.Disabled)
-                return;
-
-            Expire();
-            document.Solution.Start();
-        }));
+        if (Volatile.Read(ref _stopping) != 0) return;
+        BackgroundSolveScheduler.Request(this,
+            () => generation == Volatile.Read(ref _generation) && Volatile.Read(ref _stopping) == 0);
     }
 
     public void PrepareForRemoval(ActionList undo) => StopListener();
 
-    /// <summary>
-    /// Called when a solution has completed successfully, i.e. the outputs this component set in it
-    /// have really been delivered. Use it to forget data that was only waiting for that confirmation.
-    /// </summary>
+    /// <summary>Confirm a publication whose own component result is the current successful cache.</summary>
     protected virtual void OnSolutionCommitted(SolutionId solution) { }
 
-    /// <summary>
-    /// True while something this component published has not been confirmed by a completed solution.
-    /// When a solution is cancelled or faults in that state, the component asks to be solved again,
-    /// because GH2 does not necessarily run it again by itself.
-    /// </summary>
+    /// <summary>True while network items have no retained successful component result.</summary>
     protected virtual bool HasUnconfirmedOutput => false;
 
-    private void OnSolutionCompleted(object? sender, SolutionEventArgs args) => OnSolutionCommitted(args.SolutionId);
-
-    private void OnSolutionAbandoned(object? sender, EventArgs args)
+    private void ConfirmCurrentPublication()
     {
-        if (HasUnconfirmedOutput)
-            RequestRecompute();
+        // Data is the most recent successful component result. CurrentId identifies that result;
+        // ProcessId and Phase can instead describe a newer cancelled/faulted computation.
+        var state = State;
+        if (state.Data is not null && state.CurrentId != SolutionId.None)
+            OnSolutionCommitted(state.CurrentId);
+    }
+
+    private void OnSolutionEnded(object? sender, EventArgs args)
+    {
+        ConfirmCurrentPublication();
+        // At most one automatic retry until another real notification arrives. A persistent
+        // abandoned solve must not produce a self-sustaining retry loop.
+        if (HasUnconfirmedOutput && Interlocked.CompareExchange(ref _abandonedRetry, 0, 1) == 1)
+            QueueRecompute();
     }
 
     /// <summary>
-    /// Items received from the network that must reach the outputs exactly once.
-    ///
-    /// A GH2 solution can be cancelled after Process has set its outputs (for example when another
-    /// component expires). Outputs of a cancelled solution are discarded, so anything taken off a
-    /// queue during it would be lost. An outbox keeps what a solve published until that solve is
-    /// confirmed complete; a solve that follows a cancelled one publishes the same items again,
-    /// followed by anything newer.
+    /// Items received from the network that remain pending until their publishing component result
+    /// becomes the current successful cache. Whole-solution cancellation does not invalidate a
+    /// component result that already completed. Discarded publications are retried; retained ones
+    /// are confirmed, so a later solution can consume their cache without republishing the items.
     /// </summary>
     protected sealed class Outbox<T>
     {
@@ -171,7 +166,7 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
             }
         }
 
-        /// <summary>True while published or newly stored items are waiting for a completed solution.</summary>
+        /// <summary>True while published or newly stored items are waiting for a retained successful component result.</summary>
         public bool HasUnconfirmed
         {
             get
@@ -201,19 +196,20 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
         if (args.OldDocument is { } old)
         {
             old.StateChanged -= OnDocumentStateChanged;
-            old.Solution.SolutionCompleted -= OnSolutionCompleted;
-            old.Solution.SolutionCancelled -= OnSolutionAbandoned;
-            old.Solution.SolutionFaulted -= OnSolutionAbandoned;
+            old.Solution.SolutionCompleted -= OnSolutionEnded;
+            old.Solution.SolutionCancelled -= OnSolutionEnded;
+            old.Solution.SolutionFaulted -= OnSolutionEnded;
             StopListener();
         }
 
         if (args.NewDocument is { } current)
         {
             current.StateChanged += OnDocumentStateChanged;
-            current.Solution.SolutionCompleted += OnSolutionCompleted;
-            current.Solution.SolutionCancelled += OnSolutionAbandoned;
-            current.Solution.SolutionFaulted += OnSolutionAbandoned;
+            current.Solution.SolutionCompleted += OnSolutionEnded;
+            current.Solution.SolutionCancelled += OnSolutionEnded;
+            current.Solution.SolutionFaulted += OnSolutionEnded;
             Volatile.Write(ref _stopping, 0);
+            Volatile.Write(ref _abandonedRetry, 1);
         }
     }
 
@@ -228,8 +224,8 @@ public abstract class ListenerComponent : SwiftletComponent, IRemovalAware
     private void StopListener()
     {
         Volatile.Write(ref _stopping, 1);
+        Volatile.Write(ref _abandonedRetry, 0);
         Interlocked.Increment(ref _generation);
-        Interlocked.Exchange(ref _expiryPosted, 0);
         try
         {
             Volatile.Read(ref _lifetime).Cancel();
