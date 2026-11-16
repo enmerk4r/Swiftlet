@@ -14,7 +14,7 @@
     <Title>Swiftlet</Title>
     <Company>Sergey Pigach</Company>
     <Description>Grasshopper 2 plugin for accessing Web APIs</Description>
-    <Copyright>Copyright (c) 2021 Sergey</Copyright>
+    <Copyright>Copyright (c) 2021 Sergey Pigach</Copyright>
     <Grasshopper2SdkVersion Condition="'$(Grasshopper2SdkVersion)' == ''">9.0.26300.9401</Grasshopper2SdkVersion>
   </PropertyGroup>
   <ItemGroup>
