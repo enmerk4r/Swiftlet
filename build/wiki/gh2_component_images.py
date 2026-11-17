@@ -1,7 +1,7 @@
 """Render one PNG per current Swiftlet component as it looks on the Grasshopper 2 canvas.
 
 The wiki shows each component next to its Grasshopper 1 screenshot, so the files are written under the
-same names the wiki already uses (component-images/<n>_<name>.png -> component-images/gh2/<same>.png).
+same names as those (component-images/gh1/<n>_<name>.png -> component-images/gh2/<same>.png).
 
     python build/wiki/gh2_component_images.py --port PORT --wiki C:\\path\\to\\Swiftlet.wiki [--only NAME ...]
 
@@ -54,7 +54,7 @@ def main():
     args = ap.parse_args()
 
     wiki = pathlib.Path(args.wiki)
-    existing = {p.stem for p in (wiki / "component-images").glob("*.png")}
+    existing = {p.stem for p in (wiki / "component-images" / "gh1").glob("*.png")}
     by_key = {re.sub(r"_(xs|sm)$", "", re.sub(r"^\d+_", "", stem)): stem for stem in existing}
     out_dir = wiki / "component-images" / "gh2"
     out_dir.mkdir(parents=True, exist_ok=True)
