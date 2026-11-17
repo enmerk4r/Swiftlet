@@ -18,7 +18,7 @@ string[] keys={"sepal_length_cm","sepal_width_cm","petal_length_cm"};
 for(int k=0;k<3;k++) {var key=Add("GetJsonObjectKeyComponent",keys[k],420,550+k*180);Put(key,1,new[]{keys[k]});Wire(rows,0,key,0);var value=Add("ReadJsonValueComponent","Coordinate "+k,720,550+k*180);Wire(key,0,value,0);Wire(value,1,Find("Measurement points"),k);}
 string[] names={"Iris Setosa","Iris Versicolour","Iris Virginica"};
 var colourT=gh.GetType("Grasshopper2.Types.Colour.Colour");double[][] rgb={new[]{0.2,0.65,0.95},new[]{0.95,0.55,0.1},new[]{0.65,0.3,0.8}};
-for(int k=0;k<3;k++) {dynamic eq=Find("Compare "+k),split=Find("Class points "+k),paint=Find("Class colour "+k);Wire(labels,0,eq,0);Put(eq,1,new[]{names[k]});Wire(Find("Measurement points"),0,split,0);Wire(eq,0,split,1);Wire(split,0,paint,0);var colour=colourT.GetMethod("FromRgb").Invoke(null,new object[]{rgb[k][0],rgb[k][1],rgb[k][2],1f});var colours=Array.CreateInstance(colourT,1);colours.SetValue(colour,0);Put(paint,1,colours);Note(names[k]+" / "+new[]{"blue","orange","purple"}[k],1810,500+k*180);}
+for(int k=0;k<3;k++) {dynamic eq=Find("Compare "+k),split=Find("Class points "+k),paint=Find("Class colour "+k);Wire(labels,0,eq,0);Put(eq,1,new[]{names[k]});Wire(Find("Measurement points"),0,split,0);Wire(eq,0,split,1);Wire(split,0,paint,0);var colour=colourT.GetMethod("FromRgb").Invoke(null,new object[]{rgb[k][0],rgb[k][1],rgb[k][2],1f});var colours=Array.CreateInstance(colourT,1);colours.SetValue(colour,0);Put(paint,1,colours);Note(names[k]+" / "+new[]{"blue","orange","purple"}[k],2350,500+k*180);}
 Note("The original flower geometry is replaced by a native scatter plot.\nEach coloured point represents one prediction. Coincident measurements overlap.\nSelect 150 Iris samples to edit the JSON input; keep all four feature keys.\nThe bundled model normalises each submitted batch; class counts depend on the batch.",40,1080);
 doc.Solution.StartWait();
 '''
@@ -31,7 +31,7 @@ def main():
  cs('doc.Solution.Stop();')
  cs('foreach(dynamic o in ((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray())doc.Objects.Remove(o);')
  natives=[('Point XYZ','Measurement points',1020,730)]
- for k in range(3):natives += [('Text Equality','Compare '+str(k),1300,550+180*k),('Dispatch','Class points '+str(k),1560,550+180*k),('00000000-c6c7-4dc9-b89a-579fdfe6bcd5','Class colour '+str(k),1840,550+180*k)]
+ for k in range(3):natives += [('Text Equality','Compare '+str(k),1840,550+180*k),('Dispatch','Class points '+str(k),2110,550+180*k),('00000000-c6c7-4dc9-b89a-579fdfe6bcd5','Class colour '+str(k),2380,550+180*k)]
  try:
   for selector,key,x,y in natives:
    result,text=call(a.port,'g2_place_component',{'selector':selector,'x':x,'y':y});assert not result.get('isError'),text

@@ -39,6 +39,16 @@ Note("GH2 HTTP GEOMETRY SERVER\nEnable Start server, then POST JSON to localhost
 Console.WriteLine("replaced 4 geometry nodes; server saved disabled");
 '''
 
+LAYOUT=r'''
+// Preserve vertical grouping while moving consumers to the right of their sources.
+var objects=((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray();
+var owners=new Dictionary<Guid,object>();foreach(dynamic o in objects)foreach(dynamic pin in o.EntireFamily)owners[(Guid)pin.InstanceId]=o;
+var before=new Dictionary<object,HashSet<object>>();foreach(dynamic o in objects){var incoming=new HashSet<object>();var property=((object)o).GetType().GetProperty("Parameters");var pins=property==null?new[]{(object)o}:((IEnumerable)((dynamic)property.GetValue(o)).Inputs).Cast<object>().ToArray();foreach(dynamic pin in pins){var inputProperty=((object)pin).GetType().GetProperty("Inputs");if(inputProperty==null)continue;foreach(Guid id in ((dynamic)inputProperty.GetValue(pin)).Forwards)if(owners.TryGetValue(id,out var src)&&!ReferenceEquals(src,(object)o))incoming.Add(src);}before[o]=incoming;}
+var done=new HashSet<object>();var visiting=new HashSet<object>();
+void Place(object obj){if(done.Contains(obj))return;Check(visiting.Add(obj),"acyclic layout");dynamic o=obj;float x=(float)o.Attributes.Pivot.X;foreach(var src in before[obj]){Place(src);x=Math.Max(x,(float)((dynamic)src).Attributes.Pivot.X+140);}o.Attributes.Pivot=new Eto.Drawing.PointF(x,(float)o.Attributes.Pivot.Y);visiting.Remove(obj);done.Add(obj);}
+foreach(var obj in objects)Place(obj);
+'''
+
 
 def main():
  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--port',required=True,type=int);a=ap.parse_args()
@@ -50,6 +60,7 @@ def main():
   for name in ['Populate Box','Populate Box','Voronoi 3D','Voronoi 3D']:
    result,text=call(a.port,'g2_place_component',{'selector':name,'x':100,'y':100});assert not result.get('isError'),text
   cs(REWIRE)
+  cs(LAYOUT)
   path=ROOT/'Examples/swiftlet-server-components/server_demo.ghz'
   report={'roundtrip':cs(ROUNDTRIP.replace('__PATH__',str(path))),'routes':{}}
   cs('Check(Find("Start server").Activity.ToString()=="Disabled","server saved disabled");Enable(Find("Start server"),true);doc.Solution.StartWait();')

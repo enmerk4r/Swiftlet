@@ -12,12 +12,12 @@ var post=Add("PostRequestComponent","Image request",700,300);Put(post,0,new[]{"h
 var parsed=Add("ParseJsonStringComponent","Response JSON",980,300);Wire(post,1,parsed,0);
 var data=Add("GetJsonObjectKeyComponent","data",1260,300);Put(data,1,new[]{"data"});Wire(parsed,0,data,0);
 var items=Add("ReadJsonArrayComponent","Images",1540,300);Wire(data,0,items,0);
-var key=Add("GetJsonObjectKeyComponent","b64_json",1540,600);Put(key,1,new[]{"b64_json"});Wire(items,0,key,0);
-var value=Add("ReadJsonValueComponent","Base64 text",1260,600);Wire(key,0,value,0);
-var bytes=Add("Base64ToByteArrayComponent","PNG bytes",980,600);Wire(value,0,bytes,0);
-var bitmap=Add("ByteArrayToBitmapComponent","Decoded bitmap",700,600);Wire(bytes,0,bitmap,0);
-var mesh=Add("BitmapToMeshComponent","Image mesh",410,600);Wire(bitmap,0,mesh,0);Panel(mesh,2,"Width",120,610);Panel(mesh,3,"Height",120,820);
-Note("Local fixture only: 2x2 red/green/blue/white test pattern.\nThe same response path handles data[].b64_json from GPT image models.\nLive generation is not verified and may incur API charges.\nA real image mesh has one vertex per pixel; resize large images before meshing.",700,850);
+var key=Add("GetJsonObjectKeyComponent","b64_json",120,600);Put(key,1,new[]{"b64_json"});Wire(items,0,key,0);
+var value=Add("ReadJsonValueComponent","Base64 text",410,600);Wire(key,0,value,0);
+var bytes=Add("Base64ToByteArrayComponent","PNG bytes",700,600);Wire(value,0,bytes,0);
+var bitmap=Add("ByteArrayToBitmapComponent","Decoded bitmap",980,600);Wire(bytes,0,bitmap,0);
+var mesh=Add("BitmapToMeshComponent","Image mesh",1260,600);Wire(bitmap,0,mesh,0);Panel(mesh,2,"Width",1540,600);Panel(mesh,3,"Height",1540,820);
+Note("Local fixture only: 2x2 red/green/blue/white test pattern.\nThe same response path handles data[].b64_json from GPT image models.\nLive generation is not verified and may incur API charges.\nA real image mesh has one vertex per pixel; resize large images before meshing.",700,1080);
 doc.Solution.StartWait();
 '''
 
