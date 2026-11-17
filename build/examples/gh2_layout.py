@@ -10,7 +10,7 @@ Needs a Rhino 9 slot (tests/Swiftlet.Cases/slot.py) with Swiftlet loaded. Nothin
 
 The rules that `check` enforces are written down in Examples/LAYOUT.md. `apply` takes a JSON list of
 operations (see OPERATIONS below), saves the file, reopens it and refuses the result if any component,
-parameter or wire went missing.
+parameter or wire went missing. Text and groups may be added and removed freely.
 
 OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "ids": [...])
     {"op": "name",    "id": GROUP, "text": ""}                    GH2's own group header (centred); the standard uses text titles instead
@@ -27,7 +27,9 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "size",    "id": VALUE, "width": 140}                  set a value box's width by hand
     {"op": "add",     "role": "heading"|"note", "text": "...", "left": X, "top": Y, "group": GROUP, "key": "n1"}
     {"op": "ungroup", "group": GROUP, "id": ANY} / {"op": "group", "group": GROUP, "id": ANY}
-An "add" with a "key" can be referred to by later ops as "@n1".
+    {"op": "new_group", "ids": [...], "key": "g1", "colour": "Teal"}   a new group around those objects
+An "add" or "new_group" with a "key" can be referred to by later ops as "@n1" / "@g1".
+Anywhere an id is expected, "name:Some name" selects the one object whose user-given name is exactly that.
 """
 import argparse, base64, json, pathlib, sys
 
@@ -120,11 +122,15 @@ else if (mode == "render") {
   var bmp = (Eto.Drawing.Bitmap)drawM.Invoke((object)canvas, new object[] { region, (int)(region.Width * scale), (int)(region.Height * scale), false, true, false });
   bmp.Save(@"__OUT__", Eto.Drawing.ImageFormat.Png); Console.WriteLine("rendered " + bmp.Width + "x" + bmp.Height); }
 else if (mode == "apply") {
-  int objectsBefore = All(doc).Count(o => !IsScribble(o)), wiresBefore = Wires(doc);
+  // Text and groups may be added or removed; components, parameters and wires may not.
+  bool Counts(object o) => !IsScribble(o) && !IsGroup(o);
+  int objectsBefore = All(doc).Count(Counts), wiresBefore = Wires(doc);
   var ops = JsonNode.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String("__OPS__"))).AsArray();
   var keyed = new Dictionary<string, object>();
   object Find(string id) {
     if (id.StartsWith("@")) return keyed[id.Substring(1)];
+    if (id.StartsWith("name:")) { var named = All(doc).Where(o => (string)((dynamic)o).UserName == id.Substring(5)).ToList();
+      if (named.Count != 1) throw new Exception("name '" + id.Substring(5) + "' matches " + named.Count + " objects"); return named[0]; }
     var hits = All(doc).Where(o => Id(o).StartsWith(id, StringComparison.OrdinalIgnoreCase)).ToList();
     if (hits.Count != 1) throw new Exception("id '" + id + "' matches " + hits.Count + " objects"); return hits[0]; }
   // A group caches its outline and does not refresh it while its members are moved from a script, so the
@@ -156,7 +162,7 @@ else if (mode == "apply") {
     var targets = op["ids"] != null ? op["ids"].AsArray().Select(i => Find((string)i)).ToList() : op["id"] != null ? new List<object> { Find((string)op["id"]) } : new List<object>();
     switch (kind) {
       case "name": foreach (dynamic g in targets) { if (!IsGroup(g)) throw new Exception("name: not a group"); g.UserName = (string)op["text"]; } break;
-      case "delete": foreach (var t in targets) { if (!IsScribble(t)) throw new Exception("delete: only text objects may be deleted"); ((dynamic)doc).Objects.Remove((dynamic)t); } break;
+      case "delete": if (replay) break; foreach (var t in targets) { if (!IsScribble(t)) throw new Exception("delete: only text objects may be deleted"); ((dynamic)doc).Objects.Remove((dynamic)t); } break;
       case "text": foreach (dynamic t in targets) t.Text = (string)op["text"]; break;
       case "style": foreach (var t in targets) Style(t, (string)op["role"], F("wrap")); Relayout(); break;
       case "move": foreach (var t in targets) MoveTo(t, F("left"), F("top")); break;
@@ -181,16 +187,21 @@ else if (mode == "apply") {
         ((dynamic)doc).Objects.Add((dynamic)n, new Eto.Drawing.PointF(F("left") ?? 0, F("top") ?? 0)); MoveTo(n, F("left"), F("top"));
         if (op["group"] != null) ((dynamic)Find((string)op["group"])).AddContent(((dynamic)n).InstanceId);
         if (op["key"] != null) keyed[(string)op["key"]] = n; break; }
+      case "new_group": { if (replay) break; object g = Activator.CreateInstance(groupT);
+        foreach (var t in targets) ((dynamic)g).AddContent(((dynamic)t).InstanceId);
+        ((dynamic)doc).Objects.Add((dynamic)g, new Eto.Drawing.PointF(0, 0));
+        if (op["colour"] != null) groupT.GetProperty("GroupColour").SetValue(g, Enum.Parse(groupT.GetProperty("GroupColour").PropertyType, (string)op["colour"]));
+        if (op["key"] != null) keyed[(string)op["key"]] = g; break; }
       case "group": ((dynamic)Find((string)op["group"])).AddContent(((dynamic)targets[0]).InstanceId); break;
       case "ungroup": ((dynamic)Find((string)op["group"])).RemoveContent(((dynamic)targets[0]).InstanceId); break;
       default: throw new Exception("unknown op " + kind); } }
   Relayout();
-  if (All(doc).Count(o => !IsScribble(o)) != objectsBefore || Wires(doc) != wiresBefore) throw new Exception("objects or wires changed; nothing saved");
+  if (All(doc).Count(Counts) != objectsBefore || Wires(doc) != wiresBefore) throw new Exception("objects or wires changed; nothing saved");
   dynamic io = Activator.CreateInstance(ioT, new object[] { doc, false, false, false, false });
   ioT.GetMethod("Save", new[] { typeof(string), gh.GetType("Grasshopper2.Doc.FileContents") }).Invoke((object)io, new object[] { @"__OUT__", Enum.Parse(gh.GetType("Grasshopper2.Doc.FileContents"), "All") });
   object back = Open(@"__OUT__");
-  if (All(back).Count(o => !IsScribble(o)) != objectsBefore || Wires(back) != wiresBefore) throw new Exception("saved file lost objects or wires: " + All(back).Count + " objects, " + Wires(back) + " wires");
-  Console.WriteLine("saved " + objectsBefore + " objects (text excluded), " + wiresBefore + " wires, " + All(back).Count(IsScribble) + " text objects"); }
+  if (All(back).Count(Counts) != objectsBefore || Wires(back) != wiresBefore) throw new Exception("saved file lost objects or wires: " + All(back).Count(Counts) + " objects, " + Wires(back) + " wires");
+  Console.WriteLine("saved " + objectsBefore + " objects, " + wiresBefore + " wires, " + All(back).Count(IsGroup) + " groups, " + All(back).Count(IsScribble) + " text objects"); }
 // leave the canvas on an empty document so a later tool call does not act on the example
 canvas.Document = (dynamic)docT.GetMethod("NewInactiveDocument").Invoke(null, null);
 '''
