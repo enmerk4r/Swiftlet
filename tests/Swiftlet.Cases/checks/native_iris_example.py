@@ -1,7 +1,7 @@
 ﻿"""Build and verify the GH2 Iris scatter-plot example against its local Python model."""
 import argparse,json,pathlib,sys,time,urllib.request
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
-from native_examples import ROOT,PRE,ROUNDTRIP
+from native_examples import ROOT,PRE,ROUNDTRIP,save_example
 from cases import call,run_csharp
 
 BUILD=r'''
@@ -37,7 +37,7 @@ def main():
    result,text=call(a.port,'g2_place_component',{'selector':selector,'x':x,'y':y});assert not result.get('isError'),text
    ident=json.loads(text)['id'];cs('foreach(dynamic o in doc.Objects.Forwards)if(o.InstanceId.ToString()=="'+ident+'")o.UserName='+json.dumps(key)+';')
   cs(BUILD.replace('__JSON__',json.dumps(json.dumps(samples,separators=(',',':')))))
-  report={'roundtrip':cs(ROUNDTRIP.replace('__PATH__',str(ROOT/'Examples/swiftlet-iris-prediction/iris-3d.ghz')))}
+  report={'roundtrip':save_example(a.port,cs,ROOT/'Examples/swiftlet-iris-prediction/iris-3d.ghz','iris')}
   cs('Check(Find("Predict Iris").Activity.ToString()=="Disabled","saved disabled");Enable(Find("Predict Iris"),true);doc.Solution.Start();')
   end=time.monotonic()+30
   while 'True' in cs('Console.WriteLine(doc.Solution.State.CurrentlyRunning!=null);'):
