@@ -5,8 +5,9 @@
     python build/examples/gh2_layout.py render --port PORT FILE.ghz OUT.png [--solve] [--region X,Y,W,H]
     python build/examples/gh2_layout.py apply  --port PORT FILE.ghz OPS.json [--out OTHER.ghz]
 
-Needs a Rhino 9 slot (tests/Swiftlet.Cases/slot.py) with Swiftlet loaded. Nothing is solved unless
---solve is given, so no example sends a request or opens a port while its layout is being worked on.
+Needs a Rhino 9 slot (tests/Swiftlet.Cases/slot.py) with Swiftlet loaded. GH2 would solve a file as soon
+as it is shown on the canvas, so the tool switches solving off while it runs (and back afterwards). No
+example sends a request or opens a port while its layout is being worked on, unless --solve is given.
 
 The rules that `check` enforces are written down in Examples/LAYOUT.md. `apply` takes a JSON list of
 operations (see OPERATIONS below), saves the file, reopens it and refuses the result if any component,
@@ -125,10 +126,16 @@ JsonObject Dump(object d) {
 
 SCRIPT = CORE + r'''
 string path = @"__PATH__"; string mode = "__MODE__";
+// GH2 solves a document as soon as it becomes the canvas document, which would send the example's requests
+// and open its ports. Solving is a process-wide switch: turn it off for the duration and restore it after.
+var solving = gh.GetType("Grasshopper2.Doc.SolutionServer").GetProperty("EnableSolutions");
+bool solvingBefore = (bool)solving.GetValue(null);
+solving.SetValue(null, false);
+try {
 object doc = Open(path); Show(doc);
 if (mode == "dump") { Console.WriteLine("JSON:" + Dump(doc).ToJsonString()); }
 else if (mode == "render") {
-  if (__SOLVE__) { ((dynamic)doc).Solution.StartWait(); Show(doc); }
+  if (__SOLVE__) { solving.SetValue(null, true); ((dynamic)doc).Solution.StartWait(); solving.SetValue(null, false); Show(doc); }
   var e = Extent(doc); float pad = 60; var region = new Eto.Drawing.RectangleF(e.X - pad, e.Y - pad, e.Width + 2 * pad, e.Height + 2 * pad);
   float[] only = new float[] { __REGION__ }; if (only.Length == 4) region = new Eto.Drawing.RectangleF(only[0], only[1], only[2], only[3]);
   float scale = Math.Min(2f, 4000f / region.Width);
@@ -222,8 +229,11 @@ else if (mode == "apply") {
   object back = Open(@"__OUT__");
   if (All(back).Count(Counts) != objectsBefore || Wires(back) != wiresBefore) throw new Exception("saved file lost objects or wires: " + All(back).Count(Counts) + " objects, " + Wires(back) + " wires");
   Console.WriteLine("saved " + objectsBefore + " objects, " + wiresBefore + " wires, " + All(back).Count(IsGroup) + " groups, " + All(back).Count(IsScribble) + " text objects"); }
-// leave the canvas on an empty document so a later tool call does not act on the example
-canvas.Document = (dynamic)docT.GetMethod("NewInactiveDocument").Invoke(null, null);
+} finally {
+  // leave the canvas on an empty document so a later tool call does not act on the example
+  canvas.Document = (dynamic)docT.GetMethod("NewInactiveDocument").Invoke(null, null);
+  solving.SetValue(null, solvingBefore);
+}
 '''
 
 

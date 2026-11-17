@@ -91,5 +91,6 @@ Things worth knowing:
 - A component or parameter with a name of its own shows that name centred underneath. The label is not
   part of the object's bounds; the tools estimate its size from the text and treat it as part of the object.
   A long name can stick out to the left of the component, so look at the render.
-- Nothing is solved while you work, so no example sends a request or opens a port.
+- GH2 solves a file the moment it is shown on the canvas. The tools switch solving off while they run, so no
+  example sends a request or opens a port. If you open a file any other way, it will run.
 - Lay out the inside of each group first, then run the column step, then check, then render and look.
