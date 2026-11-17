@@ -64,6 +64,14 @@ internal static class IntegrationTestRunner
 
         foreach ((string name, Func<Task> test) in tests)
         {
+            // System.Drawing.Common only works on Windows outside Rhino (Rhino for Mac supplies its own
+            // System.Drawing), so the Bitmap cast cannot be exercised by a plain .NET test host elsewhere.
+            if (!OperatingSystem.IsWindows() && test == BitmapGooCastsSystemDrawingBitmapAsync)
+            {
+                Console.WriteLine($"SKIP {name} (needs System.Drawing.Common, Windows only outside Rhino)");
+                continue;
+            }
+
             await test().ConfigureAwait(false);
             Console.WriteLine($"PASS {name}");
         }
