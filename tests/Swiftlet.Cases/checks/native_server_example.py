@@ -40,13 +40,15 @@ Console.WriteLine("replaced 4 geometry nodes; server saved disabled");
 '''
 
 LAYOUT=r'''
-// Preserve vertical grouping while moving consumers to the right of their sources.
+// Make migrated scalar values readable, then preserve vertical grouping while moving consumers right.
+foreach(dynamic o in doc.Objects.Forwards)if(o.GetType().Name=="ValueObject"){dynamic a=o.Attributes;a.Size=new Eto.Drawing.SizeF(Math.Max(140f,(float)a.Size.Width),(float)a.Size.Height);}
 var objects=((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray();
 var owners=new Dictionary<Guid,object>();foreach(dynamic o in objects)foreach(dynamic pin in o.EntireFamily)owners[(Guid)pin.InstanceId]=o;
 var before=new Dictionary<object,HashSet<object>>();foreach(dynamic o in objects){var incoming=new HashSet<object>();var property=((object)o).GetType().GetProperty("Parameters");var pins=property==null?new[]{(object)o}:((IEnumerable)((dynamic)property.GetValue(o)).Inputs).Cast<object>().ToArray();foreach(dynamic pin in pins){var inputProperty=((object)pin).GetType().GetProperty("Inputs");if(inputProperty==null)continue;foreach(Guid id in ((dynamic)inputProperty.GetValue(pin)).Forwards)if(owners.TryGetValue(id,out var src)&&!ReferenceEquals(src,(object)o))incoming.Add(src);}before[o]=incoming;}
 var done=new HashSet<object>();var visiting=new HashSet<object>();
-void Place(object obj){if(done.Contains(obj))return;Check(visiting.Add(obj),"acyclic layout");dynamic o=obj;float x=(float)o.Attributes.Pivot.X;foreach(var src in before[obj]){Place(src);x=Math.Max(x,(float)((dynamic)src).Attributes.Pivot.X+140);}o.Attributes.Pivot=new Eto.Drawing.PointF(x,(float)o.Attributes.Pivot.Y);visiting.Remove(obj);done.Add(obj);}
+void Place(object obj){if(done.Contains(obj))return;Check(visiting.Add(obj),"acyclic layout");dynamic o=obj;float x=(float)o.Attributes.Pivot.X;foreach(var src in before[obj]){Place(src);x=Math.Max(x,(float)((dynamic)src).Attributes.Bounds.Right+40-((float)o.Attributes.Bounds.Left-(float)o.Attributes.Pivot.X));}o.Attributes.Pivot=new Eto.Drawing.PointF(x,(float)o.Attributes.Pivot.Y);visiting.Remove(obj);done.Add(obj);}
 foreach(var obj in objects)Place(obj);
+foreach(dynamic o in objects)if(o.GetType().Name=="ValueObject"){var targets=((IEnumerable)o.Outputs.Forwards).Cast<Guid>().Where(id=>owners.ContainsKey(id)).Select(id=>owners[id]).ToArray();if(targets.Length!=1)continue;dynamic target=targets[0];float x=(float)target.Attributes.Bounds.Left-40-((float)o.Attributes.Bounds.Right-(float)o.Attributes.Pivot.X);float y=target.GetType().Name=="CreateJsonObjectComponent"?(float)target.Attributes.Pivot.Y-75:(float)o.Attributes.Pivot.Y;o.Attributes.Pivot=new Eto.Drawing.PointF(x,y);}
 '''
 
 
