@@ -1,0 +1,126 @@
+name: Tests
+
+# Builds the shared libraries and the GH1 shell, then runs the unit and integration tests on
+# Windows, Linux and macOS. The integration tests drive the HTTP, WebSocket and MCP server paths
+# through the Native AOT bridge built for that platform, which is the kind that ships in the package.
+# Nothing here runs inside Rhino: the Grasshopper components themselves are not exercised.
+
+on:
+  push:
+    branches:
+      - main
+      - swiftlet-gh2
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test ${{ matrix.rid }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runner: windows-2022
+            executable: SwiftletBridge.exe
+          - rid: linux-x64
+            runner: ubuntu-22.04
+            executable: SwiftletBridge
+          - rid: osx-arm64
+            runner: macos-15
+            executable: SwiftletBridge
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Pin .NET 8 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_version="$(dotnet --list-sdks | awk '/^8\./ {print $1}' | tail -n 1)"
+          if [ -z "$sdk_version" ]; then
+            echo "No .NET 8 SDK was found after setup-dotnet." >&2
+            dotnet --list-sdks >&2
+            exit 1
+          fi
+          printf '{\n  "sdk": {\n    "version": "%s",\n    "rollForward": "latestFeature"\n  }\n}\n' "$sdk_version" > global.json
+          dotnet --version
+
+      - name: Show build host
+        shell: bash
+        run: |
+          set -euo pipefail
+          uname -a
+          uname -m
+          dotnet --info
+
+      - name: Install Linux Native AOT prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
+
+      - name: Unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet run --project tests/Swiftlet.Core.Tests -c Release
+
+      - name: Build integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet build tests/Swiftlet.Integration.Tests -c Release
+
+      - name: Publish Native AOT bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet publish src/SwiftletBridge/SwiftletBridge.csproj \
+            -c Release \
+            -r "${{ matrix.rid }}" \
+            -p:PublishAot=true \
+            -p:SelfContained=true \
+            -p:StripSymbols=true \
+            -p:DebugType=none \
+            -p:DebugSymbols=false \
+            -o "artifacts/bridge/${{ matrix.rid }}"
+          test -f "artifacts/bridge/${{ matrix.rid }}/${{ matrix.executable }}"
+
+      - name: Use the Native AOT bridge for the integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="tests/Swiftlet.Integration.Tests/bin/Release/net8.0/${{ matrix.executable }}"
+          test -f "$target"
+          cp -f "artifacts/bridge/${{ matrix.rid }}/${{ matrix.executable }}" "$target"
+          chmod +x "$target"
+          ls -la "$target"
+
+      - name: Integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet run --project tests/Swiftlet.Integration.Tests -c Release --no-build
