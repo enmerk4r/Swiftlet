@@ -47,7 +47,10 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
-          dotnet-version: 8.0.x
+          # .NET 8 builds everything (pinned below); the Yak tool runs on .NET 10.
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Pin .NET 8 SDK
         shell: bash
@@ -89,7 +92,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $dir = Join-Path $env:RUNNER_TEMP 'yak'
           New-Item -ItemType Directory -Force $dir | Out-Null
-          Invoke-WebRequest -Uri 'https://files.mcneel.com/yak/tools/latest/yak.exe' -OutFile (Join-Path $dir 'yak.exe')
+          # Same Yak version as the one shipped with Rhino 9.1. Versions are listed at
+          # https://developer.rhino3d.com/guides/yak/yak-cli-reference/#downloads
+          Invoke-WebRequest -Uri 'https://files.mcneel.com/yak/tools/0.19.1/win-x64/yak.exe' -OutFile (Join-Path $dir 'yak.exe')
           Add-Content -Path $env:GITHUB_PATH -Value $dir
           & (Join-Path $dir 'yak.exe') version
 
