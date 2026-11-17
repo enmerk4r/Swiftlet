@@ -43,7 +43,7 @@ go through the Params input, not in the URL. Stop geometry comes from
 
 **Outputs verified against local fixtures; not verified against the live services.**
 No Google or Transitland request was made, and no credentials were configured.
-The saved graph reopens with 48 objects, 46 wires and no GH1-hosted components.
+The saved graph reopens with 56 objects, 46 wires and no GH1-hosted components.
 The test checks one route POST and one stops GET, both statuses, every route
 vertex in order, all three stop coordinates and names, distance and duration.
 Both branches solve without faults/errors.

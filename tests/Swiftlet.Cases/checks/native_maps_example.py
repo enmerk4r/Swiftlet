@@ -1,7 +1,7 @@
 ﻿"""Build and verify native GH2 route/stop geometry against local fixtures only."""
 import argparse,importlib.util,json,pathlib,sys,threading
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
-from native_examples import ROOT,PRE,ROUNDTRIP
+from native_examples import ROOT,PRE,ROUNDTRIP,save_example
 from cases import call,run_csharp
 BUILD=r'''
 Note("ROUTES + TRANSIT STOPS / GH2 / LOCAL FIXTURES\nRun python maps_fixture.py, then enable Route request and Stop request.\nExpected: both status 200, 5-vertex blue route, 3 orange stops.\nSynthetic coordinates; this is not navigation data.\nBoth requests are saved disabled. No API keys. See maps-gh2.md.",40,20);
@@ -43,7 +43,7 @@ def main():
    result,text=call(a.port,'g2_place_component',{'selector':selector,'x':x,'y':y});assert not result.get('isError'),text
    ident=json.loads(text)['id'];cs('foreach(dynamic o in doc.Objects.Forwards)if(o.InstanceId.ToString()=="'+ident+'")o.UserName='+json.dumps(key)+';')
   cs(BUILD)
-  report={'roundtrip':cs(ROUNDTRIP.replace('__PATH__',str(ROOT/'Examples/swiftlet-google-maps-api/swiftlet-google-maps-api.ghz')))}
+  report={'roundtrip':save_example(a.port,cs,ROOT/'Examples/swiftlet-google-maps-api/swiftlet-google-maps-api.ghz','maps')}
   cs('foreach(var name in new[]{"Route request","Stop request"}){Check(Find(name).Activity.ToString()=="Disabled","saved disabled");Enable(Find(name),true);}doc.Solution.StartWait();Healthy();Check(Text(Find("Route request"),0)=="200"&&Text(Find("Stop request"),0)=="200","HTTP status");')
   for key,expected in [('Route points',fixture.ROUTE),('Orange stops',fixture.STOPS)]:
    actual=json.loads(cs('Console.WriteLine(JsonSerializer.Serialize(Out(Find("'+key+'"),0).Select(x=>{dynamic p=x;return new[]{(double)p.X,(double)p.Y,(double)p.Z};})));'))

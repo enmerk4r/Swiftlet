@@ -1,0 +1,284 @@
+{
+  "file": "Examples/swiftlet-google-maps-api/swiftlet-google-maps-api.ghz",
+  "positions": {
+    "Route options": [
+      100,
+      300
+    ],
+    "Route JSON body": [
+      280,
+      300
+    ],
+    "Route request": [
+      460,
+      300
+    ],
+    "Route response": [
+      640,
+      300
+    ],
+    "routes": [
+      820,
+      300
+    ],
+    "Route items": [
+      1000,
+      300
+    ],
+    "First route": [
+      1180,
+      300
+    ],
+    "Response field mask": [
+      280,
+      100
+    ],
+    "Route status": [
+      640,
+      100
+    ],
+    "Distance": [
+      1420,
+      100
+    ],
+    "Metres": [
+      1600,
+      100
+    ],
+    "Distance metres": [
+      1800,
+      80
+    ],
+    "Duration": [
+      1420,
+      300
+    ],
+    "Duration text": [
+      1600,
+      300
+    ],
+    "Duration seconds": [
+      1800,
+      280
+    ],
+    "polyline": [
+      1420,
+      620
+    ],
+    "GeoJSON LineString": [
+      1600,
+      620
+    ],
+    "Route coordinates": [
+      1780,
+      620
+    ],
+    "Coordinate pairs": [
+      1960,
+      620
+    ],
+    "Route lon lat": [
+      2140,
+      620
+    ],
+    "Route coordinate 0": [
+      2320,
+      520
+    ],
+    "Route value 0": [
+      2500,
+      520
+    ],
+    "Route coordinate 1": [
+      2320,
+      720
+    ],
+    "Route value 1": [
+      2500,
+      720
+    ],
+    "Route points": [
+      2680,
+      620
+    ],
+    "Flatten route": [
+      2860,
+      620
+    ],
+    "Route polyline": [
+      3040,
+      620
+    ],
+    "Blue route": [
+      3220,
+      620
+    ],
+    "Stop search parameters": [
+      100,
+      1300
+    ],
+    "Stop request": [
+      280,
+      1300
+    ],
+    "Stop response": [
+      460,
+      1300
+    ],
+    "stops": [
+      640,
+      1300
+    ],
+    "Stop items": [
+      820,
+      1300
+    ],
+    "Stop geometry": [
+      1000,
+      1300
+    ],
+    "Stop coordinates": [
+      1180,
+      1300
+    ],
+    "Stop lon lat": [
+      1360,
+      1300
+    ],
+    "Stop status": [
+      460,
+      1100
+    ],
+    "Stop name": [
+      1000,
+      1100
+    ],
+    "Stop name text": [
+      1180,
+      1100
+    ],
+    "Stop names": [
+      1400,
+      1080
+    ],
+    "Stop coordinate 0": [
+      1540,
+      1300
+    ],
+    "Stop value 0": [
+      1720,
+      1300
+    ],
+    "Stop coordinate 1": [
+      1540,
+      1500
+    ],
+    "Stop value 1": [
+      1720,
+      1500
+    ],
+    "Stop points": [
+      1900,
+      1400
+    ],
+    "Orange stops": [
+      2100,
+      1400
+    ]
+  },
+  "groups": [
+    {
+      "title": "Route request and geometry",
+      "members": [
+        "Route options",
+        "Route JSON body",
+        "Route request",
+        "Route response",
+        "routes",
+        "Route items",
+        "First route",
+        "Response field mask",
+        "Route status",
+        "Distance",
+        "Metres",
+        "Distance metres",
+        "Duration",
+        "Duration text",
+        "Duration seconds",
+        "polyline",
+        "GeoJSON LineString",
+        "Route coordinates",
+        "Coordinate pairs",
+        "Route lon lat",
+        "Route coordinate 0",
+        "Route value 0",
+        "Route coordinate 1",
+        "Route value 1",
+        "Route points",
+        "Flatten route",
+        "Route polyline",
+        "Blue route"
+      ]
+    },
+    {
+      "title": "Transit stop request and geometry",
+      "members": [
+        "Stop search parameters",
+        "Stop request",
+        "Stop response",
+        "stops",
+        "Stop items",
+        "Stop geometry",
+        "Stop coordinates",
+        "Stop lon lat",
+        "Stop status",
+        "Stop name",
+        "Stop name text",
+        "Stop names",
+        "Stop coordinate 0",
+        "Stop value 0",
+        "Stop coordinate 1",
+        "Stop value 1",
+        "Stop points",
+        "Orange stops"
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "of": "Route options",
+      "text": "Run python maps_fixture.py, then enable both requests. These fixtures need no API keys; see maps-gh2.md."
+    },
+    {
+      "of": "Blue route",
+      "text": "Expect five blue route vertices. Coordinates are longitude and latitude in degrees, not a projected map."
+    },
+    {
+      "of": "Stop search parameters",
+      "text": "The fixture always returns the same three synthetic stops. Live services are not verified."
+    },
+    {
+      "of": "Orange stops",
+      "text": "Expect three orange stop points. Use the returned distance field, not geometry lengths."
+    },
+    {
+      "of": "Route value 1",
+      "where": "below",
+      "text": "Latitude supplies the Y coordinate."
+    },
+    {
+      "of": "Stop value 1",
+      "where": "below",
+      "text": "Latitude supplies the Y coordinate."
+    }
+  ],
+  "columns": [
+    [
+      0,
+      1
+    ]
+  ],
+  "labels": {
+    "Stop search parameters": "Stop filters"
+  }
+}
