@@ -26,6 +26,7 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "heading_over", "id": SCRIBBLE, "of": GROUP}           column heading: same, HEADING_GAP above the top group
     {"op": "fit_values"}                                          widen every value box (or "ids") to show its whole text
     {"op": "size",    "id": VALUE, "width": 140}                  set a value box's width by hand
+    {"op": "size",    "id": TEXTINPUT, "width": 220, "lines": 4}  a text input: width of its text area, rows shown
     {"op": "add",     "role": "heading"|"note", "text": "...", "left": X, "top": Y, "group": GROUP, "key": "n1"}
     {"op": "ungroup", "group": GROUP, "id": ANY} / {"op": "group", "group": GROUP, "id": ANY}
     {"op": "new_group", "ids": [...], "key": "g1", "colour": "Teal"}   a new group around those objects
@@ -156,11 +157,12 @@ else if (mode == "apply") {
     var hits = All(doc).Where(o => Id(o).StartsWith(id, StringComparison.OrdinalIgnoreCase)).ToList();
     if (hits.Count != 1) throw new Exception("id '" + id + "' matches " + hits.Count + " objects"); return hits[0]; }
   // A group caches its outline and does not refresh it while its members are moved from a script, so the
-  // outline is worked out from the members: their union plus the margin GH2 draws around them.
+  // outline is worked out the way GH2 draws it: the union of the members' bounds plus a margin. Name labels
+  // under members are not part of it, which is why a long label can stick out of its group.
   Eto.Drawing.RectangleF B(object o) {
     if (!IsGroup(o)) return (Eto.Drawing.RectangleF)((dynamic)o).Attributes.Bounds;
     float x0 = 1e9f, y0 = 1e9f, x1 = -1e9f, y1 = -1e9f;
-    foreach (object member in (IEnumerable)((dynamic)o).Content) { if (member == null || IsGroup(member)) continue; Eto.Drawing.RectangleF b = Full(member);
+    foreach (object member in (IEnumerable)((dynamic)o).Content) { if (member == null || IsGroup(member)) continue; Eto.Drawing.RectangleF b = ((dynamic)member).Attributes.Bounds;
       x0 = Math.Min(x0, b.Left); y0 = Math.Min(y0, b.Top); x1 = Math.Max(x1, b.Right); y1 = Math.Max(y1, b.Bottom); }
     const float margin = 14f; return new Eto.Drawing.RectangleF(x0 - margin, y0 - margin, x1 - x0 + 2 * margin, y1 - y0 + 2 * margin); }
   void MoveBy(object o, float dx, float dy) { dynamic a = ((dynamic)o).Attributes; Eto.Drawing.PointF p = a.Pivot; a.Pivot = new Eto.Drawing.PointF(p.X + dx, p.Y + dy); try { a.InvalidateLayout(); } catch { } }
@@ -205,7 +207,15 @@ else if (mode == "apply") {
           float width = Math.Max(60f, 8f * ((string)((dynamic)t).Text ?? "").Length + 34f);
           if (width > z.Width + 0.5f) { a.Size = new Eto.Drawing.SizeF(width, z.Height); MoveTo(t, before.Left, before.Top); } }
         break; }
-      case "size": foreach (var t in targets) { dynamic a = ((dynamic)t).Attributes; Eto.Drawing.SizeF z = a.Size; a.Size = new Eto.Drawing.SizeF(F("width") ?? z.Width, F("height") ?? z.Height); } Relayout(); break;
+      case "size": foreach (var t in targets) { Relayout(); var before = B(t); object att = ((dynamic)t).Attributes;
+          PropertyInfo Deep(string name) { for (var c = att.GetType(); c != null; c = c.BaseType) { var found = c.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly); if (found != null) return found; } return null; }
+          var hosting = Deep("HostingWidth"); var units = Deep("VerticalUnits");
+          if (hosting != null && units != null) {
+            // text inputs and similar: "width" is the width of the text area, "lines" its height in rows
+            if (F("width").HasValue) hosting.SetValue(att, F("width").Value);
+            if (op["lines"] != null) units.SetValue(att, (int)op["lines"].GetValue<double>()); }
+          else { dynamic a = att; Eto.Drawing.SizeF z = a.Size; a.Size = new Eto.Drawing.SizeF(F("width") ?? z.Width, F("height") ?? z.Height); }
+          MoveTo(t, before.Left, before.Top); } break;
       case "add": { object n = Activator.CreateInstance(scribbleT); ((dynamic)n).Text = (string)op["text"]; Style(n, (string)op["role"], F("wrap"));
         ((dynamic)doc).Objects.Add((dynamic)n, new Eto.Drawing.PointF(F("left") ?? 0, F("top") ?? 0)); MoveTo(n, F("left"), F("top"));
         if (op["group"] != null) ((dynamic)Find((string)op["group"])).AddContent(((dynamic)n).InstanceId);
@@ -377,8 +387,11 @@ def check(data):
                 else:
                     problems.append(f"title {label(t)} is {distance:.1f} above {label(g)}; a group title sits {TITLE_GAP} above, a column heading {HEADING_GAP}")
     for o in things:
-        if not any(contains(rect(g), rect(o)) for g in groups):
+        holders = [g for g in groups if contains(rect(g), body(o))]
+        if not holders:
             problems.append(f"object {label(o)} is not in a group")
+        elif not any(contains(rect(g), rect(o)) for g in holders):
+            problems.append(f"the name label under {label(o)} sticks out of its group: shorten the name or move the object inwards")
     for g in groups:
         if g["id"] not in titled:
             problems.append(f"group {label(g)} has no title (bold text, flush left, {TITLE_GAP} above the group)")
