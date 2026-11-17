@@ -88,5 +88,8 @@ Things worth knowing:
   absolute positions and do not try to compensate.
 - A group's outline is its members plus a 14 unit margin. It does not refresh while you move members from a
   script; `apply` works it out from the members.
+- A component or parameter with a name of its own shows that name centred underneath. The label is not
+  part of the object's bounds; the tools estimate its size from the text and treat it as part of the object.
+  A long name can stick out to the left of the component, so look at the render.
 - Nothing is solved while you work, so no example sends a request or opens a port.
 - Lay out the inside of each group first, then run the column step, then check, then render and look.

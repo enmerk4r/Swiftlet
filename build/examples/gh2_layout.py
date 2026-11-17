@@ -46,6 +46,9 @@ NOTE_GAP = (6, 18)      # allowed distance between a note and the object it is a
 ALIGN_TOLERANCE = 1.0
 MIN_GAP = 6             # closest two objects in a group may sit
 GROUP_GAP = 16          # closest two groups may sit
+# GH2 draws a component's or parameter's user-given name centred under it. That label is not part of the
+# object's bounds, so its extent is estimated from the text.
+LABEL_CHAR, LABEL_HEIGHT, LABEL_GAP = 6.6, 16.0, 3.0
 
 CORE = r'''
 using System; using System.Linq; using System.Collections; using System.Collections.Generic; using System.Reflection; using System.Text.Json; using System.Text.Json.Nodes;
@@ -81,6 +84,14 @@ Eto.Drawing.RectangleF Extent(object d) {
   float x0 = 1e9f, y0 = 1e9f, x1 = -1e9f, y1 = -1e9f;
   foreach (dynamic o in All(d)) { Eto.Drawing.RectangleF b = o.Attributes.Bounds; x0 = Math.Min(x0, b.Left); y0 = Math.Min(y0, b.Top); x1 = Math.Max(x1, b.Right); y1 = Math.Max(y1, b.Bottom); }
   return new Eto.Drawing.RectangleF(x0, y0, x1 - x0, y1 - y0); }
+bool HasLabel(object o) { if (IsGroup(o) || IsScribble(o)) return false; string n = o.GetType().Name; if (!(n.EndsWith("Component") || n.EndsWith("Parameter") || o.GetType().GetProperty("Parameters") != null)) return false;
+  return !string.IsNullOrEmpty((string)((dynamic)o).UserName); }
+// Bounds plus the name label drawn under the object, when it has one.
+Eto.Drawing.RectangleF Full(object o) {
+  Eto.Drawing.RectangleF b = ((dynamic)o).Attributes.Bounds; if (!HasLabel(o)) return b;
+  float w = __LABEL_CHAR__f * ((string)((dynamic)o).UserName).Length, cx = b.Left + b.Width / 2;
+  float x0 = Math.Min(b.Left, cx - w / 2), x1 = Math.Max(b.Right, cx + w / 2);
+  return new Eto.Drawing.RectangleF(x0, b.Top, x1 - x0, b.Height + __LABEL_GAP__f + __LABEL_HEIGHT__f); }
 JsonArray Rect(Eto.Drawing.RectangleF b) => new JsonArray(Math.Round(b.X, 2), Math.Round(b.Y, 2), Math.Round(b.Width, 2), Math.Round(b.Height, 2));
 JsonArray Pt(Eto.Drawing.PointF p) => new JsonArray(Math.Round(p.X, 2), Math.Round(p.Y, 2));
 
@@ -96,7 +107,7 @@ JsonObject Dump(object d) {
     dynamic x = o; var j = new JsonObject { ["id"] = Id(o), ["type"] = o.GetType().Name, ["name"] = (string)(x.UserName ?? "") };
     try { if (string.IsNullOrEmpty((string)j["name"])) j["name"] = (string)x.Nomen.Name; } catch { }
     j["kind"] = IsGroup(o) ? "group" : IsScribble(o) ? "text" : "object";
-    j["bounds"] = Rect((Eto.Drawing.RectangleF)x.Attributes.Bounds); j["pivot"] = Pt((Eto.Drawing.PointF)x.Attributes.Pivot);
+    j["bounds"] = Rect((Eto.Drawing.RectangleF)x.Attributes.Bounds); if (HasLabel(o)) j["extent"] = Rect(Full(o)); j["pivot"] = Pt((Eto.Drawing.PointF)x.Attributes.Pivot);
     if (o.GetType().Name == "ValueObject") j["value"] = (string)x.Text;
     if (IsScribble(o)) { j["text"] = (string)x.Text; j["font"] = x.TextFont.ToString(); j["style"] = x.TextStyle.ToString(); j["align"] = x.TextAlign.ToString(); j["wrap"] = (float)x.WrapWidth; }
     if (IsGroup(o)) { var c = new JsonArray(); foreach (Guid g in (IEnumerable<Guid>)x.ContentIds) c.Add(g.ToString()); j["content"] = c; j["colour"] = x.GroupColour.ToString(); }
@@ -122,7 +133,9 @@ else if (mode == "render") {
   float[] only = new float[] { __REGION__ }; if (only.Length == 4) region = new Eto.Drawing.RectangleF(only[0], only[1], only[2], only[3]);
   float scale = Math.Min(2f, 4000f / region.Width);
   var bmp = (Eto.Drawing.Bitmap)drawM.Invoke((object)canvas, new object[] { region, (int)(region.Width * scale), (int)(region.Height * scale), false, true, false });
-  bmp.Save(@"__OUT__", Eto.Drawing.ImageFormat.Png); Console.WriteLine("rendered " + bmp.Width + "x" + bmp.Height); }
+  var page = new Eto.Drawing.Bitmap(bmp.Width, bmp.Height, Eto.Drawing.PixelFormat.Format32bppRgba);
+  using (var g = new Eto.Drawing.Graphics(page)) { g.Clear(Eto.Drawing.Colors.White); g.DrawImage(bmp, 0, 0); }
+  page.Save(@"__OUT__", Eto.Drawing.ImageFormat.Png); Console.WriteLine("rendered " + bmp.Width + "x" + bmp.Height); }
 else if (mode == "apply") {
   // Text and groups may be added or removed; components, parameters and wires may not.
   bool Counts(object o) => !IsScribble(o) && !IsGroup(o);
@@ -140,7 +153,7 @@ else if (mode == "apply") {
   Eto.Drawing.RectangleF B(object o) {
     if (!IsGroup(o)) return (Eto.Drawing.RectangleF)((dynamic)o).Attributes.Bounds;
     float x0 = 1e9f, y0 = 1e9f, x1 = -1e9f, y1 = -1e9f;
-    foreach (object member in (IEnumerable)((dynamic)o).Content) { if (member == null || IsGroup(member)) continue; Eto.Drawing.RectangleF b = ((dynamic)member).Attributes.Bounds;
+    foreach (object member in (IEnumerable)((dynamic)o).Content) { if (member == null || IsGroup(member)) continue; Eto.Drawing.RectangleF b = Full(member);
       x0 = Math.Min(x0, b.Left); y0 = Math.Min(y0, b.Top); x1 = Math.Max(x1, b.Right); y1 = Math.Max(y1, b.Bottom); }
     const float margin = 14f; return new Eto.Drawing.RectangleF(x0 - margin, y0 - margin, x1 - x0 + 2 * margin, y1 - y0 + 2 * margin); }
   void MoveBy(object o, float dx, float dy) { dynamic a = ((dynamic)o).Attributes; Eto.Drawing.PointF p = a.Pivot; a.Pivot = new Eto.Drawing.PointF(p.X + dx, p.Y + dy); try { a.InvalidateLayout(); } catch { } }
@@ -172,8 +185,9 @@ else if (mode == "apply") {
         // Destinations are fixed when the op is first met, so the replay puts snapped children back where they belong.
         if (!destinations.TryGetValue(node, out var where)) { Relayout(); where = targets.Select(t => { var b = B(t); return (t, b.Left + (F("dx") ?? 0), b.Top + (F("dy") ?? 0)); }).ToList(); destinations[node] = where; }
         foreach (var (t, left, top) in where) MoveTo(t, left, top); break; }
-      case "below": case "above": { Relayout(); var anchor = B(Find((string)op["of"])); float gap = F("gap") ?? 10;
-        foreach (var t in targets) { var b = B(t); MoveTo(t, anchor.Left, kind == "below" ? anchor.Bottom + gap : anchor.Top - gap - b.Height); } break; }
+      case "below": case "above": { Relayout(); var of = Find((string)op["of"]); var anchor = B(of); float gap = F("gap") ?? 10;
+        float under = IsGroup(of) ? anchor.Bottom : Full(of).Bottom;   // clear of the name label, if any
+        foreach (var t in targets) { var b = B(t); MoveTo(t, anchor.Left, kind == "below" ? under + gap : anchor.Top - gap - b.Height); } break; }
       case "title_over": case "heading_over": { Relayout(); var anchor = B(Find((string)op["of"])); float gap = kind == "title_over" ? __TITLE_GAP__ : __HEADING_GAP__;
         foreach (var t in targets) { var b = B(t); MoveTo(t, anchor.Left, anchor.Top - gap - b.Height); } break; }
       case "fit_values": {
@@ -217,7 +231,8 @@ def run(port, mode, path, out="", ops=None, solve=False, region=""):
     script = (SCRIPT.replace("__PATH__", str(pathlib.Path(path).resolve())).replace("__MODE__", mode)
               .replace("__OUT__", str(pathlib.Path(out).resolve()) if out else "")
               .replace("__OPS__", base64.b64encode(json.dumps(ops or []).encode()).decode())
-              .replace("__SOLVE__", "true" if solve else "false").replace("__REGION__", region or "").replace("__HEADING_GAP__", str(HEADING_GAP)).replace("__TITLE_GAP__", str(TITLE_GAP)))
+              .replace("__SOLVE__", "true" if solve else "false").replace("__REGION__", region or "").replace("__HEADING_GAP__", str(HEADING_GAP)).replace("__TITLE_GAP__", str(TITLE_GAP))
+              .replace("__LABEL_CHAR__", str(LABEL_CHAR)).replace("__LABEL_GAP__", str(LABEL_GAP)).replace("__LABEL_HEIGHT__", str(LABEL_HEIGHT)))
     call(port, "g2_start", {})
     return run_csharp(port, script)
 
@@ -229,8 +244,14 @@ def dump(port, path):
 
 
 # ---------------------------------------------------------------- checks
-def rect(o):
+def body(o):
     x, y, w, h = o["bounds"]
+    return x, y, x + w, y + h
+
+
+def rect(o):
+    """What the object occupies on the canvas: its bounds plus the name label under it, if it has one."""
+    x, y, w, h = o.get("extent") or o["bounds"]
     return x, y, x + w, y + h
 
 
@@ -313,7 +334,7 @@ def check(data):
             ok = False
             for o in anchors:
                 ro = rect(o)
-                aligned = abs(rt[0] - ro[0]) <= ALIGN_TOLERANCE
+                aligned = abs(rt[0] - body(o)[0]) <= ALIGN_TOLERANCE
                 below = NOTE_GAP[0] <= rt[1] - ro[3] <= NOTE_GAP[1]
                 above = NOTE_GAP[0] <= ro[1] - rt[3] <= NOTE_GAP[1]
                 if aligned and (below or above):
