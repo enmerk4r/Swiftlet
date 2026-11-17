@@ -29,6 +29,7 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "ungroup", "group": GROUP, "id": ANY} / {"op": "group", "group": GROUP, "id": ANY}
     {"op": "new_group", "ids": [...], "key": "g1", "colour": "Teal"}   a new group around those objects
     {"op": "delete_group", "id": GROUP}                           removes the group and keeps its members
+    {"op": "label",   "id": OBJECT, "text": "Bake"}               the name GH2 shows under a component or parameter
 An "add" or "new_group" with a "key" can be referred to by later ops as "@n1" / "@g1".
 Anywhere an id is expected, "name:Some name" selects the one object whose user-given name is exactly that.
 """
@@ -193,6 +194,7 @@ else if (mode == "apply") {
         ((dynamic)doc).Objects.Add((dynamic)g, new Eto.Drawing.PointF(0, 0));
         if (op["colour"] != null) groupT.GetProperty("GroupColour").SetValue(g, Enum.Parse(groupT.GetProperty("GroupColour").PropertyType, (string)op["colour"]));
         if (op["key"] != null) keyed[(string)op["key"]] = g; break; }
+      case "label": foreach (dynamic t in targets) { if (IsGroup(t) || IsScribble(t)) throw new Exception("label: use name/text for groups and text"); t.UserName = (string)op["text"]; } Relayout(); break;
       case "delete_group": if (replay) break; foreach (var t in targets) { if (!IsGroup(t)) throw new Exception("delete_group: not a group");
         foreach (Guid member in ((IEnumerable<Guid>)((dynamic)t).ContentIds).ToArray()) ((dynamic)t).RemoveContent(member);
         ((dynamic)doc).Objects.Remove((dynamic)t); } break;
