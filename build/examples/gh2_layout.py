@@ -18,7 +18,9 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "name",    "id": GROUP, "text": ""}                    GH2's own group header (centred); the standard uses text titles instead
     {"op": "delete",  "id": SCRIBBLE}                             text objects only
     {"op": "text",    "id": SCRIBBLE, "text": "..."}
-    {"op": "style",   "id": SCRIBBLE, "role": "heading"|"note", "wrap": 220}
+    {"op": "style",   "id": SCRIBBLE, "role": "heading"|"note"|"flag", "wrap": 220}
+    {"op": "colour",  "id": SCRIBBLE, "colour": "Red"}           text colour: an OpenColor family (Red, Orange, ...); "Flat" is the skin default
+    {"op": "disable", "ids": [...]} / {"op": "enable", "ids": [...]}   save components disabled or enabled
     {"op": "move",    "id": ANY, "left": X, "top": Y}             either coordinate may be omitted
     {"op": "moveby",  "ids": [...], "dx": 0, "dy": 0}
     {"op": "below",   "id": SCRIBBLE, "of": ANY, "gap": 10}       left edges aligned, under the object
@@ -28,7 +30,7 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "fit_values"}                                          widen every value box (or "ids") to show its whole text
     {"op": "size",    "id": VALUE, "width": 140}                  set a value box's width by hand
     {"op": "size",    "id": TEXTINPUT, "width": 220, "lines": 4}  a text input: width of its text area, rows shown
-    {"op": "add",     "role": "heading"|"note", "text": "...", "left": X, "top": Y, "group": GROUP, "key": "n1"}
+    {"op": "add",     "role": "heading"|"note"|"flag", "text": "...", "left": X, "top": Y, "group": GROUP, "key": "n1", "colour": "Red"}
     {"op": "ungroup", "group": GROUP, "id": ANY} / {"op": "group", "group": GROUP, "id": ANY}
     {"op": "new_group", "ids": [...], "key": "g1", "colour": "Teal"}   a new group around those objects
     {"op": "delete_group", "id": GROUP}                           removes the group and keeps its members
@@ -120,7 +122,8 @@ JsonObject Dump(object d) {
     j["kind"] = IsGroup(o) ? "group" : IsScribble(o) ? "text" : "object";
     j["bounds"] = Rect((Eto.Drawing.RectangleF)x.Attributes.Bounds); if (HasLabel(o)) j["extent"] = Rect(Full(o)); j["pivot"] = Pt((Eto.Drawing.PointF)x.Attributes.Pivot);
     if (o.GetType().Name == "ValueObject") j["value"] = (string)x.Text;
-    if (IsScribble(o)) { j["text"] = (string)x.Text; j["font"] = x.TextFont.ToString(); j["style"] = x.TextStyle.ToString(); j["align"] = x.TextAlign.ToString(); j["wrap"] = (float)x.WrapWidth; }
+    if (IsScribble(o)) { j["text"] = (string)x.Text; j["font"] = x.TextFont.ToString(); j["style"] = x.TextStyle.ToString(); j["align"] = x.TextAlign.ToString(); j["wrap"] = (float)x.WrapWidth; j["colour"] = x.TextColour.ToString(); }
+    else if (!IsGroup(o)) { try { j["enabled"] = x.Activity.ToString() != "Disabled"; } catch { } }
     if (IsGroup(o)) { var c = new JsonArray(); foreach (Guid g in (IEnumerable<Guid>)x.ContentIds) c.Add(g.ToString()); j["content"] = c; j["colour"] = x.GroupColour.ToString(); }
     var wires = new JsonArray();
     foreach (dynamic pin in Pins(o, true)) {
@@ -180,11 +183,13 @@ else if (mode == "apply") {
   void MoveTo(object o, float? left, float? top) { Relayout(); var b = B(o); MoveBy(o, left.HasValue ? left.Value - b.Left : 0, top.HasValue ? top.Value - b.Top : 0); Relayout(); }
   void Style(object o, string role, float? wrap) {
     scribbleT.GetProperty("TextFont").SetValue(o, Enum.Parse(fontT, "Sans"));
-    scribbleT.GetProperty("TextStyle").SetValue(o, Enum.Parse(typeof(Eto.Drawing.FontStyle), role == "heading" ? "Bold" : "Italic"));
+    scribbleT.GetProperty("TextStyle").SetValue(o, Enum.Parse(typeof(Eto.Drawing.FontStyle), role == "note" ? "Italic" : "Bold"));
     scribbleT.GetProperty("TextAlign").SetValue(o, Enum.Parse(alignT, "Left"));
     ((dynamic)o).TextAngle = 0; if (wrap.HasValue) ((dynamic)o).WrapWidth = wrap.Value; }
   // Objects snapped onto a component (a toggle on an input, say) travel with it when it moves, so every
   // placement is replayed once after everything has moved.
+  void Colour(object o, string family) {
+    var c = scribbleT.GetProperty("TextColour"); c.SetValue(o, Enum.Parse(c.PropertyType, family)); }
   var absolute = new HashSet<string> { "move", "moveby", "below", "above", "heading_over", "title_over" };
   var destinations = new Dictionary<JsonNode, List<(object, float, float)>>();
   var plan = ops.Select(n => n).ToList(); plan.AddRange(ops.Where(n => absolute.Contains((string)n["op"])).ToList());
@@ -199,6 +204,9 @@ else if (mode == "apply") {
       case "delete": if (replay) break; foreach (var t in targets) { if (!IsScribble(t)) throw new Exception("delete: only text objects may be deleted"); ((dynamic)doc).Objects.Remove((dynamic)t); } break;
       case "text": foreach (dynamic t in targets) t.Text = (string)op["text"]; break;
       case "style": foreach (var t in targets) Style(t, (string)op["role"], F("wrap")); Relayout(); break;
+      case "colour": foreach (var t in targets) { if (!IsScribble(t)) throw new Exception("colour: text objects only"); Colour(t, (string)op["colour"]); } Relayout(); break;
+      case "disable": case "enable": foreach (dynamic t in targets) { if (IsGroup(t) || IsScribble(t)) throw new Exception(kind + ": components and parameters only");
+          var act = ((object)t).GetType().GetProperty("Activity"); act.SetValue(t, Enum.Parse(act.PropertyType, kind == "disable" ? "Disabled" : "Enabled")); } break;
       case "move": foreach (var t in targets) MoveTo(t, F("left"), F("top")); break;
       case "moveby": {
         // Destinations are fixed when the op is first met, so the replay puts snapped children back where they belong.
@@ -227,6 +235,7 @@ else if (mode == "apply") {
           else { dynamic a = att; Eto.Drawing.SizeF z = a.Size; a.Size = new Eto.Drawing.SizeF(F("width") ?? z.Width, F("height") ?? z.Height); }
           MoveTo(t, before.Left, before.Top); } break;
       case "add": { object n = Activator.CreateInstance(scribbleT); ((dynamic)n).Text = (string)op["text"]; Style(n, (string)op["role"], F("wrap"));
+        if (op["colour"] != null) Colour(n, (string)op["colour"]);
         ((dynamic)doc).Objects.Add((dynamic)n, new Eto.Drawing.PointF(F("left") ?? 0, F("top") ?? 0)); MoveTo(n, F("left"), F("top"));
         if (op["group"] != null) ((dynamic)Find((string)op["group"])).AddContent(((dynamic)n).InstanceId);
         if (op["key"] != null) keyed[(string)op["key"]] = n; break; }
@@ -332,6 +341,11 @@ def label(o):
     return f'{o["id"][:8]} "{text.splitlines()[0][:40] if text else ""}"'
 
 
+def is_flag(t):
+    """A bold note in a colour of its own, such as the red ENABLE ME! under a disabled request."""
+    return t["style"] == "Bold" and t.get("colour", "Flat") != "Flat"
+
+
 def check(data):
     objs = data["objects"]
     by_id = {o["id"]: o for o in objs}
@@ -372,7 +386,14 @@ def check(data):
         for g in groups:
             if not contains(rect(g), rt) and intersects(rect(g), rt):
                 problems.append(f"text {label(t)} straddles the edge of group {label(g)}")
-        if inside:
+        if inside and is_flag(t):
+            # a flag: a bold coloured line directly under a component saved disabled, telling the reader to enable it
+            if t["id"] not in member:
+                problems.append(f"flag {label(t)} lies in a group it does not belong to; add it to the group")
+            under = [o for o in things if abs(rt[0] - body(o)[0]) <= ALIGN_TOLERANCE and NOTE_GAP[0] <= rt[1] - rect(o)[3] <= NOTE_GAP[1]]
+            if not any(o.get("enabled") is False for o in under):
+                problems.append(f"flag {label(t)} is not directly under a disabled component (left edges aligned, {NOTE_GAP[0]}-{NOTE_GAP[1]} below it)")
+        elif inside:
             if t["style"] != "Italic":
                 problems.append(f"note {label(t)} must be italic (is {t['style']})")
             if t["id"] not in member:
