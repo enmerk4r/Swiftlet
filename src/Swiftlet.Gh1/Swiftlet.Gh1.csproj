@@ -80,6 +80,9 @@
 
   <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
     <Compile Remove="Components\*.WindowsMenu.cs" />
+    <!-- On Windows System.Drawing.Common comes from the Windows Desktop reference pack above. Other hosts
+         (CI test builds on Linux and macOS) need the package to compile; shipped packages are built on Windows. -->
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
