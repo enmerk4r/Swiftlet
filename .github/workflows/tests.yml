@@ -1,6 +1,6 @@
 name: Tests
 
-# Builds the shared libraries and the GH1 shell, then runs the unit and integration tests on
+# Builds the shared libraries and the GH1 and GH2 shells, then runs the unit and integration tests on
 # Windows, Linux and macOS. The integration tests drive the HTTP, WebSocket and MCP server paths
 # through the Native AOT bridge built for that platform, which is the kind that ships in the package.
 # Nothing here runs inside Rhino: the Grasshopper components themselves are not exercised.
@@ -87,6 +87,12 @@ jobs:
         run: |
           set -euo pipefail
           dotnet run --project tests/Swiftlet.Core.Tests -c Release
+
+      - name: Build the Grasshopper 2 plug-in
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet build src/Swiftlet.Gh2 -c Release
 
       - name: Build integration tests
         shell: bash
