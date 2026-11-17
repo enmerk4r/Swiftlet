@@ -65,7 +65,7 @@
     },
     {
       "of": "Client",
-      "text": "Start the server, then set Run to true. Wait until the status reads Connected."
+      "text": "Start the server, then set Run to true. Wait until the status reads Connected. Stop this client before the server."
     },
     {
       "of": "Send to server",

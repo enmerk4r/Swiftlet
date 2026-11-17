@@ -111,7 +111,7 @@
   "notes": [
     {
       "of": "150 Iris samples",
-      "text": "Start the bundled Python server, then enable Predict Iris. All 150 samples include four measurements; see iris-gh2.md."
+      "text": "See iris-gh2.md for setup. Start the bundled Python server, then enable Predict Iris. Each of the 150 samples has four measurements."
     },
     {
       "of": "sepal_length_cm",
