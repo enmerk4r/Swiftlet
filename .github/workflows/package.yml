@@ -16,7 +16,9 @@ on:
     paths:
       - .github/workflows/package.yml
       - .github/workflows/bridge-aot-artifacts.yml
-      - build/**
+      - build/packaging/**
+      - build/targets/**
+      - build/Version.props
 
 permissions:
   contents: read
