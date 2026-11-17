@@ -110,10 +110,27 @@ Console.WriteLine("ROUNDTRIP "+JsonSerializer.Serialize(new {objects=before,wire
 '''
 
 
+def save_example(port, cs, path, layout_key):
+    """Save, lay out with the shared standard, then reopen the saved graph for its fixture checks."""
+    result = cs(ROUNDTRIP.replace('__PATH__', str(path)))
+    sys.path.insert(0, str(ROOT / 'build/examples'))
+    from native_layout import apply
+    _, problems = apply(port, layout_key)
+    if problems:
+        raise AssertionError('Layout check failed: ' + '; '.join(problems))
+    cs(r'''var dt=gh.GetType("Grasshopper2.Doc.Document");var it=gh.GetType("Grasshopper2.Doc.DocumentIO");
+    dynamic reader=Activator.CreateInstance(it,new object[]{dt.GetMethod("NewInactiveDocument").Invoke(null,null),false,false,false,false});
+    var open=it.GetMethods().Single(m=>m.Name=="Open"&&m.GetParameters().Length==3&&m.GetParameters()[0].ParameterType==typeof(string));
+    Check((bool)open.Invoke(reader,new object[]{@"__PATH__",Array.CreateInstance(dt,0),null}),"read laid-out example");
+    editor.Canvas.Document=reader.Document;'''.replace('__PATH__', str(path)))
+    return result
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--port',type=int,required=True)
     ap.add_argument('--report',type=pathlib.Path)
+    ap.add_argument('--only',choices=['multipart','websocket'])
     args=ap.parse_args()
     def cs(code):
         result=run_csharp(args.port,PRE+code)
@@ -134,32 +151,34 @@ def main():
     (ROOT/'artifacts/native-examples').mkdir(parents=True,exist_ok=True)
     try:
         cs('Console.WriteLine("PID "+Environment.ProcessId+"; "+plug.Location);')
-        cs(MULTIPART)
-        path=ROOT/'Examples/swiftlet-simple-examples/multipart-form-data.ghz'
-        report['multipart_roundtrip']=cs(ROUNDTRIP.replace('__PATH__',str(path)))
-        cs('Check(Find("POST Request").Activity.ToString()=="Disabled","POST saved disabled");Enable(Find("POST Request"),true);doc.Solution.StartWait();Check(Text(Find("POST Request"),0)=="200","HTTP 200");Console.WriteLine("BODY:"+Text(Find("POST Request"),1));')
-        expected={'fields':[{'name':'title','filename':None,'content_type':'text/plain','text':'Swiftlet origami','bytes':16}, {'name':'upload','filename':'origami.txt','content_type':'text/plain','text':'Fold me.\n','bytes':9}]}
-        assert server.received==[expected],server.received
-        response=cs('Console.WriteLine("JSON:"+Text(Find("POST Request"),1));')
-        assert json.loads(next(l[5:] for l in response.splitlines() if l.startswith('JSON:')))==expected
-        report['multipart_received']=server.received
-        cs('Healthy();Render(@"'+str(ROOT/'artifacts/native-examples/multipart.png')+'");')
-        cs('Enable(Find("POST Request"),false);foreach(dynamic item in ((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray()) doc.Objects.Remove(item);')
-        cs(WEBSOCKET)
-        path=ROOT/'Examples/swiftlet-listeners/swiftlet-websocket-loopback.ghz'
-        report['websocket_roundtrip']=cs(ROUNDTRIP.replace('__PATH__',str(path)))
-        cs('Put(Find("Local server"),1,new[]{true});doc.Solution.StartWait();')
-        wait('Text(Find("Local server"),4)','Listening on ws://localhost:18742/')
-        cs('Put(Find("Client"),2,new[]{true});doc.Solution.StartWait();')
-        wait('Text(Find("Client"),3)','Connected')
-        cs('Put(Find("Send to server"),2,new[]{true});doc.Solution.StartWait();Check(Text(Find("Send to server"),0)=="True","client sent");Put(Find("Send to server"),2,new[]{false});doc.Solution.StartWait();')
-        wait('Text(Find("Local server"),1)','hello from Swiftlet')
-        cs('Put(Find("Reply to client"),2,new[]{true});doc.Solution.StartWait();Check(Text(Find("Reply to client"),0)=="True","server sent");Put(Find("Reply to client"),2,new[]{false});doc.Solution.StartWait();')
-        wait('Text(Find("Client"),1)','subscribed: origami')
-        cs('Healthy();Render(@"'+str(ROOT/'artifacts/native-examples/websocket.png')+'");')
-        cs('Put(Find("Client"),2,new[]{false});doc.Solution.StartWait();Put(Find("Local server"),1,new[]{false});doc.Solution.StartWait();Check(Text(Find("Local server"),4)=="Stopped","server stopped");')
-        report['websocket']={'client_to_server':'hello from Swiftlet','server_to_client':'subscribed: origami','stopped':True}
-        print('PASS: both saved files reopened and their network outputs verified.',flush=True)
+        if args.only in (None,'multipart'):
+            cs(MULTIPART)
+            path=ROOT/'Examples/swiftlet-simple-examples/multipart-form-data.ghz'
+            report['multipart_roundtrip']=save_example(args.port,cs,path,'multipart')
+            cs('Check(Find("POST Request").Activity.ToString()=="Disabled","POST saved disabled");Enable(Find("POST Request"),true);doc.Solution.StartWait();Check(Text(Find("POST Request"),0)=="200","HTTP 200");Console.WriteLine("BODY:"+Text(Find("POST Request"),1));')
+            expected={'fields':[{'name':'title','filename':None,'content_type':'text/plain','text':'Swiftlet origami','bytes':16}, {'name':'upload','filename':'origami.txt','content_type':'text/plain','text':'Fold me.\n','bytes':9}]}
+            assert server.received==[expected],server.received
+            response=cs('Console.WriteLine("JSON:"+Text(Find("POST Request"),1));')
+            assert json.loads(next(l[5:] for l in response.splitlines() if l.startswith('JSON:')))==expected
+            report['multipart_received']=server.received
+            cs('Healthy();Render(@"'+str(ROOT/'artifacts/native-examples/multipart.png')+'");')
+            cs('Enable(Find("POST Request"),false);foreach(dynamic item in ((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray()) doc.Objects.Remove(item);')
+        if args.only in (None,'websocket'):
+            cs(WEBSOCKET)
+            path=ROOT/'Examples/swiftlet-listeners/swiftlet-websocket-loopback.ghz'
+            report['websocket_roundtrip']=cs(ROUNDTRIP.replace('__PATH__',str(path)))
+            cs('Put(Find("Local server"),1,new[]{true});doc.Solution.StartWait();')
+            wait('Text(Find("Local server"),4)','Listening on ws://localhost:18742/')
+            cs('Put(Find("Client"),2,new[]{true});doc.Solution.StartWait();')
+            wait('Text(Find("Client"),3)','Connected')
+            cs('Put(Find("Send to server"),2,new[]{true});doc.Solution.StartWait();Check(Text(Find("Send to server"),0)=="True","client sent");Put(Find("Send to server"),2,new[]{false});doc.Solution.StartWait();')
+            wait('Text(Find("Local server"),1)','hello from Swiftlet')
+            cs('Put(Find("Reply to client"),2,new[]{true});doc.Solution.StartWait();Check(Text(Find("Reply to client"),0)=="True","server sent");Put(Find("Reply to client"),2,new[]{false});doc.Solution.StartWait();')
+            wait('Text(Find("Client"),1)','subscribed: origami')
+            cs('Healthy();Render(@"'+str(ROOT/'artifacts/native-examples/websocket.png')+'");')
+            cs('Put(Find("Client"),2,new[]{false});doc.Solution.StartWait();Put(Find("Local server"),1,new[]{false});doc.Solution.StartWait();Check(Text(Find("Local server"),4)=="Stopped","server stopped");')
+            report['websocket']={'client_to_server':'hello from Swiftlet','server_to_client':'subscribed: origami','stopped':True}
+        print('PASS: selected saved files reopened and their network outputs verified.',flush=True)
         if args.report:
             args.report.parent.mkdir(parents=True,exist_ok=True)
             args.report.write_text(json.dumps(report,indent=2),encoding='utf-8')
