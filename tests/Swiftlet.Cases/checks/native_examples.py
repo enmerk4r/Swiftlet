@@ -166,7 +166,7 @@ def main():
         if args.only in (None,'websocket'):
             cs(WEBSOCKET)
             path=ROOT/'Examples/swiftlet-listeners/swiftlet-websocket-loopback.ghz'
-            report['websocket_roundtrip']=cs(ROUNDTRIP.replace('__PATH__',str(path)))
+            report['websocket_roundtrip']=save_example(args.port,cs,path,'websocket')
             cs('Put(Find("Local server"),1,new[]{true});doc.Solution.StartWait();')
             wait('Text(Find("Local server"),4)','Listening on ws://localhost:18742/')
             cs('Put(Find("Client"),2,new[]{true});doc.Solution.StartWait();')
