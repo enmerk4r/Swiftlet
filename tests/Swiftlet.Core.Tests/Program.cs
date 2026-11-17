@@ -800,6 +800,8 @@ internal static class TestRunner
             IpBlacklist blacklist = IpBlacklist.FromEnvironment(variableName);
 
             Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
+            Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("2001:4860:4860::8888")));
+            Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("::1")));
         }
         finally
         {

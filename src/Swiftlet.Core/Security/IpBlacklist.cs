@@ -35,8 +35,8 @@ public sealed class IpBlacklist : IIpBlacklist
         }
         catch (ArgumentException)
         {
-            // A parsing failure is treated as suspicious configuration: block everything.
-            return new IpBlacklist(["0.0.0.0/0"]);
+            // A parsing failure is treated as suspicious configuration: block everything, IPv4 and IPv6.
+            return new IpBlacklist(["0.0.0.0/0", "0:0:0:0:0:0:0:0/0"]);
         }
     }
 
