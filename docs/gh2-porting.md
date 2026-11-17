@@ -70,6 +70,11 @@ Use identity rules only for stateless one-to-one mappings. Stateful rules first 
 
 The 21-example audit found 19 fully native Swiftlet conversions and two retaining only the unsupported archived Swiftlet objects above, with their wires intact. Google Maps also has unavailable third-party objects and one missing non-Swiftlet wire; do not generalize that result to lossless conversion. Standard conversion drops GH1 scribbles. `make_gh2_examples.py` recreates notes with their text/position and GH2 default styling, saves through DocumentIO.Save and reopens to compare counts. Fifteen `.ghz` examples were generated; the key-dependent OpenAI example was reopened only, and two others reported unavailable external services when solved.
 
+Two host differences surfaced when the converted MCP example was exercised with a real client; neither is a Swiftlet fault, and both needed a hand edit in the `.ghz`:
+
+- GH1 maths components convert text to numbers (a Panel holding `2` feeding Division). GH2's Division rejects text. Replace such inputs with number values.
+- A converted GH1 Python script component has GUID marshalling on, so a script that returns an object GUID outputs the object's geometry instead. Switch the option off on the component when downstream objects expect the identifier.
+
 ## Icons, palette and viewport services
 
 `Assets/Icons/icons.json` drives shared `IconSlugs.g.cs`; SVG masters feed GH2 vector icons and generated 24px GH1 PNGs. The pipeline outlines text/strokes, flattens transforms and shadows, and splits compound glyph holes for GH2's SVG parser. Native renders were compared against reference renders. The converter discards elements wholly outside the artboard, including seven Illustrator organising captions that GH2 otherwise displayed; GH1 PNGs already clipped them. Keep the original origami colors and flat shaded faces.
