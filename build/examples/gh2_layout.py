@@ -434,7 +434,11 @@ def check(data):
                         problems.append(f"column heading {label(t)} must be upper case")
                 else:
                     problems.append(f"title {label(t)} is {distance:.1f} above {label(g)}; a group title sits {TITLE_GAP} above, a column heading {HEADING_GAP}")
+    flags = [t for t in texts if is_flag(t)]
     for o in things:
+        if o.get("enabled") is False and not any(
+                abs(rect(t)[0] - body(o)[0]) <= ALIGN_TOLERANCE and NOTE_GAP[0] <= rect(t)[1] - rect(o)[3] <= NOTE_GAP[1] for t in flags):
+            problems.append(f"{label(o)} is saved disabled but has no flag under it telling the reader to enable it")
         holders = [g for g in groups if contains(rect(g), body(o))]
         if not holders:
             problems.append(f"object {label(o)} is not in a group")
