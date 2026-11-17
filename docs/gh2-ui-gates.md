@@ -45,11 +45,11 @@ change was observed. A second available window inventory also exposed only the
 parent Rhino window. This is an automation targeting limitation, not evidence of a
 Swiftlet control defect.
 
-Evidence: `C:\Users\pigac\AppData\Local\Temp\swiftlet-ui-clickthrough\get-before-*.png`
-contains the actual GET popup and its 100-second value. The scratch Rhino was closed
-and mouse/keyboard control released after the attempt.
+Screenshots of the GET popup and its 100-second value were captured during the attempt. The
+scratch Rhino was closed and mouse/keyboard control released afterwards.
 
-The following visible-UI gates remain pending: changing all five request timeouts,
+The following visible-UI gates remain pending and need a person at the machine (about ten
+minutes): changing all five request timeouts,
 content type and save mode; Undo/Redo for those controls; Server Input route
 add/remove and wire restoration; MCP Port/Server Name edits and copy-config buttons;
 and Tab/Enter/Esc focus handling. The programmatic event checks above remain valid,
