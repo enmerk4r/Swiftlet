@@ -23,6 +23,7 @@ The hierarchy is therefore made with weight and case.
 
 ## Groups, titles and columns
 
+- Every component, parameter and panel is in a group. **(checked)**
 - Everything that is drawn inside a group is a member of that group. **(checked for notes)**
 - A group title is flush with the left edge of its group and its bottom edge is 8 units above the group. Every
   group has exactly one. **(checked)**

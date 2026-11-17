@@ -28,6 +28,7 @@ OPERATIONS (ids are the 8-character ids that `dump` prints; several ops take "id
     {"op": "add",     "role": "heading"|"note", "text": "...", "left": X, "top": Y, "group": GROUP, "key": "n1"}
     {"op": "ungroup", "group": GROUP, "id": ANY} / {"op": "group", "group": GROUP, "id": ANY}
     {"op": "new_group", "ids": [...], "key": "g1", "colour": "Teal"}   a new group around those objects
+    {"op": "delete_group", "id": GROUP}                           removes the group and keeps its members
 An "add" or "new_group" with a "key" can be referred to by later ops as "@n1" / "@g1".
 Anywhere an id is expected, "name:Some name" selects the one object whose user-given name is exactly that.
 """
@@ -192,6 +193,9 @@ else if (mode == "apply") {
         ((dynamic)doc).Objects.Add((dynamic)g, new Eto.Drawing.PointF(0, 0));
         if (op["colour"] != null) groupT.GetProperty("GroupColour").SetValue(g, Enum.Parse(groupT.GetProperty("GroupColour").PropertyType, (string)op["colour"]));
         if (op["key"] != null) keyed[(string)op["key"]] = g; break; }
+      case "delete_group": if (replay) break; foreach (var t in targets) { if (!IsGroup(t)) throw new Exception("delete_group: not a group");
+        foreach (Guid member in ((IEnumerable<Guid>)((dynamic)t).ContentIds).ToArray()) ((dynamic)t).RemoveContent(member);
+        ((dynamic)doc).Objects.Remove((dynamic)t); } break;
       case "group": ((dynamic)Find((string)op["group"])).AddContent(((dynamic)targets[0]).InstanceId); break;
       case "ungroup": ((dynamic)Find((string)op["group"])).RemoveContent(((dynamic)targets[0]).InstanceId); break;
       default: throw new Exception("unknown op " + kind); } }
@@ -339,6 +343,9 @@ def check(data):
                         problems.append(f"column heading {label(t)} must be upper case")
                 else:
                     problems.append(f"title {label(t)} is {distance:.1f} above {label(g)}; a group title sits {TITLE_GAP} above, a column heading {HEADING_GAP}")
+    for o in things:
+        if not any(contains(rect(g), rect(o)) for g in groups):
+            problems.append(f"object {label(o)} is not in a group")
     for g in groups:
         if g["id"] not in titled:
             problems.append(f"group {label(g)} has no title (bold text, flush left, {TITLE_GAP} above the group)")
