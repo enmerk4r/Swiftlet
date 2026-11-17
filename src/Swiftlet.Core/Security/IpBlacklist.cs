@@ -36,7 +36,7 @@ public sealed class IpBlacklist : IIpBlacklist
         catch (ArgumentException)
         {
             // A parsing failure is treated as suspicious configuration: block everything, IPv4 and IPv6.
-            return new IpBlacklist(["0.0.0.0/0", "0:0:0:0:0:0:0:0/0"]);
+            return new IpBlacklist(["0.0.0.0/0", "::/0"]);
         }
     }
 
@@ -225,7 +225,19 @@ public sealed class IpBlacklist : IIpBlacklist
 
         private static string[] ExpandIpv6Address(string address)
         {
-            string normalizedAddress = address.EndsWith("::", StringComparison.Ordinal) ? address + "0" : address;
+            // "::" at either end stands for a run of zero groups; give it an explicit zero group so the
+            // split below sees exactly one empty part ("::1" -> "0::1", "fe80::" -> "fe80::0", "::" -> "0::0").
+            string normalizedAddress = address;
+            if (normalizedAddress.StartsWith("::", StringComparison.Ordinal))
+            {
+                normalizedAddress = "0" + normalizedAddress;
+            }
+
+            if (normalizedAddress.EndsWith("::", StringComparison.Ordinal))
+            {
+                normalizedAddress += "0";
+            }
+
             string[] addressParts = normalizedAddress.Split(':');
 
             if (addressParts.Length > 8)

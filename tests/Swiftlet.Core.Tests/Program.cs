@@ -787,6 +787,17 @@ internal static class TestRunner
         Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("127.0.0.1")));
         Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
         Assert.False(blacklist.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
+
+        // Compressed IPv6 forms with "::" at the start or as the whole address.
+        IpBlacklist loopback = new(["::1/128", "fe80::/10"]);
+        Assert.True(loopback.IsAddressBlacklisted(IPAddress.Parse("::1")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("::2")));
+        Assert.True(loopback.IsAddressBlacklisted(IPAddress.Parse("fe80::1234")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("127.0.0.1")));
+        IpBlacklist everything6 = new(["::/0"]);
+        Assert.True(everything6.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
+        Assert.False(everything6.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
     }
 
     private static void IpBlacklistBlocksAllOnInvalidEnvironmentConfig()
