@@ -96,6 +96,7 @@ int Wires(object d){int count=0;foreach(dynamic o in ((dynamic)d).Objects.Forwar
  else {var prop=((object)o).GetType().GetProperty("Inputs");if(prop!=null)count+=(int)((dynamic)prop.GetValue(o)).Count;}}
  return count;}
 int before=Count(doc),wires=Wires(doc);
+Check(before>0,"refuse to overwrite an example with an empty document");
 dynamic io=Activator.CreateInstance(ioT,new object[]{(object)doc,false,false,false,false});
 var saved=ioT.GetMethod("Save",new[]{typeof(string),gh.GetType("Grasshopper2.Doc.FileContents")}).Invoke(io,new object[]{@"__PATH__",Enum.Parse(gh.GetType("Grasshopper2.Doc.FileContents"),"All")});
 object back=docT.GetMethod("NewInactiveDocument").Invoke(null,null);
