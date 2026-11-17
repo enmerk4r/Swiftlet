@@ -251,7 +251,7 @@ def run(port, mode, path, out="", ops=None, solve=False, region=""):
     script = (SCRIPT.replace("__PATH__", str(pathlib.Path(path).resolve())).replace("__MODE__", mode)
               .replace("__OUT__", str(pathlib.Path(out).resolve()) if out else "")
               .replace("__OPS__", base64.b64encode(json.dumps(ops or []).encode()).decode())
-              .replace("__SOLVE__", "true" if solve else "false").replace("__REGION__", region or "").replace("__HEADING_GAP__", str(HEADING_GAP)).replace("__TITLE_GAP__", str(TITLE_GAP))
+              .replace("__SOLVE__", "true" if solve else "false").replace("__REGION__", ", ".join(f"{float(v)}f" for v in region.split(",")) if region else "").replace("__HEADING_GAP__", str(HEADING_GAP)).replace("__TITLE_GAP__", str(TITLE_GAP))
               .replace("__LABEL_CHAR__", str(LABEL_CHAR)).replace("__LABEL_GAP__", str(LABEL_GAP)).replace("__LABEL_HEIGHT__", str(LABEL_HEIGHT)))
     call(port, "g2_start", {})
     return run_csharp(port, script)
