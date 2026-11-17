@@ -59,8 +59,9 @@ The hierarchy is therefore made with weight and case.
 
 - A request component that would send something the moment the file opens is saved disabled, with a flag
   reading `ENABLE ME!` directly under it: left edges aligned, 8 units below, member of the same group, bold
-  and red (`"role": "flag", "colour": "Red"` in `apply`). **(checked: a flag must sit under a disabled
-  component)**
+  and red (`"role": "flag", "colour": "Red"` in `apply`). **(checked: every disabled component has a
+  flag under it, and every flag is under a disabled component)**
+- A flag does not replace the note that says what to do before enabling (start a server, enter a key).
 - Make room for the flag if it would touch a wire, a name label or another object.
 - Flags are for the reader's next action only. Explanations are notes.
 
