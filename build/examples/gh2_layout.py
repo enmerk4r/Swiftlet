@@ -4,6 +4,7 @@
     python build/examples/gh2_layout.py check  --port PORT FILE.ghz
     python build/examples/gh2_layout.py render --port PORT FILE.ghz OUT.png [--solve] [--region X,Y,W,H]
     python build/examples/gh2_layout.py apply  --port PORT FILE.ghz OPS.json [--out OTHER.ghz]
+    python build/examples/gh2_layout.py thumbnail --port PORT FILE.ghz      redraw the preview stored in the file
 
 Needs a Rhino 9 slot (tests/Swiftlet.Cases/slot.py) with Swiftlet loaded. GH2 would solve a file as soon
 as it is shown on the canvas, so the tool switches solving off while it runs (and back afterwards). No
@@ -102,6 +103,14 @@ Eto.Drawing.PointF Grip(object pin, bool inlet) {
   object att = ((dynamic)pin).Attributes; var prop = att.GetType().GetProperty(inlet ? "Inlet" : "Outlet");
   if (prop != null) return (Eto.Drawing.PointF)prop.GetValue(att);
   Eto.Drawing.RectangleF b = ((dynamic)att).Bounds; return new Eto.Drawing.PointF(inlet ? b.Left : b.Right, b.Top + b.Height / 2); }
+// The 500 x 300 preview stored inside a .ghz. GH2 writes whatever the canvas view happens to show, which is
+// blank for a file saved from a script, so the tool draws the whole graph and stores that instead.
+void Thumbnail(object d, string png) {
+  Show(d); var e = Extent(d); float pad = 40; float w = e.Width + 2 * pad, h = e.Height + 2 * pad;
+  if (w / h < 500f / 300f) w = h * 500f / 300f; else h = w * 300f / 500f;
+  var region = new Eto.Drawing.RectangleF(e.X + e.Width / 2 - w / 2, e.Y + e.Height / 2 - h / 2, w, h);
+  var bmp = (Eto.Drawing.Bitmap)drawM.Invoke((object)canvas, new object[] { region, 500, 300, true, true, false });
+  bmp.Save(png, Eto.Drawing.ImageFormat.Png); }
 JsonObject Dump(object d) {
   var all = All(d); var arr = new JsonArray(); var owner = new Dictionary<object, object>();
   foreach (var o in all) { foreach (var p in Pins(o, true)) owner[p] = o; foreach (var p in Pins(o, false)) owner[p] = o; }
@@ -135,6 +144,7 @@ solving.SetValue(null, false);
 try {
 object doc = Open(path); Show(doc);
 if (mode == "dump") { Console.WriteLine("JSON:" + Dump(doc).ToJsonString()); }
+else if (mode == "thumbnail") { Thumbnail(doc, @"__OUT__"); Console.WriteLine("thumbnail drawn"); }
 else if (mode == "render") {
   if (__SOLVE__) { solving.SetValue(null, true); ((dynamic)doc).Solution.StartWait(); solving.SetValue(null, false); Show(doc); }
   var e = Extent(doc); float pad = 60; var region = new Eto.Drawing.RectangleF(e.X - pad, e.Y - pad, e.Width + 2 * pad, e.Height + 2 * pad);
@@ -238,6 +248,7 @@ else if (mode == "apply") {
   ioT.GetMethod("Save", new[] { typeof(string), gh.GetType("Grasshopper2.Doc.FileContents") }).Invoke((object)io, new object[] { @"__OUT__", Enum.Parse(gh.GetType("Grasshopper2.Doc.FileContents"), "All") });
   object back = Open(@"__OUT__");
   if (All(back).Count(Counts) != objectsBefore || Wires(back) != wiresBefore) throw new Exception("saved file lost objects or wires: " + All(back).Count(Counts) + " objects, " + Wires(back) + " wires");
+  Thumbnail(back, @"__OUT__" + ".canvas.png");
   Console.WriteLine("saved " + objectsBefore + " objects, " + wiresBefore + " wires, " + All(back).Count(IsGroup) + " groups, " + All(back).Count(IsScribble) + " text objects"); }
 } finally {
   // leave the canvas on an empty document so a later tool call does not act on the example
@@ -255,6 +266,22 @@ def run(port, mode, path, out="", ops=None, solve=False, region=""):
               .replace("__LABEL_CHAR__", str(LABEL_CHAR)).replace("__LABEL_GAP__", str(LABEL_GAP)).replace("__LABEL_HEIGHT__", str(LABEL_HEIGHT)))
     call(port, "g2_start", {})
     return run_csharp(port, script)
+
+
+def store_thumbnail(ghz, png):
+    """Replace canvas.png inside the .ghz with the given image, leaving every other entry byte for byte."""
+    import os, zipfile
+    ghz, png = pathlib.Path(ghz), pathlib.Path(png)
+    image = png.read_bytes()
+    temp = ghz.with_suffix(".ghz.tmp")
+    with zipfile.ZipFile(ghz) as source, zipfile.ZipFile(temp, "w") as target:
+        for item in source.infolist():
+            data = image if item.filename == "canvas.png" else source.read(item.filename)
+            target.writestr(item, data, compress_type=item.compress_type)
+        if "canvas.png" not in source.namelist():
+            target.writestr("canvas.png", image, compress_type=zipfile.ZIP_DEFLATED)
+    os.replace(temp, ghz)
+    png.unlink()
 
 
 def dump(port, path):
@@ -415,7 +442,7 @@ def check(data):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["dump", "check", "render", "apply"])
+    ap.add_argument("mode", choices=["dump", "check", "render", "apply", "thumbnail"])
     ap.add_argument("--port", type=int, required=True)
     ap.add_argument("file")
     ap.add_argument("extra", nargs="?")
@@ -430,7 +457,14 @@ def main():
         return
     if a.mode == "apply":
         ops = json.loads(pathlib.Path(a.extra).read_text(encoding="utf-8"))
-        print(run(a.port, "apply", a.file, out=a.out or a.file, ops=ops).strip())
+        out = a.out or a.file
+        print(run(a.port, "apply", a.file, out=out, ops=ops).strip())
+        store_thumbnail(out, str(pathlib.Path(out).resolve()) + ".canvas.png")
+        return
+    if a.mode == "thumbnail":
+        png = str(pathlib.Path(a.file).resolve()) + ".canvas.png"
+        print(run(a.port, "thumbnail", a.file, out=png).strip())
+        store_thumbnail(a.file, png)
         return
     data = dump(a.port, a.file)
     if a.json:
