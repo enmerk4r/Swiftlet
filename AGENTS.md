@@ -53,5 +53,5 @@ Also:
 - Custom data uses the plain domain type plus a `TypeAssistant<T>` and `Parameter<T>`; there are no Goo wrappers in GH2.
 - UI is Eto only. No WinForms, no `System.Drawing` UI.
 - Never touch the Rhino document from `Process`.
-- To recompute from a background thread (listeners, sockets, MCP): `Expire()` then `Document?.Solution.Start()`, or `Document.Solution.DelayedExpire(obj)` for bursts. Guard against the document having been closed.
+- To recompute from a background thread (listeners, sockets, MCP, transfers): call `RequestRecompute()` on a `ListenerComponent`, or `BackgroundSolveScheduler.Request(...)` elsewhere. Do not call `Expire()` plus `Document.Solution.Start()` from a background thread, and do not use `Document.Solution.DelayedExpire(obj)`: both can cancel a solve that is already running, which loses data and caused a recompute storm. Never cancel a running solve to deliver background data. See "Cancellation and background delivery" in `docs/gh2-porting.md`.
 - Each GH2 component carries its own `[IoId]`; the GH1 `ComponentGuid` it replaces is recorded in the migration table so GH1 files upgrade.
