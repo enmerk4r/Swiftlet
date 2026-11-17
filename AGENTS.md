@@ -37,6 +37,8 @@ dotnet run --project tests/Swiftlet.Integration.Tests
 
 ImageSharp 3.2 checks a Six Labors licence key when `Swiftlet.Imaging` compiles. The key is `sixlabors.lic` at the repo root; it is a community key scoped to the `Swiftlet.Imaging` assembly, is committed so that clones and CI can build (an assembly-scoped community key may be public), and expires on 2028-02-15. Without a valid key Debug builds warn and Release builds fail. Renew it at https://licensing.sixlabors.com/ within 90 days of expiry.
 
+CI: `.github/workflows/tests.yml` runs on every push and pull request. On Windows, Linux and macOS arm64 it builds the shared libraries and both shells and runs the unit and integration tests against the Native AOT bridge for that platform. `.github/workflows/package.yml` builds both Yak packages (see `build/packaging/README.md`). Neither runs anything inside Rhino.
+
 ## Grasshopper 2 rules
 
 Grasshopper 2 is not Grasshopper 1 with new names. Follow McNeel's six rules:

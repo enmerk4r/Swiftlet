@@ -82,6 +82,18 @@ The script:
 - copies the bridge binaries into `bridge/<rid>/` inside the packaged plugin payload
 - writes a machine-readable `artifact-manifest.json`
 
+## Building the packages in CI
+
+`.github/workflows/package.yml` builds both Yak packages from one commit without a local machine:
+
+1. It runs the bridge workflow for the Linux x64 and macOS arm64 Native AOT bridges.
+2. On a Windows runner it runs the unit and integration tests, then calls `Publish-Target.ps1` for `rhino8` and `rhino9` with those bridges, using the versioned Yak command-line tool from McNeel (no Rhino is installed on the runner).
+3. It uploads `swiftlet-<version>-rh8_0-any.yak` and `swiftlet-<version>-rh9-any.yak` as the `swiftlet-yak-packages` artifact.
+
+Start it from the Actions tab or with `gh workflow run package.yml --ref <branch>`; it also runs when `build/**` or the packaging workflows change. Download the result with `gh run download <run id> --name swiftlet-yak-packages`.
+
+The workflow does not publish. `yak push` remains a manual step.
+
 ## Optional Release Packaging
 
 `src/Swiftlet.Gh1` can invoke `Publish-Target.ps1` after a Windows `Release` build, but this is disabled by default because release packaging now expects Linux and macOS ARM bridge artifacts from the build-only CI workflow.
