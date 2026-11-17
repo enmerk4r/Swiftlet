@@ -28,14 +28,14 @@ The native 3D scatter plot uses sepal length, sepal width and petal length as
 X, Y and Z, in centimetres. Petal width is also sent to the model. Blue points are
 Iris Setosa, orange points Iris Versicolour, and purple points Iris Virginica.
 Use Zoom Extents in Rhino to see the plot; coincident measurements overlap.
-The **150 Iris samples** component holds the editable JSON input, copied from
+The **Iris samples** component holds the editable JSON input, copied from
 the original GH1 example and also stored in `iris-samples.json`. Editing that file
 alone does not change the saved graph; paste the updated JSON into the component.
 
 ## Verification
 
 **Output verified against the bundled local Flask/PyTorch service on Windows.**
-The saved graph reopens with 30 objects, 29 wires and no GH1-hosted components.
+The saved graph reopens with 33 objects, 29 wires and no GH1-hosted components.
 All 150 response labels matched a separate request to the same model. Every
 point coordinate and its class assignment were checked, with 49 Setosa,
 48 Versicolour and 53 Virginica predictions for the bundled batch/model.

@@ -29,7 +29,7 @@ there is no Python component or image-import plug-in.
 
 **Output verified against a local fixture; not verified against the live service.**
 No OpenAI request was made and no API key was configured. Save/reopen preserves
-16 objects and 13 wires with no GH1-hosted objects. The check verifies one local
+18 objects and 13 wires with no GH1-hosted objects. The check verifies one local
 POST, status 200, exact PNG bytes, all four RGBA pixels, bitmap dimensions and a
 mesh with four vertices and one face. Reproduce from the repo root:
 

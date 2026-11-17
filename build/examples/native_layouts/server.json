@@ -1,0 +1,269 @@
+{
+  "file": "Examples/swiftlet-server-components/server_demo.ghz",
+  "positions": {
+    "value:\"18744\"": [
+      100,
+      350
+    ],
+    "Start server": [
+      420,
+      350
+    ],
+    "Deconstruct Request#0": [
+      800,
+      200
+    ],
+    "Deconstruct Body#0": [
+      980,
+      400
+    ],
+    "Text#0": [
+      1160,
+      400
+    ],
+    "Parse JSON String#0": [
+      1340,
+      400
+    ],
+    "Box From Intervals#0": [
+      2080,
+      560
+    ],
+    "Populate Box#0": [
+      2260,
+      460
+    ],
+    "Voronoi 3D#0": [
+      2440,
+      460
+    ],
+    "Scale 3D#0": [
+      2800,
+      460
+    ],
+    "Mass Addition#0": [
+      3160,
+      460
+    ],
+    "Create JSON Value#0": [
+      3340,
+      460
+    ],
+    "Create JSON Object#0": [
+      3520,
+      460
+    ],
+    "Create Text Body#0": [
+      3700,
+      460
+    ],
+    "Server Response#0": [
+      3880,
+      200
+    ],
+    "Get JSON Object Key#0": [
+      1720,
+      360
+    ],
+    "Read JSON Value#0": [
+      1900,
+      360
+    ],
+    "Get JSON Object Key#1": [
+      1720,
+      560
+    ],
+    "Read JSON Value#1": [
+      1900,
+      560
+    ],
+    "Area Centroid#0": [
+      2620,
+      660
+    ],
+    "Volume Centroid": [
+      2980,
+      460
+    ],
+    "value:\"num_points\"#0": [
+      1520,
+      320
+    ],
+    "value:\"box_size\"#0": [
+      1520,
+      590
+    ],
+    "value:\"volume\"": [
+      3320,
+      300
+    ],
+    "Deconstruct Request#1": [
+      800,
+      1050
+    ],
+    "Deconstruct Body#1": [
+      980,
+      1250
+    ],
+    "Text#1": [
+      1160,
+      1250
+    ],
+    "Parse JSON String#1": [
+      1340,
+      1250
+    ],
+    "Box From Intervals#1": [
+      2080,
+      1410
+    ],
+    "Populate Box#1": [
+      2260,
+      1310
+    ],
+    "Voronoi 3D#1": [
+      2440,
+      1310
+    ],
+    "Scale 3D#1": [
+      2800,
+      1310
+    ],
+    "Mass Addition#1": [
+      3160,
+      1310
+    ],
+    "Create JSON Value#1": [
+      3340,
+      1310
+    ],
+    "Create JSON Object#1": [
+      3520,
+      1310
+    ],
+    "Create Text Body#1": [
+      3700,
+      1310
+    ],
+    "Server Response#1": [
+      3880,
+      1050
+    ],
+    "Get JSON Object Key#2": [
+      1720,
+      1210
+    ],
+    "Read JSON Value#2": [
+      1900,
+      1210
+    ],
+    "Get JSON Object Key#3": [
+      1720,
+      1410
+    ],
+    "Read JSON Value#3": [
+      1900,
+      1410
+    ],
+    "Area Centroid#2": [
+      2620,
+      1510
+    ],
+    "Area Centroid#1": [
+      2980,
+      1310
+    ],
+    "value:\"num_points\"#1": [
+      1520,
+      1170
+    ],
+    "value:\"box_size\"#1": [
+      1520,
+      1440
+    ],
+    "value:\"area\"": [
+      3320,
+      1150
+    ]
+  },
+  "groups": [
+    {
+      "title": "Start the HTTP server",
+      "members": [
+        "value:\"18744\"",
+        "Start server"
+      ]
+    },
+    {
+      "title": "POST /voronoi-volume",
+      "members": [
+        "Deconstruct Request#0",
+        "Deconstruct Body#0",
+        "Text#0",
+        "Parse JSON String#0",
+        "Box From Intervals#0",
+        "Populate Box#0",
+        "Voronoi 3D#0",
+        "Scale 3D#0",
+        "Mass Addition#0",
+        "Create JSON Value#0",
+        "Create JSON Object#0",
+        "Create Text Body#0",
+        "Server Response#0",
+        "Get JSON Object Key#0",
+        "Read JSON Value#0",
+        "Get JSON Object Key#1",
+        "Read JSON Value#1",
+        "Area Centroid#0",
+        "Volume Centroid",
+        "value:\"num_points\"#0",
+        "value:\"box_size\"#0",
+        "value:\"volume\""
+      ]
+    },
+    {
+      "title": "POST /voronoi-area",
+      "members": [
+        "Deconstruct Request#1",
+        "Deconstruct Body#1",
+        "Text#1",
+        "Parse JSON String#1",
+        "Box From Intervals#1",
+        "Populate Box#1",
+        "Voronoi 3D#1",
+        "Scale 3D#1",
+        "Mass Addition#1",
+        "Create JSON Value#1",
+        "Create JSON Object#1",
+        "Create Text Body#1",
+        "Server Response#1",
+        "Get JSON Object Key#2",
+        "Read JSON Value#2",
+        "Get JSON Object Key#3",
+        "Read JSON Value#3",
+        "Area Centroid#2",
+        "Area Centroid#1",
+        "value:\"num_points\"#1",
+        "value:\"box_size\"#1",
+        "value:\"area\""
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "of": "value:\"18744\"",
+      "text": "Enable Start server, then run server_request.py. Disable it when finished.",
+      "where": "below"
+    }
+  ],
+  "columns": [
+    [
+      0
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "labels": {}
+}

@@ -1,0 +1,141 @@
+{
+  "file": "Examples/swiftlet-iris-prediction/iris-3d.ghz",
+  "positions": {
+    "150 Iris samples": [
+      100,
+      300
+    ],
+    "JSON request body": [
+      300,
+      300
+    ],
+    "Predict Iris": [
+      500,
+      300
+    ],
+    "HTTP status": [
+      700,
+      100
+    ],
+    "Parse predictions": [
+      700,
+      300
+    ],
+    "Prediction list": [
+      900,
+      300
+    ],
+    "Class labels": [
+      1100,
+      300
+    ],
+    "Predictions": [
+      1300,
+      100
+    ],
+    "Sample rows": [
+      300,
+      750
+    ],
+    "Measurement points": [
+      900,
+      750
+    ],
+    "sepal_length_cm": [
+      500,
+      550
+    ],
+    "Coordinate 0": [
+      700,
+      550
+    ],
+    "Compare 0": [
+      1300,
+      420
+    ],
+    "Class points 0": [
+      1500,
+      550
+    ],
+    "Class colour 0": [
+      1700,
+      550
+    ],
+    "sepal_width_cm": [
+      500,
+      750
+    ],
+    "Coordinate 1": [
+      700,
+      750
+    ],
+    "Compare 1": [
+      1300,
+      620
+    ],
+    "Class points 1": [
+      1500,
+      750
+    ],
+    "Class colour 1": [
+      1700,
+      750
+    ],
+    "petal_length_cm": [
+      500,
+      950
+    ],
+    "Coordinate 2": [
+      700,
+      950
+    ],
+    "Compare 2": [
+      1300,
+      820
+    ],
+    "Class points 2": [
+      1500,
+      950
+    ],
+    "Class colour 2": [
+      1700,
+      950
+    ]
+  },
+  "groups": [
+    {
+      "title": "Classify Iris samples and preview the predictions",
+      "members": "*"
+    }
+  ],
+  "notes": [
+    {
+      "of": "150 Iris samples",
+      "text": "Start the bundled Python server, then enable Predict Iris. All 150 samples include four measurements; see iris-gh2.md."
+    },
+    {
+      "of": "sepal_length_cm",
+      "text": "X is sepal length, Y is sepal width and Z is petal length, in centimetres."
+    },
+    {
+      "of": "Class colour 0",
+      "text": "Setosa predictions are blue."
+    },
+    {
+      "of": "Class colour 1",
+      "text": "Versicolour predictions are orange."
+    },
+    {
+      "of": "Class colour 2",
+      "text": "Virginica predictions are purple."
+    },
+    {
+      "of": "Coordinate 2",
+      "where": "below",
+      "text": "Each point represents one prediction. Coincident measurements overlap."
+    }
+  ],
+  "labels": {
+    "150 Iris samples": "Iris samples"
+  }
+}
