@@ -19,15 +19,12 @@ def apply(port, key):
     data = layout.dump(port, path)
     things = [o for o in data["objects"] if o["kind"] == "object"]
     def find(name):
-        if name.startswith("id:"):
-            hits = [o for o in things if o["id"].startswith(name[3:])]
-            if len(hits) != 1:
-                raise ValueError(f"Missing or ambiguous ID: {name}")
-            return hits[0]["id"]
         base, sep, index = name.rpartition("#")
         if not sep:
             base, index = name, 0
-        hits = sorted([o for o in things if o["name"] in (base, spec.get("labels", {}).get(base, base))], key=lambda o: (o["bounds"][1], o["bounds"][0]))
+        hits = ([o for o in things if o.get("value") == base[6:]] if base.startswith("value:")
+                else [o for o in things if o["name"] in (base, spec.get("labels", {}).get(base, base))])
+        hits.sort(key=lambda o: (o["bounds"][1], o["bounds"][0]))
         if not hits or (not sep and len(hits) != 1):
             raise ValueError(f"Ambiguous or missing object: {name}")
         return hits[int(index)]["id"]

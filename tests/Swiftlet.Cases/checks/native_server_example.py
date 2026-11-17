@@ -3,7 +3,7 @@ Run against an exclusively owned Rhino 9 with installed Swiftlet and GH1/GH2 ope
 """
 import argparse,json,pathlib,sys,urllib.request
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
-from native_examples import ROOT,PRE,ROUNDTRIP
+from native_examples import ROOT,PRE,ROUNDTRIP,save_example
 from cases import call,run_csharp
 
 CONVERT=r'''
@@ -64,7 +64,7 @@ def main():
   cs(REWIRE)
   cs(LAYOUT)
   path=ROOT/'Examples/swiftlet-server-components/server_demo.ghz'
-  report={'roundtrip':cs(ROUNDTRIP.replace('__PATH__',str(path))),'routes':{}}
+  report={'roundtrip':save_example(a.port,cs,path,'server'),'routes':{}}
   cs('Check(Find("Start server").Activity.ToString()=="Disabled","server saved disabled");Enable(Find("Start server"),true);doc.Solution.StartWait();')
   for route,key in [('voronoi-volume','volume'),('voronoi-area','area')]:
    data=json.dumps({'num_points':8,'box_size':10}).encode()
