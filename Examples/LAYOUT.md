@@ -16,6 +16,7 @@ The hierarchy is therefore made with weight and case.
 | Column heading | A column of related groups, for example `SIMPLE REQUESTS` | Sans, **bold, all capitals**, one line |
 | Group title | One group, for example `GET Request` | Sans, **bold**, one line |
 | Note | An explanation of one component or one row | Sans, *italic*, wrapped at 260 |
+| Flag | A call to action on one component, for example `ENABLE ME!` | Sans, **bold**, red, one line |
 
 - All text is left-aligned and unrotated. **(checked)**
 - Titles and headings are free text above the group. Do not use the built-in group header as well. **(checked)**
@@ -54,13 +55,23 @@ The hierarchy is therefore made with weight and case.
 - Prefer the note above the first input of the row it explains. Put it below only when a wire has to pass
   above.
 
+## Flags
+
+- A request component that would send something the moment the file opens is saved disabled, with a flag
+  reading `ENABLE ME!` directly under it: left edges aligned, 8 units below, member of the same group, bold
+  and red (`"role": "flag", "colour": "Red"` in `apply`). **(checked: a flag must sit under a disabled
+  component)**
+- Make room for the flag if it would touch a wire, a name label or another object.
+- Flags are for the reader's next action only. Explanations are notes.
+
 ## Behaviour that must not change
 
 Layout work changes positions, text and group membership only. `gh2_layout.py apply` refuses to save if a
 component, parameter or wire went missing, but it cannot tell whether a value changed: do not edit values,
 and re-run the example's own check afterwards if it has one.
 
-Request components that are saved disabled stay disabled.
+Request components that are saved disabled stay disabled. The `disable` op is the one exception to the rule
+above: use it only for a component that gets a flag (see Flags).
 
 ## Working on a file
 
