@@ -23,6 +23,34 @@ python tests/Swiftlet.Gh2.Validation/validate_gh1_mcp_undo.py --port PORT --repo
 
 `validate_variable_settings.py` deliberately exits nonzero while MCP output-wire restoration fails. It preserves an explicit failing repro for the shared GH1/GH2 limitation. The coordinator has deferred a behaviour change for pigac to review; it is separate from the passing GH2 parity gates. The GH1 baseline uses two real Define Tool components, records the native wire action before disconnecting the second tool, and then invokes GH1 document Undo. It avoids serialising custom tool goos into a generic persistent-data undo record.
 
-## Human click check still needed
+## Mouse-and-keyboard check: incomplete
 
-Programmatic event checks do not prove popup focus, pointer hit targets or keyboard handling. Desktop automation was stopped by the user, so these remain **needs pigac to click**: open each component's input panel, select the values in the table, use GH2 Undo and Redo, and confirm the displayed choice and resulting output. For Server Input, use its actual add/remove-output UI and confirm the connected route wire returns after Undo. No permission request is needed for the completed programmatic checks.
+A real desktop check was attempted on Windows on 2026-11-17 against the installed
+Swiftlet 0.4.0 package built from `441ca1c`, in a separately owned Rhino 9 scratch
+process. Only a disabled GET component with a loopback URL was prepared; no request
+was sent and no repository example was overwritten.
+
+The first attempt stopped before any input because Windows was locked. After the
+user unlocked it, a right-click on the GET component opened its settings popup and
+visibly showed **Timeout: 100 seconds**. This confirms that the popup can be opened
+by pointer input; it does not establish that changing the control or undo works.
+
+The automation could not continue reliably: the window inventory exposes Rhino's
+parent window, while GH2 and its popup appear only as owned windows in captures.
+An accessibility click on the Timeout control was rejected as being over GH2 rather
+than the selected parent Rhino window. After refreshing and retrying with the
+popup's screenshot coordinates, input activation dismissed the popup and the
+resulting capture showed the GH2 canvas instead of an expanded list. No setting
+change was observed. A second available window inventory also exposed only the
+parent Rhino window. This is an automation targeting limitation, not evidence of a
+Swiftlet control defect.
+
+Evidence: `C:\Users\pigac\AppData\Local\Temp\swiftlet-ui-clickthrough\get-before-*.png`
+contains the actual GET popup and its 100-second value. The scratch Rhino was closed
+and mouse/keyboard control released after the attempt.
+
+The following visible-UI gates remain pending: changing all five request timeouts,
+content type and save mode; Undo/Redo for those controls; Server Input route
+add/remove and wire restoration; MCP Port/Server Name edits and copy-config buttons;
+and Tab/Enter/Esc focus handling. The programmatic event checks above remain valid,
+but must not be described as having passed these mouse-and-keyboard gates.
