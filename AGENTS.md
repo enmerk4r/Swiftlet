@@ -25,6 +25,8 @@ dotnet run --project tests/Swiftlet.Core.Tests
 dotnet run --project tests/Swiftlet.Integration.Tests
 ```
 
+ImageSharp 3.2 checks a Six Labors licence key when `Swiftlet.Imaging` compiles. The key is `sixlabors.lic` at the repo root; it is a community key scoped to the `Swiftlet.Imaging` assembly, is not committed (see `.gitignore`), and expires on 2028-02-15. Without it Debug builds warn and Release builds fail. Renew it at https://licensing.sixlabors.com/ within 90 days of expiry.
+
 ## Grasshopper 2 rules
 
 Grasshopper 2 is not Grasshopper 1 with new names. Follow McNeel's six rules:
