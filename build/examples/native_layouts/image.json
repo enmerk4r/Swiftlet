@@ -1,0 +1,77 @@
+{
+  "file": "Examples/swiftlet-openai-api/swiftlet-dalle-example.ghz",
+  "positions": {
+    "Request JSON": [
+      100,
+      300
+    ],
+    "JSON body": [
+      280,
+      300
+    ],
+    "Image request": [
+      460,
+      300
+    ],
+    "Response JSON": [
+      640,
+      300
+    ],
+    "data": [
+      820,
+      300
+    ],
+    "Images": [
+      1000,
+      300
+    ],
+    "b64_json": [
+      1180,
+      300
+    ],
+    "Base64 text": [
+      1360,
+      300
+    ],
+    "PNG bytes": [
+      1540,
+      300
+    ],
+    "Decoded bitmap": [
+      1720,
+      300
+    ],
+    "Image mesh": [
+      1900,
+      300
+    ],
+    "HTTP status": [
+      640,
+      100
+    ],
+    "Width": [
+      2240,
+      300
+    ],
+    "Height": [
+      2240,
+      500
+    ]
+  },
+  "groups": [
+    {
+      "title": "Read an image response",
+      "members": "*"
+    }
+  ],
+  "notes": [
+    {
+      "of": "Request JSON",
+      "text": "Run python image_fixture.py, then enable Image request. This local fixture needs no API key."
+    },
+    {
+      "of": "Image mesh",
+      "text": "Expect a 2 by 2 red, green, blue and white test pattern. Live image generation is not verified."
+    }
+  ]
+}

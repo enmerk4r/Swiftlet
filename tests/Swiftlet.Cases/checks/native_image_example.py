@@ -1,7 +1,7 @@
 ﻿"""Build and test the GH2 image example using loopback fixtures only; no API key or OpenAI call."""
 import argparse,importlib.util,json,pathlib,sys,threading
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
-from native_examples import ROOT,PRE,ROUNDTRIP
+from native_examples import ROOT,PRE,ROUNDTRIP,save_example
 from cases import call,run_csharp
 BUILD=r'''
 foreach(dynamic o in ((IEnumerable)doc.Objects.Forwards).Cast<object>().ToArray())doc.Objects.Remove(o);
@@ -28,7 +28,7 @@ def main():
  def cs(code):return run_csharp(a.port,PRE+code,timeout=60)
  try:
   call(a.port,'g2_start',{});cs(BUILD)
-  report={'roundtrip':cs(ROUNDTRIP.replace('__PATH__',str(ROOT/'Examples/swiftlet-openai-api/swiftlet-dalle-example.ghz')))}
+  report={'roundtrip':save_example(a.port,cs,ROOT/'Examples/swiftlet-openai-api/swiftlet-dalle-example.ghz','image')}
   cs('Check(Find("Image request").Activity.ToString()=="Disabled","saved disabled");Enable(Find("Image request"),true);doc.Solution.StartWait();Healthy();Check(Text(Find("Image request"),0)=="200","HTTP 200");')
   import base64
   got=cs('Console.WriteLine(Convert.ToBase64String((byte[])Out(Find("PNG bytes"),0).Single()));').strip();assert base64.b64decode(got)==fixture.fixture_png()
