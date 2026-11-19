@@ -26,6 +26,7 @@ internal static class IntegrationTestRunner
         List<(string Name, Func<Task> Test)> tests =
         [
             ("XML creation imports opposite source orders without nested locks", XmlCreateElementTests.RunAsync),
+            ("File transfers isolate callbacks from reset and superseded workers", FileTransferRestartTests.RunAsync),
             ("Image codec round-trips PNG pixel data", ImageCodecRoundTripsPngAsync),
             ("Bitmap goo casts to System.Drawing.Bitmap and back", BitmapGooCastsSystemDrawingBitmapAsync),
             ("File path utility normalizes native paths and rejects Windows paths off Windows", FilePathUtilityNormalizesPaths),

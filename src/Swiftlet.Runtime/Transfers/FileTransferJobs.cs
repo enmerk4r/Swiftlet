@@ -29,13 +29,17 @@ internal sealed record TransferSnapshot(
 internal abstract class FileTransferJob : IDisposable
 {
     protected const int BufferSize = 81920;
-    protected static readonly HttpClient Http = new();
+    private static readonly HttpClient SharedHttp = new();
+    protected readonly HttpClient Http;
     private static readonly TimeSpan ProgressInterval = TimeSpan.FromMilliseconds(100);
 
     private readonly object _sync = new();
     private TransferSnapshot _state = TransferSnapshot.Idle;
     private CancellationTokenSource? _cancellation;
     private DateTime _lastProgress = DateTime.MinValue;
+    private long _generation;
+
+    protected FileTransferJob(HttpClient? http = null) => Http = http ?? SharedHttp;
 
     /// <summary>Raised on a worker thread; the argument is true for completion, false for progress.</summary>
     public event Action<bool>? Changed;
@@ -55,13 +59,13 @@ internal abstract class FileTransferJob : IDisposable
         CancellationTokenSource? cancellation;
         lock (_sync)
         {
+            ++_generation; // invalidate every callback before cancellation can wake the old worker
             cancellation = _cancellation;
             _cancellation = null;
             _state = TransferSnapshot.Idle;
         }
 
-        Cancel(cancellation);
-        cancellation?.Dispose();
+        Cancel(cancellation); // the worker owns disposal until it has actually finished
     }
 
     /// <summary>Cancels a running transfer without resetting its state (GH1: removed from the document).</summary>
@@ -75,28 +79,46 @@ internal abstract class FileTransferJob : IDisposable
 
     public void Dispose() => Reset();
 
-    protected void Begin(long totalBytes, string? path, Func<CancellationToken, Task> work)
+    protected Task Begin(long totalBytes, string? path, Func<long, CancellationToken, Task> work)
     {
         var cancellation = new CancellationTokenSource();
+        CancellationToken token = cancellation.Token;
+        CancellationTokenSource? previous;
+        long generation;
         lock (_sync)
         {
-            _cancellation?.Dispose();
+            generation = ++_generation;
+            previous = _cancellation;
             _cancellation = cancellation;
             _state = new TransferSnapshot(true, false, false, 0, 0, totalBytes, 0, null, null, path);
             _lastProgress = DateTime.MinValue;
         }
 
-        CancellationToken token = cancellation.Token;
-        _ = Task.Run(() => work(token), token);
+        Cancel(previous);
+        // Do not pass token to Task.Run: even a reset before scheduling must run the finally block.
+        return Task.Run(async () =>
+        {
+            try
+            {
+                await work(generation, token).ConfigureAwait(false);
+            }
+            finally
+            {
+                lock (_sync)
+                    if (generation == _generation)
+                        _cancellation = null;
+                cancellation.Dispose();
+            }
+        });
     }
 
     /// <summary>Records progress; percentages stay below 100 until the transfer completes, as in GH1.</summary>
-    protected void ReportProgress(long bytes, long totalBytes)
+    protected void ReportProgress(long generation, long bytes, long totalBytes)
     {
         bool raise;
         lock (_sync)
         {
-            if (!_state.Running)
+            if (generation != _generation || !_state.Running)
                 return;
             int progress = totalBytes > 0 ? Math.Min((int)(bytes * 100L / totalBytes), 99) : _state.Progress;
             _state = _state with { Bytes = bytes, TotalBytes = totalBytes, Progress = progress };
@@ -110,18 +132,21 @@ internal abstract class FileTransferJob : IDisposable
             Changed?.Invoke(false);
     }
 
-    protected void SetStatus(int statusCode)
+    protected void SetStatus(long generation, int statusCode)
     {
         lock (_sync)
-            _state = _state with { StatusCode = statusCode };
+            if (generation == _generation && _state.Running)
+                _state = _state with { StatusCode = statusCode };
     }
 
-    protected void Complete(bool success, string? error, string? content = null, bool setProgress = false)
+    protected void Complete(long generation, bool success, string? error, string? content = null, bool setProgress = false, Action? commit = null)
     {
         lock (_sync)
         {
-            if (!_state.Running)
-                return; // reset meanwhile
+            if (generation != _generation || !_state.Running)
+                return; // reset or superseded meanwhile
+            // Publish a download and its success together; Reset/Begin cannot interleave with the file move.
+            commit?.Invoke();
             _state = _state with
             {
                 Running = false,
@@ -166,21 +191,24 @@ internal abstract class FileTransferJob : IDisposable
 /// <summary>Download File: streams a GET response to disk.</summary>
 internal sealed class FileDownloadJob : FileTransferJob
 {
-    public void Start(string url, string path, IReadOnlyList<HttpHeader> headers)
-        => Begin(0, path, token => RunAsync(url, path, headers, token));
+    public FileDownloadJob(HttpClient? http = null) : base(http) { }
 
-    private async Task RunAsync(string url, string path, IReadOnlyList<HttpHeader> headers, CancellationToken token)
+    public Task Start(string url, string path, IReadOnlyList<HttpHeader> headers)
+        => Begin(0, path, (generation, token) => RunAsync(generation, url, path, headers, token));
+
+    private async Task RunAsync(long generation, string url, string path, IReadOnlyList<HttpHeader> headers, CancellationToken token)
     {
+        string? temporaryPath = null;
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             AddHeaders(request, headers);
             using HttpResponseMessage response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
             int status = (int)response.StatusCode;
-            SetStatus(status);
+            SetStatus(generation, status);
             if (!response.IsSuccessStatusCode)
             {
-                Complete(false, $"HTTP {status}: {response.ReasonPhrase}");
+                Complete(generation, false, $"HTTP {status}: {response.ReasonPhrase}");
                 return;
             }
 
@@ -189,31 +217,38 @@ internal sealed class FileDownloadJob : FileTransferJob
             if (!string.IsNullOrWhiteSpace(directory))
                 Directory.CreateDirectory(directory);
 
+            // Each run writes its own sibling file. An old worker can only clean up its own bytes,
+            // never truncate/delete a replacement run's target or keep that target locked.
+            temporaryPath = Path.Combine(directory ?? string.Empty, $".swiftlet-download-{Guid.NewGuid():N}.tmp");
             await using Stream responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-            await using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, useAsync: true))
+            await using (var fileStream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, BufferSize, useAsync: true))
             {
                 byte[] buffer = new byte[BufferSize];
                 long written = 0;
                 int read;
-                ReportProgress(0, total);
+                ReportProgress(generation, 0, total);
                 while ((read = await responseStream.ReadAsync(buffer.AsMemory(0, buffer.Length), token).ConfigureAwait(false)) > 0)
                 {
                     await fileStream.WriteAsync(buffer.AsMemory(0, read), token).ConfigureAwait(false);
                     written += read;
-                    ReportProgress(written, total);
+                    ReportProgress(generation, written, total);
                 }
             }
 
-            Complete(true, null, setProgress: true);
+            Complete(generation, true, null, setProgress: true,
+                commit: () => File.Move(temporaryPath, path, overwrite: true));
         }
         catch (Exception error)
         {
-            TryDelete(path);
-            Complete(false, Describe(error, "Download"));
+            Complete(generation, false, Describe(error, "Download"));
+        }
+        finally
+        {
+            TryDelete(temporaryPath);
         }
     }
 
-    private static void TryDelete(string path)
+    private static void TryDelete(string? path)
     {
         try
         {
@@ -230,17 +265,19 @@ internal sealed class FileDownloadJob : FileTransferJob
 /// <summary>Upload File: streams a file as the body of a POST or PUT.</summary>
 internal sealed class FileUploadJob : FileTransferJob
 {
-    public void Start(string url, string path, string method, string contentType, IReadOnlyList<HttpHeader> headers, long fileSize)
-        => Begin(fileSize, null, token => RunAsync(url, path, method, contentType, headers, fileSize, token));
+    public FileUploadJob(HttpClient? http = null) : base(http) { }
 
-    private async Task RunAsync(string url, string path, string method, string contentType, IReadOnlyList<HttpHeader> headers, long fileSize, CancellationToken token)
+    public Task Start(string url, string path, string method, string contentType, IReadOnlyList<HttpHeader> headers, long fileSize)
+        => Begin(fileSize, null, (generation, token) => RunAsync(generation, url, path, method, contentType, headers, fileSize, token));
+
+    private async Task RunAsync(long generation, string url, string path, string method, string contentType, IReadOnlyList<HttpHeader> headers, long fileSize, CancellationToken token)
     {
         try
         {
             using var request = new HttpRequestMessage(method == "PUT" ? HttpMethod.Put : HttpMethod.Post, url);
             AddHeaders(request, headers);
             await using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, useAsync: true);
-            using var progressStream = new ProgressReadStream(fileStream, read => ReportProgress(read, fileSize));
+            using var progressStream = new ProgressReadStream(fileStream, read => ReportProgress(generation, read, fileSize));
             using var content = new StreamContent(progressStream, BufferSize);
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
             content.Headers.ContentLength = fileSize;
@@ -248,14 +285,14 @@ internal sealed class FileUploadJob : FileTransferJob
 
             using HttpResponseMessage response = await Http.SendAsync(request, token).ConfigureAwait(false);
             int status = (int)response.StatusCode;
-            SetStatus(status);
+            SetStatus(generation, status);
             string body = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
             bool success = response.IsSuccessStatusCode;
-            Complete(success, success ? null : $"HTTP {status}: {response.ReasonPhrase}", body, setProgress: true);
+            Complete(generation, success, success ? null : $"HTTP {status}: {response.ReasonPhrase}", body, setProgress: true);
         }
         catch (Exception error)
         {
-            Complete(false, Describe(error, "Upload"));
+            Complete(generation, false, Describe(error, "Upload"));
         }
     }
 }
@@ -263,11 +300,13 @@ internal sealed class FileUploadJob : FileTransferJob
 /// <summary>Upload File Multipart: streams a file plus extra fields as multipart/form-data.</summary>
 internal sealed class FileMultipartUploadJob : FileTransferJob
 {
-    public void Start(string url, string path, string fieldName, string fileName, string contentType,
-        IReadOnlyList<MultipartField> fields, IReadOnlyList<HttpHeader> headers, long fileSize)
-        => Begin(fileSize, null, token => RunAsync(url, path, fieldName, fileName, contentType, fields, headers, fileSize, token));
+    public FileMultipartUploadJob(HttpClient? http = null) : base(http) { }
 
-    private async Task RunAsync(string url, string path, string fieldName, string fileName, string contentType,
+    public Task Start(string url, string path, string fieldName, string fileName, string contentType,
+        IReadOnlyList<MultipartField> fields, IReadOnlyList<HttpHeader> headers, long fileSize)
+        => Begin(fileSize, null, (generation, token) => RunAsync(generation, url, path, fieldName, fileName, contentType, fields, headers, fileSize, token));
+
+    private async Task RunAsync(long generation, string url, string path, string fieldName, string fileName, string contentType,
         IReadOnlyList<MultipartField> fields, IReadOnlyList<HttpHeader> headers, long fileSize, CancellationToken token)
     {
         try
@@ -276,7 +315,7 @@ internal sealed class FileMultipartUploadJob : FileTransferJob
             AddHeaders(request, headers);
             using var multipart = new MultipartFormDataContent();
             await using var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, useAsync: true);
-            using var progressStream = new ProgressReadStream(fileStream, read => ReportProgress(read, fileSize));
+            using var progressStream = new ProgressReadStream(fileStream, read => ReportProgress(generation, read, fileSize));
             using var fileContent = new StreamContent(progressStream, BufferSize);
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
             multipart.Add(fileContent, fieldName, fileName);
@@ -302,14 +341,14 @@ internal sealed class FileMultipartUploadJob : FileTransferJob
             request.Content = multipart;
             using HttpResponseMessage response = await Http.SendAsync(request, token).ConfigureAwait(false);
             int status = (int)response.StatusCode;
-            SetStatus(status);
+            SetStatus(generation, status);
             string body = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
             bool success = response.IsSuccessStatusCode;
-            Complete(success, success ? null : $"HTTP {status}: {response.ReasonPhrase}", body, setProgress: true);
+            Complete(generation, success, success ? null : $"HTTP {status}: {response.ReasonPhrase}", body, setProgress: true);
         }
         catch (Exception error)
         {
-            Complete(false, Describe(error, "Upload"));
+            Complete(generation, false, Describe(error, "Upload"));
         }
     }
 }
