@@ -29,6 +29,7 @@ internal static class IntegrationTestRunner
             ("Bitmap goo casts to System.Drawing.Bitmap and back", BitmapGooCastsSystemDrawingBitmapAsync),
             ("File path utility normalizes native paths and rejects Windows paths off Windows", FilePathUtilityNormalizesPaths),
             ("QR generation returns a raster image with both dark and light pixels", QrGenerationProducesRasterAsync),
+            ("GH2 XML node archive restores every node kind and reads older saves", XmlNodeArchiveTests.RunAsync),
             ("Utility CSV helpers preserve quoted delimiters and quotes", UtilityCsvHelpersRoundTripAsync),
             ("Utility compression round-trips bytes", UtilityCompressionRoundTripsAsync),
             ("Utility URL encoding preserves form encoding semantics", UtilityUrlEncodingProducesExpectedOutputAsync),
