@@ -2,67 +2,28 @@
 
 ## 0.4.0 - 2026-11-18
 
-### Grasshopper 2
+### Added
 
-- Adds a native Rhino 9 Grasshopper 2 version covering all 115 current components and 19 custom parameters, alongside the existing Grasshopper 1 version.
-- Uses one `swiftlet` Yak package: Rhino 8 carries GH1; Rhino 9 carries GH1 and GH2 with the same shared libraries. [cd5cda1](https://github.com/enmerk4r/Swiftlet/commit/cd5cda1b5932e566387f4495faa5e5bd026d9835)
-- Converts current Swiftlet components and floating parameters in GH1 definitions to native GH2 objects, including saved HTTP timeouts, text-body content types and server output names.
-- Converts archived Create Text Body to the current component and archived three-input MCP Tool Response to a hidden native compatibility component with its original result format. [42fe962](https://github.com/enmerk4r/Swiftlet/commit/42fe962ec715dbd0b5e1ed351713350d07196d9a) [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
-- Leaves archived Socket Listener and Create Multipart Form Body Named/Unnamed on GH1 interop hosts; third-party and scripting components may also need GH1 hosting. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
-- Every example now has a Grasshopper 2 `.ghz` file next to its original `.gh` (21 in all), laid out to one standard (`Examples/LAYOUT.md`). Examples that would send a request or start a server on opening are saved with that component disabled and a red `ENABLE ME!` under it. The GET example now calls timeapi.io, and the ChatGPT example asks for `gpt-6.1-sol` without a temperature setting, in both the GH1 and GH2 files.
-- Keeps GH1's optional-input behavior for HTML Recursive, CSV Delimiter, Byte Array To Text Encoding and the four QR settings, including fallback values when their pin data is cleared. [65baefe](https://github.com/enmerk4r/Swiftlet/commit/65baefeb9c75c9d8e7403ccfb4d7bf8ab07ace4d)
-- Shows GH1-equivalent component status text through GH2 labels, including listener URLs, transfer progress and OAuth state. [3598797](https://github.com/enmerk4r/Swiftlet/commit/3598797698dd3797d9262d9079d4f1a24f82e0c1)
-- Uses vector icons and palette groups matching GH1's exposure rows. [d731741](https://github.com/enmerk4r/Swiftlet/commit/d731741bd924810768678b3d7e90e15125853a19) [f54cddc](https://github.com/enmerk4r/Swiftlet/commit/f54cddc104f72c8fb067ae1852a24f10a404856c)
-- Queues background updates until the active solve stops, preventing listener/transfer callbacks from repeatedly canceling work; retained component results confirm delivery, while discarded publications receive a bounded retry. [09bebfd](https://github.com/enmerk4r/Swiftlet/commit/09bebfdf4e7a3eb1df951e53f29c80a0ceb693fd)
-- Omits Illustrator organising captions from seven parameter icons; GH1 PNGs were already clipped and are unchanged by this correction. [6de3d15](https://github.com/enmerk4r/Swiftlet/commit/6de3d15a154853e33aa49e647a6293cc95e1a95f)
+- Native Grasshopper 2 version for Rhino 9: all 115 components and 19 parameters, with vector icons. One `swiftlet` package installs Grasshopper 1 on Rhino 8 and both versions on Rhino 9.
+- Grasshopper 1 definitions convert to native Grasshopper 2 components. The deprecated Socket Listener and Create Multipart Form Body Named/Unnamed stay hosted Grasshopper 1 objects.
+- A Grasshopper 2 `.ghz` file for every example. Examples that send a request or start a server on opening are saved disabled and marked ENABLE ME!
 
-### Changes affecting Grasshopper 1
+### Changed (both versions)
 
-These changes also apply to GH2 where the implementation is shared; the GH1 assembly name and component GUIDs are retained.
+- Create Text Body keeps the content type chosen in its menu.
+- ImageSharp 3.2.0, fixing six security advisories.
+- `BLOCKED_SUBNETS` accepts IPv6 ranges starting with `::`; a malformed value now blocks IPv6 as well as IPv4.
+- WebSocket Client stops trying to connect after 10 seconds and reports why.
+- Icons redrawn from shared vector masters.
 
-- Icons now use PNGs generated from the shared vector masters, including flat origami shadows and redrawn parameter hexagons. [a25f129](https://github.com/enmerk4r/Swiftlet/commit/a25f129a6c1e2f3dc7357fabb5906edd9d6f9422)
-- Create Text Body no longer overwrites its saved content-type menu choice when JSON, XML or HTML content is connected: that content still goes out with its own type, and plain text returns to the chosen one. A definition that relied on the old switch (typed content once, then plain text sent as that type) now sends the menu choice. [be07282](https://github.com/enmerk4r/Swiftlet/commit/be07282d032859fb1bbf03cd84895b1568b61b7e)
-- Updates ImageSharp from 3.1.12 to 3.2.0, which fixes six published advisories (two reachable when loading a crafted TIFF). Building `Swiftlet.Imaging` in Release now needs the Six Labors licence key described in `AGENTS.md`. [acc8705](https://github.com/enmerk4r/Swiftlet/commit/acc870519abbeaa18e19933ad4303476afe17581)
-- A malformed `BLOCKED_SUBNETS` value now blocks IPv6 addresses as well as IPv4. Before, the block-everything fallback covered IPv4 only. With the variable unset nothing is blocked, as before. [38f3593](https://github.com/enmerk4r/Swiftlet/commit/38f35938607fb7e8f5e2b647682b00bcfc59cee5)
-- `BLOCKED_SUBNETS` accepts IPv6 ranges that begin with `::`, such as `::1/128` and `::/0`. These were rejected as malformed, which blocked every address. [9f83486](https://github.com/enmerk4r/Swiftlet/commit/9f834868a4d55cd154c49006ca4868cc11305b91)
-- Create CSV Line handles an empty cell list and removes an entire trailing delimiter, including multi-character delimiters. [5e0982f](https://github.com/enmerk4r/Swiftlet/commit/5e0982f9ae0bbe3dbe6dbafc48b0703217422535)
-- Read JSON Array and Read JSON Object preserve JSON null elements as valid JSON-null values. [42fe962](https://github.com/enmerk4r/Swiftlet/commit/42fe962ec715dbd0b5e1ed351713350d07196d9a)
-- HTTP requests no longer deadlock when a synchronous caller occupies the context needed by their asynchronous continuation; this was reproduced with a programmatically solved GH1 graph. [83e0599](https://github.com/enmerk4r/Swiftlet/commit/83e05998fcb6d4d10ff1af9cb1050665cec6f16a)
-- Viewport capture executes directly when already on Rhino's UI thread instead of dispatching back to that thread and waiting. [a4513b3](https://github.com/enmerk4r/Swiftlet/commit/a4513b3ef26aa37521fff582e4f1df8aa2a95f8b)
-- HTTP Listener accepts ports through 65535 instead of rejecting ports above the previous typo, 65353. [c49296f](https://github.com/enmerk4r/Swiftlet/commit/c49296f8dcbb087fef6d14d6f77eb76ea1534f30)
-- HTTP Listener, WebSocket Server, Server Input and UDP Listener reject port 0 at the component boundary with the shared 1-65535 rule; previously the first three failed later during startup, while UDP bound an invisible random port. [4f2a31a](https://github.com/enmerk4r/Swiftlet/commit/4f2a31a19eb739de73b76e3ee20045a5d2dcc8ec)
-- WebSocket Client limits connection/handshake attempts, including automatic reconnection, to 10 seconds instead of waiting indefinitely for a silent endpoint. [dae121b](https://github.com/enmerk4r/Swiftlet/commit/dae121b858575a2d6d5458c00728470196afa776)
-- Failed WebSocket connections, including refused ports, now show `Error: <reason>` in Status and `Error` as the component message instead of `Disconnected` with only a runtime error. [dae121b](https://github.com/enmerk4r/Swiftlet/commit/dae121b858575a2d6d5458c00728470196afa776)
-- WebSocket Server/Client suppress redundant notifications from idle stops and internal connection replacement, while real connection, message and disconnection events still update their outputs. [d07cc55](https://github.com/enmerk4r/Swiftlet/commit/d07cc55e33677a4e8c6c3dc6b201f6866f0095a6)
-- Corrects shared tooltip typos and misleading content-type, header, HTML search, byte-array and bitmap-format descriptions; the generic HTTP Body pin now says "Request body". [b0431b4](https://github.com/enmerk4r/Swiftlet/commit/b0431b475fabc084b07bbacfdf349ff36b1c0651) [4f2a31a](https://github.com/enmerk4r/Swiftlet/commit/4f2a31a19eb739de73b76e3ee20045a5d2dcc8ec)
-- Server Input retains an unanswered request across recomputes and advances its route queue when that request receives a response. [58b28dd](https://github.com/enmerk4r/Swiftlet/commit/58b28ddfa3b74b48c574e1ee7678f4d77b508fc2)
-- Server Input finishes removed-route or stopped-server requests with HTTP 503 and marks canceled response waits complete with HTTP 408. [58b28dd](https://github.com/enmerk4r/Swiftlet/commit/58b28ddfa3b74b48c574e1ee7678f4d77b508fc2)
-- Server Input keeps replies attached to their original bridge connection across restarts and closes pending waits when that bridge stops. [58b28dd](https://github.com/enmerk4r/Swiftlet/commit/58b28ddfa3b74b48c574e1ee7678f4d77b508fc2)
-- Server Input reconnects its notifications after being added back to a document and prevents inserting a route before Root. [58b28dd](https://github.com/enmerk4r/Swiftlet/commit/58b28ddfa3b74b48c574e1ee7678f4d77b508fc2)
-- Server Input ignores callbacks queued before its removal or document closure. [e9c1cf1](https://github.com/enmerk4r/Swiftlet/commit/e9c1cf1b55d15a62569a89883940c6474817d837)
-- Download File, Upload File and Upload File Multipart ignore completion from a canceled job after Run was reset, allowing the next run to start without a stale failure. [6728044](https://github.com/enmerk4r/Swiftlet/commit/672804441460f91fab66d2650efe1a06fc12a819)
-- OAuth Token no longer reuses an already redeemed authorization code when Refresh changes from true back to false. [6d708ea](https://github.com/enmerk4r/Swiftlet/commit/6d708ea2251edf7344e600d537476d34472e81cd)
-- OAuth Token cancels requests on component removal or document closure and allows a canceled refresh to be retried without losing its trigger. [6d708ea](https://github.com/enmerk4r/Swiftlet/commit/6d708ea2251edf7344e600d537476d34472e81cd)
-- OAuth network continuations no longer depend on resuming on the calling UI context. [6d708ea](https://github.com/enmerk4r/Swiftlet/commit/6d708ea2251edf7344e600d537476d34472e81cd)
-- OAuth Authorize ignores queued completion notifications from a superseded or stopped authorization attempt. [9597f5d](https://github.com/enmerk4r/Swiftlet/commit/9597f5d0b93a2b20441f73cb4ab4af6d714ec99d)
-- OAuth reset and disposal now wait for callback listeners and incomplete request readers to stop before returning, so their port can be reused immediately. [3f2521c](https://github.com/enmerk4r/Swiftlet/commit/3f2521c5e0a52d630c0a466d80b43e7311bece00)
-- OAuth ignores empty or malformed connections, returns 404 for unrelated paths, and reads simultaneous clients independently so idle browser preconnects do not consume or delay the real callback. [fa8de0a](https://github.com/enmerk4r/Swiftlet/commit/fa8de0ab261a0e46171c7f3153ddd4657647da6f)
-- MCP Server retains unanswered calls across recomputes and advances each tool's queue after a successful response. [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
-- MCP Server completes pending calls with an error when their tool is removed or the server stops instead of silently discarding them. [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
-- MCP Server isolates replies from old bridge instances, serializes tool removal against incoming calls, and dispatches notifications without blocking bridge shutdown on the UI. [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
-- MCP Server restores notifications when added back to a document and ignores delayed callbacks after shutdown. [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
-- In both versions, undoing the removal of an MCP tool now brings its output back with the same pin and its downstream wires, where it previously came back unwired. [7d28dd7](https://github.com/enmerk4r/Swiftlet/commit/7d28dd7472bfa683fdad42b6a8e69c9bb708738c)
-- Shared DLLs now carry the Swiftlet release version instead of an indistinguishable `1.0.0.0` identity. [49f1ba3](https://github.com/enmerk4r/Swiftlet/commit/49f1ba3b1dce5869bca000fd2ae937b38125f657)
+### Fixed (both versions)
 
-For callers of the shared HTTP API, explicit caller cancellation now propagates as cancellation rather than an HTTP failure response; existing GH1 request components do not supply that token, and timeout responses remain unchanged. [8ee85ff](https://github.com/enmerk4r/Swiftlet/commit/8ee85ff5c8bb2e30f3d8aa6a62b980741c17b484)
+- HTTP Listener accepts ports up to 65535; listeners and servers reject port 0.
+- Server Input and MCP Server keep unanswered requests across recomputes, and answer them with an error when a route or tool is removed or the server stops.
+- Undoing the removal of an MCP tool restores its output and wires.
+- OAuth, file transfer and HTTP requests behave correctly when cancelled, repeated or run concurrently.
+- Read JSON Array/Object keep JSON nulls; Create CSV Line handles empty input and multi-character delimiters.
 
-### Compatibility and verification notes
+### Not yet tested
 
-- The scheduler-only build `ea09bf0` passed four deterministic race checks, five WebSocket-only rounds, five fresh-process 13-component placements (two completed solves and zero cancellations/faults each), and both delivery cases with actual cancellation and one echo each. Its 200 bursts completed 6,600 operations with zero duplicates; the 602.62-second lifecycle run covered 111 cycles, 5,265 completions, 1,383 deliberately interrupted operations and 225 ports with no leaks or duplicates. These long-run results precede the WebSocket/runtime and port-validation changes; the merged-build checks are recorded separately below. [ea09bf0](https://github.com/enmerk4r/Swiftlet/commit/ea09bf01da6993e790bcb2a7f2f15d5fc11c1658)
-- Windows Rhino 9.1 checks cover 247 GH1/GH2 cases, 134 migration rules, and whole-file conversion of 21 examples; two examples retain only the archived Swiftlet components listed above as GH1 hosts. [4f2a31a](https://github.com/enmerk4r/Swiftlet/commit/4f2a31a19eb739de73b76e3ee20045a5d2dcc8ec) [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
-- The merged Windows build `0ce30e2` passes Core 40/40, Integration 35/35, all 247 parity cases, 134 migration rules, network/UDP/WebSocket checks and all four scheduler regressions; five WebSocket-only rounds complete in one solve each and three full 13-component rounds in two, with no cancellations. [0ce30e2](https://github.com/enmerk4r/Swiftlet/commit/0ce30e2e78a40330dc214a4f315cf049df77e3ae)
-- A Windows-bridge-only 0.4.0 test Yak package built from `0ce30e2` passes cold start and real Yak CLI install/upgrade/uninstall: published 0.3.3 registers 139 GH1 objects and no GH2 plug-in; upgrading loads all Swiftlet assemblies as 0.4.0.0 from the 0.4.0 package folder, with 139 GH1 and 135 GH2 objects (134 current plus the hidden legacy adapter), without load errors; uninstall removes both version folders and a fresh Rhino registers neither shell. Network, solve-storm and GH1 WebSocket checks pass against the installed copy. [0ce30e2](https://github.com/enmerk4r/Swiftlet/commit/0ce30e2e78a40330dc214a4f315cf049df77e3ae)
-- Whole-file checks report missing third-party objects and non-Swiftlet wire differences; they are not a promise that arbitrary third-party definitions convert losslessly. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
-- Download File retains its existing URL-validation behavior and 32-bit Size output, which can wrap above 2 GB. [6728044](https://github.com/enmerk4r/Swiftlet/commit/672804441460f91fab66d2650efe1a06fc12a819)
-- GH1 WebSocket connection/reconnection remains synchronous and can pause Rhino while waiting for the ten-second limit. [dae121b](https://github.com/enmerk4r/Swiftlet/commit/dae121b858575a2d6d5458c00728470196afa776)
-- Programmatic settings and undo checks passed. The 0.4.0 packages for Rhino 8 and Rhino 9 are built with CI-built Linux and macOS arm64 bridges and install and cold-start on Windows in Rhino 8.36 and Rhino 9.1. CI (`tests.yml`) runs the unit tests and the integration tests on Windows, Linux and macOS arm64 against the Native AOT bridge for each; the System.Drawing bitmap cast is Windows-only there. The settings menus and undo were also checked by hand with mouse and keyboard in Grasshopper 2 on Windows. Still unverified: Swiftlet inside Rhino for Mac, the macOS x64 bridge, and upgrading through Rhino's Package Manager UI. [6870fd4](https://github.com/enmerk4r/Swiftlet/commit/6870fd434039267684be4e69583d3c26e515a2b8)
+- Inside Rhino for Mac, and the macOS Intel bridge. Linux and macOS arm64 are covered by CI only.
