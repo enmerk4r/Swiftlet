@@ -86,4 +86,16 @@ Check((string)divBack.Name == "div" && (string)divBack.OuterHtml == (string)div.
 var xdoc = new System.Xml.XmlDocument(); xdoc.LoadXml("<root a=\"1\"><child>t</child></root>");
 dynamic xBack = RoundTrip("XmlNodeParameter", xdoc.DocumentElement);
 Check((string)xBack.Name == "root" && (string)xBack.OuterXml == xdoc.DocumentElement.OuterXml, "XmlNode round-trip");
+// Nodes that are not elements (what XPath or Get Child Nodes can output) keep their kind and content.
+var mixed = new System.Xml.XmlDocument(); mixed.LoadXml("<r xmlns:p=\"urn:p\" a=\"1\" p:b=\"2\">hello<!--c--><![CDATA[x<y]]><?pi d?></r>");
+var ns = new System.Xml.XmlNamespaceManager(mixed.NameTable); ns.AddNamespace("p", "urn:p");
+foreach (string xpath in new[] { "text()", "@a", "@p:b", "comment()", "processing-instruction()" })
+{
+    System.Xml.XmlNode node = mixed.DocumentElement.SelectSingleNode(xpath, ns);
+    var back = (System.Xml.XmlNode)RoundTrip("XmlNodeParameter", node);
+    Check(back.NodeType == node.NodeType && back.Name == node.Name && back.NamespaceURI == node.NamespaceURI && back.Value == node.Value, "XmlNode " + node.NodeType + " " + node.Name + " round-trip");
+}
+var cdataNode = mixed.DocumentElement.ChildNodes.Cast<System.Xml.XmlNode>().Single(n => n.NodeType == System.Xml.XmlNodeType.CDATA);
+var cdataBack = (System.Xml.XmlNode)RoundTrip("XmlNodeParameter", cdataNode);
+Check(cdataBack.NodeType == System.Xml.XmlNodeType.CDATA && cdataBack.Value == "x<y", "XmlNode CDATA round-trip");
 Console.WriteLine("ALL TYPE CHECKS PASSED");
