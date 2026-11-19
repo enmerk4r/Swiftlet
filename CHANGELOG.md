@@ -14,7 +14,6 @@
 - ImageSharp 3.2.0, which fixes six security advisories.
 - `BLOCKED_SUBNETS` accepts IPv6 ranges starting with `::`.
 - WebSocket Client stops trying to connect after 10 seconds and reports why.
-- New icons.
 
 ### Fixed
 
@@ -23,7 +22,3 @@
 - Undoing the removal of an MCP tool restores its output and wires.
 - OAuth, file transfers and HTTP requests behave correctly when cancelled or restarted.
 - Read JSON Array/Object keep JSON nulls.
-
-### Not yet tested
-
-- Inside Rhino for Mac. If you try it there, please open an issue.
