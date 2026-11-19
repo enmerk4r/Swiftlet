@@ -157,7 +157,13 @@ internal static class XmlQueries
                 continue;
             }
 
-            element.AppendChild(document.ImportNode(child, deep: true));
+            // The destination document is private to this call. Only the current
+            // source is shared: never hold one source lock while acquiring another,
+            // since parallel callers can supply the same documents in reverse order.
+            XmlNode imported;
+            lock ((object?)child.OwnerDocument ?? child)
+                imported = document.ImportNode(child, deep: true);
+            element.AppendChild(imported);
         }
 
         return element;

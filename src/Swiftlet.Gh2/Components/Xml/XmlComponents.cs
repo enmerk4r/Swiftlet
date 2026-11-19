@@ -106,12 +106,12 @@ public sealed class CreateXmlElementComponent : SwiftletComponent
             return;
         }
 
-        // Importing a child reads its source document, so hold that document's lock while importing.
+        // The shared helper imports one child at a time under its source document lock.
         XmlElement element;
         List<int> skipped;
         try
         {
-            element = CreateLocked(name, text, xmlNamespace, names, values, childNodes, 0, out skipped);
+            element = XmlQueries.CreateElement(name, text, xmlNamespace, names, values, childNodes, out skipped);
         }
         catch (XmlException ex)
         {
@@ -125,15 +125,6 @@ public sealed class CreateXmlElementComponent : SwiftletComponent
         access.SetItem(0, element);
     }
 
-    private static XmlElement CreateLocked(
-        string name, string? text, string? xmlNamespace, string[] names, string[] values, XmlNode[] children, int lockIndex, out List<int> skipped)
-    {
-        if (lockIndex >= children.Length)
-            return XmlQueries.CreateElement(name, text, xmlNamespace, names, values, children, out skipped);
-
-        lock (XmlSync.For(children[lockIndex]))
-            return CreateLocked(name, text, xmlNamespace, names, values, children, lockIndex + 1, out skipped);
-    }
 }
 
 [IoId(ComponentIds.GetXmlAttributeValue)]
