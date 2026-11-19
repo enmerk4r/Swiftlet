@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 - Unreleased
+## 0.4.0 - 2026-11-18
 
 ### Grasshopper 2
 
@@ -9,7 +9,7 @@
 - Converts current Swiftlet components and floating parameters in GH1 definitions to native GH2 objects, including saved HTTP timeouts, text-body content types and server output names.
 - Converts archived Create Text Body to the current component and archived three-input MCP Tool Response to a hidden native compatibility component with its original result format. [42fe962](https://github.com/enmerk4r/Swiftlet/commit/42fe962ec715dbd0b5e1ed351713350d07196d9a) [402882c](https://github.com/enmerk4r/Swiftlet/commit/402882c63f3aa12301148b7a8e0efa0384c72232)
 - Leaves archived Socket Listener and Create Multipart Form Body Named/Unnamed on GH1 interop hosts; third-party and scripting components may also need GH1 hosting. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
-- Adds 15 `.ghz` example counterparts, retaining the original `.gh` files and recreating their notes; the OpenAI example was reopened but not executed without a key. [c3d55bb](https://github.com/enmerk4r/Swiftlet/commit/c3d55bb38f2a865610b6a1007f3668df2b271cc6)
+- Every example now has a Grasshopper 2 `.ghz` file next to its original `.gh` (21 in all), laid out to one standard (`Examples/LAYOUT.md`). Examples that would send a request or start a server on opening are saved with that component disabled and a red `ENABLE ME!` under it. The GET example now calls timeapi.io, and the ChatGPT example asks for `gpt-6.1-sol` without a temperature setting, in both the GH1 and GH2 files.
 - Keeps GH1's optional-input behavior for HTML Recursive, CSV Delimiter, Byte Array To Text Encoding and the four QR settings, including fallback values when their pin data is cleared. [65baefe](https://github.com/enmerk4r/Swiftlet/commit/65baefeb9c75c9d8e7403ccfb4d7bf8ab07ace4d)
 - Shows GH1-equivalent component status text through GH2 labels, including listener URLs, transfer progress and OAuth state. [3598797](https://github.com/enmerk4r/Swiftlet/commit/3598797698dd3797d9262d9079d4f1a24f82e0c1)
 - Uses vector icons and palette groups matching GH1's exposure rows. [d731741](https://github.com/enmerk4r/Swiftlet/commit/d731741bd924810768678b3d7e90e15125853a19) [f54cddc](https://github.com/enmerk4r/Swiftlet/commit/f54cddc104f72c8fb067ae1852a24f10a404856c)
@@ -65,6 +65,4 @@ For callers of the shared HTTP API, explicit caller cancellation now propagates 
 - Whole-file checks report missing third-party objects and non-Swiftlet wire differences; they are not a promise that arbitrary third-party definitions convert losslessly. [8c5805d](https://github.com/enmerk4r/Swiftlet/commit/8c5805d3f0ae15d3a34a6a9f57560c39e55e8625)
 - Download File retains its existing URL-validation behavior and 32-bit Size output, which can wrap above 2 GB. [6728044](https://github.com/enmerk4r/Swiftlet/commit/672804441460f91fab66d2650efe1a06fc12a819)
 - GH1 WebSocket connection/reconnection remains synchronous and can pause Rhino while waiting for the ten-second limit. [dae121b](https://github.com/enmerk4r/Swiftlet/commit/dae121b858575a2d6d5458c00728470196afa776)
-- Programmatic settings and undo checks passed. The 0.4.0 packages for Rhino 8 and Rhino 9 are built with CI-built Linux and macOS arm64 bridges and install and cold-start on Windows in Rhino 8.36 and Rhino 9.1. CI (`tests.yml`) runs the unit tests and the integration tests on Windows, Linux and macOS arm64 against the Native AOT bridge for each; the System.Drawing bitmap cast is Windows-only there. Still unverified: Swiftlet inside Rhino for Mac, the macOS x64 bridge, upgrading through Rhino's Package Manager UI, and pointer/focus review. [6870fd4](https://github.com/enmerk4r/Swiftlet/commit/6870fd434039267684be4e69583d3c26e515a2b8)
-
-This entry describes the release branch, not a published release.
+- Programmatic settings and undo checks passed. The 0.4.0 packages for Rhino 8 and Rhino 9 are built with CI-built Linux and macOS arm64 bridges and install and cold-start on Windows in Rhino 8.36 and Rhino 9.1. CI (`tests.yml`) runs the unit tests and the integration tests on Windows, Linux and macOS arm64 against the Native AOT bridge for each; the System.Drawing bitmap cast is Windows-only there. The settings menus and undo were also checked by hand with mouse and keyboard in Grasshopper 2 on Windows. Still unverified: Swiftlet inside Rhino for Mac, the macOS x64 bridge, and upgrading through Rhino's Package Manager UI. [6870fd4](https://github.com/enmerk4r/Swiftlet/commit/6870fd434039267684be4e69583d3c26e515a2b8)
