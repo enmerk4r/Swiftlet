@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Swiftlet.Core.Auth;
 using Swiftlet.Core.Mcp;
 using Swiftlet.Gh.Rhino8;
+using Swiftlet.Runtime;
 using Swiftlet.Gh.Rhino8.Goo;
 using Swiftlet.HostAbstractions;
 using Swiftlet.Hosts.Desktop;
@@ -24,10 +25,13 @@ internal static class IntegrationTestRunner
     {
         List<(string Name, Func<Task> Test)> tests =
         [
+            ("XML creation imports opposite source orders without nested locks", XmlCreateElementTests.RunAsync),
+            ("File transfers isolate callbacks from reset and superseded workers", FileTransferRestartTests.RunAsync),
             ("Image codec round-trips PNG pixel data", ImageCodecRoundTripsPngAsync),
             ("Bitmap goo casts to System.Drawing.Bitmap and back", BitmapGooCastsSystemDrawingBitmapAsync),
             ("File path utility normalizes native paths and rejects Windows paths off Windows", FilePathUtilityNormalizesPaths),
             ("QR generation returns a raster image with both dark and light pixels", QrGenerationProducesRasterAsync),
+            ("GH2 XML node archive restores every node kind and reads older saves", XmlNodeArchiveTests.RunAsync),
             ("Utility CSV helpers preserve quoted delimiters and quotes", UtilityCsvHelpersRoundTripAsync),
             ("Utility compression round-trips bytes", UtilityCompressionRoundTripsAsync),
             ("Utility URL encoding preserves form encoding semantics", UtilityUrlEncodingProducesExpectedOutputAsync),
@@ -37,6 +41,10 @@ internal static class IntegrationTestRunner
             ("JSON goos cast from Newtonsoft tokens for legacy interop", JsonGoosCastFromNewtonsoftTokensAsync),
             ("Headless host services require manual browser and clipboard actions", HeadlessServicesRequireManualActionsAsync),
             ("Desktop host workflow exposes desktop capabilities", DesktopWorkflowExposesCapabilitiesAsync),
+            ("OAuth callback ignores preconnect, favicon and malformed connections", OAuthCallbackDisposalTests.IgnoreNonCallbacksAsync),
+            ("OAuth callback disposal joins pending accepts and incomplete requests", OAuthCallbackDisposalTests.RunAsync),
+            ("OAuth token session deduplicates, refreshes and cancels without replaying codes", OAuthTokenSessionTests.RunAsync),
+            ("OAuth controller rejects wrong state, releases callbacks and guards reset generations", OAuthAuthorizationControllerTests.RunAsync),
             ("Modern OAuth authorization flow tracks state through callback completion", OAuthAuthorizationFlowTracksStateAsync),
             ("OAuth callback listener completes a loopback authorization round-trip", OAuthLoopbackCallbackRoundTripAsync),
             ("OAuth callback listener accepts form-post authorization responses", OAuthLoopbackCallbackFormPostRoundTripAsync),
@@ -44,10 +52,14 @@ internal static class IntegrationTestRunner
             ("OAuth callback listener normalizes malformed file-style callback targets", OAuthLoopbackCallbackMalformedFileTargetRoundTripAsync),
             ("Modern MCP server handles initialize, tools/list, and tools/call over HTTP", ModernMcpServerHandlesJsonRpcOverHttpAsync),
             ("Modern MCP server session manages lifecycle and config export", ModernMcpServerSessionManagesLifecycleAsync),
+            ("MCP calls survive retries and advance only after a successful response", McpCallsSurviveRetriesAsync),
             ("Modern MCP response workflow preserves deconstruct and one-shot semantics", ModernMcpResponseWorkflowPreservesSemanticsAsync),
             ("Modern HTTP server routes requests and completes one-shot responses", ModernServerRoutesRequestsAndCompletesResponsesAsync),
+            ("Server input retains requests across retries and advances after responses", ServerInputRetainsRequestsAcrossRetriesAsync),
+            ("Modern HTTP server cancellation releases a pending response handle", ModernServerCancellationReleasesHandleAsync),
             ("Simple HTTP listener captures requests and returns configured content", SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync),
             ("Modern WebSocket server and client exchange messages", ModernWebSocketServerAndClientExchangeMessagesAsync),
+            ("WebSocket client connect times out on an endpoint that never completes the handshake", WebSocketClientConnectTimesOutWithoutHandshakeAsync),
             ("MCP config generation resolves platform bridge artifacts", McpConfigGenerationResolvesBridgeArtifactsAsync),
             ("Bridge artifact resolution repairs Unix execute permissions for native binaries", BridgeArtifactResolutionRepairsUnixExecutePermissionsAsync),
             ("MCP export reports manual clipboard guidance through notifications", McpExportReportsManualClipboardGuidanceAsync),
@@ -55,6 +67,14 @@ internal static class IntegrationTestRunner
 
         foreach ((string name, Func<Task> test) in tests)
         {
+            // System.Drawing.Common only works on Windows outside Rhino (Rhino for Mac supplies its own
+            // System.Drawing), so the Bitmap cast cannot be exercised by a plain .NET test host elsewhere.
+            if (!OperatingSystem.IsWindows() && test == BitmapGooCastsSystemDrawingBitmapAsync)
+            {
+                Console.WriteLine($"SKIP {name} (needs System.Drawing.Common, Windows only outside Rhino)");
+                continue;
+            }
+
             await test().ConfigureAwait(false);
             Console.WriteLine($"PASS {name}");
         }
@@ -186,7 +206,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityCsvHelpersRoundTripAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityCsv");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityCsv");
         string line = (string)utilityType.GetMethod("CreateLine")!.Invoke(null, [new[] { "alpha", "be,ta", "say \"hi\"" }, ","])!;
         IReadOnlyList<string> parsed = (IReadOnlyList<string>)utilityType.GetMethod("ParseLine")!.Invoke(null, [line, ","])!;
 
@@ -201,7 +221,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityCompressionRoundTripsAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityCompression");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityCompression");
         byte[] original = Encoding.UTF8.GetBytes("swiftlet utilities round trip");
         byte[] compressed = (byte[])utilityType.GetMethod("Compress")!.Invoke(null, [original])!;
         byte[] decompressed = (byte[])utilityType.GetMethod("Decompress", [typeof(byte[])])!.Invoke(null, [compressed])!;
@@ -213,7 +233,7 @@ internal static class IntegrationTestRunner
 
     private static Task UtilityUrlEncodingProducesExpectedOutputAsync()
     {
-        Type utilityType = GetShellType("Swiftlet.Gh.Rhino8.UtilityUrlEncoding");
+        Type utilityType = GetShellType("Swiftlet.Runtime.UtilityUrlEncoding");
         string encoded = (string)utilityType.GetMethod("Encode")!.Invoke(null, ["cafe au lait+?", Encoding.UTF8])!;
 
         Assert.Equal("cafe+au+lait%2B%3F", encoded);
@@ -232,14 +252,14 @@ internal static class IntegrationTestRunner
 
         foreach ((string fileName, string expectedGuid) in archivedComponentGuids)
         {
-            string source = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "ARCHIVED", fileName));
+            string source = File.ReadAllText(RepoPath("src", "Swiftlet.Gh1", "ARCHIVED", fileName));
 
             Assert.Contains("[Obsolete(", source);
             Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.hidden;", source);
             Assert.Contains($"public override Guid ComponentGuid => new(\"{expectedGuid}\");", source);
         }
 
-        string currentTextBodySource = File.ReadAllText(RepoPath("src", "Swiftlet.Gh.Rhino8", "Components", "CreateTextBodyComponent.cs"));
+        string currentTextBodySource = File.ReadAllText(RepoPath("src", "Swiftlet.Gh1", "Components", "CreateTextBodyComponent.cs"));
         Assert.Contains("public override GH_Exposure Exposure => GH_Exposure.secondary;", currentTextBodySource);
         Assert.Contains("public override Guid ComponentGuid => new(\"D5BF7D4A-9FC3-4984-90F7-FEB32AA96D9F\");", currentTextBodySource);
 
@@ -712,6 +732,20 @@ internal static class IntegrationTestRunner
 
         Assert.Equal(HttpStatusCode.OK, callResponse.StatusCode);
         Assert.Contains("\"text\":\"echo: hello\"", callBody);
+
+        using var oldRequest = new HttpRequestMessage(HttpMethod.Post, "mcp/")
+        {
+            Content = JsonContent("""{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"echo","arguments":{}}}"""),
+        };
+        oldRequest.Headers.Add("Mcp-Session-Id", sessionId);
+        Task<HttpResponseMessage> oldResponse = client.SendAsync(oldRequest);
+        var oldCall = await WaitForPendingCallAsync(session, "echo").ConfigureAwait(false);
+        await session.StopAsync().ConfigureAwait(false);
+        try { using var closed = await oldResponse.WaitAsync(TimeSpan.FromSeconds(3)); }
+        catch (HttpRequestException) { }
+        await session.ReconfigureAsync(GetAvailablePort(), "Restarted", [new McpToolDefinition("echo", "Echo")]);
+        Assert.False(oldCall.TryRespondWithText("must not cross bridge generations"));
+        Assert.False(oldCall.ResponseTask.IsCompleted);
     }
 
     private static async Task ModernMcpServerSessionManagesLifecycleAsync()
@@ -757,6 +791,36 @@ internal static class IntegrationTestRunner
         Assert.False(session.IsRunning);
         Assert.Equal(0, session.Port);
         Assert.Equal("Stopped", session.StatusMessage);
+    }
+
+    private static async Task McpCallsSurviveRetriesAsync()
+    {
+        var first = new ModernMcpToolCallContext("1", "echo", [], _ => true);
+        var second = new ModernMcpToolCallContext("2", "echo", [], _ => true);
+        var queue = new Queue<ModernMcpToolCallContext>([first, second]);
+        var state = new McpCallRequestState();
+        var notified = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        state.RequestReady += (_, _) => notified.TrySetResult(true);
+        ModernMcpToolCallContext? Dequeue(string _) => queue.TryDequeue(out var call) ? call : null;
+        Assert.True(ReferenceEquals(first, state.Capture(["echo"], Dequeue)[0]));
+        Assert.True(ReferenceEquals(first, state.Capture(["echo"], Dequeue)[0]));
+        Assert.Equal(1, queue.Count);
+        Assert.True(first.TryRespondWithText("first"));
+        await first.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2));
+        await notified.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.False(first.TryRespondWithText("duplicate"));
+        Assert.True(ReferenceEquals(second, state.Capture(["echo"], Dequeue)[0]));
+        state.Capture([], Dequeue);
+        Assert.True(second.HasResponded);
+        Assert.True(state.Capture(["echo"], Dequeue)[0] is null);
+        var failed = new ModernMcpToolCallContext("failed", "echo", [], _ => false);
+        queue.Enqueue(failed);
+        state.Capture(["echo"], Dequeue);
+        Assert.False(failed.TryRespondWithText("not sent"));
+        Assert.False(failed.ResponseTask.IsCompleted);
+        Assert.True(ReferenceEquals(failed, state.Capture(["echo"], Dequeue)[0]));
+        state.Clear();
+        Assert.True(state.Capture(["echo"], Dequeue)[0] is null);
     }
 
     private static async Task ModernMcpResponseWorkflowPreservesSemanticsAsync()
@@ -809,6 +873,52 @@ internal static class IntegrationTestRunner
         Assert.NotNull(sentError);
         Assert.True(sentError!.IsError);
         Assert.Equal("boom", sentError.Content[0].ToJson()["text"]!.GetValue<string>());
+    }
+
+    private static async Task ServerInputRetainsRequestsAcrossRetriesAsync()
+    {
+        static ModernServerRequestContext Context(string path) => new("/", path, "GET", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []));
+        var first = Context("/first");
+        var second = Context("/second");
+        var queued = new Queue<ModernServerRequestContext>([first, second]);
+        var state = new ServerInputRequestState();
+        var notified = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        state.RequestReady += (_, _) => notified.TrySetResult(true);
+        ModernServerRequestContext? Dequeue(string _) => queued.TryDequeue(out var request) ? request : null;
+        Assert.True(ReferenceEquals(first, state.Capture(["/"], Dequeue)[0]));
+        Assert.True(ReferenceEquals(first, state.Capture(["/"], Dequeue)[0]));
+        Assert.Equal(1, queued.Count);
+        Assert.True(first.TrySetResponse(ModernServerHttpResponse.Empty()));
+        await notified.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.True(ReferenceEquals(second, state.Capture(["/"], Dequeue)[0]));
+        state.Clear();
+        Assert.Equal(503, (await second.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+        Assert.True(state.Capture(["/"], Dequeue)[0] is null);
+
+        var removed = Context("/removed");
+        queued.Enqueue(removed);
+        state.Capture(["/"], Dequeue);
+        state.Capture(["/other"], _ => null);
+        Assert.Equal(503, (await removed.ResponseTask.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+    }
+
+    private static async Task ModernServerCancellationReleasesHandleAsync()
+    {
+        var server = new ModernServer(["/"]);
+        using var cancelled = new CancellationTokenSource();
+        var pending = server.HandleHttpRequestAsync("GET", "/", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []), cancelled.Token);
+        Assert.True(server.TryDequeuePendingRequest("/", out var context));
+        Assert.True(context is not null);
+        cancelled.Cancel();
+        Assert.Equal(408, (await pending.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
+        Assert.True(context!.HasResponded);
+        Assert.False(context.TrySetResponse(ModernServerHttpResponse.Empty()));
+        var removed = server.HandleHttpRequestAsync("GET", "/queued", null, null,
+            new Swiftlet.Core.Http.RequestBodyBytes(Swiftlet.Core.Http.ContentTypes.ApplicationOctetStream, []));
+        server.ConfigureRoutes(["/other"]);
+        Assert.Equal(503, (await removed.WaitAsync(TimeSpan.FromSeconds(2))).StatusCode);
     }
 
     private static async Task ModernServerRoutesRequestsAndCompletesResponsesAsync()
@@ -870,7 +980,13 @@ internal static class IntegrationTestRunner
 
         Assert.True(clientSession.IsConnected);
         Assert.NotNull(clientSession.Connection);
-        Assert.True(serverSession.TryGetAnyOpenConnection(out ModernWebSocketConnection? serverConnectionBeforeMessage));
+        // The server learns about the connection asynchronously (via the bridge), so poll briefly.
+        ModernWebSocketConnection? serverConnectionBeforeMessage = null;
+        for (int attempt = 0; attempt < 200 && !serverSession.TryGetAnyOpenConnection(out serverConnectionBeforeMessage); attempt++)
+        {
+            await Task.Delay(10).ConfigureAwait(false);
+        }
+
         Assert.NotNull(serverConnectionBeforeMessage);
         Assert.Equal("Connected", serverConnectionBeforeMessage!.GetStatusString());
 
@@ -887,6 +1003,84 @@ internal static class IntegrationTestRunner
 
         string clientMessage = await WaitForWebSocketClientMessageAsync(clientSession).ConfigureAwait(false);
         Assert.Equal("hello from server", clientMessage);
+    }
+
+    private static async Task WebSocketClientConnectTimesOutWithoutHandshakeAsync()
+    {
+        // A listener that accepts TCP connections and never answers the WebSocket upgrade.
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        var accepted = new List<TcpClient>();
+        using var stopAccepting = new CancellationTokenSource();
+        Task acceptLoop = Task.Run(async () =>
+        {
+            try
+            {
+                while (true)
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync(stopAccepting.Token).ConfigureAwait(false);
+                    lock (accepted) accepted.Add(client);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        });
+
+        try
+        {
+            await using var session = new ModernWebSocketClientSession();
+            int notifications = 0;
+            session.StateChanged += (_, _) => Interlocked.Increment(ref notifications);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            Exception? failure = null;
+            try
+            {
+                await session.ReconnectAsync($"ws://127.0.0.1:{port}/", parameters: null)
+                    .WaitAsync(ModernWebSocketClient.ConnectTimeout + TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            }
+            catch (Exception error)
+            {
+                failure = error;
+            }
+
+            watch.Stop();
+            Assert.True(failure is TimeoutException, $"expected TimeoutException from the client, got {failure?.GetType().Name ?? "success"}: {failure?.Message}");
+            Assert.True(watch.Elapsed >= ModernWebSocketClient.ConnectTimeout - TimeSpan.FromSeconds(1)
+                && watch.Elapsed < ModernWebSocketClient.ConnectTimeout + TimeSpan.FromSeconds(3),
+                $"connect gave up after {watch.Elapsed.TotalSeconds:0.0} s, expected about {ModernWebSocketClient.ConnectTimeout.TotalSeconds} s");
+            Assert.False(session.IsConnected);
+            Assert.Null(session.Connection);
+            Assert.True(session.LastError?.StartsWith("Connection timed out", StringComparison.Ordinal) == true, $"LastError: {session.LastError}");
+            lock (accepted) Assert.True(accepted.Count >= 1, "the listener should have accepted the TCP connection");
+            // A failed connect must not notify: the components would answer by reconnecting straight away.
+            Assert.Equal(0, Volatile.Read(ref notifications));
+
+            // A refused port fails fast with an error as well.
+            int closedPort = GetAvailablePort();
+            watch.Restart();
+            failure = null;
+            try
+            {
+                await session.ReconnectAsync($"ws://127.0.0.1:{closedPort}/", parameters: null).ConfigureAwait(false);
+            }
+            catch (Exception error)
+            {
+                failure = error;
+            }
+
+            Assert.True(failure is not null and not TimeoutException, $"refused connect: {failure?.GetType().Name}");
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), $"refused connect took {watch.Elapsed.TotalSeconds:0.0} s");
+            Assert.True(!string.IsNullOrEmpty(session.LastError), "refused connect sets LastError");
+        }
+        finally
+        {
+            stopAccepting.Cancel();
+            listener.Stop();
+            try { await acceptLoop.ConfigureAwait(false); } catch { }
+            lock (accepted) foreach (TcpClient client in accepted) client.Dispose();
+        }
     }
 
     private static async Task SimpleHttpListenerCapturesRequestsAndReturnsConfiguredContentAsync()
@@ -1091,6 +1285,7 @@ internal static class IntegrationTestRunner
     private static Type GetShellType(string fullName)
     {
         return typeof(ModernServer).Assembly.GetType(fullName)
+               ?? typeof(Swiftlet.Gh.Rhino8.Goo.ByteArrayGoo).Assembly.GetType(fullName)
                ?? throw new InvalidOperationException($"Unable to find shell type '{fullName}'.");
     }
 
@@ -1135,7 +1330,7 @@ internal static class IntegrationTestRunner
 
     private static string NormalizePathForTest(string path, bool isWindows)
     {
-        Type pathUtilityType = GetShellType("Swiftlet.Gh.Rhino8.FilePathUtility");
+        Type pathUtilityType = GetShellType("Swiftlet.Runtime.FilePathUtility");
         MethodInfo normalizeMethod = pathUtilityType.GetMethod(
             "NormalizePath",
             BindingFlags.NonPublic | BindingFlags.Static,
@@ -1173,6 +1368,13 @@ internal static class IntegrationTestRunner
 
         foreach (string directory in Directory.GetDirectories(windowsDesktopRoot).OrderByDescending(GetFrameworkPreference))
         {
+            // A desktop framework newer than the running runtime cannot be loaded into it.
+            if (Version.TryParse(Path.GetFileName(directory), out Version? frameworkVersion) &&
+                frameworkVersion.Major > Environment.Version.Major)
+            {
+                continue;
+            }
+
             string assemblyPath = Path.Combine(directory, "System.Drawing.Common.dll");
             if (!File.Exists(assemblyPath))
             {

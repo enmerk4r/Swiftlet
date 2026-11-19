@@ -1,10 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\Version.props" />
   <PropertyGroup>
+    <!-- Shared libraries carry the Swiftlet version so a stale copy from another install cannot be mistaken for this one. -->
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Swiftlet.Imaging</RootNamespace>
     <AssemblyName>Swiftlet.Imaging</AssemblyName>
+    <!-- ImageSharp 3.2+ validates a licence key at build time; the assembly-scoped community key lives at the repo root. -->
+    <SixLaborsLicenseFile>$(MSBuildThisFileDirectory)../../sixlabors.lic</SixLaborsLicenseFile>
     <Description>Cross-platform imaging services and image model for Swiftlet.</Description>
   </PropertyGroup>
 
@@ -14,6 +21,6 @@
 
   <ItemGroup>
     <PackageReference Include="QRCoder" Version="1.4.3" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.2.0" />
   </ItemGroup>
 </Project>

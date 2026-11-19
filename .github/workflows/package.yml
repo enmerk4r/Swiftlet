@@ -1,0 +1,142 @@
+name: Package
+
+# Builds the Rhino 8 and Rhino 9 Yak packages from one commit and uploads them as artifacts.
+# The Linux and macOS arm64 bridges come from the bridge workflow; everything else, including the
+# Windows and macOS x64 bridges, is built on the Windows runner by build/packaging/Publish-Target.ps1,
+# the same script that build/packaging/Build-YakPackage.ps1 uses locally.
+# Nothing is published to the Yak server: `yak push` stays a manual step.
+
+on:
+  workflow_dispatch:
+  # Also runs when the packaging itself changes, so a broken package build is caught before a release.
+  push:
+    branches:
+      - main
+      - swiftlet-gh2
+    paths:
+      - .github/workflows/package.yml
+      - .github/workflows/bridge-aot-artifacts.yml
+      - build/packaging/**
+      - build/targets/**
+      - build/Version.props
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  bridges:
+    name: Bridges
+    uses: ./.github/workflows/bridge-aot-artifacts.yml
+
+  package:
+    name: Yak packages
+    needs: bridges
+    runs-on: windows-2022
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          # .NET 8 builds everything (pinned below); the Yak tool runs on .NET 10.
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Pin .NET 8 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_version="$(dotnet --list-sdks | awk '/^8\./ {print $1}' | tail -n 1)"
+          if [ -z "$sdk_version" ]; then
+            echo "No .NET 8 SDK was found after setup-dotnet." >&2
+            dotnet --list-sdks >&2
+            exit 1
+          fi
+          printf '{\n  "sdk": {\n    "version": "%s",\n    "rollForward": "latestFeature"\n  }\n}\n' "$sdk_version" > global.json
+          dotnet --version
+
+      - name: Download the Linux and macOS bridges built by this run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for rid in linux-x64 osx-arm64; do
+            name="swiftlet-bridge-$rid"
+            gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name "$name" --dir "artifacts/ci-bridge"
+            expected="$(awk '{print $1}' "artifacts/ci-bridge/$name.tar.gz.sha256")"
+            actual="$(sha256sum "artifacts/ci-bridge/$name.tar.gz" | awk '{print $1}')"
+            if [ "$expected" != "$actual" ]; then
+              echo "Checksum mismatch for $name: expected $expected, got $actual" >&2
+              exit 1
+            fi
+            mkdir -p "artifacts/prebuilt-bridge/$rid"
+            tar -xzf "artifacts/ci-bridge/$name.tar.gz" -C "artifacts/prebuilt-bridge/$rid"
+            test -f "artifacts/prebuilt-bridge/$rid/SwiftletBridge"
+            ls -la "artifacts/prebuilt-bridge/$rid"
+          done
+
+      - name: Get the Yak command-line tool
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = Join-Path $env:RUNNER_TEMP 'yak'
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          # Same Yak version as the one shipped with Rhino 9.1. Versions are listed at
+          # https://developer.rhino3d.com/guides/yak/yak-cli-reference/#downloads
+          Invoke-WebRequest -Uri 'https://files.mcneel.com/yak/tools/0.19.1/win-x64/yak.exe' -OutFile (Join-Path $dir 'yak.exe')
+          Add-Content -Path $env:GITHUB_PATH -Value $dir
+          & (Join-Path $dir 'yak.exe') version
+
+      - name: Tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet run --project tests/Swiftlet.Core.Tests -c Release
+          dotnet run --project tests/Swiftlet.Integration.Tests -c Release
+
+      - name: Build the Rhino 8 package
+        shell: powershell
+        run: |
+          & ./build/packaging/Publish-Target.ps1 -Target rhino8 -Configuration Release -PrebuiltBridgeRoot (Join-Path $PWD 'artifacts/prebuilt-bridge')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build the Rhino 9 package
+        shell: powershell
+        run: |
+          & ./build/packaging/Publish-Target.ps1 -Target rhino9 -Configuration Release -PrebuiltBridgeRoot (Join-Path $PWD 'artifacts/prebuilt-bridge')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: List package contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/yak
+          find artifacts/publish -name '*.yak' -path '*/yak/any/*' -exec cp {} artifacts/yak/ \;
+          ls -la artifacts/yak
+          test "$(ls artifacts/yak/*.yak | wc -l)" -eq 2
+          for f in artifacts/yak/*.yak; do
+            echo "== $f"
+            unzip -l "$f" | grep -E 'manifest.yml|\.gha|\.rhp|bridge/|ImageSharp'
+            sha256sum "$f"
+          done
+
+      - name: Upload Yak packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: swiftlet-yak-packages
+          path: artifacts/yak/*.yak
+          if-no-files-found: error
+          retention-days: 30

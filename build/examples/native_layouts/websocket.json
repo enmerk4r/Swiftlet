@@ -1,0 +1,81 @@
+{
+  "file": "Examples/swiftlet-listeners/swiftlet-websocket-loopback.ghz",
+  "positions": {
+    "Local server": [
+      100,
+      220
+    ],
+    "Reply to client": [
+      450,
+      220
+    ],
+    "Server received": [
+      450,
+      380
+    ],
+    "Server status": [
+      450,
+      540
+    ],
+    "Client": [
+      100,
+      836
+    ],
+    "Send to server": [
+      450,
+      836
+    ],
+    "Client received": [
+      450,
+      996
+    ],
+    "Client status": [
+      450,
+      1156
+    ]
+  },
+  "groups": [
+    {
+      "title": "WebSocket server",
+      "members": [
+        "Local server",
+        "Reply to client",
+        "Server received",
+        "Server status"
+      ]
+    },
+    {
+      "title": "WebSocket client",
+      "members": [
+        "Client",
+        "Send to server",
+        "Client received",
+        "Client status"
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "of": "Local server",
+      "text": "Set Run to true to listen on port 18742. Stop the client first, then set Run to false when finished."
+    },
+    {
+      "of": "Reply to client",
+      "text": "After the client connects, pulse Send true then false to reply with subscribed: origami."
+    },
+    {
+      "of": "Client",
+      "text": "Start the server, then set Run to true. Wait until the status reads Connected. Stop this client before the server."
+    },
+    {
+      "of": "Send to server",
+      "text": "Pulse Send true then false to send hello from Swiftlet. Leaving it true can resend on recompute."
+    }
+  ],
+  "columns": [
+    [
+      0,
+      1
+    ]
+  ]
+}

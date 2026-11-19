@@ -1,0 +1,38 @@
+using Grasshopper2.Components;
+using Grasshopper2.UI;
+using GrasshopperIO;
+using Swiftlet.Core.Http;
+using Swiftlet.Gh2.Parameters;
+using Grasshopper2.UI.Icon;
+using Swiftlet.Gh2.Icons;
+
+namespace Swiftlet.Gh2.Components;
+
+[IoId(ComponentIds.CreateHttpHeader)]
+public sealed class CreateHttpHeaderComponent : Component
+{
+    public CreateHttpHeaderComponent()
+        : base(Palette.Entry(nameof(CreateHttpHeaderComponent), "Create Http Header", "Create a new Http Header", "Swiftlet", "2. Request")) { }
+
+    public CreateHttpHeaderComponent(IReader reader) : base(reader) { }
+
+    protected override IIcon IconInternal => SwiftletIcons.For(GetType()) ?? base.IconInternal;
+
+    protected override void AddInputs(InputAdder inputs)
+    {
+        inputs.AddText("Key", "K", "Header Key");
+        inputs.AddText("Value", "V", "Header Value");
+    }
+
+    protected override void AddOutputs(OutputAdder outputs)
+    {
+        outputs.Add(new HttpHeaderParameter("Header", "H", "Http Header"));
+    }
+
+    protected override void Process(IDataAccess access)
+    {
+        access.GetItem(0, out string key);
+        access.GetItem(1, out string value);
+        access.SetItem(0, new HttpHeader(key, value));
+    }
+}

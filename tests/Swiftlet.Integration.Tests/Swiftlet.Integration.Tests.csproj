@@ -24,7 +24,8 @@
     <ProjectReference Include="..\..\src\Swiftlet.HostAbstractions\Swiftlet.HostAbstractions.csproj" />
     <ProjectReference Include="..\..\src\Swiftlet.Hosts.Desktop\Swiftlet.Hosts.Desktop.csproj" />
     <ProjectReference Include="..\..\src\Swiftlet.Hosts.Headless\Swiftlet.Hosts.Headless.csproj" />
-    <ProjectReference Include="..\..\src\Swiftlet.Gh.Rhino8\Swiftlet.Gh.Rhino8.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Runtime\Swiftlet.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Swiftlet.Gh1\Swiftlet.Gh1.csproj" />
   </ItemGroup>
 
   <Target Name="StageBridgeForIntegrationTests" AfterTargets="Build"

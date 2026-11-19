@@ -7,7 +7,9 @@ param(
     [switch]$NoRestore,
     [string]$PluginOutputDir,
     [string]$PrebuiltBridgeRoot,
-    [switch]$SkipBridgePublish
+    [switch]$SkipBridgePublish,
+    # Local test packages only: publish just these bridge ids (for example win-x64). Release packages need all of them.
+    [string[]]$OnlyBridgeIds
 )
 
 $ErrorActionPreference = "Stop"
@@ -598,10 +600,81 @@ if (-not (Test-Path $pluginArtifactPath)) {
     throw "Expected plugin artifact was not produced: $pluginArtifactPath"
 }
 
+# Additional plug-ins that ship in the same package folder (for example the Grasshopper 2 shell
+# next to the Grasshopper 1 shell). They share one copy of every common assembly, so a shared
+# file that differs between the two builds is a packaging error, not something to overwrite.
+$additionalPluginArtifacts = @()
+if ($null -ne $targetMetadata.additionalPlugins) {
+    if (-not [string]::IsNullOrWhiteSpace($PluginOutputDir)) {
+        throw "-PluginOutputDir cannot be combined with a target that defines additionalPlugins; all shells must come from the same build."
+    }
+
+    foreach ($additionalPlugin in $targetMetadata.additionalPlugins) {
+        $additionalId = [string]$additionalPlugin.id
+        $additionalProjectPath = Resolve-RepoPath -BasePath $repoRoot -RelativePath ([string]$additionalPlugin.project)
+        $additionalBuildDirectory = Join-Path $stageRoot "intermediate\plugin-build-$additionalId"
+        New-CleanDirectory -Path $additionalBuildDirectory
+
+        $additionalBuildArguments = @(
+            "build",
+            $additionalProjectPath,
+            "-c", $Configuration,
+            "-o", $additionalBuildDirectory
+        )
+
+        if ($NoRestore) {
+            $additionalBuildArguments += "--no-restore"
+        }
+
+        Invoke-Dotnet -Arguments $additionalBuildArguments
+
+        $additionalArtifactName = [string]$additionalPlugin.artifactName
+        if (-not (Test-Path (Join-Path $additionalBuildDirectory $additionalArtifactName))) {
+            throw "Expected additional plugin artifact was not produced: $additionalArtifactName"
+        }
+
+        Get-ChildItem -Path $additionalBuildDirectory -File -Recurse | ForEach-Object {
+            if ($_.Extension -eq ".pdb") {
+                return
+            }
+
+            $relativePath = $_.FullName.Substring($additionalBuildDirectory.Length).TrimStart('\', '/')
+            $destinationPath = Join-Path $pluginStageDirectory $relativePath
+
+            if (Test-Path $destinationPath) {
+                $isAssembly = $_.Extension -in @(".dll", ".exe")
+                if ($isAssembly) {
+                    $existingName = [System.Reflection.AssemblyName]::GetAssemblyName($destinationPath)
+                    $incomingName = [System.Reflection.AssemblyName]::GetAssemblyName($_.FullName)
+                    if ($existingName.FullName -ne $incomingName.FullName) {
+                        throw "Shared assembly '$relativePath' differs between plug-ins: '$($existingName.FullName)' vs '$($incomingName.FullName)'. Both shells must reference the same version."
+                    }
+                }
+
+                return
+            }
+
+            New-Item -ItemType Directory -Path (Split-Path -Parent $destinationPath) -Force | Out-Null
+            Copy-Item -Path $_.FullName -Destination $destinationPath -Force
+        }
+
+        $additionalPluginArtifacts += [pscustomobject]@{
+            id = $additionalId
+            project = [string]$additionalPlugin.project
+            artifact = (Join-Path $pluginStageDirectory $additionalArtifactName)
+        }
+    }
+}
+
 $bridgePublishes = @()
 if (-not $SkipBridgePublish) {
     foreach ($publishTarget in $targetMetadata.bridgePublishes) {
         $publishId = [string]$publishTarget.id
+        if ($null -ne $OnlyBridgeIds -and $OnlyBridgeIds.Count -gt 0 -and $OnlyBridgeIds -notcontains $publishId) {
+            Write-Warning "Skipping bridge '$publishId' (-OnlyBridgeIds). This package is not release-complete."
+            continue
+        }
+
         $publishMode = Resolve-BridgePublishMode -PublishTarget $publishTarget
         $publishDirectory = Join-Path $bridgeStageRoot $publishId
         New-CleanDirectory -Path $publishDirectory

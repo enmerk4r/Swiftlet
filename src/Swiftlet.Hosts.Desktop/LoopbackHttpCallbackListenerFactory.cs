@@ -32,6 +32,11 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
     private sealed class LoopbackHttpCallbackSession : ILocalHttpCallbackSession
     {
         private readonly Uri _callbackUri;
+        private readonly object _sync = new();
+        private readonly CancellationTokenSource _lifetime = new();
+        private Task<LocalHttpCallbackRequest>? _pendingRead;
+        private Task? _disposeTask;
+        private bool _disposed;
         private TcpClient? _client;
         private NetworkStream? _stream;
         private bool _responseSent;
@@ -43,47 +48,117 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
 
         public Uri CallbackUri => _callbackUri;
 
-        public async Task<LocalHttpCallbackRequest> WaitForCallbackAsync(CancellationToken cancellationToken = default)
+        public Task<LocalHttpCallbackRequest> WaitForCallbackAsync(CancellationToken cancellationToken = default)
         {
-            if (_client is not null)
+            lock (_sync)
             {
-                throw new InvalidOperationException("This callback session has already accepted a request.");
+                if (_disposed) throw new ObjectDisposedException(nameof(LoopbackHttpCallbackSession));
+                if (_client is not null || _pendingRead is { IsCompleted: false })
+                    throw new InvalidOperationException("This callback session is already receiving a request.");
+                return _pendingRead = ReadCallbackAsync(cancellationToken);
+            }
+        }
+
+        private sealed record ReceivedCallback(TcpClient Client, NetworkStream Stream, LocalHttpCallbackRequest Request);
+
+        private async Task<LocalHttpCallbackRequest> ReadCallbackAsync(CancellationToken cancellationToken)
+        {
+            using var receive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.Token);
+            IReadOnlyList<TcpListener> listeners = CreateListeners(_callbackUri.Port);
+            var acceptedClients = new Queue<TcpClient>();
+            var readers = new List<Task>();
+            var winner = new TaskCompletionSource<ReceivedCallback>(TaskCreationOptions.RunContinuationsAsynchronously);
+            bool published = false;
+
+            async Task ReadClientAsync(TcpClient client)
+            {
+                bool keepClient = false;
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(receive.Token);
+                timeout.CancelAfter(TimeSpan.FromSeconds(5));
+                using var cancellation = timeout.Token.Register(client.Dispose);
+                try
+                {
+                    NetworkStream stream = client.GetStream();
+                    using var reader = new StreamReader(stream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+                    var request = await ReadRequestAsync(reader).ConfigureAwait(false);
+                    if (!string.Equals(request.RequestUri.AbsolutePath, _callbackUri.AbsolutePath, StringComparison.Ordinal))
+                    {
+                        byte[] reply = Encoding.ASCII.GetBytes("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+                        await stream.WriteAsync(reply, timeout.Token).ConfigureAwait(false);
+                        return;
+                    }
+                    timeout.CancelAfter(Timeout.InfiniteTimeSpan);
+                    timeout.Token.ThrowIfCancellationRequested();
+                    // Once selected, the response socket belongs to the session, not to
+                    // the receive-loop cancellation used to shut down losing readers.
+                    cancellation.Dispose();
+                    keepClient = winner.TrySetResult(new ReceivedCallback(client, stream, request));
+                }
+                catch (Exception error) when (error is IOException or SocketException or InvalidOperationException or FormatException or ObjectDisposedException or OperationCanceledException)
+                { /* Empty, malformed and timed-out connections are not callbacks. */ }
+                catch (Exception error) { winner.TrySetException(error); }
+                finally { if (!keepClient) client.Dispose(); }
             }
 
-            TcpClient client = await AcceptClientAsync(cancellationToken).ConfigureAwait(false);
-            _client = client;
-            _stream = client.GetStream();
-            _responseSent = false;
+            async Task AcceptAsync()
+            {
+                while (true)
+                {
+                    receive.Token.ThrowIfCancellationRequested();
+                    TcpClient client = await AcceptClientAsync(listeners, acceptedClients, receive.Token).ConfigureAwait(false);
+                    // An idle browser preconnect must not delay the real callback.
+                    readers.Add(ReadClientAsync(client));
+                }
+            }
 
-            using var reader = new StreamReader(_stream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+            Task accepting = AcceptAsync();
+            try
+            {
+                Task completed = await Task.WhenAny(winner.Task, accepting).ConfigureAwait(false);
+                if (ReferenceEquals(completed, accepting)) await accepting.ConfigureAwait(false);
+                ReceivedCallback result = await winner.Task.ConfigureAwait(false);
+                lock (_sync)
+                {
+                    if (_disposed || receive.IsCancellationRequested)
+                        throw new OperationCanceledException(receive.Token);
+                    _client = result.Client;
+                    _stream = result.Stream;
+                    _responseSent = false;
+                    published = true;
+                }
+                return result.Request;
+            }
+            finally
+            {
+                receive.Cancel();
+                foreach (TcpListener listener in listeners) listener.Stop();
+                try { await accepting.ConfigureAwait(false); }
+                catch (Exception) { /* Observe the canceled accept before enumerating its readers. */ }
+                await Task.WhenAll(readers).ConfigureAwait(false);
+                while (acceptedClients.TryDequeue(out var queued)) queued.Dispose();
+                if (!published && winner.Task.IsCompletedSuccessfully) winner.Task.Result.Client.Dispose();
+            }
+        }
 
+        private async Task<LocalHttpCallbackRequest> ReadRequestAsync(StreamReader reader)
+        {
             string requestLine = await ReadRequiredLineAsync(reader).ConfigureAwait(false);
             string[] parts = requestLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length < 2)
-            {
-                throw new InvalidOperationException("Received an invalid HTTP request line.");
-            }
-
+            if (parts.Length != 3 || !parts[0].All(char.IsAsciiLetter) ||
+                parts[2] is not ("HTTP/1.0" or "HTTP/1.1"))
+                throw new FormatException("Received an invalid HTTP request line.");
             Dictionary<string, string> headers = new(StringComparer.OrdinalIgnoreCase);
             while (true)
             {
-                string? headerLine = await reader.ReadLineAsync().ConfigureAwait(false);
-                if (string.IsNullOrEmpty(headerLine))
-                {
-                    break;
-                }
-
-                TryAddHeader(headerLine, headers);
+                string? line = await reader.ReadLineAsync().ConfigureAwait(false);
+                if (line is null) throw new IOException("Incomplete HTTP headers.");
+                if (line.Length == 0) break;
+                if (line.IndexOf(':') <= 0) throw new FormatException("Invalid HTTP header.");
+                TryAddHeader(line, headers);
             }
-
-            string requestBody = await ReadRequestBodyAsync(reader, headers).ConfigureAwait(false);
-            Uri requestUri = BuildRequestUri(parts[1]);
-            return new LocalHttpCallbackRequest(
-                requestUri,
-                parts[0],
-                ParseCallbackParameters(requestUri, parts[0], headers, requestBody),
-                headers,
-                requestBody);
+            string body = await ReadRequestBodyAsync(reader, headers).ConfigureAwait(false);
+            Uri uri = BuildRequestUri(parts[1]);
+            return new LocalHttpCallbackRequest(uri, parts[0], ParseCallbackParameters(uri, parts[0], headers, body), headers, body);
         }
 
         public async Task SendResponseAsync(LocalHttpCallbackResponse response, CancellationToken cancellationToken = default)
@@ -122,23 +197,25 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
 
         public ValueTask DisposeAsync()
         {
-            try
-            {
-                _stream?.Dispose();
-            }
-            catch
-            {
-            }
+            lock (_sync)
+                return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
 
-            try
+        private async Task DisposeCoreAsync()
+        {
+            _disposed = true;
+            _lifetime.Cancel();
+            _stream?.Dispose();
+            _client?.Dispose();
+            // ReadCallbackAsync owns both IPv4/IPv6 listeners and stops them in finally.
+            // Join that operation before returning: cancellation alone merely schedules
+            // its continuation and does not prove the callback port has been released.
+            if (_pendingRead is { } pending)
             {
-                _client?.Dispose();
+                try { await pending.ConfigureAwait(false); }
+                catch (Exception) { /* The waiter retains the original failure; disposal observes it. */ }
             }
-            catch
-            {
-            }
-
-            return ValueTask.CompletedTask;
+            _lifetime.Dispose();
         }
 
         private static IReadOnlyList<TcpListener> CreateListeners(int port)
@@ -168,31 +245,29 @@ public sealed class LoopbackHttpCallbackListenerFactory : ILocalHttpCallbackList
             return listener;
         }
 
-        private async Task<TcpClient> AcceptClientAsync(CancellationToken cancellationToken)
+        private static async Task<TcpClient> AcceptClientAsync(IReadOnlyList<TcpListener> listeners, Queue<TcpClient> acceptedClients, CancellationToken cancellationToken)
         {
-            IReadOnlyList<TcpListener> listeners = CreateListeners(_callbackUri.Port);
-            List<Task<TcpClient>> acceptTasks = [];
-            foreach (TcpListener listener in listeners)
-            {
-                acceptTasks.Add(listener.AcceptTcpClientAsync(cancellationToken).AsTask());
-            }
-
+            if (acceptedClients.TryDequeue(out var queued)) return queued;
+            using var acceptCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var accepts = listeners.Select(listener => listener.AcceptTcpClientAsync(acceptCancellation.Token).AsTask()).ToArray();
+            TcpClient? accepted = null;
             try
             {
-                Task<TcpClient> completed = await Task.WhenAny(acceptTasks).ConfigureAwait(false);
-                return await completed.ConfigureAwait(false);
+                Task<TcpClient> completed = await Task.WhenAny(accepts).ConfigureAwait(false);
+                return accepted = await completed.ConfigureAwait(false);
             }
             finally
             {
-                foreach (TcpListener listener in listeners)
+                // Cancel the losing IPv4/IPv6 accept without closing the listening sockets.
+                acceptCancellation.Cancel();
+                foreach (Task<TcpClient> task in accepts)
                 {
                     try
                     {
-                        listener.Stop();
+                        TcpClient other = await task.ConfigureAwait(false);
+                        if (!ReferenceEquals(other, accepted)) acceptedClients.Enqueue(other);
                     }
-                    catch
-                    {
-                    }
+                    catch (Exception) { /* Observe canceled accepts while preserving the winner's result. */ }
                 }
             }
         }

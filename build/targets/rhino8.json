@@ -3,7 +3,7 @@
   "minimumRhinoMajor": 8,
   "supportedRhinoMajors": [8, 9],
   "yakRhinoMajor": 8,
-  "pluginProject": "src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj",
+  "pluginProject": "src/Swiftlet.Gh1/Swiftlet.Gh1.csproj",
   "pluginAssemblyName": "Swiftlet.Gh.Rhino8",
   "pluginArtifactName": "Swiftlet.Gh.Rhino8.gha",
   "bridgeProject": "src/SwiftletBridge/SwiftletBridge.csproj",

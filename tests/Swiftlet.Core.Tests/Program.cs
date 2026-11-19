@@ -16,6 +16,7 @@ internal static class TestRunner
         List<(string Name, Action Test)> tests =
         [
             ("ContentTypes.ToDisplayName maps known and custom types", ContentTypesMapDisplayNames),
+            ("JsonData wrappers are immutable, kind-checked and distinguish JSON null", JsonDataWrappersBehave),
             ("MimeTypeMap resolves known and unknown extensions", MimeTypeMapResolvesExtensions),
             ("UrlBuilder appends encoded query parameters", UrlBuilderAppendsQueryParameters),
             ("RequestBodyFormUrlEncoded serializes form values", RequestBodyFormUrlEncodedSerializesValues),
@@ -34,6 +35,9 @@ internal static class TestRunner
             ("OAuth token client parses successful token responses", OAuthTokenClientParsesSuccessfulResponses),
             ("HttpRequestDefinition builds full URL and preserves headers", HttpRequestDefinitionBuildsRequestData),
             ("HttpRequestExecutor returns response data from handler", HttpRequestExecutorReturnsResponseData),
+            ("HTTP synchronous adapter does not capture a blocked caller context", HttpSynchronousAdapterDoesNotCaptureContext),
+            ("HTTP caller cancellation propagates instead of becoming response data", HttpCallerCancellationPropagates),
+            ("HTTP timeout remains a failure response", HttpTimeoutRemainsFailureResponse),
             ("JSON object merger recursively merges nested objects", JsonObjectMergerRecursivelyMergesNestedObjects),
             ("JSON object merger supports null-aware conflict modes", JsonObjectMergerSupportsNullAwareConflictModes),
             ("JSON object merger treats arrays and type mismatches as conflicts", JsonObjectMergerTreatsArraysAndTypeMismatchesAsConflicts),
@@ -367,6 +371,61 @@ internal static class TestRunner
         Assert.Equal(202, response.StatusCode);
         Assert.Equal("{\"status\":\"ok\"}", response.Content);
         Assert.Equal("abc", response.Headers.Single(header => header.Key == "X-Test").Value);
+    }
+
+    private static void HttpSynchronousAdapterDoesNotCaptureContext()
+    {
+        using var handler = new DeferredHttpMessageHandler();
+        using var client = new HttpClient(handler);
+        var context = new NonPumpingContext();
+        var completed = new TaskCompletionSource<HttpResponseData>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(context);
+            try { completed.SetResult(new HttpRequestExecutor(client).Execute(new HttpRequestDefinition("https://example.test", "GET"))); }
+            catch (Exception error) { completed.SetException(error); }
+        }) { IsBackground = true };
+        thread.Start();
+        Assert.True(handler.Started.Task.Wait(TimeSpan.FromSeconds(5)), "Request never reached handler.");
+        // The await must be installed before the response completes. An async signal from the
+        // handler plus this spin waits for either the sync caller to block or an unexpected exit.
+        Assert.True(SpinWait.SpinUntil(() => (thread.ThreadState & ThreadState.WaitSleepJoin) != 0, TimeSpan.FromSeconds(5)), "Caller never blocked.");
+        handler.Response.SetResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+        try
+        {
+            Assert.True(completed.Task.Wait(TimeSpan.FromSeconds(5)), "HTTP sync adapter deadlocked on caller context.");
+            Assert.Equal(200, completed.Task.GetAwaiter().GetResult().StatusCode);
+            Assert.Equal(0, context.PostCount);
+        }
+        finally { context.Release(); thread.Join(TimeSpan.FromSeconds(5)); }
+    }
+
+    private static void HttpCallerCancellationPropagates()
+    {
+        using var cancellation = new CancellationTokenSource();
+        using var handler = new CancellationHttpMessageHandler();
+        using var client = new HttpClient(handler);
+        var task = new HttpRequestExecutor(client).ExecuteAsync(
+            new HttpRequestDefinition("https://example.test", "GET"), cancellation.Token);
+        handler.Started.Task.Wait(TimeSpan.FromSeconds(5));
+        Assert.True(handler.Started.Task.IsCompleted, "Request did not start.");
+        cancellation.Cancel();
+        try
+        {
+            task.GetAwaiter().GetResult();
+            throw new InvalidOperationException("Caller cancellation was converted into response data.");
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
+    }
+
+    private static void HttpTimeoutRemainsFailureResponse()
+    {
+        using var handler = new FakeHttpMessageHandler(_ => throw new TaskCanceledException("timeout"));
+        using var client = new HttpClient(handler);
+        var result = new HttpRequestExecutor(client).Execute(
+            new HttpRequestDefinition("https://example.test", "GET"));
+        Assert.Equal(-1, result.StatusCode);
+        Assert.Contains("timeout", result.ReasonPhrase);
     }
 
     private static void JsonObjectMergerRecursivelyMergesNestedObjects()
@@ -728,6 +787,17 @@ internal static class TestRunner
         Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("127.0.0.1")));
         Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
         Assert.False(blacklist.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
+
+        // Compressed IPv6 forms with "::" at the start or as the whole address.
+        IpBlacklist loopback = new(["::1/128", "fe80::/10"]);
+        Assert.True(loopback.IsAddressBlacklisted(IPAddress.Parse("::1")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("::2")));
+        Assert.True(loopback.IsAddressBlacklisted(IPAddress.Parse("fe80::1234")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
+        Assert.False(loopback.IsAddressBlacklisted(IPAddress.Parse("127.0.0.1")));
+        IpBlacklist everything6 = new(["::/0"]);
+        Assert.True(everything6.IsAddressBlacklisted(IPAddress.Parse("2001:db8::1")));
+        Assert.False(everything6.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
     }
 
     private static void IpBlacklistBlocksAllOnInvalidEnvironmentConfig()
@@ -741,6 +811,8 @@ internal static class TestRunner
             IpBlacklist blacklist = IpBlacklist.FromEnvironment(variableName);
 
             Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("8.8.8.8")));
+            Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("2001:4860:4860::8888")));
+            Assert.True(blacklist.IsAddressBlacklisted(IPAddress.Parse("::1")));
         }
         finally
         {
@@ -780,6 +852,48 @@ internal static class TestRunner
     private static JsonObject ParseJsonObject(string json)
     {
         return JsonNode.Parse(json)?.AsObject() ?? throw new InvalidOperationException("Failed to parse JSON object.");
+    }
+
+    private static void JsonDataWrappersBehave()
+    {
+        JsonToken token = JsonToken.Parse("{ \"a\": 1, \"b\": [true, null, \"x\"] }");
+        Assert.Equal("{\"a\":1,\"b\":[true,null,\"x\"]}", token.Json);
+        Assert.Equal("JSON Object [2 keys]", token.ToString());
+        Assert.False(token.IsNull);
+
+        // Every caller gets its own node; mutating one does not affect the token or other callers.
+        JsonObject first = (JsonObject)token.ToNode()!;
+        first["a"] = 99;
+        Assert.Equal(1, ((JsonObject)token.ToNode()!)["a"]!.GetValue<int>());
+
+        Assert.True(JsonObjectData.TryFrom(token, out JsonObjectData? asObject));
+        Assert.Equal(2, asObject!.ToObject().Count);
+        Assert.False(JsonArrayData.TryFrom(token, out _));
+        Assert.False(JsonValueData.TryFrom(token, out _));
+
+        JsonToken array = JsonToken.Parse("[1,2,3]");
+        Assert.True(JsonArrayData.TryFrom(array, out JsonArrayData? asArray));
+        Assert.Equal("JSON Array [3 items]", asArray!.ToString());
+        Assert.False(JsonObjectData.TryFrom(array, out _));
+
+        // JSON null is a real value, distinct from "no value".
+        Assert.True(JsonToken.Null.IsNull);
+        Assert.Null(JsonToken.Null.ToNode());
+        Assert.Equal("JSON Value [null]", JsonToken.Null.ToString());
+        Assert.True(JsonValueData.TryFrom(JsonToken.Null, out JsonValueData? nullValue));
+        Assert.True(nullValue!.IsNull);
+        Assert.True(new JsonToken((JsonNode?)null).Equals(JsonToken.Null));
+        Assert.True(new JsonValueData(null).Equals(JsonValueData.Null));
+
+        JsonValueData text = new(JsonValue.Create("hello"));
+        Assert.Equal("\"hello\"", text.Json);
+        Assert.Equal("hello", text.ToValue()!.GetValue<string>());
+        Assert.Equal("JSON Value [\"hello\"]", text.ToString());
+        Assert.True(JsonToken.From(text).Equals(JsonToken.Parse("\"hello\"")));
+        Assert.False(text.Equals(JsonToken.Parse("\"hello\"")));
+
+        Assert.Equal("{}", new JsonObjectData(null).Json);
+        Assert.Equal("[]", new JsonArrayData(null).Json);
     }
 
     private static void AssertJsonEqual(JsonObject expected, JsonObject actual)
@@ -857,6 +971,18 @@ internal sealed class FakeHttpMessageHandler : HttpMessageHandler
     }
 }
 
+internal sealed class CancellationHttpMessageHandler : HttpMessageHandler
+{
+    public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        Started.TrySetResult(true);
+        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        throw new InvalidOperationException("Infinite delay unexpectedly completed.");
+    }
+}
+
 internal static class Assert
 {
     public static void True(bool condition, string? message = null)
@@ -898,4 +1024,21 @@ internal static class Assert
             throw new InvalidOperationException($"Expected '{actual}' to contain '{expectedSubstring}'.");
         }
     }
+}
+
+internal sealed class DeferredHttpMessageHandler : HttpMessageHandler
+{
+    public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource<HttpResponseMessage> Response { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    { Started.TrySetResult(true); return Response.Task; }
+}
+internal sealed class NonPumpingContext : SynchronizationContext
+{
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(SendOrPostCallback Callback, object? State)> _pending = new();
+    public int PostCount;
+    public override void Post(SendOrPostCallback callback, object? state)
+    { Interlocked.Increment(ref PostCount); _pending.Enqueue((callback, state)); }
+    public void Release()
+    { while (_pending.TryDequeue(out var work)) ThreadPool.QueueUserWorkItem(_ => work.Callback(work.State)); }
 }

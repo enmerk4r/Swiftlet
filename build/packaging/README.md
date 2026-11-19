@@ -82,9 +82,21 @@ The script:
 - copies the bridge binaries into `bridge/<rid>/` inside the packaged plugin payload
 - writes a machine-readable `artifact-manifest.json`
 
+## Building the packages in CI
+
+`.github/workflows/package.yml` builds both Yak packages from one commit without a local machine:
+
+1. It runs the bridge workflow for the Linux x64 and macOS arm64 Native AOT bridges.
+2. On a Windows runner it runs the unit and integration tests, then calls `Publish-Target.ps1` for `rhino8` and `rhino9` with those bridges, using the versioned Yak command-line tool from McNeel (no Rhino is installed on the runner).
+3. It uploads `swiftlet-<version>-rh8_0-any.yak` and `swiftlet-<version>-rh9-any.yak` as the `swiftlet-yak-packages` artifact.
+
+Start it from the Actions tab or with `gh workflow run package.yml --ref <branch>`; it also runs when `build/**` or the packaging workflows change. Download the result with `gh run download <run id> --name swiftlet-yak-packages`.
+
+The workflow does not publish. `yak push` remains a manual step.
+
 ## Optional Release Packaging
 
-`src/Swiftlet.Gh.Rhino8` can invoke `Publish-Target.ps1` after a Windows `Release` build, but this is disabled by default because release packaging now expects Linux and macOS ARM bridge artifacts from the build-only CI workflow.
+`src/Swiftlet.Gh1` can invoke `Publish-Target.ps1` after a Windows `Release` build, but this is disabled by default because release packaging now expects Linux and macOS ARM bridge artifacts from the build-only CI workflow.
 
 - It packages from the existing build output via `-PluginOutputDir`, so it does not rebuild the plug-in.
 - It passes `-NoRestore`, so it reuses the already-restored packages from the build machine.
@@ -94,16 +106,27 @@ The script:
 ## Current Target Model
 
 - `rhino8`
-  - builds from `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
+  - builds from `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
   - represents the active Rhino 8+ line
   - currently packages bridge artifacts for `win-x64`, `linux-x64`, `osx-arm64`, and `osx-x64`
   - uses Native AOT for `win-x64`, `linux-x64`, and `osx-arm64`
   - keeps `osx-x64` as a self-contained single-file bridge
   - produces a single `rh8-any` Yak package because Yak compatibility is derived from the referenced RhinoCommon SDK
 - `rhino9`
-  - builds from the same `src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj`
-  - stages the same binary for Rhino 9 discovery
+  - builds the Grasshopper 1 shell from the same `src/Swiftlet.Gh1/Swiftlet.Gh1.csproj`
+  - also builds the Grasshopper 2 shell (`src/Swiftlet.Gh2/Swiftlet.Gh2.csproj`, listed under `additionalPlugins` in `build/targets/rhino9.json`) and stages `Swiftlet.Gh2.rhp` into the same folder
+  - both shells share one copy of every common assembly; packaging fails if a shared assembly's identity differs between them
   - re-tags the generated `any` package to `rh9-*` after `yak build`
+
+For a local test package without the CI-built Linux and macOS bridges:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build\packaging\Publish-Target.ps1 -Target rhino9 -Configuration Release -OnlyBridgeIds win-x64
+```
+
+Such a package is not release-complete. The Windows Native AOT bridge needs the MSVC linker (Visual Studio Build Tools, C++ workload) and `vswhere.exe` on `PATH` (`C:\Program Files (x86)\Microsoft Visual Studio\Installer`). `Yak.exe` from Rhino 9 needs the .NET 10 runtime.
+
+To try a built package without installing it, extract the `.yak` (it is a zip) and start Rhino 9 with `RHINO_PACKAGE_DIRS` set to the extracted folder.
 
 ## Output Layout
 

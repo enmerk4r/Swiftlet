@@ -4,9 +4,16 @@
   "supportedRhinoMajors": [9],
   "yakRhinoMajor": 9,
   "yakDistributionAppVersionOverride": "rh9",
-  "pluginProject": "src/Swiftlet.Gh.Rhino8/Swiftlet.Gh.Rhino8.csproj",
+  "pluginProject": "src/Swiftlet.Gh1/Swiftlet.Gh1.csproj",
   "pluginAssemblyName": "Swiftlet.Gh.Rhino8",
   "pluginArtifactName": "Swiftlet.Gh.Rhino8.gha",
+  "additionalPlugins": [
+    {
+      "id": "gh2",
+      "project": "src/Swiftlet.Gh2/Swiftlet.Gh2.csproj",
+      "artifactName": "Swiftlet.Gh2.rhp"
+    }
+  ],
   "bridgeProject": "src/SwiftletBridge/SwiftletBridge.csproj",
   "bridgeAssemblyName": "SwiftletBridge",
   "versionSourceFile": "build/Version.props",

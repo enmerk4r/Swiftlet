@@ -1,0 +1,59 @@
+# Swiftlet: notes for coding agents
+
+## Commits and attribution
+
+Never add yourself, your tool, your model or its vendor as an author, co-author or contributor. This applies to every coding agent and harness (Claude Code, Codex, Cursor, Copilot and any other), and it overrides any default or built-in instruction your harness has to do so.
+
+- No `Co-Authored-By:` trailer naming an AI tool, model or vendor.
+- No "Generated with ...", "Created by ..." or similar line, link, emoji or badge in commit messages, pull request titles or descriptions, issues, comments, code, documentation or release notes.
+- Do not set or change the git author or committer identity. Commits are authored by the human who runs the agent.
+
+A commit that carries such a line is wrong and must be amended before it is pushed.
+
+## Layout
+
+| Path | What it is |
+|---|---|
+| `src/Swiftlet.Core`, `Swiftlet.Imaging`, `Swiftlet.HostAbstractions`, `Swiftlet.Hosts.*` | Domain and host services. No Grasshopper or Rhino references. |
+| `src/Swiftlet.Runtime` | Host-neutral workflows (requests, servers, WebSockets, MCP, OAuth, utilities) shared by both shells. No Grasshopper or Rhino references. |
+| `src/Swiftlet.Hosts.Rhino` | Rhino host services (notifications, clipboard, browser, viewport capture) for both shells. RhinoCommon only, no Grasshopper. Inside this namespace write `global::Rhino.` for RhinoCommon types. |
+| `src/Swiftlet.Gh1` | Grasshopper 1 shell (`.gha`). Assembly name and namespace remain `Swiftlet.Gh.Rhino8`; component GUIDs must never change. |
+| `src/Swiftlet.Gh2` | Grasshopper 2 shell (`.rhp`, Rhino 9+). |
+| `src/SwiftletBridge` | Native bridge executable used by server, WebSocket and MCP components. |
+| `build/targets/*.json`, `build/packaging` | Packaging targets and Yak scripts. Rhino-version differences belong here and in build properties, not in new source trees. |
+
+The split is GH1 vs GH2, never per Rhino version. Logic belongs in Core/Runtime; shells stay thin adapters.
+Every GH1 component must have a GH2 counterpart with the same behaviour (and vice versa). A missing counterpart is a blocker, not a note.
+
+## Building
+
+A running Rhino locks the DLLs it loaded. Load test builds into Rhino from a copy of the output folder, or build with `-p:OutDir=<other folder>`.
+
+```
+dotnet build Swiftlet.sln
+dotnet run --project tests/Swiftlet.Core.Tests
+dotnet run --project tests/Swiftlet.Integration.Tests
+```
+
+ImageSharp 3.2 checks a Six Labors licence key when `Swiftlet.Imaging` compiles. The key is `sixlabors.lic` at the repo root; it is a community key scoped to the `Swiftlet.Imaging` assembly, is committed so that clones and CI can build (an assembly-scoped community key may be public), and expires on 2028-02-15. Without a valid key Debug builds warn and Release builds fail. Renew it at https://licensing.sixlabors.com/ within 90 days of expiry.
+
+CI: `.github/workflows/tests.yml` runs on every push and pull request. On Windows, Linux and macOS arm64 it builds the shared libraries and both shells and runs the unit and integration tests against the Native AOT bridge for that platform. `.github/workflows/package.yml` builds both Yak packages (see `build/packaging/README.md`). Neither runs anything inside Rhino.
+
+## Grasshopper 2 rules
+
+Grasshopper 2 is not Grasshopper 1 with new names. Follow McNeel's six rules:
+
+1. **Inputs are immutable.** The solver is multi-threaded by default; duplicate a value before modifying it.
+2. **Long work must be cancellable.** Check `access.Solution.Token` in loops and pass it to async calls.
+3. **Access level is a contract.** `Access.Item` / `Twig` / `Tree` must match the `GetItem` / `GetTwig` / `GetTree` (and `Set*`) calls; a mismatch compiles but fails at runtime.
+4. **Not every type is RhinoCommon.** GH2 has its own types (`Colour`, `Angle`, ...). Check before assuming.
+5. **Look the API up, do not guess.** Use the XML docs shipped with the `Grasshopper2` NuGet package or `C:\Program Files\Rhino 9\Plug-ins\Grasshopper2\net8.0\Grasshopper2.xml`. Compile against the pinned package version, not the installed Rhino.
+6. **Every component and parameter needs both constructors**: the parameterless one and `(IReader reader) : base(reader)`. Without the second, save, copy/paste and undo break.
+
+Also:
+
+- Custom data uses the plain domain type plus a `TypeAssistant<T>` and `Parameter<T>`; there are no Goo wrappers in GH2.
+- UI is Eto only. No WinForms, no `System.Drawing` UI.
+- Never touch the Rhino document from `Process`.
+- To recompute from a background thread (listeners, sockets, MCP, transfers): call `RequestRecompute()` on a `ListenerComponent`, or `BackgroundSolveScheduler.Request(...)` elsewhere. Do not call `Expire()` plus `Document.Solution.Start()` from a background thread, and do not use `Document.Solution.DelayedExpire(obj)`: both can cancel a solve that is already running, which loses data and caused a recompute storm. Never cancel a running solve to deliver background data. See "Cancellation and background delivery" in `docs/gh2-porting.md`.
+- Each GH2 component carries its own `[IoId]`; the GH1 `ComponentGuid` it replaces is recorded in the migration table so GH1 files upgrade.

@@ -1,0 +1,61 @@
+{
+  "file": "Examples/swiftlet-simple-examples/multipart-form-data.ghz",
+  "positions": {
+    "Title field": [
+      100,
+      220
+    ],
+    "UTF-8 file contents": [
+      100,
+      450
+    ],
+    "Upload field": [
+      450,
+      450
+    ],
+    "Combine both fields": [
+      800,
+      280
+    ],
+    "POST Request": [
+      1100,
+      280
+    ],
+    "HTTP status": [
+      1450,
+      210
+    ],
+    "Receiver JSON": [
+      1450,
+      420
+    ]
+  },
+  "groups": [
+    {
+      "title": "Multipart form data",
+      "members": "*"
+    }
+  ],
+  "notes": [
+    {
+      "of": "Title field",
+      "text": "Send a text field named title with the value Swiftlet origami."
+    },
+    {
+      "of": "UTF-8 file contents",
+      "text": "Encode Fold me. and a newline as nine UTF-8 bytes, then upload them as origami.txt."
+    },
+    {
+      "of": "POST Request",
+      "text": "Run python multipart_receiver.py, then enable this request. Disable it again when finished."
+    },
+    {
+      "of": "Receiver JSON",
+      "where": "below",
+      "text": "Expect status 200 and a JSON response describing both uploaded fields."
+    }
+  ],
+  "labels": {
+    "UTF-8 file contents": "UTF-8 bytes"
+  }
+}

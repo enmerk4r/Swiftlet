@@ -25,8 +25,8 @@ public sealed class OAuthTokenClient
             Content = request.ToRequestBody().ToHttpContent(),
         };
 
-        using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        string responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {

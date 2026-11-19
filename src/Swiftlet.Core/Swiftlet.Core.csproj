@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="PublishAot">
+  <Import Project="..\..\build\Version.props" />
   <PropertyGroup>
+    <!-- Shared libraries carry the Swiftlet version so a stale copy from another install cannot be mistaken for this one. -->
+    <Version>$(SwiftletVersion)</Version>
+    <AssemblyVersion>$(SwiftletAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(SwiftletAssemblyVersion)</FileVersion>
     <PublishAot>false</PublishAot>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

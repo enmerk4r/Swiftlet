@@ -340,3 +340,6 @@ CLAUDE.md
 .claude/
 temp/
 Yak/
+
+# Grasshopper autosave files
+*.ghautosave
